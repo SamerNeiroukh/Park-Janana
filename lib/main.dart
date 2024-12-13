@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'screens/splash_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
-  runApp(MyApp());
+void main() {
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,11 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Park Janana')),
-        body: const Center(child: Text('Welcome to Park Janana')),
-      ),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: SplashScreen(), // Start with the Splash Screen
     );
   }
 }
