@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "591611847814",
+    "project_id": "park-janana",
+    "storage_bucket": "park-janana.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591611847814:android:28e6778d1857b492d95d07",
+        "android_client_info": {
+          "package_name": "com.example.park_janana"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhj896B7LW87PykUHRtfs6pOgj4JGs6PM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
