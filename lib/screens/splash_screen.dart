@@ -20,28 +20,50 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Initialize the animation controller
     _controller = AnimationController(
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 5), // Total duration for all transitions
       vsync: this,
     );
 
     // Define logo fade animation
     _logoFadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.8, 1.0, curve: Curves.easeOut), // Logo fades in the last part
+      ),
     );
 
-    // Define background color fade animation
-    _backgroundColorAnimation = ColorTween(
-      begin: const Color.fromARGB(255, 86, 194, 244), // Sky blue
-      end: Colors.white, // Fade to white
+    // Define background color sequence animation
+    _backgroundColorAnimation = TweenSequence<Color?>(
+      [
+        TweenSequenceItem(
+          tween: ColorTween(begin: Colors.white, end: Colors.blue),
+          weight: 1.0,
+        ),
+        TweenSequenceItem(
+          tween: ColorTween(begin: Colors.blue, end: Colors.red),
+          weight: 1.0,
+        ),
+        TweenSequenceItem(
+          tween: ColorTween(begin: Colors.red, end: Colors.yellow),
+          weight: 1.0,
+        ),
+        TweenSequenceItem(
+          tween: ColorTween(begin: Colors.yellow, end: Colors.white),
+          weight: 1.0,
+        ),
+      ],
     ).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut, // Smooth transitions between colors
+      ),
     );
 
     // Start the animation
     _controller.forward();
 
     // Navigate to the WelcomeScreen after the animation
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 6), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
       );
@@ -60,10 +82,10 @@ class _SplashScreenState extends State<SplashScreen>
       animation: _controller,
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: _backgroundColorAnimation.value,
+          backgroundColor: _backgroundColorAnimation.value, // Dynamic background color
           body: Center(
             child: Opacity(
-              opacity: _logoFadeAnimation.value,
+              opacity: _logoFadeAnimation.value, // Dynamic logo opacity
               child: Image.asset(
                 'assets/images/park_logo.png',
                 width: 250,
