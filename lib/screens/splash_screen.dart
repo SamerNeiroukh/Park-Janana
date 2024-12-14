@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'welcome_screen.dart'; // Import the WelcomeScreen
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SplashScreenState createState() => _SplashScreenState();
 }
 
@@ -12,8 +12,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _logoFadeAnimation;
-  late Animation<double> _logoMoveAnimation;
-  late Animation<double> _formFadeAnimation;
+  late Animation<Color?> _backgroundColorAnimation;
 
   @override
   void initState() {
@@ -25,21 +24,28 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     );
 
-    // Define animations
-    _logoFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5, curve: Curves.easeIn)),
+    // Define logo fade animation
+    _logoFadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 1.0, curve: Curves.easeOut)),
     );
 
-    _logoMoveAnimation = Tween<double>(begin: 0.0, end: -100.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.2, 0.7, curve: Curves.easeInOut)),
-    );
-
-    _formFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.6, 1.0, curve: Curves.easeIn)),
+    // Define background color fade animation
+    _backgroundColorAnimation = ColorTween(
+      begin: const Color.fromARGB(255, 86, 194, 244), // Sky blue
+      end: Colors.white, // Fade to white
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 1.0, curve: Curves.easeOut)),
     );
 
     // Start the animation
     _controller.forward();
+
+    // Navigate to the WelcomeScreen after the animation
+    Future.delayed(const Duration(seconds: 4), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      );
+    });
   }
 
   @override
@@ -50,86 +56,23 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Stack(
-              children: [
-                // Logo Animation
-                Positioned(
-                  top: MediaQuery.of(context).size.height * 0.25 + _logoMoveAnimation.value,
-                  left: 0,
-                  right: 0,
-                  child: Opacity(
-                    opacity: _logoFadeAnimation.value,
-                    child: Center(
-                      child: Image.asset(
-                        'assets/images/park_logo.png',
-                        width: 250,
-                        height: 250,
-                      ),
-                    ),
-                  ),
-                ),
-                // Login Form Animation with Keyboard Adjustment
-                Positioned.fill(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.5,
-                      bottom: MediaQuery.of(context).viewInsets.bottom + 80, // Keeps form above the keyboard
-                    ),
-                    child: Opacity(
-                      opacity: _formFadeAnimation.value,
-                      child: const LoginScreenContent(),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class LoginScreenContent extends StatelessWidget {
-  const LoginScreenContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const TextField(
-            decoration: InputDecoration(
-              labelText: 'Username',
-              border: OutlineInputBorder(),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: _backgroundColorAnimation.value,
+          body: Center(
+            child: Opacity(
+              opacity: _logoFadeAnimation.value,
+              child: Image.asset(
+                'assets/images/park_logo.png',
+                width: 250,
+                height: 250,
+              ),
             ),
           ),
-          const SizedBox(height: 16.0),
-          const TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 24.0),
-          ElevatedButton(
-            onPressed: () {
-              // Handle login action
-            },
-            child: const Text('Login'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
