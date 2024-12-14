@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart'; // Import the LoginScreen file
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -58,7 +59,29 @@ class WelcomeScreen extends StatelessWidget {
                     label: 'כניסה',
                     color: const Color.fromARGB(255, 86, 194, 244),
                     onPressed: () {
-                      // Handle login navigation
+                      // Navigate to LoginScreen with a slide-from-bottom transition
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) =>
+                              const LoginScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0); // Start from the bottom
+                            const end = Offset.zero; // End at original position
+                            const curve = Curves.easeInOut;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+                            var offsetAnimation = animation.drive(tween);
+
+                            return SlideTransition(
+                              position: offsetAnimation,
+                              child: child,
+                            );
+                          },
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 16.0),
@@ -67,7 +90,7 @@ class WelcomeScreen extends StatelessWidget {
                     label: 'עובד חדש ?',
                     color: const Color.fromARGB(255, 246, 195, 76),
                     onPressed: () {
-                      // Handle sign-up navigation
+                      // Handle sign-up navigation (to be implemented later)
                     },
                   ),
                 ],
@@ -96,8 +119,8 @@ class WelcomeScreen extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      child: Directionality( // Ensure Right-to-Left alignment for Hebrew text
-        textDirection: TextDirection.rtl,
+      child: Directionality(
+        textDirection: TextDirection.rtl, // Ensure Right-to-Left alignment for Hebrew
         child: Text(
           label,
           style: const TextStyle(
