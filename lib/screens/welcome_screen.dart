@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart'; // Import the LoginScreen file
+import 'new_worker_screen.dart'; // Import the NewWorkerScreen file
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -90,7 +91,29 @@ class WelcomeScreen extends StatelessWidget {
                     label: 'עובד חדש ?',
                     color: const Color.fromARGB(255, 246, 195, 76),
                     onPressed: () {
-                      // Handle sign-up navigation (to be implemented later)
+                      // Navigate to NewWorkerScreen with a slide-from-bottom transition
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) =>
+                              const NewWorkerScreen(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0); // Start from the bottom
+                            const end = Offset.zero; // End at original position
+                            const curve = Curves.easeInOut;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+                            var offsetAnimation = animation.drive(tween);
+
+                            return SlideTransition(
+                              position: offsetAnimation,
+                              child: child,
+                            );
+                          },
+                        ),
+                      );
                     },
                   ),
                 ],
