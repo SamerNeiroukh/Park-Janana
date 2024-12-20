@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_screen.dart'; // Placeholder for the home screen
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,9 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Navigate to the home screen upon success
       if (context.mounted) {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false, // Remove all previous routes
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -65,19 +66,17 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Welcome Label
               const Text(
                 'שלום עובדים יקרים',
                 style: TextStyle(
-                  fontFamily: 'SuezOne', // Custom font
-                  fontSize: 36.0, // Larger font size
+                  fontFamily: 'SuezOne',
+                  fontSize: 36.0,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 86, 194, 244), // Sky blue color
+                  color: Color.fromARGB(255, 86, 194, 244),
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32.0),
-              // Email Field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -113,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 16.0),
-              // Password Field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -149,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 16.0),
-              // Forgot Password Label
               GestureDetector(
                 onTap: () {
                   // Handle "Forgot Password" action
@@ -165,7 +162,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 32.0),
-              // Log In Button
               _isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
@@ -174,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         elevation: 4,
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
                       onPressed: _login,
@@ -188,7 +184,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
               const SizedBox(height: 16.0),
-              // Back Button
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
