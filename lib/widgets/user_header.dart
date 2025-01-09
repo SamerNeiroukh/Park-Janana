@@ -40,29 +40,59 @@ class _UserHeaderState extends State<UserHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          _fullName,
-          style: const TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(width: 8.0),
-        CircleAvatar(
-          radius: 20,
-          backgroundImage: _profilePicture != null && _profilePicture!.isNotEmpty
-              ? NetworkImage(_profilePicture!)
-              : const AssetImage('assets/images/default_profile.png')
-                  as ImageProvider,
-          child: _profilePicture == null || _profilePicture!.isEmpty
-              ? const Icon(Icons.person, size: 20)
-              : null,
-        ),
-      ],
+    User? currentUser = _auth.currentUser;
+
+    if (currentUser == null) {
+      return Container(); // Return empty widget if no user is logged in.
+    }
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.collection('users').doc(currentUser.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Text("Error loading user data");
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // Show loading spinner.
+        }
+
+        if (snapshot.hasData) {
+          var data = snapshot.data?.data() as Map<String, dynamic>?;
+
+          String fullName = data?['fullName'] ?? "User";
+          String? profilePicture = data?['profile_picture'];
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 16.0, top: 5.0), // Adjusted spacing to move higher
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  fullName,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                CircleAvatar(
+                  radius: 24,
+                  backgroundImage: profilePicture != null && profilePicture.isNotEmpty
+                      ? NetworkImage(profilePicture)
+                      : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                  child: profilePicture == null || profilePicture.isEmpty
+                      ? const Icon(Icons.person, size: 24, color: Colors.white)
+                      : null,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return const Text("No user data available");
+      },
     );
   }
 }
