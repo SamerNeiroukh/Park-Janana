@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:park_janana/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -19,6 +20,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   File? _imageFile;
   final AuthService _authService = AuthService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -37,20 +39,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   Future<void> _uploadImage() async {
     if (_imageFile != null) {
       try {
-        // Debug: Print user authentication status and UID
-        final currentUser = FirebaseAuth.instance.currentUser;
-        print('Current User: ${currentUser?.email}, UID: ${currentUser?.uid}');
-
         final storageRef = _storage.ref().child('profile_pictures/${widget.uid}.jpg');
-
-        print('Uploading to path: profile_pictures/${widget.uid}.jpg'); // Debug print
 
         // Upload the file
         await storageRef.putFile(_imageFile!);
 
         // Get the download URL
         final downloadUrl = await storageRef.getDownloadURL();
-        print('Download URL: $downloadUrl'); // Debug print
 
         // Update the profile picture URL in Firestore
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
@@ -59,7 +54,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           const SnackBar(content: Text("Profile picture updated.")),
         );
       } catch (e) {
-        print('Error during upload: $e'); // Debug print
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error uploading image: $e")),
         );
@@ -78,26 +72,46 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         title: const Text('Personal Area'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
-              child: _imageFile == null ? const Icon(Icons.person, size: 50) : null,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _pickImage,
-              icon: const Icon(Icons.photo),
-              label: const Text("Choose Profile Picture"),
-            ),
-            ElevatedButton.icon(
-              onPressed: _uploadImage,
-              icon: const Icon(Icons.upload_file),
-              label: const Text("Upload Profile Picture"),
-            ),
-          ],
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: _firestore.collection('users').doc(widget.uid).snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Text("Error loading profile picture.");
+            }
+
+            if (!snapshot.hasData || snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+
+            final userDoc = snapshot.data!;
+            final profilePicture = userDoc['profile_picture'] ?? '';
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: profilePicture.isNotEmpty
+                      ? NetworkImage(profilePicture)
+                      : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                  child: profilePicture.isEmpty
+                      ? const Icon(Icons.person, size: 50)
+                      : null,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.photo),
+                  label: const Text("Choose Profile Picture"),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _uploadImage,
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text("Upload Profile Picture"),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -61,6 +61,7 @@ flutter:
     - assets/images/park_logo.png
     - assets/images/background_image.jpg
     - assets/images/team_image.jpg
+    - assets/images/default_profile.png
 
   # Fonts section to include custom fonts
   fonts:

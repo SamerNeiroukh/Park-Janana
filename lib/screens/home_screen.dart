@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/user_header.dart'; // Import the UserHeader widget
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -24,6 +25,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('עמוד הבית'),
         backgroundColor: const Color.fromARGB(255, 86, 194, 244), // Sky blue
+        actions: const [UserHeader()], // Add UserHeader to the AppBar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
