@@ -36,18 +36,20 @@ class _RegistrationFormState extends State<RegistrationForm> {
         password: _passwordController.text.trim(),
       );
 
+      // Get the UID from the newly created user
+      String uid = userCredential.user!.uid;
+
       // Create a new user profile in Firestore
       UserModel userModel = UserModel(
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),
         idNumber: _idNumberController.text.trim(),
         phoneNumber: _phoneNumberController.text.trim(),
+        uid: uid,
+        profilePicture: '', // Default empty profile picture
       );
 
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(userModel.toMap());
+      await _firestore.collection('users').doc(uid).set(userModel.toMap());
 
       // Navigate back to the WelcomeScreen
       if (context.mounted) {
