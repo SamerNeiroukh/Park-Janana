@@ -7,30 +7,35 @@ class AuthService {
 
   // Create a new user
   Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
-    try {
-      // Create user in Firebase Auth
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  try {
+    print("firebase logs: Starting user creation...");
 
-      // Get the UID of the newly created user
-      String uid = userCredential.user!.uid;
+    // Step 1: Create user in Firebase Auth
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      // Save user data to Firestore
-      await _firestore.collection('users').doc(uid).set({
-        'uid': uid,
-        'email': email,
-        'fullName': fullName,
-        'idNumber': idNumber,
-        'phoneNumber': phoneNumber,
-        'profile_picture': '', // Default empty profile picture
-      });
-      print("User created successfully with UID: $uid");
-    } catch (e) {
-      print("Error creating user: $e");
-    }
+    String uid = userCredential.user!.uid;
+    print("firebase logs: User created successfully with UID: $uid");
+
+    // Step 2: Save user data to Firestore
+    print("firebase logs: Writing user data to Firestore for UID: $uid");
+    await _firestore.collection('users').doc(uid).set({
+      'uid': uid,
+      'email': email,
+      'fullName': fullName,
+      'idNumber': idNumber,
+      'phoneNumber': phoneNumber,
+      'profile_picture': '',
+      'role': 'worker',
+    });
+    print("firebase logs: User data written to Firestore successfully for UID: $uid");
+  } catch (e) {
+    print("firebase logs: Error during user creation or Firestore write: $e");
   }
+}
+
 
   // Update profile picture
   Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
@@ -43,6 +48,18 @@ class AuthService {
     } catch (e) {
       print("firebase logs: Failed to update profile picture for user $uid: $e");
       throw e;
+    }
+  }
+
+  // Assign a role to a user
+  Future<void> assignRole(String uid, String role) async {
+    try {
+      await _firestore.collection('users').doc(uid).set({
+        'role': role,
+      }, SetOptions(merge: true)); // Merge ensures existing data is not overwritten
+      print("Role $role assigned to user $uid successfully.");
+    } catch (e) {
+      print("Error assigning role: $e");
     }
   }
 }
