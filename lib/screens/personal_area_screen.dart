@@ -94,7 +94,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             ),
             ElevatedButton.icon(
               onPressed: _uploadImage,
-              icon: const Icon(Icons.upload),
+              icon: const Icon(Icons.upload_file),
               label: const Text("Upload Profile Picture"),
             ),
           ],
