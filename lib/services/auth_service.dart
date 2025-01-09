@@ -1,52 +1,48 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Register user with email and password
-  Future<User?> registerUser({
-    required String email,
-    required String password,
-    required UserModel userModel,
-  }) async {
+  // Create a new user
+  Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
     try {
-      // Create user in Firebase Authentication
+      // Create user in Firebase Auth
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Store user details in Firestore
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid) // Use Firebase-generated UID as the document ID
-          .set(userModel.toMap());
+      // Get the UID of the newly created user
+      String uid = userCredential.user!.uid;
 
-      return userCredential.user;
+      // Save user data to Firestore
+      await _firestore.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': email,
+        'fullName': fullName,
+        'idNumber': idNumber,
+        'phoneNumber': phoneNumber,
+        'profile_picture': '', // Default empty profile picture
+      });
+      print("User created successfully with UID: $uid");
     } catch (e) {
-      print('Error registering user: $e');
-      rethrow;
+      print("Error creating user: $e");
     }
   }
 
-  // Login user with email and password
-  Future<User?> loginUser({
-    required String email,
-    required String password,
-  }) async {
+  // Update profile picture
+  Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      return userCredential.user;
+      print("firebase logs: Updating profile picture for user $uid");
+      await _firestore.collection('users').doc(uid).update({
+        'profile_picture': profilePictureUrl,
+      });
+      print("firebase logs: Profile picture updated successfully for user $uid");
     } catch (e) {
-      print('Error logging in: $e');
-      rethrow;
+      print("firebase logs: Failed to update profile picture for user $uid: $e");
+      throw e;
     }
   }
 }
