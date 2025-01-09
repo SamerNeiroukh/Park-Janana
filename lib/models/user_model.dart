@@ -1,33 +1,41 @@
 class UserModel {
-  final String fullName;
+  final String uid;
   final String email;
+  final String fullName;
   final String idNumber;
   final String phoneNumber;
+  final String profilePicture;
 
   UserModel({
-    required this.fullName,
+    required this.uid,
     required this.email,
+    required this.fullName,
     required this.idNumber,
     required this.phoneNumber,
+    required this.profilePicture,
   });
 
-  // Convert user data to a Map for Firebase
   Map<String, dynamic> toMap() {
+    print("firebase logs: Converting UserModel to Map");
     return {
-      'fullName': fullName,
+      'uid': uid,
       'email': email,
+      'fullName': fullName,
       'idNumber': idNumber,
       'phoneNumber': phoneNumber,
+      'profile_picture': profilePicture,
     };
   }
 
-  // Convert Map data from Firebase to a UserModel
   factory UserModel.fromMap(Map<String, dynamic> map) {
+    print("firebase logs: Converting Map to UserModel");
     return UserModel(
-      fullName: map['fullName'] ?? '',
+      uid: map['uid'] ?? '',
       email: map['email'] ?? '',
+      fullName: map['fullName'] ?? '',
       idNumber: map['idNumber'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
+      profilePicture: map['profile_picture'] ?? '',
     );
   }
 }
