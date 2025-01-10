@@ -46,7 +46,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
         idNumber: _idNumberController.text.trim(),
         phoneNumber: _phoneNumberController.text.trim(),
         uid: uid,
-        profilePicture: '', // Default empty profile picture
+        profilePicture: '', 
+        role: 'worker',
       );
 
       await _firestore.collection('users').doc(uid).set(userModel.toMap());

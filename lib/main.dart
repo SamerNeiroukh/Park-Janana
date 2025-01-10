@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-    
 import 'package:firebase_core/firebase_core.dart';
-    
-
-  
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/personal_area_screen.dart';
-    
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
@@ -37,7 +32,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       routes: {
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const HomeScreen(role: '',),
         '/profile': (context) {
           // Check if the user is logged in before navigating to the profile
     print("firebase logs: final user = FirebaseAuth.instance.currentUser;");
