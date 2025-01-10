@@ -48,7 +48,7 @@ class AuthService {
       print("firebase logs: Profile picture updated successfully for user $uid");
     } catch (e) {
       print("firebase logs: Failed to update profile picture for user $uid: $e");
-      throw e;
+      rethrow;
     }
   }
 

@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       routes: {
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const HomeScreen(role: '',),
         '/profile': (context) {
           // Check if the user is logged in before navigating to the profile
     print("firebase logs: final user = FirebaseAuth.instance.currentUser;");
