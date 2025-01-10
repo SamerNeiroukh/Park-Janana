@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserHeader extends StatefulWidget {
-  const UserHeader({Key? key}) : super(key: key);
+  const UserHeader({super.key});
 
   @override
   _UserHeaderState createState() => _UserHeaderState();

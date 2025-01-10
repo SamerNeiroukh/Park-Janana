@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
-import 'manager_dashboard.dart';
-import 'owner_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,23 +42,13 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userDoc.exists) {
         String role = userDoc.get('role') ?? 'worker';
 
-        // Navigate based on role
-        if (role == 'owner') {
+        // Navigate to the HomeScreen and pass the role
+        if (context.mounted) {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const OwnerDashboard()),
-            (route) => false,
-          );
-        } else if (role == 'manager') {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const ManagerDashboard()),
-            (route) => false,
-          );
-        } else {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(role: role),
+            ),
             (route) => false,
           );
         }
