@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
+import 'manager_dashboard.dart';
+import 'owner_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
 
   // Function to handle login
@@ -26,27 +31,59 @@ class _LoginScreenState extends State<LoginScreen> {
       String password = _passwordController.text.trim();
 
       // Sign in using email and password
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // Navigate to the home screen upon success
-      if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false, // Remove all previous routes
-        );
+      // Get user UID
+      String uid = userCredential.user!.uid;
+
+      // Fetch user data from Firestore
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+
+      if (userDoc.exists) {
+        String role = userDoc.get('role') ?? 'worker';
+
+        // Navigate based on role
+        if (role == 'owner') {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const OwnerDashboard()),
+            (route) => false,
+          );
+        } else if (role == 'manager') {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const ManagerDashboard()),
+            (route) => false,
+          );
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (route) => false,
+          );
+        }
+      } else {
+        throw Exception("User document does not exist.");
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'שגיאה התרחשה';
+      String errorMessage = 'An error occurred';
       if (e.code == 'user-not-found') {
-        errorMessage = 'משתמש לא נמצא';
+        errorMessage = 'User not found';
       } else if (e.code == 'wrong-password') {
-        errorMessage = 'סיסמה שגויה';
+        errorMessage = 'Wrong password';
       }
 
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(errorMessage),
+        backgroundColor: Colors.red,
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error: $e'),
         backgroundColor: Colors.red,
       ));
     } finally {

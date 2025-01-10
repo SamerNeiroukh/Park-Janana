@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -62,4 +63,28 @@ class AuthService {
       print("Error assigning role: $e");
     }
   }
+
+  Future<String?> fetchUserRole(String uid) async {
+  try {
+    final DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+    if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>;
+      final role = data['role'] as String?;
+      print("firebase logs: User role fetched - $role");
+
+      // Save role locally using SharedPreferences for session persistence
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userRole', role ?? '');
+      return role;
+    } else {
+      print("firebase logs: User document does not exist");
+      return null;
+    }
+  } catch (e) {
+    print("firebase logs: Error fetching user role - $e");
+    return null;
+  }
+}
 }
