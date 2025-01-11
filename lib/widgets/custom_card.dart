@@ -16,24 +16,30 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        elevation: 4.0,
+      child: Container(
+        width: 60.0,
+        margin: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 48.0,
-              color: const Color.fromARGB(255, 255, 193, 7), // Yellow
+            Container(
+              height: 60.0,
+              width: 60.0,
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 207, 228, 241), // Sky blue
+                borderRadius: BorderRadius.circular(25.0),
+              ),
+              child: Icon(
+                icon,
+                size: 40.0,
+                color: const Color.fromARGB(255, 0, 182, 254),
+              ),
             ),
             const SizedBox(height: 8.0),
             Text(
               title,
               style: const TextStyle(
-                fontSize: 16.0,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
