@@ -5,11 +5,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/widgets/custom_card.dart';
+import 'package:park_janana/screens/personal_area_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  final String role; // Added role as a field
+class HomeScreen extends StatefulWidget {
+  final String role;
 
-  const HomeScreen({super.key, required this.role}); // Added role to constructor
+  const HomeScreen({super.key, required this.role});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? _profilePictureUrl;
 
   Future<Map<String, dynamic>> _fetchUserData(String uid) async {
     try {
@@ -53,7 +61,7 @@ class HomeScreen extends StatelessWidget {
 
           final String userName = userData['fullName'] ?? 'משתמש';
           final String profilePictureUrl =
-              userData['profile_picture'] ?? 'https://via.placeholder.com/150';
+              _profilePictureUrl ?? userData['profile_picture'] ?? 'https://via.placeholder.com/150';
           final String currentDate =
               DateFormat('dd/MM/yyyy').format(DateTime.now());
           final int daysWorked = userData['daysWorked'] ?? 0;
@@ -88,8 +96,22 @@ class HomeScreen extends StatelessWidget {
                     CustomCard(
                       title: 'פרופיל',
                       icon: Icons.person,
-                      onTap: () {
-                        debugPrint('Profile tapped');
+                      onTap: () async {
+                        // Navigate to PersonalAreaScreen and wait for the updated profile picture URL
+                        final updatedProfilePictureUrl = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PersonalAreaScreen(uid: currentUser.uid),
+                          ),
+                        );
+
+                        // Update the profile picture if a new URL is returned
+                        if (updatedProfilePictureUrl != null) {
+                          setState(() {
+                            _profilePictureUrl = updatedProfilePictureUrl;
+                          });
+                        }
                       },
                     ),
                     CustomCard(

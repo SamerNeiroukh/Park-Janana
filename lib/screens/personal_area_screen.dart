@@ -17,6 +17,7 @@ class PersonalAreaScreen extends StatefulWidget {
 
 class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   File? _imageFile;
+  bool _isUploading = false; // State for uploading indicator
   final AuthService _authService = AuthService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -38,6 +39,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Future<void> _uploadImage() async {
     if (_imageFile != null) {
+      setState(() {
+        _isUploading = true;
+      });
       try {
         final storageRef = _storage.ref().child('profile_pictures/${widget.uid}.jpg');
         await storageRef.putFile(_imageFile!);
@@ -46,10 +50,15 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profile picture updated.")),
         );
+        Navigator.pop(context, downloadUrl); // Return the new profile picture URL
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error uploading image: $e")),
         );
+      } finally {
+        setState(() {
+          _isUploading = false;
+        });
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -190,51 +199,62 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       appBar: AppBar(
         title: const Text('אזור אישי'),
       ),
-      body: Center(
-        child: StreamBuilder<DocumentSnapshot>(
-          stream: _firestore.collection('users').doc(widget.uid).snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const Text("שגיאה בטעינת הפרופיל.");
-            }
+      body: Stack(
+        children: [
+          Center(
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: _firestore.collection('users').doc(widget.uid).snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text("שגיאה בטעינת הפרופיל.");
+                }
 
-            if (!snapshot.hasData || snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
+                if (!snapshot.hasData || snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
 
-            final userDoc = snapshot.data!;
-            final profilePicture = userDoc['profile_picture'] ?? '';
-            final fullName = userDoc['fullName'] ?? 'לא ידוע';
-            final email = userDoc['email'] ?? 'לא ידוע';
-            final idNumber = userDoc['idNumber'] ?? 'לא ידוע';
-            final phoneNumber = userDoc['phoneNumber'] ?? 'לא ידוע';
+                final userDoc = snapshot.data!;
+                final profilePicture = userDoc['profile_picture'] ?? '';
+                final fullName = userDoc['fullName'] ?? 'לא ידוע';
+                final email = userDoc['email'] ?? 'לא ידוע';
+                final idNumber = userDoc['idNumber'] ?? 'לא ידוע';
+                final phoneNumber = userDoc['phoneNumber'] ?? 'לא ידוע';
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: _showOptions,
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundImage: profilePicture.isNotEmpty
-                          ? NetworkImage(profilePicture)
-                          : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                      child: profilePicture.isEmpty
-                          ? const Icon(Icons.person, size: 80)
-                          : null,
-                    ),
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: _showOptions,
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundImage: profilePicture.isNotEmpty
+                              ? NetworkImage(profilePicture)
+                              : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                          child: profilePicture.isEmpty
+                              ? const Icon(Icons.person, size: 80)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildInfoRow(Icons.person, "שם מלא", fullName),
+                      _buildInfoRow(Icons.email, "אימייל", email),
+                      _buildInfoRow(Icons.badge, "תעודת זהות", idNumber),
+                      _buildEditableInfoRow(Icons.phone, "מספר טלפון", phoneNumber),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  _buildInfoRow(Icons.person, "שם מלא", fullName),
-                  _buildInfoRow(Icons.email, "אימייל", email),
-                  _buildInfoRow(Icons.badge, "תעודת זהות", idNumber),
-                  _buildEditableInfoRow(Icons.phone, "מספר טלפון", phoneNumber),
-                ],
+                );
+              },
+            ),
+          ),
+          if (_isUploading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(),
               ),
-            );
-          },
-        ),
+            ),
+        ],
       ),
     );
   }
