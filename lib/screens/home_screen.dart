@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/personal_area_screen.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -18,6 +20,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? _profilePictureUrl;
+  Map<String, dynamic>? _roleData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRolesData();
+  }
+
+  Future<void> _loadRolesData() async {
+    final String rolesJson = await rootBundle.loadString('lib/config/roles.json');
+    setState(() {
+      _roleData = json.decode(rolesJson);
+    });
+  }
 
   Future<Map<String, dynamic>> _fetchUserData(String uid) async {
     try {
@@ -29,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       debugPrint('Error fetching user data: $e');
     }
-    return {}; // Return an empty map if the document does not exist or an error occurs
+    return {}; 
   }
 
   @override
@@ -57,7 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final userData = snapshot.data!;
-          debugPrint('Fetched User Data: $userData');
+          final String role = userData['role'] ?? 'worker';
+          debugPrint('Fetched User Role: $role');
 
           final String userName = userData['fullName'] ?? 'משתמש';
           final String profilePictureUrl =
@@ -96,73 +113,49 @@ class _HomeScreenState extends State<HomeScreen> {
                     CustomCard(
                       title: 'פרופיל',
                       icon: Icons.person,
-                      onTap: () async {
-                        // Navigate to PersonalAreaScreen and wait for the updated profile picture URL
-                        final updatedProfilePictureUrl = await Navigator.push(
+                      onTap: () {
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                PersonalAreaScreen(uid: currentUser.uid),
+                            builder: (context) => PersonalAreaScreen(uid: currentUser.uid),
                           ),
                         );
-
-                        // Update the profile picture if a new URL is returned
-                        if (updatedProfilePictureUrl != null) {
-                          setState(() {
-                            _profilePictureUrl = updatedProfilePictureUrl;
-                          });
-                        }
                       },
                     ),
-                    CustomCard(
-                      title: 'שעות עבודה',
-                      icon: Icons.schedule,
-                      onTap: () {
-                        debugPrint('Working hours tapped');
-                      },
-                    ),
-                    CustomCard(
-                      title: 'משימות',
-                      icon: Icons.task,
-                      onTap: () {
-                        debugPrint('Tasks tapped');
-                      },
-                    ),
-                    CustomCard(
-                      title: 'דוחות',
-                      icon: Icons.report,
-                      onTap: () {
-                        debugPrint('Reports tapped');
-                      },
-                    ),
-                    CustomCard(
-                      title: 'הגדרות',
-                      icon: Icons.settings,
-                      onTap: () {
-                        debugPrint('Settings tapped');
-                      },
-                    ),
-                    CustomCard(
-                      title: 'עזרה',
-                      icon: Icons.help,
-                      onTap: () {
-                        debugPrint('Help tapped');
-                      },
-                    ),
-                    CustomCard(
-                      title: 'מיקום',
-                      icon: Icons.location_on,
-                      onTap: () {
-                        debugPrint('Location tapped');
-                      },
-                    ),
-                    CustomCard(
-                      title: 'טלפון',
-                      icon: Icons.phone,
-                      onTap: () {
-                        debugPrint('Phone tapped');
-                      },
-                    ),
+                    if (_roleData != null && _roleData![role] != null)
+                      ..._roleData![role].map<Widget>((operation) {
+                        return CustomCard(
+                          title: operation['title'],
+                          icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
+                          onTap: () {
+                            debugPrint('${operation['title']} tapped');
+                          },
+                        );
+                      }).toList(),
+                    if (role == 'manager')
+                      CustomCard(
+                        title: 'ניהול עובדים',
+                        icon: Icons.supervisor_account,
+                        onTap: () {
+                          debugPrint('ניהול עובדים tapped');
+                        },
+                      ),
+                    if (role == 'worker')
+                      CustomCard(
+                        title: 'דיווח שעות',
+                        icon: Icons.access_time,
+                        onTap: () {
+                          debugPrint('דיווח שעות tapped');
+                        },
+                      ),
+                    if (role == 'owner')
+                      CustomCard(
+                        title: 'דוחות עסקיים',
+                        icon: Icons.bar_chart,
+                        onTap: () {
+                          debugPrint('דוחות עסקיים tapped');
+                        },
+                      ),
                   ],
                 ),
               ),
