@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:park_janana/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/user_header.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -17,7 +18,7 @@ class PersonalAreaScreen extends StatefulWidget {
 
 class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   File? _imageFile;
-  bool _isUploading = false; // State for uploading indicator
+  bool _isUploading = false;
   final AuthService _authService = AuthService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,10 +31,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         _imageFile = File(pickedFile.path);
       });
       _confirmUpload();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No image selected.")),
-      );
     }
   }
 
@@ -48,35 +45,18 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile picture updated.")),
+          const SnackBar(content: Text("תמונת הפרופיל עודכנה בהצלחה.")),
         );
-        Navigator.pop(context, downloadUrl); // Return the new profile picture URL
+        Navigator.pop(context, downloadUrl);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error uploading image: $e")),
+          SnackBar(content: Text("שגיאה בהעלאת תמונה: $e")),
         );
       } finally {
         setState(() {
           _isUploading = false;
         });
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No image selected.")),
-      );
-    }
-  }
-
-  Future<void> _deleteProfilePicture() async {
-    try {
-      await _authService.updateProfilePicture(widget.uid, '');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile picture deleted.")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error deleting image: $e")),
-      );
     }
   }
 
@@ -103,14 +83,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text("מחק תמונה", style: TextStyle(color: Colors.red)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _deleteProfilePicture();
                 },
               ),
             ],
@@ -146,62 +118,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     );
   }
 
-  void _updatePhoneNumber(String newPhone) async {
-    try {
-      await _firestore.collection('users').doc(widget.uid).update({'phoneNumber': newPhone});
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Phone number updated.")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error updating phone number: $e")),
-      );
-    }
-  }
-
-  void _editPhoneNumber(String currentPhone) {
-    final TextEditingController phoneController = TextEditingController(text: currentPhone);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("עדכן מספר טלפון"),
-          content: TextField(
-            controller: phoneController,
-            keyboardType: TextInputType.phone,
-            textAlign: TextAlign.right,
-            decoration: const InputDecoration(hintText: "הכנס מספר חדש"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("ביטול"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _updatePhoneNumber(phoneController.text.trim());
-              },
-              child: const Text("שמור"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('אזור אישי'),
-      ),
-      body: Stack(
+      body: Column(
         children: [
-          Center(
+          const UserHeader(), // ✅ Keep consistency with HomeScreen
+          Expanded(
             child: StreamBuilder<DocumentSnapshot>(
               stream: _firestore.collection('users').doc(widget.uid).snapshots(),
               builder: (context, snapshot) {
@@ -224,83 +147,82 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: _showOptions,
-                        child: CircleAvatar(
-                          radius: 80,
-                          backgroundImage: profilePicture.isNotEmpty
-                              ? NetworkImage(profilePicture)
-                              : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                          child: profilePicture.isEmpty
-                              ? const Icon(Icons.person, size: 80)
-                              : null,
-                        ),
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 85,
+                            backgroundColor: Colors.blue.shade700,
+                            child: CircleAvatar(
+                              radius: 80,
+                              backgroundImage: profilePicture.isNotEmpty
+                                  ? NetworkImage(profilePicture)
+                                  : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                              child: profilePicture.isEmpty
+                                  ? const Icon(Icons.person, size: 80, color: Colors.white)
+                                  : null,
+                            ),
+                          ),
+                          Positioned(
+                            right: 5,
+                            bottom: 5,
+                            child: GestureDetector(
+                              onTap: _showOptions,
+                              child: const CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius: 22,
+                                child: Icon(Icons.camera_alt, color: Colors.blue, size: 22),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20),
-                      _buildInfoRow(Icons.person, "שם מלא", fullName),
-                      _buildInfoRow(Icons.email, "אימייל", email),
-                      _buildInfoRow(Icons.badge, "תעודת זהות", idNumber),
-                      _buildEditableInfoRow(Icons.phone, "מספר טלפון", phoneNumber),
+                      const SizedBox(height: 25),
+                      _buildInfoCard([
+                        _buildInfoRow(Icons.person, "שם מלא", fullName),
+                        _buildInfoRow(Icons.email, "אימייל", email),
+                        _buildInfoRow(Icons.badge, "תעודת זהות", idNumber),
+                        _buildInfoRow(Icons.phone, "מספר טלפון", phoneNumber),
+                      ]),
                     ],
                   ),
                 );
               },
             ),
           ),
-          if (_isUploading)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(List<Widget> children) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(children: children),
       ),
     );
   }
 
   Widget _buildInfoRow(IconData icon, String field, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          Icon(icon, color: Colors.blue),
-          const SizedBox(width: 8.0),
+          Icon(icon, color: Colors.blueGrey.shade700),
+          const SizedBox(width: 12.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(field, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(value),
+                Text(field, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade600)),
+                Text(value, style: const TextStyle(fontSize: 16.0, color: Colors.black87)),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditableInfoRow(IconData icon, String field, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        textDirection: TextDirection.rtl,
-        children: [
-          Icon(icon, color: Colors.blue),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(field, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(value),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.grey),
-            onPressed: () => _editPhoneNumber(value),
           ),
         ],
       ),
