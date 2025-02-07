@@ -1,44 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/shift_model.dart';
 
 class ShiftService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Create a new shift (Manager only)
-  Future<void> createShift({
-    required String date,
-    required String startTime,
-    required String endTime,
-    required String department,
-    required int maxWorkers,
-  }) async {
-    try {
-      DocumentReference shiftRef = _firestore.collection('shifts').doc();
-      await shiftRef.set({
-        'shift_id': shiftRef.id,
-        'date': date,
-        'startTime': startTime,
-        'endTime': endTime,
-        'department': department,
-        'maxWorkers': maxWorkers,
-        'assignedWorkers': [],
-        'requestedWorkers': [],
-      });
-    } catch (e) {
-      print("Error creating shift: $e");
-    }
-  }
-
-  /// Fetch all available shifts (For workers to view)
-  Future<List<Map<String, dynamic>>> getAvailableShifts() async {
-    try {
-      QuerySnapshot snapshot =
-          await _firestore.collection('shifts').get();
-
-      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-    } catch (e) {
-      print("Error fetching shifts: $e");
-      return [];
-    }
+  /// Fetch all available shifts as a Stream (For workers to view in real-time)
+  Stream<List<ShiftModel>> getShiftsStream() {
+    return _firestore.collection('shifts').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return ShiftModel.fromMap(doc.id, doc.data() as Map<String, dynamic>);
+      }).toList();
+    });
   }
 
   /// Request to join a shift (Worker action)
@@ -62,6 +34,31 @@ class ShiftService {
       });
     } catch (e) {
       print("Error canceling shift request: $e");
+    }
+  }
+
+  /// Create a new shift (Manager only)
+  Future<void> createShift({
+    required String date,
+    required String startTime,
+    required String endTime,
+    required String department,
+    required int maxWorkers,
+  }) async {
+    try {
+      DocumentReference shiftRef = _firestore.collection('shifts').doc();
+      await shiftRef.set({
+        'shift_id': shiftRef.id,
+        'date': date,
+        'startTime': startTime,
+        'endTime': endTime,
+        'department': department,
+        'maxWorkers': maxWorkers,
+        'assignedWorkers': [],
+        'requestedWorkers': [],
+      });
+    } catch (e) {
+      print("Error creating shift: $e");
     }
   }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/shift_model.dart';
 import '../widgets/user_header.dart';
+import '../services/shift_service.dart';
 
 class ShiftsScreen extends StatefulWidget {
   const ShiftsScreen({super.key});
@@ -13,81 +13,23 @@ class ShiftsScreen extends StatefulWidget {
 
 class _ShiftsScreenState extends State<ShiftsScreen> {
   final User? _currentUser = FirebaseAuth.instance.currentUser;
-
-  Future<void> _requestShift(String shiftId) async {
-    if (_currentUser == null) return;
-
-    try {
-      DocumentReference shiftRef =
-          FirebaseFirestore.instance.collection('shifts').doc(shiftId);
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot shiftSnapshot = await transaction.get(shiftRef);
-        if (!shiftSnapshot.exists) return;
-
-        Map<String, dynamic> shiftData =
-            shiftSnapshot.data() as Map<String, dynamic>;
-
-        List<String> requestedWorkers =
-            List<String>.from(shiftData['requestedWorkers'] ?? []);
-
-        if (!requestedWorkers.contains(_currentUser!.uid) &&
-            requestedWorkers.length < shiftData['maxWorkers']) {
-          requestedWorkers.add(_currentUser!.uid);
-          transaction.update(shiftRef, {'requestedWorkers': requestedWorkers});
-        }
-      });
-
-      setState(() {});
-    } catch (e) {
-      debugPrint('Error requesting shift: $e');
-    }
-  }
-
-  Future<void> _cancelShiftRequest(String shiftId) async {
-    if (_currentUser == null) return;
-
-    try {
-      DocumentReference shiftRef =
-          FirebaseFirestore.instance.collection('shifts').doc(shiftId);
-
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot shiftSnapshot = await transaction.get(shiftRef);
-        if (!shiftSnapshot.exists) return;
-
-        Map<String, dynamic> shiftData =
-            shiftSnapshot.data() as Map<String, dynamic>;
-
-        List<String> requestedWorkers =
-            List<String>.from(shiftData['requestedWorkers'] ?? []);
-
-        if (requestedWorkers.contains(_currentUser!.uid)) {
-          requestedWorkers.remove(_currentUser!.uid);
-          transaction.update(shiftRef, {'requestedWorkers': requestedWorkers});
-        }
-      });
-
-      setState(() {});
-    } catch (e) {
-      debugPrint('Error canceling shift request: $e');
-    }
-  }
+  final ShiftService _shiftService = ShiftService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          const UserHeader(), // ✅ Keep consistency with HomeScreen
+          const UserHeader(), // ✅ Unified user header
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('shifts').snapshots(),
+            child: StreamBuilder<List<ShiftModel>>(
+              stream: _shiftService.getShiftsStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(
                     child: Text(
                       'אין משמרות זמינות כרגע.',
@@ -96,9 +38,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                   );
                 }
 
-                List<ShiftModel> shifts = snapshot.data!.docs.map((doc) {
-                  return ShiftModel.fromMap(doc.id, doc.data() as Map<String, dynamic>);
-                }).toList();
+                List<ShiftModel> shifts = snapshot.data!;
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(16.0),
@@ -140,21 +80,22 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: hasRequested
                                         ? Colors.redAccent
-                                        : (isShiftFull ? Colors.grey : Colors.green.shade600), // ✅ Green join button
+                                        : (isShiftFull ? Colors.grey : Colors.green.shade600),
                                     elevation: 4,
                                     minimumSize: const Size(200, 50),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(22.0), // ✅ Balanced button radius
+                                      borderRadius: BorderRadius.circular(22.0),
                                     ),
                                   ),
                                   onPressed: isShiftFull
                                       ? null
                                       : () {
                                           if (hasRequested) {
-                                            _cancelShiftRequest(shift.id);
+                                            _shiftService.cancelShiftRequest(shift.id, _currentUser!.uid);
                                           } else {
-                                            _requestShift(shift.id);
+                                            _shiftService.requestShift(shift.id, _currentUser!.uid);
                                           }
+                                          setState(() {});
                                         },
                                   child: Text(
                                     hasRequested ? 'ביטול בקשה' : 'אני רוצה במשמרת',
@@ -182,7 +123,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(icon, color: Colors.blueGrey.shade700), // ✅ Darker icon for contrast
+          Icon(icon, color: Colors.blueGrey.shade700),
           const SizedBox(width: 8.0),
           Text(
             text,
