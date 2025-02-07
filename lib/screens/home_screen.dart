@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/personal_area_screen.dart';
+import 'package:park_janana/screens/shifts_screen.dart'; // Import the new shifts screen
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -142,10 +143,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     if (role == 'worker')
                       CustomCard(
-                        title: 'דיווח שעות',
-                        icon: Icons.access_time,
+                        title: 'משמרות',
+                        icon: Icons.schedule, // New icon for shifts
                         onTap: () {
-                          debugPrint('דיווח שעות tapped');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ShiftsScreen(),
+                            ),
+                          );
                         },
                       ),
                     if (role == 'owner')
