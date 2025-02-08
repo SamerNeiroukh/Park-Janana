@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/shift_model.dart';
+import '../models/user_model.dart'; // ✅ Import user model for worker details
 
 class ShiftService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -38,13 +39,7 @@ class ShiftService {
   }
 
   /// Create a new shift (Manager only)
-  Future<void> createShift({
-    required String date,
-    required String startTime,
-    required String endTime,
-    required String department,
-    required int maxWorkers,
-  }) async {
+  Future<void> createShift({required String date, required String startTime, required String endTime, required String department, required int maxWorkers}) async {
     try {
       DocumentReference shiftRef = _firestore.collection('shifts').doc();
       await shiftRef.set({
@@ -62,7 +57,17 @@ class ShiftService {
     }
   }
 
-  /// Approve a worker for a shift (Manager action)
+  /// Delete a shift (Manager action)
+  Future<void> deleteShift(String shiftId) async {
+    try {
+      await _firestore.collection('shifts').doc(shiftId).delete();
+      print("✅ Shift $shiftId deleted successfully.");
+    } catch (e) {
+      print("Error deleting shift: $e");
+    }
+  }
+
+  /// Approve a worker for a shift (Move from `requestedWorkers` to `assignedWorkers`)
   Future<void> approveWorker(String shiftId, String workerId) async {
     try {
       DocumentReference shiftRef = _firestore.collection('shifts').doc(shiftId);
@@ -73,5 +78,45 @@ class ShiftService {
     } catch (e) {
       print("Error approving worker: $e");
     }
+  }
+
+  /// Reject a worker's request (Remove from `requestedWorkers`)
+  Future<void> rejectWorker(String shiftId, String workerId) async {
+    try {
+      DocumentReference shiftRef = _firestore.collection('shifts').doc(shiftId);
+      await shiftRef.update({
+        'requestedWorkers': FieldValue.arrayRemove([workerId]),
+      });
+    } catch (e) {
+      print("Error rejecting worker: $e");
+    }
+  }
+
+  /// Remove an assigned worker from a shift
+  Future<void> removeWorker(String shiftId, String workerId) async {
+    try {
+      DocumentReference shiftRef = _firestore.collection('shifts').doc(shiftId);
+      await shiftRef.update({
+        'assignedWorkers': FieldValue.arrayRemove([workerId]),
+      });
+    } catch (e) {
+      print("Error removing worker: $e");
+    }
+  }
+
+  /// Fetch worker details (Name & Profile Picture) for displaying in UI
+  Future<List<UserModel>> fetchWorkerDetails(List<String> workerIds) async {
+    List<UserModel> workers = [];
+    try {
+      for (String workerId in workerIds) {
+        DocumentSnapshot userDoc = await _firestore.collection('users').doc(workerId).get();
+        if (userDoc.exists && userDoc.data() != null) {
+          workers.add(UserModel.fromMap(userDoc.data() as Map<String, dynamic>));
+        }
+      }
+    } catch (e) {
+      print("Error fetching worker details: $e");
+    }
+    return workers;
   }
 }

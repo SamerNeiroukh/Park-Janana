@@ -6,6 +6,7 @@ class ShiftModel {
   final String endTime;
   final int maxWorkers;
   final List<String> requestedWorkers;
+  final List<String> assignedWorkers; // ✅ Add this field
 
   ShiftModel({
     required this.id,
@@ -15,19 +16,8 @@ class ShiftModel {
     required this.endTime,
     required this.maxWorkers,
     required this.requestedWorkers,
+    required this.assignedWorkers, // ✅ Add this field
   });
-
-  // Convert ShiftModel to Map for Firestore
-  Map<String, dynamic> toMap() {
-    return {
-      'date': date,
-      'department': department,
-      'startTime': startTime,
-      'endTime': endTime,
-      'maxWorkers': maxWorkers,
-      'requestedWorkers': requestedWorkers,
-    };
-  }
 
   // Convert Firestore document to ShiftModel
   factory ShiftModel.fromMap(String id, Map<String, dynamic> map) {
@@ -39,6 +29,7 @@ class ShiftModel {
       endTime: map['endTime'] ?? '',
       maxWorkers: map['maxWorkers'] ?? 0,
       requestedWorkers: List<String>.from(map['requestedWorkers'] ?? []),
+      assignedWorkers: List<String>.from(map['assignedWorkers'] ?? []), // ✅ Add this line
     );
   }
 }

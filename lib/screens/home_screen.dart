@@ -6,7 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/personal_area_screen.dart';
-import 'package:park_janana/screens/shifts_screen.dart'; // Import the new shifts screen
+import 'package:park_janana/screens/shifts_screen.dart';
+import 'package:park_janana/screens/manager_shifts_screen.dart'; // ✅ Import Manager's Shift Screen
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       debugPrint('Error fetching user data: $e');
     }
-    return {}; 
+    return {};
   }
 
   @override
@@ -95,8 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 hoursWorked: hoursWorked,
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   'פעולות',
                   style: const TextStyle(
@@ -135,16 +135,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       }).toList(),
                     if (role == 'manager')
                       CustomCard(
-                        title: 'ניהול עובדים',
-                        icon: Icons.supervisor_account,
+                        title: 'ניהול משמרות', // ✅ Updated title
+                        icon: Icons.schedule, // ✅ Updated icon
                         onTap: () {
-                          debugPrint('ניהול עובדים tapped');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ManagerShiftsScreen(), // ✅ Navigate to manager's shift screen
+                            ),
+                          );
                         },
                       ),
                     if (role == 'worker')
                       CustomCard(
                         title: 'משמרות',
-                        icon: Icons.schedule, // New icon for shifts
+                        icon: Icons.access_time, // ✅ Updated to differentiate from manager's shift screen
                         onTap: () {
                           Navigator.push(
                             context,
