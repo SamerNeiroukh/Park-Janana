@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/services/auth_service.dart';
 
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   const UserHeader({super.key});
@@ -26,8 +27,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                       leading: const Icon(Icons.logout),
                       title: const Text('התנתק'),
                       onTap: () async {
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, '/login', (route) => false);
+                        await AuthService().signOut();
+                        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                       },
                     ),
                   ],

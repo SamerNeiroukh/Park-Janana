@@ -4,6 +4,7 @@ import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/personal_area_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
@@ -23,19 +24,50 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _showSplashScreen = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Show splash screen for 2 seconds, then check login state
+    Future.delayed(const Duration(seconds: 6), () {
+      setState(() {
+        _showSplashScreen = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: _showSplashScreen
+          ? const SplashScreen()
+          : StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasData) {
+                  return const HomeScreen(role: '');
+                }
+                return const WelcomeScreen();
+              },
+            ),
       routes: {
-        '/home': (context) => const HomeScreen(role: '',),
+        '/home': (context) => const HomeScreen(role: ''),
+        '/login': (context) => const WelcomeScreen(),
         '/profile': (context) {
-          // Check if the user is logged in before navigating to the profile
-    print("firebase logs: final user = FirebaseAuth.instance.currentUser;");
           final user = FirebaseAuth.instance.currentUser;
           if (user != null) {
             return PersonalAreaScreen(uid: user.uid);
