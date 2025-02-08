@@ -64,6 +64,7 @@ flutter:
     - assets/images/background_image.jpg
     - assets/images/team_image.jpg
     - assets/images/default_profile.png
+    - lib/config/roles.json
 
   # Fonts section to include custom fonts
   fonts:
