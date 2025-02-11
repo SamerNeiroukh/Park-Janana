@@ -1,14 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:park_janana/constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/custom_exception.dart';
+import 'firebase_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseService _firebaseService = FirebaseService();
 
-  // Create a new user
+  // 🟢 Create a new user
   Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
@@ -17,7 +16,7 @@ class AuthService {
       );
       String uid = userCredential.user!.uid;
 
-      await _firestore.collection(AppConstants.usersCollection).doc(uid).set({
+      await _firebaseService.addUser({
         'uid': uid,
         'email': email,
         'fullName': fullName,
@@ -26,45 +25,33 @@ class AuthService {
         'profile_picture': '',
         'role': 'worker',
       });
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        throw CustomException('כתובת הדוא"ל כבר רשומה במערכת.');
-      } else if (e.code == 'weak-password') {
-        throw CustomException('הסיסמה חלשה מדי. נסה שוב עם סיסמה חזקה יותר.');
-      } else {
-        throw CustomException('אירעה שגיאה ביצירת חשבון. נסה שוב.');
-      }
     } catch (e) {
-      throw CustomException('שגיאה לא צפויה ביצירת חשבון.');
+      throw CustomException('שגיאה ביצירת משתמש.');
     }
   }
 
-  // Update profile picture
+  // 🟢 Update profile picture
   Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
     try {
-      await _firestore.collection(AppConstants.usersCollection).doc(uid).update({
-        'profile_picture': profilePictureUrl,
-      });
+      await _firebaseService.updateUser(uid, {'profile_picture': profilePictureUrl});
     } catch (e) {
       throw CustomException('שגיאה בעדכון תמונת הפרופיל.');
     }
   }
 
-  // Assign a role to a user
+  // 🟢 Assign a role to a user
   Future<void> assignRole(String uid, String role) async {
     try {
-      await _firestore.collection(AppConstants.usersCollection).doc(uid).set({
-        'role': role,
-      }, SetOptions(merge: true));
+      await _firebaseService.updateUser(uid, {'role': role});
     } catch (e) {
       throw CustomException('שגיאה בהקצאת תפקיד.');
     }
   }
 
-  // Fetch User Role
+  // 🟢 Fetch user role
   Future<String?> fetchUserRole(String uid) async {
     try {
-      final DocumentSnapshot userDoc = await _firestore.collection(AppConstants.usersCollection).doc(uid).get();
+      final userDoc = await _firebaseService.getUser(uid);
 
       if (userDoc.exists) {
         final data = userDoc.data() as Map<String, dynamic>;
@@ -82,7 +69,7 @@ class AuthService {
     }
   }
 
-  // Logout Function
+  // 🟢 Logout
   Future<void> signOut() async {
     try {
       await _auth.signOut();
