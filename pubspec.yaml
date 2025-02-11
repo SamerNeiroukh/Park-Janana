@@ -65,6 +65,10 @@ flutter:
     - assets/images/team_image.jpg
     - assets/images/default_profile.png
     - lib/config/roles.json
+    - lib/constants/app_constants.dart
+    - lib/constants/app_colors.dart
+    - lib/constants/app_strings.dart
+    - lib/constants/app_endpoints.dart
 
   # Fonts section to include custom fonts
   fonts:

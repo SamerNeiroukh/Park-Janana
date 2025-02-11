@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:park_janana/constants/app_strings.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -179,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Handle "Forgot Password" action
                   },
                   child: const Text(
-                    'שכחתי סיסמה',
+                    AppStrings.forgotPassword,
                     style: TextStyle(
                       fontSize: 16.0,
                       color: Color.fromARGB(255, 86, 194, 244),

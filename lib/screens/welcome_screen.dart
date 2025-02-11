@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart'; // Import the LoginScreen file
 import 'new_worker_screen.dart'; // Import the NewWorkerScreen file
+import '../../constants/app_constants.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_strings.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -17,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
               child: Stack(
                 children: [
                   Image.asset(
-                    'assets/images/team_image.jpg',
+                    AppConstants.teamImage,
                     width: double.infinity,
                     height: MediaQuery.of(context).size.height * 0.7,
                     fit: BoxFit.cover,
@@ -30,8 +33,8 @@ class WelcomeScreen extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.4),
+                            AppColors.textBlack,
+                            AppColors.textBlack.withOpacity(0.0),
                           ],
                         ),
                       ),
@@ -48,7 +51,7 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   // Logo
                   Image.asset(
-                    'assets/images/park_logo.png',
+                    AppConstants.parkLogo,
                     width: MediaQuery.of(context).size.width * 0.4, // Dynamic width
                     height: MediaQuery.of(context).size.height * 0.1,
                     fit: BoxFit.contain,
@@ -57,8 +60,8 @@ class WelcomeScreen extends StatelessWidget {
                   // Buttons
                   _buildButton(
                     context: context,
-                    label: 'כניסה',
-                    color: const Color.fromARGB(255, 86, 194, 244),
+                    label: AppStrings.loginButtonText,
+                    color: AppColors.primaryBlue,
                     onPressed: () {
                       // Navigate to LoginScreen with a slide-from-bottom transition
                       Navigator.push(
@@ -88,8 +91,8 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 16.0),
                   _buildButton(
                     context: context,
-                    label: 'עובד חדש ?',
-                    color: const Color.fromARGB(255, 246, 195, 76),
+                    label: AppStrings.newWorkerButtonText,
+                    color: AppColors.secondaryYellow,
                     onPressed: () {
                       // Navigate to NewWorkerScreen with a slide-from-bottom transition
                       Navigator.push(
@@ -149,7 +152,7 @@ class WelcomeScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.bold,
-            color: Colors.black, // Black text color
+            color: AppColors.textBlack, // Black text color
           ),
         ),
       ),

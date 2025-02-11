@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:park_janana/constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -22,7 +23,7 @@ class AuthService {
 
     // Step 2: Save user data to Firestore
     print("firebase logs: Writing user data to Firestore for UID: $uid");
-    await _firestore.collection('users').doc(uid).set({
+    await _firestore.collection(AppConstants.usersCollection).doc(uid).set({
       'uid': uid,
       'email': email,
       'fullName': fullName,
@@ -42,7 +43,7 @@ class AuthService {
   Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
     try {
       print("firebase logs: Updating profile picture for user $uid");
-      await _firestore.collection('users').doc(uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(uid).update({
         'profile_picture': profilePictureUrl,
       });
       print("firebase logs: Profile picture updated successfully for user $uid");
@@ -55,7 +56,7 @@ class AuthService {
   // Assign a role to a user
   Future<void> assignRole(String uid, String role) async {
     try {
-      await _firestore.collection('users').doc(uid).set({
+      await _firestore.collection(AppConstants.usersCollection).doc(uid).set({
         'role': role,
       }, SetOptions(merge: true)); // Merge ensures existing data is not overwritten
       print("Role $role assigned to user $uid successfully.");
@@ -67,7 +68,7 @@ class AuthService {
   Future<String?> fetchUserRole(String uid) async {
   try {
     final DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).get();
 
     if (userDoc.exists) {
       final data = userDoc.data() as Map<String, dynamic>;

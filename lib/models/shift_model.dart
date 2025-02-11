@@ -6,7 +6,7 @@ class ShiftModel {
   final String endTime;
   final int maxWorkers;
   final List<String> requestedWorkers;
-  final List<String> assignedWorkers; // ✅ Add this field
+  final List<String> assignedWorkers;
 
   ShiftModel({
     required this.id,
@@ -16,7 +16,7 @@ class ShiftModel {
     required this.endTime,
     required this.maxWorkers,
     required this.requestedWorkers,
-    required this.assignedWorkers, // ✅ Add this field
+    required this.assignedWorkers,
   });
 
   // Convert Firestore document to ShiftModel
@@ -29,7 +29,7 @@ class ShiftModel {
       endTime: map['endTime'] ?? '',
       maxWorkers: map['maxWorkers'] ?? 0,
       requestedWorkers: List<String>.from(map['requestedWorkers'] ?? []),
-      assignedWorkers: List<String>.from(map['assignedWorkers'] ?? []), // ✅ Add this line
+      assignedWorkers: List<String>.from(map['assignedWorkers'] ?? []),
     );
   }
 }
