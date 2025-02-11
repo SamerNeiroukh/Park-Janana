@@ -14,7 +14,7 @@ class UserModel {
     required this.idNumber,
     required this.phoneNumber,
     required this.profilePicture,
-    required this.role, // Added role field
+    required this.role,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,7 +26,7 @@ class UserModel {
       'idNumber': idNumber,
       'phoneNumber': phoneNumber,
       'profile_picture': profilePicture,
-      'role': role, // Added role field to the map
+      'role': role, 
     };
   }
 

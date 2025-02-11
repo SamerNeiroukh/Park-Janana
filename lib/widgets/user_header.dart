@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/services/auth_service.dart';
+import '../constants/app_constants.dart';
 
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   const UserHeader({super.key});
@@ -11,8 +12,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: true,
       title: Image.asset(
-        'assets/images/park_logo.png',
-        height: 50.0, // Adjust the size of the logo
+        AppConstants.parkLogo,
+        height: 50.0,
       ),
       actions: [
         IconButton(
@@ -28,7 +29,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                       title: const Text('התנתק'),
                       onTap: () async {
                         await AuthService().signOut();
-                        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, '/login', (route) => false);
                       },
                     ),
                   ],
