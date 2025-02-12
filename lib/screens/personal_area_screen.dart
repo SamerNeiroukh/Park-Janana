@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +22,10 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // ✅ Set a valid default profile picture from Firebase Storage
+  static const String defaultProfilePictureUrl =
+      "https://firebasestorage.googleapis.com/v0/b/park-janana-app.appspot.com/o/profile_pictures%2Fdefault_profile.png?alt=media";
+
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
 
@@ -40,22 +43,29 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         _isUploading = true;
       });
       try {
-        final storageRef = _storage.ref().child('profile_pictures/${widget.uid}.jpg');
+        final storageRef = _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
         await storageRef.putFile(_imageFile!);
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("תמונת הפרופיל עודכנה בהצלחה.")),
-        );
-        Navigator.pop(context, downloadUrl);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("תמונת הפרופיל עודכנה בהצלחה.")),
+          );
+          Navigator.pop(context, downloadUrl);
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("שגיאה בהעלאת תמונה: $e")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("שגיאה בהעלאת תמונה: $e")),
+          );
+        }
       } finally {
-        setState(() {
-          _isUploading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+        }
       }
     }
   }
@@ -123,7 +133,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     return Scaffold(
       body: Column(
         children: [
-          const UserHeader(), // ✅ Keep consistency with HomeScreen
+          const UserHeader(),
           Expanded(
             child: StreamBuilder<DocumentSnapshot>(
               stream: _firestore.collection('users').doc(widget.uid).snapshots(),
@@ -137,7 +147,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 }
 
                 final userDoc = snapshot.data!;
-                final profilePicture = userDoc['profile_picture'] ?? '';
+                String profilePicture = userDoc['profile_picture'] ?? '';
+
+                // ✅ Ensure a valid profile picture URL is always used
+                if (profilePicture.isEmpty || !profilePicture.startsWith('http')) {
+                  profilePicture = defaultProfilePictureUrl;
+                }
+
                 final fullName = userDoc['fullName'] ?? 'לא ידוע';
                 final email = userDoc['email'] ?? 'לא ידוע';
                 final idNumber = userDoc['idNumber'] ?? 'לא ידוע';
@@ -155,12 +171,12 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                             backgroundColor: Colors.blue.shade700,
                             child: CircleAvatar(
                               radius: 80,
-                              backgroundImage: profilePicture.isNotEmpty
-                                  ? NetworkImage(profilePicture)
-                                  : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                              child: profilePicture.isEmpty
-                                  ? const Icon(Icons.person, size: 80, color: Colors.white)
-                                  : null,
+                              backgroundImage: NetworkImage(profilePicture),
+                              onBackgroundImageError: (_, __) {
+                                setState(() {
+                                  profilePicture = defaultProfilePictureUrl;
+                                });
+                              },
                             ),
                           ),
                           Positioned(
