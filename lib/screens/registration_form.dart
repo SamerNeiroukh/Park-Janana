@@ -46,7 +46,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
         idNumber: _idNumberController.text.trim(),
         phoneNumber: _phoneNumberController.text.trim(),
         uid: uid,
-        profilePicture: '', 
+        profilePicture: 'https://firebasestorage.googleapis.com/v0/b/park-janana-app.firebasestorage.app/o/profile_pictures%2Fdefault_profile.png?alt=media&token=918661c9-90a5-4197-8649-d2498d8ef4cd', 
         role: 'worker',
       );
 

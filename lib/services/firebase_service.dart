@@ -39,6 +39,24 @@ class FirebaseService {
     }
   }
 
+  // 🟢 NEW: Update Profile Picture
+  Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
+    try {
+      await updateUser(uid, {'profile_picture': profilePictureUrl});
+    } catch (e) {
+      throw CustomException('שגיאה בעדכון תמונת הפרופיל.');
+    }
+  }
+
+  // 🟢 NEW: Assign Role to User
+  Future<void> assignRole(String uid, String role) async {
+    try {
+      await updateUser(uid, {'role': role});
+    } catch (e) {
+      throw CustomException('שגיאה בהקצאת תפקיד.');
+    }
+  }
+
   // 🟢 Fetch all shifts as a stream
   Stream<QuerySnapshot> getShiftsStream() {
     return _firestore.collection(AppConstants.shiftsCollection).snapshots();
