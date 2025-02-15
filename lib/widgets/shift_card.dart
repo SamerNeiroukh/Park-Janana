@@ -204,7 +204,6 @@ class ShiftCardState extends State<ShiftCard> {
               timestamp: msg['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
               senderId: msg['senderId'] ?? "",
               shiftId: widget.shift.id,
-              canEdit: true, // ✅ Enables edit/delete for managers
             );
           }),
         ],
