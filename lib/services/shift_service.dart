@@ -160,4 +160,37 @@ class ShiftService {
     }
     return workers;
   }
+
+  Future<void> updateMessage(String shiftId, int timestamp, String newMessage) async {
+  try {
+    DocumentReference shiftRef = FirebaseFirestore.instance.collection(AppConstants.shiftsCollection).doc(shiftId);
+    DocumentSnapshot shiftDoc = await shiftRef.get();
+
+    if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
+
+    List messages = List.from(shiftDoc['messages'] ?? []);
+    int index = messages.indexWhere((msg) => msg['timestamp'] == timestamp);
+    if (index != -1) {
+      messages[index]['message'] = newMessage;
+      await shiftRef.update({'messages': messages});
+    }
+  } catch (e) {
+    throw CustomException('שגיאה בעדכון ההודעה.');
+  }
+}
+
+Future<void> deleteMessage(String shiftId, int timestamp) async {
+  try {
+    DocumentReference shiftRef = FirebaseFirestore.instance.collection(AppConstants.shiftsCollection).doc(shiftId);
+    DocumentSnapshot shiftDoc = await shiftRef.get();
+
+    if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
+
+    List messages = List.from(shiftDoc['messages'] ?? []);
+    messages.removeWhere((msg) => msg['timestamp'] == timestamp);
+    await shiftRef.update({'messages': messages});
+  } catch (e) {
+    throw CustomException('שגיאה במחיקת ההודעה.');
+  }
+}
 }
