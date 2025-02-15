@@ -16,11 +16,10 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 60.0,
-        margin: const EdgeInsets.all(8.0),
+      child: SizedBox( // ✅ Use SizedBox to ensure proper constraints
+        width: 80.0, // Slightly increased to accommodate text
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min, // ✅ Prevents overflow by using min size
           children: [
             Container(
               height: 60.0,
@@ -36,13 +35,17 @@ class CustomCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8.0),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14.0,
-                fontWeight: FontWeight.bold,
+            Flexible( // ✅ Wrap Text in Flexible to prevent text overflow
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis, // ✅ Ensures long text does not overflow
+                maxLines: 2, // ✅ Allows text wrapping if necessary
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),

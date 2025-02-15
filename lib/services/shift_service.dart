@@ -17,7 +17,7 @@ class ShiftService {
     });
   }
 
-  // 🟢 Create a new shift (Fixed: Now uses named parameters)
+  // 🟢 Create a new shift
   Future<void> createShift({
     required String date,
     required String startTime,
@@ -36,12 +36,50 @@ class ShiftService {
         'maxWorkers': maxWorkers,
         'assignedWorkers': [],
         'requestedWorkers': [],
+        'messages': [], // ✅ Initialize messages list
       });
     } catch (e) {
       throw CustomException('שגיאה ביצירת משמרת.');
     }
   }
 
+  Future<void> addMessageToShift(String shiftId, String message, String managerId) async {
+  try {
+    print("Firebase logs: Attempting to add message to shift -> $shiftId");
+
+    DocumentReference shiftRef = FirebaseFirestore.instance.collection(AppConstants.shiftsCollection).doc(shiftId);
+    DocumentSnapshot shiftDoc = await shiftRef.get();
+
+    if (!shiftDoc.exists) {
+      print("Firebase logs: Shift does not exist -> $shiftId");
+      throw CustomException("המשמרת לא קיימת");
+    }
+
+    final shiftData = shiftDoc.data() as Map<String, dynamic>?;
+
+    if (shiftData == null || !shiftData.containsKey('messages')) {
+      print("Firebase logs: Initializing messages field for shift -> $shiftId");
+      await shiftRef.update({'messages': []});
+    }
+
+    print("Firebase logs: Sending message -> $message");
+
+    await shiftRef.update({
+      'messages': FieldValue.arrayUnion([
+        {
+          'message': message,
+          'timestamp': DateTime.now().toUtc().millisecondsSinceEpoch,
+          'senderId': managerId, // ✅ Store the manager ID
+        }
+      ])
+    });
+
+    print("Firebase logs: Message added successfully!");
+  } catch (e) {
+    print("Firebase logs: Error adding message -> $e");
+    throw CustomException('שגיאה בהוספת הודעה למשמרת.');
+  }
+}
   // 🟢 Delete a shift
   Future<void> deleteShift(String shiftId) async {
     try {
