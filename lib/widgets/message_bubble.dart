@@ -3,13 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firebase_service.dart';
 import '../services/shift_service.dart';
 import '../constants/app_constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MessageBubble extends StatefulWidget {
   final String message;
   final int timestamp;
   final String senderId;
   final String shiftId;
-  final bool canEdit;
 
   const MessageBubble({
     super.key,
@@ -17,7 +17,6 @@ class MessageBubble extends StatefulWidget {
     required this.timestamp,
     required this.senderId,
     required this.shiftId,
-    this.canEdit = false,
   });
 
   @override
@@ -26,13 +25,33 @@ class MessageBubble extends StatefulWidget {
 
 class _MessageBubbleState extends State<MessageBubble> {
   final ShiftService _shiftService = ShiftService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isEditing = false;
   TextEditingController _messageController = TextEditingController();
+  String? _currentUserId;
+  String? _currentUserRole;
 
   @override
   void initState() {
     super.initState();
     _messageController.text = widget.message;
+    _getCurrentUser();
+  }
+
+  Future<void> _getCurrentUser() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      setState(() {
+        _currentUserId = user.uid;
+      });
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          _currentUserRole = userDoc['role']; // ✅ Fetch current user role
+        });
+      }
+    }
   }
 
   @override
@@ -55,8 +74,11 @@ class _MessageBubbleState extends State<MessageBubble> {
         String formattedTime =
             "${messageTime.hour.toString().padLeft(2, '0')}:${messageTime.minute.toString().padLeft(2, '0')}";
 
+        bool canEditOrDelete =
+            (_currentUserId == widget.senderId) || (_currentUserRole == "owner"); // ✅ Only owner or message sender
+
         return Directionality(
-          textDirection: TextDirection.rtl, // ✅ Everything starts from the right
+          textDirection: TextDirection.rtl, // ✅ Ensure Right-to-Left alignment
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -72,7 +94,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, // ✅ Aligns text right after the picture
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         senderName,
@@ -113,7 +135,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                               style: const TextStyle(fontSize: 12, color: Colors.grey),
                               textAlign: TextAlign.right,
                             ),
-                            if (widget.canEdit) ...[
+                            if (canEditOrDelete) ...[
                               IconButton(
                                 icon: const Icon(Icons.edit, color: Colors.orange, size: 18),
                                 onPressed: () => setState(() => _isEditing = true),
