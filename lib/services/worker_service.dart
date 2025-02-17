@@ -8,7 +8,9 @@ class WorkerService {
   // 🟢 Approve a worker for a shift
   Future<void> approveWorker(String shiftId, String workerId) async {
     try {
-      await _firestore.collection(AppConstants.shiftsCollection).doc(shiftId).update({
+      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+
+      await shiftRef.update({
         'requestedWorkers': FieldValue.arrayRemove([workerId]),
         'assignedWorkers': FieldValue.arrayUnion([workerId]),
       });
@@ -20,7 +22,9 @@ class WorkerService {
   // 🟢 Reject a worker's request
   Future<void> rejectWorker(String shiftId, String workerId) async {
     try {
-      await _firestore.collection(AppConstants.shiftsCollection).doc(shiftId).update({
+      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+
+      await shiftRef.update({
         'requestedWorkers': FieldValue.arrayRemove([workerId]),
       });
     } catch (e) {
@@ -29,13 +33,36 @@ class WorkerService {
   }
 
   // 🟢 Remove an assigned worker from a shift
-  Future<void> removeWorker(String shiftId, String workerId) async {
+   Future<void> removeWorker(String shiftId, String workerId) async {
     try {
-      await _firestore.collection(AppConstants.shiftsCollection).doc(shiftId).update({
+      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+
+      await shiftRef.update({
         'assignedWorkers': FieldValue.arrayRemove([workerId]),
       });
     } catch (e) {
       throw CustomException('שגיאה בהסרת עובד מהמשמרת.');
     }
   }
+
+
+
+  Future<void> bulkApproveWorkers(String shiftId, List<String> workerIds) async {
+    try {
+      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+
+      await shiftRef.update({
+        'requestedWorkers': FieldValue.arrayRemove(workerIds),
+        'assignedWorkers': FieldValue.arrayUnion(workerIds),
+      });
+    } catch (e) {
+      throw Exception("שגיאה באישור העובדים למשמרת.");
+    }
+  }
 }
+
+
+
+
+
+
