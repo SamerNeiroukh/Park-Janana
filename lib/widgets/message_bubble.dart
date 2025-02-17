@@ -27,7 +27,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   final ShiftService _shiftService = ShiftService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isEditing = false;
-  TextEditingController _messageController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
   String? _currentUserId;
   String? _currentUserRole;
 

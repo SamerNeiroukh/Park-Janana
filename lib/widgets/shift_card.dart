@@ -5,7 +5,7 @@ import '../services/shift_service.dart';
 import '../services/worker_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/message_bubble.dart';
-import '../constants/app_constants.dart';
+import '../widgets/worker_row.dart';
 
 class ShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -27,6 +27,9 @@ class ShiftCardState extends State<ShiftCard> {
   final TextEditingController _messageController = TextEditingController();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
+  List<String> _approvedWorkers =
+      []; // ✅ Temporary list to store approved workers
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -39,6 +42,7 @@ class ShiftCardState extends State<ShiftCard> {
         collapsedIconColor: Colors.blue.shade700,
         title: _buildShiftHeader(),
         children: [
+          if (_approvedWorkers.isNotEmpty) _buildSubmitButton(),
           _buildWorkerList("🕐 בקשות למשמרת", widget.shift.requestedWorkers,
               isAssigned: false),
           _buildWorkerList("👥 עובדים מוקצים", widget.shift.assignedWorkers,
@@ -47,6 +51,22 @@ class ShiftCardState extends State<ShiftCard> {
           _buildAddMessageSection(),
           _buildDeleteShiftButton(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade700,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        ),
+        onPressed: _submitApprovedWorkers,
+        child: const Text("✅ אשר עובדים למשמרת",
+            style: TextStyle(fontSize: 16, color: Colors.white)),
       ),
     );
   }
@@ -80,137 +100,110 @@ class ShiftCardState extends State<ShiftCard> {
     );
   }
 
-  Widget _buildWorkerList(String title, List<String> workers, {required bool isAssigned}) {
-  return Directionality(
-    textDirection: TextDirection.rtl, // ✅ Ensures full RTL layout
-    child: FutureBuilder<List<UserModel>>(
-      future: widget.shiftService.fetchWorkerDetails(workers),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget _buildWorkerList(String title, List<String> workers,
+      {required bool isAssigned}) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: FutureBuilder<List<UserModel>>(
+        future: widget.shiftService.fetchWorkerDetails(workers),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        List<UserModel>? workerDetails = snapshot.data;
+          List<UserModel>? workerDetails = snapshot.data;
 
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          padding: const EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(
-                color: isAssigned
-                    ? Colors.green.shade700
-                    : Colors.orange.shade700),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end, // ✅ Align text & labels to right
-            children: [
-              Align(
-                alignment: Alignment.centerRight, // ✅ Forces the title to the right
-                child: Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(
+                  color: isAssigned
+                      ? Colors.green.shade700
+                      : Colors.orange.shade700),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-              ),
-              const Divider(),
-              (workerDetails == null || workerDetails.isEmpty)
-                  ? Align(
-                      alignment: Alignment.centerRight, // ✅ Aligns the empty state message
-                      child: const Text("אין בקשות למשמרת זו."),
-                    )
-                  : Column(
-                      children: workerDetails.map((worker) {
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: null, // ✅ Remove default leading padding for better RTL layout
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.start, // ✅ Keeps profile & name together
-                            children: [
-                              CircleAvatar(
-                                radius: 25.0,
-                                backgroundImage: worker.profilePicture.startsWith('http')
-                                    ? NetworkImage(worker.profilePicture)
-                                    : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.centerRight, // ✅ Aligns text next to image
-                                  child: Text(
-                                    worker.fullName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: isAssigned
-                              ? IconButton(
-                                  icon: const Icon(Icons.remove_circle, color: Colors.red),
-                                  onPressed: () => widget.workerService
-                                      .removeWorker(widget.shift.id, worker.uid),
-                                )
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.check_circle, color: Colors.green),
-                                      onPressed: () => widget.workerService
-                                          .approveWorker(widget.shift.id, worker.uid),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.cancel, color: Colors.red),
-                                      onPressed: () => widget.workerService
-                                          .rejectWorker(widget.shift.id, worker.uid),
-                                    ),
-                                  ],
-                                ),
-                        );
-                      }).toList(),
-                    ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
-
-
+                const Divider(),
+                (workerDetails == null || workerDetails.isEmpty)
+                    ? const Align(
+                        alignment: Alignment.centerRight,
+                        child: Text("אין בקשות למשמרת זו."),
+                      )
+                    : Column(
+                        children: workerDetails.map((worker) {
+                          return WorkerRow(
+                            worker: worker,
+                            shiftId: widget.shift.id,
+                            isAssigned: isAssigned,
+                            workerService: widget.workerService,
+                            isApproved: _approvedWorkers.contains(worker.uid),
+                            onApproveToggle: (bool isApproved) {
+                              setState(() {
+                                if (isApproved) {
+                                  _approvedWorkers.add(worker.uid);
+                                } else {
+                                  _approvedWorkers.remove(worker.uid);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildMessagesSection() {
-  return Directionality(
-    textDirection: TextDirection.rtl, // ✅ Align messages Right
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end, // ✅ Align text & labels to right
-        children: [
-          Align(
-            alignment: Alignment.centerRight, // ✅ Moves label fully to the right
-            child: const Text(
-              "📩 הודעות מנהלים:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ),
-          if (widget.shift.messages.isEmpty)
+    return Directionality(
+      textDirection: TextDirection.rtl, // ✅ Align messages Right
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.end, // ✅ Align text & labels to right
+          children: [
             Align(
-              alignment: Alignment.centerRight, // ✅ Aligns empty message properly
-              child: const Text("אין הודעות זמינות."),
+              alignment:
+                  Alignment.centerRight, // ✅ Moves label fully to the right
+              child: const Text(
+                "📩 הודעות מנהלים:",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ),
-          ...widget.shift.messages.map((msg) {
-            return MessageBubble(
-              message: msg['message'] ?? "אין תוכן",
-              timestamp: msg['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
-              senderId: msg['senderId'] ?? "",
-              shiftId: widget.shift.id,
-            );
-          }),
-        ],
+            if (widget.shift.messages.isEmpty)
+              Align(
+                alignment:
+                    Alignment.centerRight, // ✅ Aligns empty message properly
+                child: const Text("אין הודעות זמינות."),
+              ),
+            ...widget.shift.messages.map((msg) {
+              return MessageBubble(
+                message: msg['message'] ?? "אין תוכן",
+                timestamp:
+                    msg['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+                senderId: msg['senderId'] ?? "",
+                shiftId: widget.shift.id,
+              );
+            }),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   Widget _buildAddMessageSection() {
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -270,6 +263,16 @@ class ShiftCardState extends State<ShiftCard> {
           widget.shift.id, _messageController.text, _currentUser.uid ?? '');
       _messageController.clear();
       setState(() {});
+    }
+  }
+
+  void _submitApprovedWorkers() async {
+    if (_approvedWorkers.isNotEmpty) {
+      await widget.workerService
+          .bulkApproveWorkers(widget.shift.id, _approvedWorkers);
+      setState(() {
+        _approvedWorkers.clear();
+      });
     }
   }
 }
