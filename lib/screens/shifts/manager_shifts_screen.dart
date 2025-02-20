@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/shift_model.dart';
-import '../widgets/user_header.dart';
-import '../services/shift_service.dart';
-import '../services/worker_service.dart';
-import '../screens/create_shift_screen.dart';
-import '../widgets/shift_card.dart';
-import '../utils/datetime_utils.dart';
+import '../../models/shift_model.dart';
+import '../../widgets/user_header.dart';
+import '../../services/shift_service.dart';
+import '../../services/worker_service.dart';
+import 'create_shift_screen.dart';
+import '../../widgets/shift_card.dart';
+import '../../utils/datetime_utils.dart';
 
 class ManagerShiftsScreen extends StatefulWidget {
   const ManagerShiftsScreen({super.key});

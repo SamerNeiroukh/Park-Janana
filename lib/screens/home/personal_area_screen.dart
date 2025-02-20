@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:park_janana/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/user_header.dart';
+import '../../widgets/user_header.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
