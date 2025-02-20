@@ -18,51 +18,79 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   final ShiftService _shiftService = ShiftService();
   final WorkerService _workerService = WorkerService();
 
+  String _sortOption = 'תאריך'; // ✅ Default to 'תאריך' (Date)
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const UserHeader(),
-          _buildCreateShiftButton(),
-          Expanded(
-            child: StreamBuilder<List<ShiftModel>>(
-              stream: _shiftService.getShiftsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+    return Directionality(
+      textDirection: TextDirection.rtl, // ✅ Right-to-Left layout
+      child: Scaffold(
+        body: Column(
+          children: [
+            const UserHeader(),
+            _buildCreateShiftButton(),
+            _buildSortOptions(),
+            Expanded(
+              child: StreamBuilder<List<ShiftModel>>(
+                stream: _shiftService.getShiftsStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'אין משמרות זמינות כרגע.',
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'אין משמרות זמינות כרגע.',
+                        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
+                      ),
+                    );
+                  }
+
+                  List<ShiftModel> shifts = snapshot.data!;
+                  shifts = _shiftService.sortShifts(shifts, _sortOption);
+
+                  Map<String, List<ShiftModel>> groupedShifts = {};
+                  for (var shift in shifts) {
+                    String groupKey = _sortOption == 'תאריך'
+                        ? DateTimeUtils.formatDateWithDay(shift.date)
+                        : 'מחלקה: ${shift.department}';
+
+                    if (!groupedShifts.containsKey(groupKey)) {
+                      groupedShifts[groupKey] = [];
+                    }
+                    groupedShifts[groupKey]!.add(shift);
+                  }
+
+                  return ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    children: groupedShifts.entries.map((entry) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            entry.key,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+                          ),
+                          ...entry.value.map((shift) => ShiftCard(
+                                shift: shift,
+                                shiftService: _shiftService,
+                                workerService: _workerService,
+                              )),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }).toList(),
                   );
-                }
-
-                List<ShiftModel> shifts = snapshot.data!;
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: shifts.length,
-                  itemBuilder: (context, index) {
-                    return ShiftCard(
-                      shift: shifts[index],
-                      shiftService: _shiftService,
-                      workerService: _workerService,
-                    ); // ✅ Uses new ShiftCard widget
-                  },
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  // ✅ Create Shift Button in Hebrew
   Widget _buildCreateShiftButton() {
     return Container(
       width: double.infinity,
@@ -82,4 +110,25 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
       ),
     );
   }
+
+  // ✅ Sort Options: Only "תאריך" and "מחלקה"
+  Widget _buildSortOptions() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    child: DropdownButton<String>(
+  value: ['תאריך', 'מחלקה'].contains(_sortOption) ? _sortOption : 'תאריך',
+  items: ['תאריך', 'מחלקה'].map((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text("מיון לפי $value"),
+    );
+  }).toList(),
+  onChanged: (newValue) {
+    setState(() {
+      _sortOption = newValue!;
+    });
+  },
+),
+  );
+}
 }

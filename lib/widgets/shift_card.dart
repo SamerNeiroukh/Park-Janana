@@ -27,7 +27,7 @@ class ShiftCardState extends State<ShiftCard> {
   final TextEditingController _messageController = TextEditingController();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
-  List<String> _approvedWorkers =
+  final List<String> _approvedWorkers =
       []; // ✅ Temporary list to store approved workers
 
   @override
