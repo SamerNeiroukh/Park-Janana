@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/widgets/custom_card.dart';
-import 'package:park_janana/screens/personal_area_screen.dart';
-import 'package:park_janana/screens/shifts_screen.dart';
-import 'package:park_janana/screens/manager_shifts_screen.dart'; // ✅ Import Manager's Shift Screen
+import 'package:park_janana/screens/home/personal_area_screen.dart';
+import 'package:park_janana/screens/shifts/shifts_screen.dart';
+import 'package:park_janana/screens/shifts/manager_shifts_screen.dart'; // ✅ Import Manager's Shift Screen
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 

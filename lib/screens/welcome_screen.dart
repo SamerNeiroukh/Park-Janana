@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Import the LoginScreen file
-import 'new_worker_screen.dart'; // Import the NewWorkerScreen file
+import 'auth/login_screen.dart'; // Import the LoginScreen file
+import 'auth/new_worker_screen.dart'; // Import the NewWorkerScreen file
 import '../../constants/app_constants.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_strings.dart';

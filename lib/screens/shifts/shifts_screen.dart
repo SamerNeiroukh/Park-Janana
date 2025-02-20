@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/shift_model.dart';
-import '../widgets/user_header.dart';
-import '../services/shift_service.dart';
+import '../../models/shift_model.dart';
+import '../../widgets/user_header.dart';
+import '../../services/shift_service.dart';
 
 class ShiftsScreen extends StatefulWidget {
   const ShiftsScreen({super.key});
