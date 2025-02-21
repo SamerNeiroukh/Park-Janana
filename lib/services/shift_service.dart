@@ -212,4 +212,15 @@ class ShiftService {
       throw CustomException('שגיאה במחיקת ההודעה.');
     }
   }
+
+  Future<List<ShiftModel>> getShiftsByWeek(DateTime weekStart) async {
+  final weekEnd = weekStart.add(Duration(days: 6));
+  final querySnapshot = await FirebaseFirestore.instance
+      .collection('shifts')
+      .where('date', isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekStart))
+      .where('date', isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekEnd))
+      .get();
+
+  return querySnapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList();
+}
 }

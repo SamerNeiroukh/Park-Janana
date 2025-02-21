@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../../models/shift_model.dart';
-import '../../widgets/user_header.dart';
 import '../../services/shift_service.dart';
+import '../../widgets/user_header.dart';
+import '../../widgets/worker_shift_card.dart';
+
 
 class ShiftsScreen extends StatefulWidget {
   const ShiftsScreen({super.key});
@@ -12,129 +15,131 @@ class ShiftsScreen extends StatefulWidget {
 }
 
 class _ShiftsScreenState extends State<ShiftsScreen> {
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
   final ShiftService _shiftService = ShiftService();
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
+
+  // ✅ For week navigation
+  DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+  DateTime _selectedDay = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const UserHeader(),
       body: Column(
         children: [
-          const UserHeader(), // ✅ Unified user header
-          Expanded(
-            child: StreamBuilder<List<ShiftModel>>(
-              stream: _shiftService.getShiftsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          _buildWeekNavigation(),
+          _buildDayTabs(),
+          Expanded(child: _buildShiftList()),
+        ],
+      ),
+    );
+  }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'אין משמרות זמינות כרגע.',
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
-                  );
-                }
+  // 🟢 Week Navigation (Previous, Current, Next)
+  Widget _buildWeekNavigation() {
+    String weekRange = "${DateFormat('MMM dd').format(_currentWeekStart)} - ${DateFormat('MMM dd').format(_currentWeekStart.add(const Duration(days: 6)))}";
 
-                List<ShiftModel> shifts = snapshot.data!;
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: shifts.length,
-                  itemBuilder: (context, index) {
-                    final shift = shifts[index];
-                    bool isShiftFull = shift.requestedWorkers.length >= shift.maxWorkers;
-                    bool hasRequested = shift.requestedWorkers.contains(_currentUser?.uid);
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100, // ✅ Soft blue for shift card
-                        borderRadius: BorderRadius.circular(18.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 6.0,
-                            spreadRadius: 2.0,
-                            offset: const Offset(3, 3),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildShiftInfoRow(Icons.date_range, 'תאריך: ${shift.date}'),
-                              _buildShiftInfoRow(Icons.business, 'מחלקה: ${shift.department}'),
-                              _buildShiftInfoRow(Icons.access_time, 'שעות: ${shift.startTime} - ${shift.endTime}'),
-                              _buildShiftInfoRow(Icons.people, 'מקומות פנויים: ${shift.maxWorkers - shift.requestedWorkers.length} מתוך ${shift.maxWorkers}'),
-                              const SizedBox(height: 12.0),
-                              Align(
-                                alignment: Alignment.center,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: hasRequested
-                                        ? Colors.redAccent
-                                        : (isShiftFull ? Colors.grey : Colors.green.shade600),
-                                    elevation: 4,
-                                    minimumSize: const Size(200, 50),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(22.0),
-                                    ),
-                                  ),
-                                  onPressed: isShiftFull
-                                      ? null
-                                      : () {
-                                          if (hasRequested) {
-                                            _shiftService.cancelShiftRequest(shift.id, _currentUser!.uid);
-                                          } else {
-                                            _shiftService.requestShift(shift.id, _currentUser!.uid);
-                                          }
-                                          setState(() {});
-                                        },
-                                  child: Text(
-                                    hasRequested ? 'ביטול בקשה' : 'אני רוצה במשמרת',
-                                    style: const TextStyle(fontSize: 18.0, color: Colors.white, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              setState(() {
+                _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
+              });
+            },
+          ),
+          Text(
+            weekRange,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () {
+              setState(() {
+                _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
+              });
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildShiftInfoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.blueGrey.shade700),
-          const SizedBox(width: 8.0),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+  // 🟢 Day Tabs (Sunday - Saturday)
+  Widget _buildDayTabs() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(7, (index) {
+        DateTime day = _currentWeekStart.add(Duration(days: index));
+        bool isSelected = _selectedDay.day == day.day && _selectedDay.month == day.month;
+
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedDay = day;
+            });
+          },
+          child: Column(
+            children: [
+              Text(
+                DateFormat('E').format(day), // Day abbreviation (Sun, Mon, etc.)
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.blue : Colors.black,
+                ),
+              ),
+              Text(
+                DateFormat('dd').format(day),
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.blue : Colors.black,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }),
+    );
+  }
+
+  // 🟢 Build Shifts List for Selected Day
+  Widget _buildShiftList() {
+    return StreamBuilder<List<ShiftModel>>(
+      stream: _shiftService.getShiftsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('אין משמרות זמינות כרגע.'));
+        }
+
+        // 🟢 Filter shifts for the selected day
+        final filteredShifts = snapshot.data!.where((shift) {
+          return shift.date == DateFormat('dd/MM/yyyy').format(_selectedDay);
+        }).toList();
+
+        if (filteredShifts.isEmpty) {
+          return const Center(child: Text('אין משמרות ליום זה.'));
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(12.0),
+          itemCount: filteredShifts.length,
+          itemBuilder: (context, index) {
+            return WorkerShiftCard(
+              shift: filteredShifts[index],
+              shiftService: _shiftService,
+            );
+          },
+        );
+      },
     );
   }
 }
