@@ -27,7 +27,7 @@ class ShiftCardState extends State<ShiftCard> {
   final TextEditingController _messageController = TextEditingController();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
-  final List<String> _approvedWorkers =
+  List<String> _approvedWorkers =
       []; // ✅ Temporary list to store approved workers
 
   @override
@@ -101,70 +101,69 @@ class ShiftCardState extends State<ShiftCard> {
   }
 
   Widget _buildWorkerList(String title, List<String> workers,
-      {required bool isAssigned}) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: FutureBuilder<List<UserModel>>(
-        future: widget.shiftService.fetchWorkerDetails(workers),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    {required bool isAssigned}) {
+  return Directionality(
+    textDirection: TextDirection.rtl,
+    child: FutureBuilder<List<UserModel>>(
+      future: widget.shiftService.fetchWorkerDetails(workers),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          List<UserModel>? workerDetails = snapshot.data;
+        List<UserModel>? workerDetails = snapshot.data;
 
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                  color: isAssigned
-                      ? Colors.green.shade700
-                      : Colors.orange.shade700),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                const Divider(),
-                (workerDetails == null || workerDetails.isEmpty)
-                    ? const Align(
-                        alignment: Alignment.centerRight,
-                        child: Text("אין בקשות למשמרת זו."),
-                      )
-                    : Column(
-                        children: workerDetails.map((worker) {
-                          return WorkerRow(
-                            worker: worker,
-                            shiftId: widget.shift.id,
-                            isAssigned: isAssigned,
-                            workerService: widget.workerService,
-                            isApproved: _approvedWorkers.contains(worker.uid),
-                            onApproveToggle: (bool isApproved) {
-                              setState(() {
-                                if (isApproved) {
-                                  _approvedWorkers.add(worker.uid);
-                                } else {
-                                  _approvedWorkers.remove(worker.uid);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+                color: isAssigned ? Colors.green.shade700 : Colors.orange.shade700),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              const Divider(),
+              (workerDetails == null || workerDetails.isEmpty)
+                  ? const Align(
+                      alignment: Alignment.centerRight,
+                      child: Text("אין בקשות למשמרת זו."),
+                    )
+                  : Column(
+                      children: workerDetails.map((worker) {
+                        return WorkerRow(
+                          worker: worker,
+                          shiftId: widget.shift.id,
+                          isAssigned: isAssigned,
+                          workerService: widget.workerService,
+                          isApproved: _approvedWorkers.contains(worker.uid),
+                          onApproveToggle: (bool isApproved) {
+                            setState(() {
+                              if (isApproved) {
+                                _approvedWorkers.add(worker.uid);
+                              } else {
+                                _approvedWorkers.remove(worker.uid);
+                              }
+                            });
+                          },
+                          showRemoveIcon: isAssigned, // ✅ Fix: Allow remove for assigned workers only
+                        );
+                      }).toList(),
+                    ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
 
   Widget _buildMessagesSection() {
     return Directionality(
