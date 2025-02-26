@@ -17,7 +17,6 @@ class PersonalAreaScreen extends StatefulWidget {
 
 class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   File? _imageFile;
-  bool _isUploading = false;
   final AuthService _authService = AuthService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,7 +39,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   Future<void> _uploadImage() async {
     if (_imageFile != null) {
       setState(() {
-        _isUploading = true;
       });
       try {
         final storageRef = _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
@@ -63,7 +61,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       } finally {
         if (mounted) {
           setState(() {
-            _isUploading = false;
           });
         }
       }

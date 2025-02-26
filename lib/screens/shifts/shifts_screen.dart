@@ -17,9 +17,10 @@ class ShiftsScreen extends StatefulWidget {
 class _ShiftsScreenState extends State<ShiftsScreen> {
   final ShiftService _shiftService = ShiftService();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
+  
 
-  // ✅ For week navigation
-  DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+  // ✅ Ensure the week starts from Sunday
+  DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday % 7));
   DateTime _selectedDay = DateTime.now();
 
   @override
@@ -36,7 +37,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
     );
   }
 
-  // 🟢 Week Navigation (Previous, Current, Next)
+  // 🟢 Week Navigation
   Widget _buildWeekNavigation() {
     String weekRange = "${DateFormat('MMM dd').format(_currentWeekStart)} - ${DateFormat('MMM dd').format(_currentWeekStart.add(const Duration(days: 6)))}";
 
@@ -87,7 +88,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
           child: Column(
             children: [
               Text(
-                DateFormat('E').format(day), // Day abbreviation (Sun, Mon, etc.)
+                DateFormat('E').format(day),
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? Colors.blue : Colors.black,
@@ -107,7 +108,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
     );
   }
 
-  // 🟢 Build Shifts List for Selected Day
+  // 🟢 Build Shift List
   Widget _buildShiftList() {
     return StreamBuilder<List<ShiftModel>>(
       stream: _shiftService.getShiftsStream(),
@@ -136,6 +137,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
             return WorkerShiftCard(
               shift: filteredShifts[index],
               shiftService: _shiftService,
+              currentUser: _currentUser!,
             );
           },
         );

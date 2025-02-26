@@ -1,19 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../models/shift_model.dart';
 import '../models/user_model.dart';
 import '../services/shift_service.dart';
 import '../widgets/message_bubble.dart';
 
+
 class WorkerShiftCard extends StatefulWidget {
   final ShiftModel shift;
   final ShiftService shiftService;
+  final User currentUser;
 
   const WorkerShiftCard({
     super.key,
     required this.shift,
     required this.shiftService,
+    required this.currentUser,
   });
 
   @override
@@ -46,7 +50,8 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
         setState(() {
           _hasRequested = requestedWorkers.contains(_currentUser?.uid);
           _isAssigned = assignedWorkers.contains(_currentUser?.uid);
-          _isShiftFull = assignedWorkers.length >= (shiftData['maxWorkers'] ?? 0);
+          _isShiftFull =
+              assignedWorkers.length >= (shiftData['maxWorkers'] ?? 0);
         });
       }
     });
@@ -54,9 +59,11 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
 
   void _toggleShiftRequest() async {
     if (_hasRequested) {
-      await widget.shiftService.cancelShiftRequest(widget.shift.id, _currentUser!.uid);
+      await widget.shiftService
+          .cancelShiftRequest(widget.shift.id, _currentUser!.uid);
     } else {
-      await widget.shiftService.requestShift(widget.shift.id, _currentUser!.uid);
+      await widget.shiftService
+          .requestShift(widget.shift.id, _currentUser!.uid);
     }
   }
 
@@ -74,8 +81,14 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(widget.shift.date);
+    bool isOutdated =
+        shiftDate.isBefore(DateTime.now()); // ✅ Check if shift is outdated
     Color cardColor = Colors.white.withOpacity(0.9);
-    if (_isAssigned) {
+
+    if (isOutdated) {
+      cardColor = Colors.grey.shade300; // ✅ Outdated shifts are gray
+    } else if (_isAssigned) {
       cardColor = Colors.green.shade50;
     } else if (_isShiftFull) {
       cardColor = Colors.red.shade50;
@@ -98,33 +111,48 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.event_note, color: Colors.blue.shade700, size: 30),
+                  child: Icon(Icons.event_note,
+                      color: Colors.blue.shade700, size: 30),
                 ),
-                _isAssigned
-                    ? _buildStatusLabel("במשמרת", Colors.green, Icons.check_circle)
-                    : _isShiftFull
-                        ? _buildStatusLabel("מלא", Colors.red, Icons.block)
-                        : ElevatedButton(
-                            onPressed: _isShiftFull && !_hasRequested ? null : _toggleShiftRequest,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _hasRequested
-                                  ? Colors.redAccent
-                                  : (_isShiftFull ? Colors.grey : Colors.green),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              elevation: 4,
-                            ),
-                            child: Text(
-                              _hasRequested ? "ביטול בקשה" : "הצטרף",
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
-                            ),
-                          ),
+                if (_isAssigned)
+                  _buildStatusLabel("עבדת במשמרת", Colors.blue,
+                      Icons.check_circle) // ✅ Show "Worked in shift" label
+                else if (isOutdated)
+                  _buildStatusLabel("עבר זמנו", Colors.grey,
+                      Icons.history) // ✅ Show "Expired" label
+                else if (_isShiftFull)
+                  _buildStatusLabel("מלא", Colors.red, Icons.block)
+                else
+                  ElevatedButton(
+                    onPressed: isOutdated
+                        ? null
+                        : (_isShiftFull && !_hasRequested
+                            ? null
+                            : _toggleShiftRequest),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _hasRequested
+                          ? Colors.redAccent
+                          : (_isShiftFull ? Colors.grey : Colors.green),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      elevation: 4,
+                    ),
+                    child: Text(
+                      _hasRequested ? "ביטול בקשה" : "הצטרף",
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 14),
             Text(
               "${widget.shift.date} | ${widget.shift.department}",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black87),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.black87),
               textAlign: TextAlign.right,
             ),
             const SizedBox(height: 8),
@@ -137,7 +165,8 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
             Align(
               alignment: Alignment.centerLeft,
               child: IconButton(
-                icon: const Icon(Icons.expand_more, color: Colors.blue, size: 28),
+                icon:
+                    const Icon(Icons.expand_more, color: Colors.blue, size: 28),
                 onPressed: _showShiftDetails,
               ),
             )
@@ -168,14 +197,14 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14),
+            style: TextStyle(
+                color: color, fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ],
       ),
     );
   }
 }
-
 
 class ShiftDetailsPopup extends StatelessWidget {
   final ShiftModel shift;
@@ -212,8 +241,6 @@ class ShiftDetailsPopup extends StatelessWidget {
             ),
           ],
         ),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
           child: Column(
             children: [
               Container(
@@ -230,37 +257,54 @@ class ShiftDetailsPopup extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("👥 עובדים מוקצים:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                    const Text("👥 עובדים מוקצים:",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 22)),
                     const SizedBox(height: 12),
                     Expanded(
                       child: shift.assignedWorkers.isEmpty
-                          ? const Center(child: Text("אין עובדים מוקצים.", style: TextStyle(fontSize: 16)))
+                          ? const Center(
+                              child: Text("אין עובדים מוקצים.",
+                                  style: TextStyle(fontSize: 16)))
                           : ListView.separated(
                               itemCount: shift.assignedWorkers.length,
-                              separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
+                              separatorBuilder: (context, index) =>
+                                  const Divider(height: 1, color: Colors.grey),
                               itemBuilder: (context, index) {
                                 return FutureBuilder<UserModel>(
-                                  future: shiftService.fetchWorkerDetails([shift.assignedWorkers[index]])
-                                      .then((users) => users.first),
+                                  future: shiftService.fetchWorkerDetails([
+                                    shift.assignedWorkers[index]
+                                  ]).then((users) => users.first),
                                   builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return const Center(child: CircularProgressIndicator());
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
                                     }
                                     if (!snapshot.hasData) {
                                       return const Text("Worker not found");
                                     }
 
                                     return ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 12.0, vertical: 6.0),
                                       leading: CircleAvatar(
                                         radius: 30.0,
-                                        backgroundImage: snapshot.data!.profilePicture.startsWith('http')
-                                            ? NetworkImage(snapshot.data!.profilePicture)
-                                            : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                                        backgroundImage: snapshot
+                                                .data!.profilePicture
+                                                .startsWith('http')
+                                            ? NetworkImage(
+                                                snapshot.data!.profilePicture)
+                                            : const AssetImage(
+                                                    'assets/images/default_profile.png')
+                                                as ImageProvider,
                                       ),
                                       title: Text(
                                         snapshot.data!.fullName,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18),
                                         textAlign: TextAlign.right,
                                       ),
                                     );
@@ -272,26 +316,30 @@ class ShiftDetailsPopup extends StatelessWidget {
                   ],
                 ),
               ),
-
               const Divider(),
-
               Expanded(
                 flex: 65,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("📩 הודעות מהמנהלים:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                    const Text("📩 הודעות מהמנהלים:",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 22)),
                     const SizedBox(height: 12),
                     Expanded(
                       child: shift.messages.isEmpty
-                          ? const Center(child: Text("אין הודעות זמינות.", style: TextStyle(fontSize: 16)))
+                          ? const Center(
+                              child: Text("אין הודעות זמינות.",
+                                  style: TextStyle(fontSize: 16)))
                           : ListView(
-                              children: shift.messages.map((msg) => MessageBubble(
-                                    message: msg['message'],
-                                    timestamp: msg['timestamp'],
-                                    senderId: msg['senderId'],
-                                    shiftId: shift.id,
-                                  )).toList(),
+                              children: shift.messages
+                                  .map((msg) => MessageBubble(
+                                        message: msg['message'],
+                                        timestamp: msg['timestamp'],
+                                        senderId: msg['senderId'],
+                                        shiftId: shift.id,
+                                      ))
+                                  .toList(),
                             ),
                     ),
                   ],
@@ -299,7 +347,7 @@ class ShiftDetailsPopup extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        
       ),
     );
   }

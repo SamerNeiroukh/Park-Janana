@@ -11,19 +11,22 @@ class WeeklyShiftView extends StatefulWidget {
 }
 
 class _WeeklyShiftViewState extends State<WeeklyShiftView> {
-  DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+  // ✅ Final Fix: Ensure the week starts from Sunday
+  DateTime _currentWeekStart = DateTime.now().subtract(Duration(
+      days: DateTime.now().weekday == 7 ? 0 : DateTime.now().weekday));
   DateTime _selectedDay = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weekly Shift View'),
+        title: const Text('Weekly Shift View'),
         actions: [
           IconButton(
-            icon: Icon(Icons.today),
+            icon: const Icon(Icons.today),
             onPressed: () => setState(() {
-              _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
+              _currentWeekStart = DateTime.now().subtract(Duration(
+                  days: DateTime.now().weekday == 7 ? 0 : DateTime.now().weekday));
               _selectedDay = DateTime.now();
             }),
           )
@@ -40,24 +43,24 @@ class _WeeklyShiftViewState extends State<WeeklyShiftView> {
   }
 
   Widget _buildWeekNavigation() {
-    String weekRange = "${DateFormat('MMM dd').format(_currentWeekStart)} - ${DateFormat('MMM dd').format(_currentWeekStart.add(Duration(days: 6)))}";
+    String weekRange = "${DateFormat('MMM dd').format(_currentWeekStart)} - ${DateFormat('MMM dd').format(_currentWeekStart.add(const Duration(days: 6)))}";
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: Icon(Icons.chevron_left),
+          icon: const Icon(Icons.chevron_left),
           onPressed: () => setState(() {
-            _currentWeekStart = _currentWeekStart.subtract(Duration(days: 7));
+            _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
           }),
         ),
         Text(
           weekRange,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         IconButton(
-          icon: Icon(Icons.chevron_right),
+          icon: const Icon(Icons.chevron_right),
           onPressed: () => setState(() {
-            _currentWeekStart = _currentWeekStart.add(Duration(days: 7));
+            _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
           }),
         ),
       ],
@@ -69,18 +72,30 @@ class _WeeklyShiftViewState extends State<WeeklyShiftView> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: List.generate(7, (index) {
         DateTime day = _currentWeekStart.add(Duration(days: index));
+        bool isSelected = _selectedDay.day == day.day && _selectedDay.month == day.month;
+
         return GestureDetector(
-          onTap: () => setState(() => _selectedDay = day),
+          onTap: () {
+            setState(() {
+              _selectedDay = day;
+            });
+          },
           child: Column(
             children: [
               Text(
                 DateFormat('E').format(day),
                 style: TextStyle(
-                  fontWeight: _selectedDay == day ? FontWeight.bold : FontWeight.normal,
-                  color: _selectedDay == day ? Colors.blue : Colors.black,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.blue : Colors.black,
                 ),
               ),
-              Text(DateFormat('dd').format(day)),
+              Text(
+                DateFormat('dd').format(day),
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.blue : Colors.black,
+                ),
+              ),
             ],
           ),
         );
@@ -95,7 +110,7 @@ class _WeeklyShiftViewState extends State<WeeklyShiftView> {
           .where('date', isEqualTo: DateFormat('yyyy-MM-dd').format(_selectedDay))
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         var shifts = snapshot.data!.docs;
 
         return ListView.builder(
@@ -113,14 +128,14 @@ class _WeeklyShiftViewState extends State<WeeklyShiftView> {
                       : Colors.white,
               child: ListTile(
                 title: Text("${shift['department']} (${shift['startTime']} - ${shift['endTime']})"),
-                subtitle: Text("${shift['assignedWorkers'].length}/${shift['maxWorkers']} workers assigned"),
+                subtitle: Text("${shift['assignedWorkers'].length}/${shift['maxWorkers']} עובדים מוקצים"),
                 trailing: isAssigned
                     ? _buildStatusLabel("במשמרת", Colors.green, Icons.check_circle)
                     : isFull
                         ? _buildStatusLabel("מלא", Colors.red, Icons.block)
                         : ElevatedButton(
                             onPressed: () => _joinShift(shift['id']),
-                            child: Text("הצטרף"),
+                            child: const Text("הצטרף"),
                           ),
               ),
             );
