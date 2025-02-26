@@ -5,6 +5,7 @@ import '../services/shift_service.dart';
 import '../constants/app_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class MessageBubble extends StatefulWidget {
   final String message;
   final int timestamp;

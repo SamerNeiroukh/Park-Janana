@@ -259,7 +259,7 @@ class ShiftCardState extends State<ShiftCard> {
   void _addMessage() async {
     if (_messageController.text.isNotEmpty && _currentUser != null) {
       await widget.shiftService.addMessageToShift(
-          widget.shift.id, _messageController.text, _currentUser.uid ?? '');
+          widget.shift.id, _messageController.text, _currentUser.uid);
       _messageController.clear();
       setState(() {});
     }

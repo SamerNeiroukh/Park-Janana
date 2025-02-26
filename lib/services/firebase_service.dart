@@ -4,7 +4,6 @@ import '../utils/custom_exception.dart';
 import '../constants/app_constants.dart';
 
 class FirebaseService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // 🟢 Generate a new Firestore Document ID
