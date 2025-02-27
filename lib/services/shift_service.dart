@@ -8,6 +8,18 @@ import 'package:intl/intl.dart';
 
 class ShiftService {
   final FirebaseService _firebaseService = FirebaseService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
+    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+    return _firestore
+        .collection('shifts')
+        .where('date', isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(startOfWeek))
+        .where('date', isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(endOfWeek))
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList());
+  }
 
   // 🟢 Fetch available shifts as a stream
   Stream<List<ShiftModel>> getShiftsStream() {
