@@ -7,4 +7,7 @@ class AppConstants {
   static const String parkLogo = 'assets/images/park_logo.png';
   static const String teamImage = 'assets/images/team_image.jpg';
   static const String defaultProfileImage = 'assets/images/default_profile.png';
+
+// 📌 Font Configuration
+  static const String defaultFontFamily = 'Rubik';
 }

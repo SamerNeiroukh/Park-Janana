@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/constants/app_colors.dart';
 import 'registration_form.dart';
 
 class NewWorkerScreen extends StatelessWidget {
@@ -16,30 +18,21 @@ class NewWorkerScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center, // Center align content
               children: [
-                const Text(
+                Text(
                   'עובד חדש? ברוך הבא!',
-                  style: TextStyle(
-                    fontFamily: 'SuezOne',
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 246, 195, 76), // Yellow color
-                  ),
-                  textAlign: TextAlign.center, // Center align text
+                  style: AppTheme.titleStyle.copyWith(color: AppColors.secondary), // ✅ Use Yellow
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16.0),
-                const Text(
+                Text(
                   'ליצירת חשבון עובד חדש בפארק גננה, צור קשר עם ההנהלה או שלח פניה.',
-                  style: TextStyle(
-                    fontFamily: 'SuezOne',
-                    fontSize: 16.0,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center, // Center align text
+                  style: AppTheme.bodyText,
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24.0),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 246, 195, 76), // Yellow color
+                    backgroundColor: AppColors.secondary, // ✅ Use Yellow
                     elevation: 4,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(

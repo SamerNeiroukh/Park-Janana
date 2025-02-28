@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../services/shift_service.dart';
-import '../../utils/datetime_utils.dart';
-import '../../widgets/date_time_picker.dart';
+import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/services/shift_service.dart';
+import 'package:park_janana/utils/datetime_utils.dart';
+import 'package:park_janana/widgets/date_time_picker.dart';
 
 class CreateShiftScreen extends StatefulWidget {
   const CreateShiftScreen({super.key});
@@ -39,7 +42,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ משמרת נוצרה בהצלחה!")),
+        SnackBar(
+          content: Text("✅ משמרת נוצרה בהצלחה!", style: AppTheme.bodyText),
+          backgroundColor: AppColors.success,
+        ),
       );
     }
   }
@@ -47,22 +53,42 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("יצירת משמרת חדשה")),
-      body: Padding(
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("📅 בחר תאריך", style: TextStyle(fontWeight: FontWeight.bold)),
+            // ✅ Park Logo & Header
+            const UserHeader(),
+
+            const SizedBox(height: 20),
+
+            // ✅ Page Title
+            Text("יצירת משמרת חדשה", style: AppTheme.screenTitle),
+
+            const SizedBox(height: 20),
+
+            // 📅 **Select Date**
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text("בחר תאריך", style: AppTheme.sectionTitle),
+            ),
             DatePickerWidget(
               initialDate: _selectedDate,
               onDateSelected: (date) => setState(() => _selectedDate = date),
             ),
-            const SizedBox(height: 10),
 
-            const Text("🏢 בחר מחלקה", style: TextStyle(fontWeight: FontWeight.bold)),
-            DropdownButton<String>(
+            const SizedBox(height: 20),
+
+            // 🏢 **Select Department**
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text("בחר מחלקה", style: AppTheme.sectionTitle),
+            ),
+            DropdownButtonFormField<String>(
               value: _selectedDepartment,
+              decoration: AppTheme.inputDecoration(hintText: "בחר מחלקה"),
               isExpanded: true,
               onChanged: (String? newValue) {
                 setState(() {
@@ -72,46 +98,73 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               items: departments.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value),
+                  child: Text(value, style: AppTheme.bodyText),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 10),
 
-            const Text("👥 מספר מקסימלי של עובדים", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+
+            // 👥 **Select Maximum Workers**
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text("מספר מקסימלי של עובדים", style: AppTheme.sectionTitle),
+            ),
             Slider(
               value: _maxWorkers.toDouble(),
               min: 1,
               max: 20,
               divisions: 19,
               label: _maxWorkers.toString(),
+              activeColor: AppColors.accent,
               onChanged: (double value) {
                 setState(() {
                   _maxWorkers = value.toInt();
                 });
               },
             ),
-            const SizedBox(height: 10),
 
-            const Text("⏰ זמן התחלה", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+
+            // ⏰ **Select Start Time**
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text("זמן התחלה", style: AppTheme.sectionTitle),
+            ),
             TimePickerWidget(
               initialTime: _startTime,
               onTimeSelected: (time) => setState(() => _startTime = time),
             ),
-            const SizedBox(height: 10),
 
-            const Text("⏰ זמן סיום", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+
+            // ⏰ **Select End Time**
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text("זמן סיום", style: AppTheme.sectionTitle),
+            ),
             TimePickerWidget(
               initialTime: _endTime,
               onTimeSelected: (time) => setState(() => _endTime = time),
             ),
-            const SizedBox(height: 20),
 
-            Center(
-              child: ElevatedButton(
-                onPressed: _createShift,
-                child: const Text("✅ צור משמרת"),
-              ),
+            const SizedBox(height: 30),
+
+            // ✅ **Create Shift Button**
+            ElevatedButton(
+              style: AppTheme.primaryButtonStyle,
+              onPressed: _createShift,
+              child: Text("צור משמרת", style: AppTheme.buttonTextStyle),
+            ),
+
+            const SizedBox(height: 15),
+
+            // ❌ **Cancel Button**
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("חזור", style: AppTheme.linkTextStyle),
             ),
           ],
         ),
