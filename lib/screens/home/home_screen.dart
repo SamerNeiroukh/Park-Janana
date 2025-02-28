@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:park_janana/widgets/user_header.dart';
-import 'package:park_janana/widgets/user_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/widgets/user_card.dart';
 import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:park_janana/screens/shifts/shifts_screen.dart';
-import 'package:park_janana/screens/shifts/manager_shifts_screen.dart'; // ✅ Import Manager's Shift Screen
+import 'package:park_janana/screens/shifts/manager_shifts_screen.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -57,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (currentUser == null) {
       return Scaffold(
         body: Center(
-          child: Text('לא נמצא משתמש מחובר', style: TextStyle(fontSize: 18.0)),
+          child: Text('לא נמצא משתמש מחובר', style: AppTheme.bodyText), // ✅ Use themed text
         ),
       );
     }
@@ -71,7 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError || snapshot.data == null) {
             debugPrint('Error or no data: ${snapshot.error}');
-            return const Center(child: Text('שגיאה בטעינת הנתונים'));
+            return Center(
+              child: Text('שגיאה בטעינת הנתונים', style: AppTheme.bodyText),
+            );
           }
 
           final userData = snapshot.data!;
@@ -99,10 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   'פעולות',
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTheme.sectionTitle, // ✅ Use the theme for section titles
                 ),
               ),
               SizedBox(
@@ -135,13 +135,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       }).toList(),
                     if (role == 'manager')
                       CustomCard(
-                        title: 'ניהול משמרות', // ✅ Updated title
-                        icon: Icons.schedule, // ✅ Updated icon
+                        title: 'ניהול משמרות',
+                        icon: Icons.schedule,
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ManagerShiftsScreen(), // ✅ Navigate to manager's shift screen
+                              builder: (context) => const ManagerShiftsScreen(),
                             ),
                           );
                         },
@@ -149,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (role == 'worker')
                       CustomCard(
                         title: 'משמרות',
-                        icon: Icons.access_time, // ✅ Updated to differentiate from manager's shift screen
+                        icon: Icons.access_time,
                         onTap: () {
                           Navigator.push(
                             context,

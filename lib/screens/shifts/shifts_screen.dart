@@ -5,7 +5,8 @@ import '../../models/shift_model.dart';
 import '../../services/shift_service.dart';
 import '../../widgets/user_header.dart';
 import '../../widgets/worker_shift_card.dart';
-
+import '../../constants/app_colors.dart';
+import '../../constants/app_theme.dart';
 
 class ShiftsScreen extends StatefulWidget {
   const ShiftsScreen({super.key});
@@ -17,7 +18,6 @@ class ShiftsScreen extends StatefulWidget {
 class _ShiftsScreenState extends State<ShiftsScreen> {
   final ShiftService _shiftService = ShiftService();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
-  
 
   // ✅ Ensure the week starts from Sunday
   DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday % 7));
@@ -26,6 +26,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: const UserHeader(),
       body: Column(
         children: [
@@ -41,25 +42,27 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
   Widget _buildWeekNavigation() {
     String weekRange = "${DateFormat('MMM dd').format(_currentWeekStart)} - ${DateFormat('MMM dd').format(_currentWeekStart.add(const Duration(days: 6)))}";
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: AppTheme.navigationBoxDecoration,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
+            color: AppColors.primary,
+            iconSize: 28,
             onPressed: () {
               setState(() {
                 _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
               });
             },
           ),
-          Text(
-            weekRange,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          Text(weekRange, style: AppTheme.sectionTitle),
           IconButton(
             icon: const Icon(Icons.chevron_right),
+            color: AppColors.primary,
+            iconSize: 28,
             onPressed: () {
               setState(() {
                 _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
@@ -73,38 +76,44 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
   // 🟢 Day Tabs (Sunday - Saturday)
   Widget _buildDayTabs() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(7, (index) {
-        DateTime day = _currentWeekStart.add(Duration(days: index));
-        bool isSelected = _selectedDay.day == day.day && _selectedDay.month == day.month;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(7, (index) {
+          DateTime day = _currentWeekStart.add(Duration(days: index));
+          bool isSelected = _selectedDay.day == day.day && _selectedDay.month == day.month;
 
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedDay = day;
-            });
-          },
-          child: Column(
-            children: [
-              Text(
-                DateFormat('E').format(day),
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.blue : Colors.black,
-                ),
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedDay = day;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+              decoration: isSelected
+                  ? BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    )
+                  : null,
+              child: Column(
+                children: [
+                  Text(
+                    DateFormat('E').format(day),
+                    style: isSelected ? AppTheme.tabTextStyle.copyWith(color: AppColors.onPrimary) : AppTheme.tabTextStyle,
+                  ),
+                  Text(
+                    DateFormat('dd').format(day),
+                    style: isSelected ? AppTheme.tabTextStyle.copyWith(color: AppColors.onPrimary) : AppTheme.tabTextStyle,
+                  ),
+                ],
               ),
-              Text(
-                DateFormat('dd').format(day),
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.blue : Colors.black,
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -118,7 +127,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('אין משמרות זמינות כרגע.'));
+          return Center(child: Text('אין משמרות זמינות כרגע.', style: AppTheme.bodyText));
         }
 
         // 🟢 Filter shifts for the selected day
@@ -127,7 +136,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         }).toList();
 
         if (filteredShifts.isEmpty) {
-          return const Center(child: Text('אין משמרות ליום זה.'));
+          return Center(child: Text('אין משמרות ליום זה.', style: AppTheme.bodyText));
         }
 
         return ListView.builder(

@@ -7,6 +7,8 @@ import '../../services/worker_service.dart';
 import 'create_shift_screen.dart';
 import '../../widgets/shift_card.dart';
 import '../../utils/datetime_utils.dart';
+import '../../constants/app_theme.dart';
+import '../../constants/app_colors.dart';
 
 class ManagerShiftsScreen extends StatefulWidget {
   const ManagerShiftsScreen({super.key});
@@ -36,7 +38,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200], // Light background for a modern look
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           const UserHeader(),
@@ -65,21 +67,15 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
     );
   }
 
-  /// 📆 **Navigation Between Weeks**
   Widget _buildWeekNavigation() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, 2))
-        ],
-      ),
+      decoration: AppTheme.navigationBoxDecoration,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.blue, size: 28),
+            icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
               _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
             }),
@@ -87,17 +83,13 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
           Expanded(
             child: Text(
               "${DateTimeUtils.formatDate(_currentWeekStart)} - ${DateTimeUtils.formatDate(_currentWeekStart.add(const Duration(days: 6)))}",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: AppTheme.screenTitle,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.arrow_forward, color: Colors.blue, size: 28),
+            icon: Icon(Icons.arrow_forward, color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
               _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
             }),
@@ -107,16 +99,15 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
     );
   }
 
-  /// 📅 **Tab Bar for Weekly Navigation**
   Widget _buildTabBar() {
     return Container(
-      color: Colors.white,
+      color: AppColors.surface,
       child: TabBar(
         controller: _tabController,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.black54,
+        labelColor: AppColors.onPrimary,
+        unselectedLabelColor: AppColors.textSecondary,
         indicator: BoxDecoration(
-          color: Colors.blue.shade700,
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(12),
         ),
         isScrollable: true,
@@ -127,7 +118,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
               child: Text(
                 DateTimeUtils.getHebrewWeekdayName(day.weekday),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: AppTheme.tabTextStyle,
               ),
             ),
           );
@@ -136,7 +127,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
     );
   }
 
-  /// 📆 **Shift List for Selected Day**
   Widget _buildShiftList(DateTime selectedDay) {
     return StreamBuilder<List<ShiftModel>>(
       stream: _shiftService.getShiftsStream(),
@@ -144,7 +134,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return _buildEmptyShiftsMessage();
         }
@@ -162,7 +151,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
         }
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 70), // ✅ Prevents FAB from covering shifts
+          padding: const EdgeInsets.only(bottom: 70),
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: shifts.map((shift) => ShiftCard(
@@ -176,27 +165,22 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
     );
   }
 
-  /// 🚫 **Display "No Shifts" Message**
   Widget _buildEmptyShiftsMessage() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.work_off, size: 50, color: Colors.grey),
+          Icon(Icons.work_off, size: 50, color: AppColors.textSecondary),
           const SizedBox(height: 10),
-          const Text(
-            'אין משמרות זמינות ליום זה.',
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
+          Text('אין משמרות זמינות ליום זה.', style: AppTheme.bodyText),
         ],
       ),
     );
   }
 
-  /// ➕ **Floating Action Button for Creating a Shift**
   Widget _buildCreateShiftButton() {
     return FloatingActionButton.extended(
-      backgroundColor: Colors.blue.shade700,
+      backgroundColor: AppColors.primary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onPressed: () {
         Navigator.push(
@@ -205,7 +189,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
         );
       },
       icon: const Icon(Icons.add, size: 30, color: Colors.white),
-      label: const Text("יצירת משמרת", style: TextStyle(fontSize: 16, color: Colors.white)),
+      label: Text("יצירת משמרת", style: AppTheme.buttonTextStyle),
     );
   }
 }

@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/constants/app_strings.dart';
 import '../home/home_screen.dart';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,7 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
       String uid = userCredential.user!.uid;
 
       // Fetch user data from Firestore
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
         String role = userDoc.get('role') ?? 'worker';
@@ -92,14 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'שלום עובדים יקרים',
-                  style: TextStyle(
-                    fontFamily: 'SuezOne',
-                    fontSize: 36.0,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 86, 194, 244),
-                  ),
+                  style: AppTheme.titleStyle.copyWith(color: AppColors.primary),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32.0),
@@ -121,12 +119,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 16.0),
                         hintText: 'הכנס את כתובת האימייל שלך',
-                        hintStyle: const TextStyle(fontSize: 14.0),
+                        hintStyle: AppTheme.hintTextStyle,
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 86, 194, 244),
+                          borderSide: BorderSide(
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
                           borderRadius: BorderRadius.circular(12.0),
@@ -134,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       textAlign: TextAlign.center,
                       keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
                     ),
                   ],
                 ),
@@ -158,12 +156,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 16.0),
                         hintText: 'הכנס את הסיסמה שלך',
-                        hintStyle: const TextStyle(fontSize: 14.0),
+                        hintStyle: AppTheme.hintTextStyle,
                         focusedBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 86, 194, 244),
+                            color: AppColors.primary,
                             width: 2.0,
                           ),
                           borderRadius: BorderRadius.circular(12.0),
@@ -179,13 +178,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   onTap: () {
                     // Handle "Forgot Password" action
                   },
-                  child: const Text(
+                  child: Text(
                     AppStrings.forgotPassword,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Color.fromARGB(255, 86, 194, 244),
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTheme.linkTextStyle
+                        .copyWith(color: AppColors.primary),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -193,37 +189,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 86, 194, 244),
-                          elevation: 4,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                        ),
+                        style: AppTheme.primaryButtonStyle,
                         onPressed: _login,
-                        child: const Text(
-                          'כניסה',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: const Text('כניסה',
+                            style: AppTheme.buttonTextStyle),
                       ),
                 const SizedBox(height: 16.0),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Text(
-                    'חזור',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                    ),
-                  ),
+                  child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
                 ),
               ],
             ),

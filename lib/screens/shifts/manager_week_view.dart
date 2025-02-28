@@ -7,6 +7,8 @@ import '../../services/worker_service.dart';
 import 'create_shift_screen.dart';
 import '../../widgets/shift_card.dart';
 import '../../utils/datetime_utils.dart';
+import '../../constants/app_colors.dart';
+import '../../constants/app_theme.dart';
 
 class ManagerWeekView extends StatefulWidget {
   const ManagerWeekView({super.key});
@@ -24,6 +26,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           const UserHeader(),
@@ -38,10 +41,10 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
                       'אין משמרות זמינות לשבוע זה.',
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
+                      style: AppTheme.bodyText,
                     ),
                   );
                 }
@@ -68,10 +71,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          entry.key,
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
-                        ),
+                        Text(entry.key, style: AppTheme.sectionTitle.copyWith(color: AppColors.primary)),
                         ...entry.value.map((shift) => ShiftCard(
                               shift: shift,
                               shiftService: _shiftService,
@@ -97,17 +97,21 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.blue, size: 28),
+            icon: const Icon(Icons.arrow_back),
+            color: AppColors.primary,
+            iconSize: 28,
             onPressed: () => setState(() {
               _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
             }),
           ),
           Text(
             "שבוע ${DateTimeUtils.formatDate(_currentWeekStart)} - ${DateTimeUtils.formatDate(_currentWeekStart.add(const Duration(days: 6)))}",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: AppTheme.sectionTitle,
           ),
           IconButton(
-            icon: const Icon(Icons.arrow_forward, color: Colors.blue, size: 28),
+            icon: const Icon(Icons.arrow_forward),
+            color: AppColors.primary,
+            iconSize: 28,
             onPressed: () => setState(() {
               _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
             }),
@@ -128,11 +132,8 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
             MaterialPageRoute(builder: (context) => const CreateShiftScreen()),
           );
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade700,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        ),
-        child: const Text("➕ יצירת משמרת", style: TextStyle(fontSize: 18, color: Colors.white)),
+        style: AppTheme.primaryButtonStyle,
+        child: const Text("➕ יצירת משמרת"),
       ),
     );
   }

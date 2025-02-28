@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:park_janana/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/user_header.dart';
+import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/constants/app_colors.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -38,17 +40,21 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Future<void> _uploadImage() async {
     if (_imageFile != null) {
-      setState(() {
-      });
+      setState(() {});
       try {
-        final storageRef = _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
+        final storageRef =
+            _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
         await storageRef.putFile(_imageFile!);
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("תמונת הפרופיל עודכנה בהצלחה.")),
+            SnackBar(
+              content: Text("תמונת הפרופיל עודכנה בהצלחה.",
+                  style: AppTheme.bodyText),
+              backgroundColor: AppColors.success,
+            ),
           );
           Navigator.pop(context, downloadUrl);
         }
@@ -60,8 +66,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         }
       } finally {
         if (mounted) {
-          setState(() {
-          });
+          setState(() {});
         }
       }
     }
@@ -78,7 +83,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.black),
-                title: const Text("צלם תמונה", style: TextStyle(color: Colors.black)),
+                title: const Text("צלם תמונה",
+                    style: TextStyle(color: Colors.black)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -86,7 +92,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo, color: Colors.black),
-                title: const Text("העלה תמונה", style: TextStyle(color: Colors.black)),
+                title: const Text("העלה תמונה",
+                    style: TextStyle(color: Colors.black)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -133,13 +140,15 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           const UserHeader(),
           Expanded(
             child: StreamBuilder<DocumentSnapshot>(
-              stream: _firestore.collection('users').doc(widget.uid).snapshots(),
+              stream:
+                  _firestore.collection('users').doc(widget.uid).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text("שגיאה בטעינת הפרופיל.");
                 }
 
-                if (!snapshot.hasData || snapshot.connectionState == ConnectionState.waiting) {
+                if (!snapshot.hasData ||
+                    snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 }
 
@@ -147,7 +156,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 String profilePicture = userDoc['profile_picture'] ?? '';
 
                 // ✅ Ensure a valid profile picture URL is always used
-                if (profilePicture.isEmpty || !profilePicture.startsWith('http')) {
+                if (profilePicture.isEmpty ||
+                    !profilePicture.startsWith('http')) {
                   profilePicture = defaultProfilePictureUrl;
                 }
 
@@ -165,7 +175,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                         children: [
                           CircleAvatar(
                             radius: 85,
-                            backgroundColor: Colors.blue.shade700,
+                            backgroundColor: AppColors.accent,
                             child: CircleAvatar(
                               radius: 80,
                               backgroundImage: NetworkImage(profilePicture),
@@ -182,9 +192,10 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                             child: GestureDetector(
                               onTap: _showOptions,
                               child: const CircleAvatar(
-                                backgroundColor: Colors.white,
+                                backgroundColor: AppColors.background,
                                 radius: 22,
-                                child: Icon(Icons.camera_alt, color: Colors.blue, size: 22),
+                                child: Icon(Icons.camera_alt,
+                                    color: Colors.blue, size: 22),
                               ),
                             ),
                           ),
@@ -212,6 +223,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       elevation: 4,
+      color: AppColors.background, // Use theme background color
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -232,8 +244,10 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(field, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade600)),
-                Text(value, style: const TextStyle(fontSize: 16.0, color: Colors.black87)),
+                Text(field,
+                    style: AppTheme.sectionTitle
+                        .copyWith(color: AppColors.accent)), // Title
+                Text(value, style: AppTheme.bodyText), // Value
               ],
             ),
           ),

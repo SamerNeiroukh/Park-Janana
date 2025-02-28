@@ -6,6 +6,8 @@ import 'screens/home/home_screen.dart';
 import 'screens/home/personal_area_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'constants/app_theme.dart'; // Import your theme file
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +52,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       home: _showSplashScreen
           ? const SplashScreen()
           : StreamBuilder<User?>(
