@@ -80,101 +80,99 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(widget.shift.date);
-    bool isOutdated =
-        shiftDate.isBefore(DateTime.now()); // ✅ Check if shift is outdated
-    Color cardColor = Colors.white.withOpacity(0.9);
+Widget build(BuildContext context) {
+  DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(widget.shift.date);
+  bool isOutdated = shiftDate.isBefore(DateTime.now());
+  Color cardColor = Colors.white.withOpacity(0.9);
 
-    if (isOutdated) {
-      cardColor = Colors.grey.shade300; // ✅ Outdated shifts are gray
-    } else if (_isAssigned) {
-      cardColor = Colors.green.shade50;
-    } else if (_isShiftFull) {
-      cardColor = Colors.red.shade50;
-    }
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-      elevation: 12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      shadowColor: Colors.blueAccent.withOpacity(0.3),
-      color: cardColor,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.event_note,
-                      color: Colors.blue.shade700, size: 30),
-                ),
-                if (_isAssigned)
-                  _buildStatusLabel("עבדת במשמרת", Colors.blue,
-                      Icons.check_circle) // ✅ Show "Worked in shift" label
-                else if (isOutdated)
-                  _buildStatusLabel("עבר זמנו", Colors.grey,
-                      Icons.history) // ✅ Show "Expired" label
-                else if (_isShiftFull)
-                  _buildStatusLabel("מלא", Colors.red, Icons.block)
-                else
-                  ElevatedButton(
-                    onPressed: isOutdated
-                        ? null
-                        : (_isShiftFull && !_hasRequested
-                            ? null
-                            : _toggleShiftRequest),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _hasRequested
-                          ? Colors.redAccent
-                          : (_isShiftFull ? Colors.grey : Colors.green),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      elevation: 4,
-                    ),
-                    child: Text(
-                      _hasRequested ? "ביטול בקשה" : "הצטרף",
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              "${widget.shift.date} | ${widget.shift.department}",
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.black87),
-              textAlign: TextAlign.right,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "שעות: ${widget.shift.startTime} - ${widget.shift.endTime}",
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
-              textAlign: TextAlign.right,
-            ),
-            const SizedBox(height: 14),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon:
-                    const Icon(Icons.expand_more, color: Colors.blue, size: 28),
-                onPressed: _showShiftDetails,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+  if (isOutdated) {
+    cardColor = Colors.grey.shade300; // ✅ Outdated shifts are gray
+  } else if (_isAssigned) {
+    cardColor = Colors.green.shade50;
+  } else if (_isShiftFull) {
+    cardColor = Colors.red.shade50;
   }
+
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+    elevation: 12,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    shadowColor: Colors.blueAccent.withOpacity(0.3),
+    color: cardColor,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: Colors.blue.shade100,
+                child: Icon(Icons.event_note,
+                    color: Colors.blue.shade700, size: 30),
+              ),
+              if (_isAssigned)
+                _buildStatusLabel(
+                    isOutdated ? "עבדת במשמרת" : "משובץ",
+                    Colors.blue,
+                    Icons.check_circle) // ✅ Corrected Label Based on Shift Date
+              else if (isOutdated)
+                _buildStatusLabel("עבר זמנו", Colors.grey, Icons.history)
+              else if (_isShiftFull)
+                _buildStatusLabel("מלא", Colors.red, Icons.block)
+              else
+                ElevatedButton(
+                  onPressed: isOutdated
+                      ? null
+                      : (_isShiftFull && !_hasRequested
+                          ? null
+                          : _toggleShiftRequest),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _hasRequested
+                        ? Colors.redAccent
+                        : (_isShiftFull ? Colors.grey : Colors.green),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    elevation: 4,
+                  ),
+                  child: Text(
+                    _hasRequested ? "ביטול בקשה" : "הצטרף",
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            "${widget.shift.date} | ${widget.shift.department}",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black87),
+            textAlign: TextAlign.right,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "שעות: ${widget.shift.startTime} - ${widget.shift.endTime}",
+            style: const TextStyle(fontSize: 16, color: Colors.black54),
+            textAlign: TextAlign.right,
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: const Icon(Icons.expand_more, color: Colors.blue, size: 28),
+              onPressed: _showShiftDetails,
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+}
+
 
   Widget _buildStatusLabel(String label, Color color, IconData icon) {
     return Container(
@@ -195,11 +193,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
         children: [
           Icon(icon, color: color, size: 18),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-                color: color, fontWeight: FontWeight.bold, fontSize: 14),
-          ),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
         ],
       ),
     );

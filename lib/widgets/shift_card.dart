@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_theme.dart';
 import '../models/shift_model.dart';
 import '../models/user_model.dart';
 import '../services/shift_service.dart';
@@ -27,46 +29,27 @@ class ShiftCardState extends State<ShiftCard> {
   final TextEditingController _messageController = TextEditingController();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
-  final List<String> _approvedWorkers =
-      []; // ✅ Temporary list to store approved workers
+  final List<String> _approvedWorkers = [];
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 8,
+      elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-      shadowColor: Colors.grey.withOpacity(0.5),
+      shadowColor: AppColors.cardShadow,
       child: ExpansionTile(
-        iconColor: Colors.blue.shade700,
-        collapsedIconColor: Colors.blue.shade700,
+        iconColor: AppColors.primary,
+        collapsedIconColor: AppColors.primary,
         title: _buildShiftHeader(),
         children: [
           if (_approvedWorkers.isNotEmpty) _buildSubmitButton(),
-          _buildWorkerList("🕐 בקשות למשמרת", widget.shift.requestedWorkers,
-              isAssigned: false),
-          _buildWorkerList("👥 עובדים מוקצים", widget.shift.assignedWorkers,
-              isAssigned: true),
+          _buildWorkerList("🕐 בקשות למשמרת", widget.shift.requestedWorkers, isAssigned: false),
+          _buildWorkerList("👥 עובדים מוקצים", widget.shift.assignedWorkers, isAssigned: true),
           _buildMessagesSection(),
           _buildAddMessageSection(),
-          _buildDeleteShiftButton(context),
+          _buildDeleteShiftButton(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade700,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        ),
-        onPressed: _submitApprovedWorkers,
-        child: const Text("✅ אשר עובדים למשמרת",
-            style: TextStyle(fontSize: 16, color: Colors.white)),
       ),
     );
   }
@@ -76,8 +59,8 @@ class ShiftCardState extends State<ShiftCard> {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0),
-        gradient: LinearGradient(
-          colors: [Colors.blue.shade400, Colors.blue.shade700],
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.accent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -85,114 +68,99 @@ class ShiftCardState extends State<ShiftCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("📅 ${widget.shift.date} | 🏢 ${widget.shift.department}",
-              style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-          Text("⏰ ${widget.shift.startTime} - ${widget.shift.endTime}",
-              style: const TextStyle(fontSize: 14.0, color: Colors.white70)),
           Text(
-              "👥 עובדים מוקצים: ${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers}",
-              style: const TextStyle(fontSize: 14.0, color: Colors.white)),
+            "📅 ${widget.shift.date} | 🏢 ${widget.shift.department}",
+            style: AppTheme.bodyText.copyWith(color: AppColors.onPrimary, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "⏰ ${widget.shift.startTime} - ${widget.shift.endTime}",
+            style: AppTheme.bodyText.copyWith(color: Colors.white70),
+          ),
+          Text(
+            "👥 עובדים מוקצים: ${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers}",
+            style: AppTheme.bodyText.copyWith(color: Colors.white),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildWorkerList(String title, List<String> workers,
-    {required bool isAssigned}) {
-  return Directionality(
-    textDirection: TextDirection.rtl,
-    child: FutureBuilder<List<UserModel>>(
-      future: widget.shiftService.fetchWorkerDetails(workers),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget _buildWorkerList(String title, List<String> workers, {required bool isAssigned}) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: FutureBuilder<List<UserModel>>(
+        future: widget.shiftService.fetchWorkerDetails(workers),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        List<UserModel>? workerDetails = snapshot.data;
+          List<UserModel>? workerDetails = snapshot.data;
 
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          padding: const EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(
-                color: isAssigned ? Colors.green.shade700 : Colors.orange.shade700),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-              const Divider(),
-              (workerDetails == null || workerDetails.isEmpty)
-                  ? const Align(
-                      alignment: Alignment.centerRight,
-                      child: Text("אין בקשות למשמרת זו."),
-                    )
-                  : Column(
-                      children: workerDetails.map((worker) {
-                        return WorkerRow(
-                          worker: worker,
-                          shiftId: widget.shift.id,
-                          isAssigned: isAssigned,
-                          workerService: widget.workerService,
-                          isApproved: _approvedWorkers.contains(worker.uid),
-                          onApproveToggle: (bool isApproved) {
-                            setState(() {
-                              if (isApproved) {
-                                _approvedWorkers.add(worker.uid);
-                              } else {
-                                _approvedWorkers.remove(worker.uid);
-                              }
-                            });
-                          },
-                          showRemoveIcon: isAssigned, // ✅ Fix: Allow remove for assigned workers only
-                        );
-                      }).toList(),
-                    ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(color: isAssigned ? AppColors.success : AppColors.secondary),
+              color: AppColors.surface,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    title,
+                    style: AppTheme.sectionTitle.copyWith(fontSize: 18),
+                  ),
+                ),
+                const Divider(),
+                (workerDetails == null || workerDetails.isEmpty)
+                    ? Align(
+                        alignment: Alignment.centerRight,
+                        child: Text("אין בקשות למשמרת זו.", style: AppTheme.bodyText),
+                      )
+                    : Column(
+                        children: workerDetails.map((worker) {
+                          return WorkerRow(
+                            worker: worker,
+                            shiftId: widget.shift.id,
+                            isAssigned: isAssigned,
+                            workerService: widget.workerService,
+                            isApproved: _approvedWorkers.contains(worker.uid),
+                            onApproveToggle: (bool isApproved) {
+                              setState(() {
+                                isApproved ? _approvedWorkers.add(worker.uid) : _approvedWorkers.remove(worker.uid);
+                              });
+                            },
+                            showRemoveIcon: isAssigned,
+                          );
+                        }).toList(),
+                      ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildMessagesSection() {
     return Directionality(
-      textDirection: TextDirection.rtl, // ✅ Align messages Right
+      textDirection: TextDirection.rtl,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.end, // ✅ Align text & labels to right
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Align(
-              alignment:
-                  Alignment.centerRight, // ✅ Moves label fully to the right
-              child: const Text(
-                "📩 הודעות מנהלים:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
+            Text("📩 הודעות מנהלים:", style: AppTheme.sectionTitle),
             if (widget.shift.messages.isEmpty)
-              Align(
-                alignment:
-                    Alignment.centerRight, // ✅ Aligns empty message properly
-                child: const Text("אין הודעות זמינות."),
-              ),
+              Text("אין הודעות זמינות.", style: AppTheme.bodyText),
             ...widget.shift.messages.map((msg) {
               return MessageBubble(
                 message: msg['message'] ?? "אין תוכן",
-                timestamp:
-                    msg['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+                timestamp: msg['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
                 senderId: msg['senderId'] ?? "",
                 shiftId: widget.shift.id,
               );
@@ -210,56 +178,50 @@ class ShiftCardState extends State<ShiftCard> {
         children: [
           TextField(
             controller: _messageController,
-            decoration: InputDecoration(
-              labelText: "הוסף הודעה למשמרת",
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-              filled: true,
-              fillColor: Colors.white,
-            ),
+            decoration: AppTheme.inputDecoration(hintText: "הוסף הודעה למשמרת"),
           ),
           const SizedBox(height: 10.0),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade600,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0)),
-            ),
+            style: AppTheme.primaryButtonStyle,
             onPressed: _addMessage,
-            child: const Text("📩 שלח הודעה",
-                style: TextStyle(color: Colors.white)),
+            child: const Text("📩 שלח הודעה"),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDeleteShiftButton(BuildContext context) {
+  Widget _buildSubmitButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.success,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        ),
+        onPressed: _submitApprovedWorkers,
+        child: const Text("✅ אשר עובדים למשמרת", style: TextStyle(fontSize: 16, color: Colors.white)),
+      ),
+    );
+  }
+
+  Widget _buildDeleteShiftButton() {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.shade600,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          backgroundColor: AppColors.error,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         ),
-        onPressed: () async {
-          await widget.shiftService.deleteShift(widget.shift.id);
-          if (mounted) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text("🗑️ משמרת נמחקה")));
-          }
-        },
-        child:
-            const Text("🗑️ מחק משמרת", style: TextStyle(color: Colors.white)),
+        onPressed: _deleteShift,
+        child: const Text("🗑️ מחק משמרת", style: TextStyle(color: Colors.white)),
       ),
     );
   }
 
   void _addMessage() async {
     if (_messageController.text.isNotEmpty && _currentUser != null) {
-      await widget.shiftService.addMessageToShift(
-          widget.shift.id, _messageController.text, _currentUser.uid);
+      await widget.shiftService.addMessageToShift(widget.shift.id, _messageController.text, _currentUser!.uid);
       _messageController.clear();
       setState(() {});
     }
@@ -267,11 +229,17 @@ class ShiftCardState extends State<ShiftCard> {
 
   void _submitApprovedWorkers() async {
     if (_approvedWorkers.isNotEmpty) {
-      await widget.workerService
-          .bulkApproveWorkers(widget.shift.id, _approvedWorkers);
+      await widget.workerService.bulkApproveWorkers(widget.shift.id, _approvedWorkers);
       setState(() {
         _approvedWorkers.clear();
       });
+    }
+  }
+
+  void _deleteShift() async {
+    await widget.shiftService.deleteShift(widget.shift.id);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("🗑️ משמרת נמחקה")));
     }
   }
 }
