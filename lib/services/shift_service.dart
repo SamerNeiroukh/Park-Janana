@@ -10,6 +10,9 @@ class ShiftService {
   final FirebaseService _firebaseService = FirebaseService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // 🔵 Cache for storing worker details
+  final Map<String, UserModel> _workerCache = {};
+
   Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
     DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
@@ -21,7 +24,7 @@ class ShiftService {
         .map((snapshot) => snapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList());
   }
 
-  // 🟢 Fetch available shifts as a stream
+  // 🔵 Fetch available shifts as a stream
   Stream<List<ShiftModel>> getShiftsStream() {
     return _firebaseService.getShiftsStream().map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -174,19 +177,36 @@ class ShiftService {
     }
   }
 
-  // 🟢 Fetch worker details for UI display
+  // 🔵 Optimized method: Fetch worker details with caching
   Future<List<UserModel>> fetchWorkerDetails(List<String> workerIds) async {
     List<UserModel> workers = [];
-    try {
-      for (String workerId in workerIds) {
-        final userDoc = await _firebaseService.getUser(workerId);
-        if (userDoc.exists && userDoc.data() != null) {
-          workers.add(UserModel.fromMap(userDoc.data() as Map<String, dynamic>));
-        }
+    List<String> missingWorkerIds = [];
+
+    // ✅ Check cache for existing workers
+    for (String workerId in workerIds) {
+      if (_workerCache.containsKey(workerId)) {
+        workers.add(_workerCache[workerId]!);
+      } else {
+        missingWorkerIds.add(workerId);
       }
-    } catch (e) {
-      throw CustomException('שגיאה בשליפת נתוני העובדים.');
     }
+
+    // ✅ Fetch only missing workers from Firestore
+    if (missingWorkerIds.isNotEmpty) {
+      try {
+        for (String workerId in missingWorkerIds) {
+          final userDoc = await _firebaseService.getUser(workerId);
+          if (userDoc.exists && userDoc.data() != null) {
+            UserModel worker = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+            _workerCache[workerId] = worker; // ✅ Store in cache
+            workers.add(worker);
+          }
+        }
+      } catch (e) {
+        throw CustomException('שגיאה בשליפת נתוני העובדים.');
+      }
+    }
+
     return workers;
   }
 
