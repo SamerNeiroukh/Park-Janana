@@ -13,9 +13,12 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      title: Image.asset(
-        AppConstants.parkLogo,
-        height: 50.0,
+      title: Padding(
+        padding: const EdgeInsets.only(bottom: 10.0), // ✅ Added padding below the logo
+        child: Image.asset(
+          AppConstants.parkLogo,
+          height: 50.0,
+        ),
       ),
       actions: [
         IconButton(

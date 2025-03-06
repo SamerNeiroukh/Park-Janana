@@ -9,7 +9,7 @@ class WorkerRow extends StatelessWidget {
   final WorkerService workerService;
   final bool isApproved;
   final Function(bool) onApproveToggle;
-  final bool showRemoveIcon; // ✅ Control remove icon
+  final bool showRemoveIcon;
 
   const WorkerRow({
     super.key,
@@ -24,29 +24,18 @@ class WorkerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isValidNetworkImage = worker.profilePicture.isNotEmpty && worker.profilePicture.startsWith('http');
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
         radius: 25.0,
-        backgroundImage: worker.profilePicture.startsWith('http')
-            ? NetworkImage(worker.profilePicture)
-            : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+        backgroundImage: isValidNetworkImage
+            ? NetworkImage(worker.profilePicture) // ✅ Uses Firestore URL
+            : const AssetImage('assets/images/default_profile.png') as ImageProvider, // ✅ Uses default if missing
+        onBackgroundImageError: (_, __) {}, // ✅ Prevents red error UI on broken image
       ),
       title: Text(worker.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
-      trailing: showRemoveIcon // ✅ Only show if true
-          ? IconButton(
-              icon: const Icon(Icons.remove_circle, color: Colors.red),
-              onPressed: () async {
-                await workerService.removeWorker(shiftId, worker.uid);
-              },
-            )
-          : IconButton(
-              icon: Icon(
-                isApproved ? Icons.remove_circle : Icons.check_circle,
-                color: isApproved ? Colors.red : Colors.green,
-              ),
-              onPressed: () => onApproveToggle(!isApproved),
-            ),
     );
   }
 }

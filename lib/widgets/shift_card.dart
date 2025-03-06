@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/screens/users_screen.dart';
 import '../models/shift_model.dart';
 import '../models/user_model.dart';
 import '../services/shift_service.dart';
@@ -30,6 +31,9 @@ class ShiftCardState extends State<ShiftCard> {
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   final List<String> _approvedWorkers = [];
+
+  static final Map<String, UserModel> _workerCache = {}; // ✅ Cache for worker details
+  List<Map<String, dynamic>> _cachedMessages = []; // ✅ Cache for messages
 
   @override
   Widget build(BuildContext context) {
@@ -85,17 +89,17 @@ class ShiftCardState extends State<ShiftCard> {
     );
   }
 
-  Widget _buildWorkerList(String title, List<String> workers, {required bool isAssigned}) {
+  Widget _buildWorkerList(String title, List<String> workerIds, {required bool isAssigned}) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: FutureBuilder<List<UserModel>>(
-        future: widget.shiftService.fetchWorkerDetails(workers),
+        future: _fetchWorkerDetailsWithCache(workerIds), // ✅ Uses cached function
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          List<UserModel>? workerDetails = snapshot.data;
+          List<UserModel>? workers = snapshot.data;
 
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -108,21 +112,56 @@ class ShiftCardState extends State<ShiftCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    title,
-                    style: AppTheme.sectionTitle.copyWith(fontSize: 18),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppTheme.sectionTitle.copyWith(fontSize: 18),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    if (isAssigned)
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          minimumSize: const Size(40, 36),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UsersScreen(
+                                shiftId: widget.shift.id,
+                                assignedWorkerIds: widget.shift.assignedWorkers,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.people, size: 18),
+                            SizedBox(width: 4),
+                            Text("עובדים", style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
                 const Divider(),
-                (workerDetails == null || workerDetails.isEmpty)
+                (workers == null || workers.isEmpty)
                     ? Align(
                         alignment: Alignment.centerRight,
-                        child: Text("אין בקשות למשמרת זו.", style: AppTheme.bodyText),
+                        child: Text("אין עובדים מוקצים למשמרת זו.", style: AppTheme.bodyText),
                       )
                     : Column(
-                        children: workerDetails.map((worker) {
+                        children: workers.map((worker) {
                           return WorkerRow(
                             worker: worker,
                             shiftId: widget.shift.id,
@@ -146,7 +185,26 @@ class ShiftCardState extends State<ShiftCard> {
     );
   }
 
+  Future<List<UserModel>> _fetchWorkerDetailsWithCache(List<String> workerIds) async {
+    List<UserModel> workers = [];
+
+    for (String id in workerIds) {
+      if (_workerCache.containsKey(id)) {
+        workers.add(_workerCache[id]!);
+      } else {
+        UserModel user = await widget.workerService.getUserDetails(id);
+        _workerCache[id] = user;
+        workers.add(user);
+      }
+    }
+    return workers;
+  }
+
   Widget _buildMessagesSection() {
+    if (_cachedMessages.isEmpty) {
+      _cachedMessages = List.from(widget.shift.messages);
+    }
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
@@ -155,9 +213,9 @@ class ShiftCardState extends State<ShiftCard> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text("📩 הודעות מנהלים:", style: AppTheme.sectionTitle),
-            if (widget.shift.messages.isEmpty)
+            if (_cachedMessages.isEmpty)
               Text("אין הודעות זמינות.", style: AppTheme.bodyText),
-            ...widget.shift.messages.map((msg) {
+            ..._cachedMessages.map((msg) {
               return MessageBubble(
                 message: msg['message'] ?? "אין תוכן",
                 timestamp: msg['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
@@ -222,6 +280,13 @@ class ShiftCardState extends State<ShiftCard> {
   void _addMessage() async {
     if (_messageController.text.isNotEmpty && _currentUser != null) {
       await widget.shiftService.addMessageToShift(widget.shift.id, _messageController.text, _currentUser!.uid);
+
+      _cachedMessages.add({
+        'message': _messageController.text,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'senderId': _currentUser!.uid,
+      });
+
       _messageController.clear();
       setState(() {});
     }
