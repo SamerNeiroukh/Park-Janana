@@ -80,99 +80,102 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
   }
 
   @override
-Widget build(BuildContext context) {
-  DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(widget.shift.date);
-  bool isOutdated = shiftDate.isBefore(DateTime.now());
-  Color cardColor = Colors.white.withOpacity(0.9);
+  Widget build(BuildContext context) {
+    DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(widget.shift.date);
+    bool isOutdated = shiftDate.isBefore(DateTime.now());
+    Color cardColor = Colors.white.withOpacity(0.9);
 
-  if (isOutdated) {
-    cardColor = Colors.grey.shade300; // ✅ Outdated shifts are gray
-  } else if (_isAssigned) {
-    cardColor = Colors.green.shade50;
-  } else if (_isShiftFull) {
-    cardColor = Colors.red.shade50;
-  }
+    if (isOutdated) {
+      cardColor = Colors.grey.shade300;
+    } else if (_isAssigned) {
+      cardColor = Colors.green.shade50;
+    } else if (_isShiftFull) {
+      cardColor = Colors.red.shade50;
+    }
 
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-    elevation: 12,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    shadowColor: Colors.blueAccent.withOpacity(0.3),
-    color: cardColor,
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.blue.shade100,
-                child: Icon(Icons.event_note,
-                    color: Colors.blue.shade700, size: 30),
-              ),
-              if (_isAssigned)
-                _buildStatusLabel(
-                    isOutdated ? "עבדת במשמרת" : "משובץ",
-                    Colors.blue,
-                    Icons.check_circle) // ✅ Corrected Label Based on Shift Date
-              else if (isOutdated)
-                _buildStatusLabel("עבר זמנו", Colors.grey, Icons.history)
-              else if (_isShiftFull)
-                _buildStatusLabel("מלא", Colors.red, Icons.block)
-              else
-                ElevatedButton(
-                  onPressed: isOutdated
-                      ? null
-                      : (_isShiftFull && !_hasRequested
-                          ? null
-                          : _toggleShiftRequest),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _hasRequested
-                        ? Colors.redAccent
-                        : (_isShiftFull ? Colors.grey : Colors.green),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    elevation: 4,
-                  ),
-                  child: Text(
-                    _hasRequested ? "ביטול בקשה" : "הצטרף",
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                  ),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      elevation: 12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shadowColor: Colors.blueAccent.withOpacity(0.3),
+      color: cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.blue.shade100,
+                  child: Icon(Icons.event_note,
+                      color: Colors.blue.shade700, size: 30),
                 ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            "${widget.shift.date} | ${widget.shift.department}",
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black87),
-            textAlign: TextAlign.right,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "שעות: ${widget.shift.startTime} - ${widget.shift.endTime}",
-            style: const TextStyle(fontSize: 16, color: Colors.black54),
-            textAlign: TextAlign.right,
-          ),
-          const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IconButton(
-              icon: const Icon(Icons.expand_more, color: Colors.blue, size: 28),
-              onPressed: _showShiftDetails,
+                if (_isAssigned)
+                  _buildStatusLabel(
+                      isOutdated ? "עבדת במשמרת" : "משובץ",
+                      Colors.blue,
+                      Icons.check_circle)
+                else if (isOutdated)
+                  _buildStatusLabel("עבר זמנו", Colors.grey, Icons.history)
+                else if (_isShiftFull)
+                  _buildStatusLabel("מלא", Colors.red, Icons.block)
+                else
+                  ElevatedButton(
+                    onPressed: isOutdated
+                        ? null
+                        : (_isShiftFull && !_hasRequested
+                            ? null
+                            : _toggleShiftRequest),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _hasRequested
+                          ? Colors.redAccent
+                          : (_isShiftFull ? Colors.grey : Colors.green),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      elevation: 4,
+                    ),
+                    child: Text(
+                      _hasRequested ? "ביטול בקשה" : "הצטרף",
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+              ],
             ),
-          )
-        ],
-      ),
-    ),
-  );
-}
+            const SizedBox(height: 14),
+            Text(
+              "${widget.shift.date} | ${widget.shift.department}",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.black87),
+              textAlign: TextAlign.right,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "שעות: ${widget.shift.startTime} - ${widget.shift.endTime}",
+              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              textAlign: TextAlign.right,
+            ),
+            const SizedBox(height: 14),
 
+            // ✅ Ensure the details button is always displayed
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(Icons.expand_more, color: Colors.blue, size: 28),
+                onPressed: _showShiftDetails,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildStatusLabel(String label, Color color, IconData icon) {
     return Container(
@@ -200,7 +203,8 @@ Widget build(BuildContext context) {
   }
 }
 
-class ShiftDetailsPopup extends StatelessWidget {
+
+class ShiftDetailsPopup extends StatefulWidget {
   final ShiftModel shift;
   final ShiftService shiftService;
 
@@ -209,6 +213,79 @@ class ShiftDetailsPopup extends StatelessWidget {
     required this.shift,
     required this.shiftService,
   });
+
+  @override
+  State<ShiftDetailsPopup> createState() => _ShiftDetailsPopupState();
+}
+
+class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
+  static final Map<String, UserModel> _workerCache = {};
+  static final Map<String, List<Map<String, dynamic>>> _messagesCache = {};
+
+  late List<UserModel> assignedWorkers = [];
+  bool isLoadingWorkers = true;
+  bool isLoadingMessages = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAssignedWorkers();
+    _fetchShiftMessages();
+  }
+
+  // ✅ Load assigned workers (from cache or Firestore)
+  Future<void> _fetchAssignedWorkers() async {
+    List<UserModel> workers = [];
+    for (String workerId in widget.shift.assignedWorkers) {
+      if (_workerCache.containsKey(workerId)) {
+        workers.add(_workerCache[workerId]!);
+      } else {
+        try {
+          UserModel worker = await widget.shiftService.fetchWorkerDetails([workerId]).then((users) => users.first);
+          _workerCache[workerId] = worker; // ✅ Cache worker details
+          workers.add(worker);
+        } catch (e) {
+          debugPrint("Failed to fetch worker details: $e");
+        }
+      }
+    }
+    if (mounted) {
+      setState(() {
+        assignedWorkers = workers;
+        isLoadingWorkers = false;
+      });
+    }
+  }
+
+  // ✅ Load messages (from cache or Firestore)
+  Future<void> _fetchShiftMessages() async {
+    if (_messagesCache.containsKey(widget.shift.id)) {
+      setState(() {
+        isLoadingMessages = false;
+      });
+      return;
+    }
+
+    try {
+      DocumentSnapshot shiftDoc = await FirebaseFirestore.instance.collection('shifts').doc(widget.shift.id).get();
+      List<Map<String, dynamic>> messages = List<Map<String, dynamic>>.from(shiftDoc['messages'] ?? []);
+
+      _messagesCache[widget.shift.id] = messages; // ✅ Cache messages
+
+      if (mounted) {
+        setState(() {
+          isLoadingMessages = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Failed to fetch shift messages: $e");
+      if (mounted) {
+        setState(() {
+          isLoadingMessages = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,113 +312,83 @@ class ShiftDetailsPopup extends StatelessWidget {
             ),
           ],
         ),
-          child: Column(
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(4),
-                ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(4),
               ),
-              Expanded(
-                flex: 35,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("👥 עובדים מוקצים:",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 22)),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: shift.assignedWorkers.isEmpty
-                          ? const Center(
-                              child: Text("אין עובדים מוקצים.",
-                                  style: TextStyle(fontSize: 16)))
-                          : ListView.separated(
-                              itemCount: shift.assignedWorkers.length,
-                              separatorBuilder: (context, index) =>
-                                  const Divider(height: 1, color: Colors.grey),
-                              itemBuilder: (context, index) {
-                                return FutureBuilder<UserModel>(
-                                  future: shiftService.fetchWorkerDetails([
-                                    shift.assignedWorkers[index]
-                                  ]).then((users) => users.first),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    }
-                                    if (!snapshot.hasData) {
-                                      return const Text("Worker not found");
-                                    }
-
-                                    return ListTile(
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 12.0, vertical: 6.0),
-                                      leading: CircleAvatar(
-                                        radius: 30.0,
-                                        backgroundImage: snapshot
-                                                .data!.profilePicture
-                                                .startsWith('http')
-                                            ? NetworkImage(
-                                                snapshot.data!.profilePicture)
-                                            : const AssetImage(
-                                                    'assets/images/default_profile.png')
-                                                as ImageProvider,
-                                      ),
-                                      title: Text(
-                                        snapshot.data!.fullName,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                ),
+            ),
+            Expanded(
+              flex: 35,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("👥 עובדים מוקצים:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: isLoadingWorkers
+                        ? const Center(child: CircularProgressIndicator())
+                        : assignedWorkers.isEmpty
+                            ? const Center(child: Text("אין עובדים מוקצים.", style: TextStyle(fontSize: 16)))
+                            : ListView.separated(
+                                itemCount: assignedWorkers.length,
+                                separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
+                                itemBuilder: (context, index) {
+                                  UserModel worker = assignedWorkers[index];
+                                  return ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                                    leading: CircleAvatar(
+                                      radius: 30.0,
+                                      backgroundImage: worker.profilePicture.startsWith('http')
+                                          ? NetworkImage(worker.profilePicture)
+                                          : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                                    ),
+                                    title: Text(
+                                      worker.fullName,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  );
+                                },
+                              ),
+                  ),
+                ],
               ),
-              const Divider(),
-              Expanded(
-                flex: 65,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("📩 הודעות מהמנהלים:",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 22)),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: shift.messages.isEmpty
-                          ? const Center(
-                              child: Text("אין הודעות זמינות.",
-                                  style: TextStyle(fontSize: 16)))
-                          : ListView(
-                              children: shift.messages
-                                  .map((msg) => MessageBubble(
-                                        message: msg['message'],
-                                        timestamp: msg['timestamp'],
-                                        senderId: msg['senderId'],
-                                        shiftId: shift.id,
-                                      ))
-                                  .toList(),
-                            ),
-                    ),
-                  ],
-                ),
+            ),
+            const Divider(),
+            Expanded(
+              flex: 65,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("📩 הודעות מהמנהלים:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: isLoadingMessages
+                        ? const Center(child: CircularProgressIndicator())
+                        : (_messagesCache[widget.shift.id]?.isEmpty ?? true)
+                            ? const Center(child: Text("אין הודעות זמינות.", style: TextStyle(fontSize: 16)))
+                            : ListView(
+                                children: _messagesCache[widget.shift.id]!
+                                    .map((msg) => MessageBubble(
+                                          message: msg['message'],
+                                          timestamp: msg['timestamp'],
+                                          senderId: msg['senderId'],
+                                          shiftId: widget.shift.id,
+                                        ))
+                                    .toList(),
+                              ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        
+            ),
+          ],
+        ),
       ),
     );
   }

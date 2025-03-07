@@ -23,7 +23,10 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // ✅ Set a valid default profile picture from Firebase Storage
+  // ✅ Cache for user profile data
+  static final Map<String, Map<String, dynamic>> _userCache = {};
+
+  // ✅ Set a valid default profile picture
   static const String defaultProfilePictureUrl =
       "https://firebasestorage.googleapis.com/v0/b/park-janana-app.appspot.com/o/profile_pictures%2Fdefault_profile.png?alt=media";
 
@@ -40,7 +43,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Future<void> _uploadImage() async {
     if (_imageFile != null) {
-      setState(() {});
       try {
         final storageRef =
             _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
@@ -48,25 +50,23 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
 
+        // ✅ Update cache to reflect changes
+        _userCache[widget.uid]?['profile_picture'] = downloadUrl;
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("תמונת הפרופיל עודכנה בהצלחה.",
-                  style: AppTheme.bodyText),
+              content: Text("תמונת הפרופיל עודכנה בהצלחה.", style: AppTheme.bodyText),
               backgroundColor: AppColors.success,
             ),
           );
-          Navigator.pop(context, downloadUrl);
+          setState(() {}); // Refresh UI
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("שגיאה בהעלאת תמונה: $e")),
           );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {});
         }
       }
     }
@@ -83,8 +83,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.black),
-                title: const Text("צלם תמונה",
-                    style: TextStyle(color: Colors.black)),
+                title: const Text("צלם תמונה", style: TextStyle(color: Colors.black)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -92,8 +91,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo, color: Colors.black),
-                title: const Text("העלה תמונה",
-                    style: TextStyle(color: Colors.black)),
+                title: const Text("העלה תמונה", style: TextStyle(color: Colors.black)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -132,6 +130,30 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     );
   }
 
+  Future<Map<String, dynamic>> _fetchUserData() async {
+    // ✅ Use cached data if available
+    if (_userCache.containsKey(widget.uid)) {
+      return Future.value(_userCache[widget.uid]!);
+    }
+
+    try {
+      final DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(widget.uid).get();
+
+      if (userDoc.exists && userDoc.data() != null) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+
+        // ✅ Store fetched data in cache
+        _userCache[widget.uid] = userData;
+        return userData;
+      }
+    } catch (e) {
+      debugPrint('Error fetching user data: $e');
+    }
+
+    return {}; // Return empty if failed
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,32 +161,28 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         children: [
           const UserHeader(),
           Expanded(
-            child: StreamBuilder<DocumentSnapshot>(
-              stream:
-                  _firestore.collection('users').doc(widget.uid).snapshots(),
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: _fetchUserData(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text("שגיאה בטעינת הפרופיל.");
                 }
 
-                if (!snapshot.hasData ||
-                    snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text("לא נמצאו נתונים להצגה.");
                 }
 
-                final userDoc = snapshot.data!;
-                String profilePicture = userDoc['profile_picture'] ?? '';
+                final userData = snapshot.data!;
+                String profilePicture = userData['profile_picture'] ?? '';
 
-                // ✅ Ensure a valid profile picture URL is always used
-                if (profilePicture.isEmpty ||
-                    !profilePicture.startsWith('http')) {
+                if (profilePicture.isEmpty || !profilePicture.startsWith('http')) {
                   profilePicture = defaultProfilePictureUrl;
                 }
 
-                final fullName = userDoc['fullName'] ?? 'לא ידוע';
-                final email = userDoc['email'] ?? 'לא ידוע';
-                final idNumber = userDoc['idNumber'] ?? 'לא ידוע';
-                final phoneNumber = userDoc['phoneNumber'] ?? 'לא ידוע';
+                final fullName = userData['fullName'] ?? 'לא ידוע';
+                final email = userData['email'] ?? 'לא ידוע';
+                final idNumber = userData['idNumber'] ?? 'לא ידוע';
+                final phoneNumber = userData['phoneNumber'] ?? 'לא ידוע';
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
@@ -179,11 +197,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                             child: CircleAvatar(
                               radius: 80,
                               backgroundImage: NetworkImage(profilePicture),
-                              onBackgroundImageError: (_, __) {
-                                setState(() {
-                                  profilePicture = defaultProfilePictureUrl;
-                                });
-                              },
                             ),
                           ),
                           Positioned(
@@ -194,8 +207,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                               child: const CircleAvatar(
                                 backgroundColor: AppColors.background,
                                 radius: 22,
-                                child: Icon(Icons.camera_alt,
-                                    color: Colors.blue, size: 22),
+                                child: Icon(Icons.camera_alt, color: Colors.blue, size: 22),
                               ),
                             ),
                           ),
@@ -223,7 +235,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       elevation: 4,
-      color: AppColors.background, // Use theme background color
+      color: AppColors.background,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -244,10 +256,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(field,
-                    style: AppTheme.sectionTitle
-                        .copyWith(color: AppColors.accent)), // Title
-                Text(value, style: AppTheme.bodyText), // Value
+                Text(field, style: AppTheme.sectionTitle.copyWith(color: AppColors.accent)),
+                Text(value, style: AppTheme.bodyText),
               ],
             ),
           ),

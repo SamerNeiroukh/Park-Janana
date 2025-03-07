@@ -33,6 +33,20 @@ class ShiftService {
     });
   }
 
+  // ✅ Fetch shifts for a specific date
+  Future<List<ShiftModel>> getShiftsByDate(DateTime date) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('shifts')
+          .where('date', isEqualTo: DateFormat('dd/MM/yyyy').format(date))
+          .get();
+
+      return querySnapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList();
+    } catch (e) {
+      throw CustomException('שגיאה בשליפת המשמרות לתאריך זה.');
+    }
+  }
+
   // 🟢 Sort shifts by Date or Department
   List<ShiftModel> sortShifts(List<ShiftModel> shifts, String sortOption) {
     if (sortOption == 'תאריך') {
