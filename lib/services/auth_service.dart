@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +12,7 @@ class AuthService {
   final FirebaseService _firebaseService = FirebaseService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // 🟢 Create a new user with default profile picture uploaded to Firebase
+  // 🟢 Create a new user with a default profile picture uploaded to Firebase
   Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
@@ -28,9 +30,13 @@ class AuthService {
         'fullName': fullName,
         'idNumber': idNumber,
         'phoneNumber': phoneNumber,
-        'profile_picture': defaultProfilePictureUrl, // ✅ Store Firebase Storage URL
+        'profile_picture': defaultProfilePictureUrl,
         'role': 'worker',
       });
+
+      // ✅ Cache user role
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userRole', 'worker');
     } catch (e) {
       throw CustomException('שגיאה ביצירת משתמש.');
     }
@@ -49,8 +55,15 @@ class AuthService {
     }
   }
 
-  // 🟢 Fetch user role
+  // 🟢 Fetch user role (Checks Cache First)
   Future<String?> fetchUserRole(String uid) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cachedRole = prefs.getString('userRole');
+
+    if (cachedRole != null && cachedRole.isNotEmpty) {
+      return cachedRole; // ✅ Return cached role if available
+    }
+
     try {
       final userDoc = await _firebaseService.getUser(uid);
 
@@ -58,9 +71,7 @@ class AuthService {
         final data = userDoc.data() as Map<String, dynamic>;
         final role = data['role'] as String?;
 
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userRole', role ?? '');
-
+        await prefs.setString('userRole', role ?? ''); // ✅ Cache role
         return role;
       } else {
         throw CustomException('מסמך המשתמש לא קיים.');
@@ -70,8 +81,15 @@ class AuthService {
     }
   }
 
-  // 🟢 Fetch user profile with default profile picture fallback
+  // 🟢 Fetch user profile with default profile picture fallback (Checks Cache First)
   Future<Map<String, dynamic>?> fetchUserProfile(String uid) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cachedProfile = prefs.getString('userProfile');
+
+    if (cachedProfile != null && cachedProfile.isNotEmpty) {
+      return Map<String, dynamic>.from(jsonDecode(cachedProfile)); // ✅ Return cached profile if available
+    }
+
     try {
       final userDoc = await _firebaseService.getUser(uid);
 
@@ -83,7 +101,7 @@ class AuthService {
             ? data['profile_picture']
             : await _uploadDefaultProfilePicture(uid); // ✅ Upload default if missing
 
-        return {
+        final profileData = {
           'uid': data['uid'] ?? '',
           'email': data['email'] ?? '',
           'fullName': data['fullName'] ?? '',
@@ -92,6 +110,10 @@ class AuthService {
           'profile_picture': profilePicture,
           'role': data['role'] ?? '',
         };
+
+        await prefs.setString('userProfile', jsonEncode(profileData)); // ✅ Cache profile
+
+        return profileData;
       } else {
         throw CustomException('מסמך המשתמש לא קיים.');
       }
@@ -100,10 +122,15 @@ class AuthService {
     }
   }
 
-  // 🟢 Logout
+  // 🟢 Logout (Clears Cached Data)
   Future<void> signOut() async {
     try {
       await _auth.signOut();
+
+      // ✅ Clear cached user data on logout
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('userRole');
+      await prefs.remove('userProfile');
     } catch (e) {
       throw CustomException('שגיאה בעת התנתקות מהמערכת.');
     }
@@ -112,10 +139,24 @@ class AuthService {
   // 🟢 Update Profile Picture
   Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
     await _firebaseService.updateProfilePicture(uid, profilePictureUrl);
+
+    // ✅ Update Cached Profile Picture
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cachedProfile = prefs.getString('userProfile');
+
+    if (cachedProfile != null) {
+      Map<String, dynamic> profileData = jsonDecode(cachedProfile);
+      profileData['profile_picture'] = profilePictureUrl;
+      await prefs.setString('userProfile', jsonEncode(profileData));
+    }
   }
 
   // 🟢 Assign Role
   Future<void> assignRole(String uid, String role) async {
     await _firebaseService.assignRole(uid, role);
+
+    // ✅ Update Cached Role
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userRole', role);
   }
 }

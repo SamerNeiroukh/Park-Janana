@@ -20,6 +20,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
 
+  // ✅ Cache storage to store user roles after login
+  static final Map<String, String> _userRoleCache = {};
+
   // Function to handle login
   Future<void> _login() async {
     setState(() {
@@ -39,6 +42,13 @@ class _LoginScreenState extends State<LoginScreen> {
       // Get user UID
       String uid = userCredential.user!.uid;
 
+      // ✅ First check if user role is cached
+      if (_userRoleCache.containsKey(uid)) {
+        // ✅ Use cached role instead of Firestore
+        _navigateToHomeScreen(_userRoleCache[uid]!);
+        return;
+      }
+
       // Fetch user data from Firestore
       DocumentSnapshot userDoc =
           await _firestore.collection('users').doc(uid).get();
@@ -46,16 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userDoc.exists) {
         String role = userDoc.get('role') ?? 'worker';
 
-        // Navigate to the HomeScreen and pass the role
-        if (context.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(role: role),
-            ),
-            (route) => false,
-          );
-        }
+        // ✅ Store role in cache
+        _userRoleCache[uid] = role;
+
+        _navigateToHomeScreen(role);
       } else {
         throw Exception("User document does not exist.");
       }
@@ -81,6 +85,19 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  // ✅ Helper function to navigate to HomeScreen
+  void _navigateToHomeScreen(String role) {
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(role: role),
+        ),
+        (route) => false,
+      );
     }
   }
 

@@ -7,7 +7,9 @@ import 'package:park_janana/utils/datetime_utils.dart';
 import 'package:park_janana/widgets/date_time_picker.dart';
 
 class CreateShiftScreen extends StatefulWidget {
-  const CreateShiftScreen({super.key});
+  final DateTime? initialDate; // ✅ Allows passing a preselected date
+
+  const CreateShiftScreen({super.key, this.initialDate});
 
   @override
   State<CreateShiftScreen> createState() => _CreateShiftScreenState();
@@ -29,6 +31,12 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
     "פארק מים",
     "גמבורי"
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate ?? DateTime.now(); // ✅ Use initial date if provided
+  }
 
   void _createShift() async {
     await _shiftService.createShift(
@@ -59,14 +67,9 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ✅ Park Logo & Header
             const UserHeader(),
-
             const SizedBox(height: 20),
-
-            // ✅ Page Title
             Text("יצירת משמרת חדשה", style: AppTheme.screenTitle),
-
             const SizedBox(height: 20),
 
             // 📅 **Select Date**
@@ -76,9 +79,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             DatePickerWidget(
               initialDate: _selectedDate,
-              onDateSelected: (date) => setState(() => _selectedDate = date),
+              onDateSelected: (date) => setState(() {
+                _selectedDate = date;
+              }),
             ),
-
             const SizedBox(height: 20),
 
             // 🏢 **Select Department**
@@ -102,7 +106,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 20),
 
             // 👥 **Select Maximum Workers**
@@ -123,7 +126,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 });
               },
             ),
-
             const SizedBox(height: 20),
 
             // ⏰ **Select Start Time**
@@ -133,9 +135,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             TimePickerWidget(
               initialTime: _startTime,
-              onTimeSelected: (time) => setState(() => _startTime = time),
+              onTimeSelected: (time) => setState(() {
+                _startTime = time;
+              }),
             ),
-
             const SizedBox(height: 20),
 
             // ⏰ **Select End Time**
@@ -145,9 +148,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             TimePickerWidget(
               initialTime: _endTime,
-              onTimeSelected: (time) => setState(() => _endTime = time),
+              onTimeSelected: (time) => setState(() {
+                _endTime = time;
+              }),
             ),
-
             const SizedBox(height: 30),
 
             // ✅ **Create Shift Button**
@@ -156,7 +160,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               onPressed: _createShift,
               child: Text("צור משמרת", style: AppTheme.buttonTextStyle),
             ),
-
             const SizedBox(height: 15),
 
             // ❌ **Cancel Button**

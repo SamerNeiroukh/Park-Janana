@@ -25,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _profilePictureUrl;
   Map<String, dynamic>? _roleData;
 
+  // ✅ Cache for user data
+  static final Map<String, Map<String, dynamic>> _userCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -39,11 +42,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Map<String, dynamic>> _fetchUserData(String uid) async {
+    // ✅ First check if user data is cached
+    if (_userCache.containsKey(uid)) {
+      return _userCache[uid]!;
+    }
+
     try {
       final DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (userDoc.exists && userDoc.data() != null) {
-        return userDoc.data() as Map<String, dynamic>;
+        final userData = userDoc.data() as Map<String, dynamic>;
+        
+        // ✅ Store user data in cache
+        _userCache[uid] = userData;
+
+        return userData;
       }
     } catch (e) {
       debugPrint('Error fetching user data: $e');
