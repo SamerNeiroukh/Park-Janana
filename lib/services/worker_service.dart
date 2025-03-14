@@ -112,4 +112,17 @@ class WorkerService {
       throw Exception("Error fetching user details: $e");
     }
   }
+
+  Future<void> moveWorkerBackToRequested(String shiftId, String workerId) async {
+  try {
+    DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+
+    await shiftRef.update({
+      'assignedWorkers': FieldValue.arrayRemove([workerId]), // ✅ Remove from assigned
+      'requestedWorkers': FieldValue.arrayUnion([workerId]), // ✅ Add back to requested
+    });
+  } catch (e) {
+    throw CustomException('שגיאה בהעברת העובד חזרה לרשימת המבקשים.');
+  }
+}
 }
