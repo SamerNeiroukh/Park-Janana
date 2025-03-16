@@ -9,7 +9,6 @@ import '../services/shift_service.dart';
 import '../services/worker_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/message_bubble.dart';
-import '../widgets/worker_row.dart';
 
 class ShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -317,7 +316,7 @@ void _removeWorker(String workerId) async {
 
   void _addMessage() async {
   if (_messageController.text.isNotEmpty && _currentUser != null) {
-    await widget.shiftService.addMessageToShift(widget.shift.id, _messageController.text, _currentUser!.uid);
+    await widget.shiftService.addMessageToShift(widget.shift.id, _messageController.text, _currentUser.uid);
     _messageController.clear();
   }
 }
