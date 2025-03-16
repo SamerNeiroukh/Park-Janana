@@ -17,16 +17,22 @@ class ManagerShiftsScreen extends StatefulWidget {
   State<ManagerShiftsScreen> createState() => _ManagerShiftsScreenState();
 }
 
-class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTickerProviderStateMixin {
+class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
+    with SingleTickerProviderStateMixin {
   final ShiftService _shiftService = ShiftService();
   final WorkerService _workerService = WorkerService();
   late TabController _tabController;
   DateTime _currentWeekStart = DateTimeUtils.startOfWeek(DateTime.now());
+  late DateTime _selectedDay; // ✅ Stores the selected day for shift creation
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 7, vsync: this);
+    _selectedDay = DateTime.now(); // ✅ Default selected day is today
+    int initialTabIndex = _selectedDay.weekday %
+        7; // ✅ Ensures correct tab selection (Sunday is index 0)
+    _tabController =
+        TabController(length: 7, vsync: this, initialIndex: initialTabIndex);
   }
 
   @override
@@ -45,21 +51,29 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
           _buildWeekNavigation(),
           _buildTabBar(),
           Expanded(
-            child: Stack(
-              children: [
-                TabBarView(
-                  controller: _tabController,
-                  children: List.generate(7, (index) {
-                    DateTime day = _currentWeekStart.add(Duration(days: index));
-                    return _buildShiftList(day);
-                  }),
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: _buildCreateShiftButton(),
-                ),
-              ],
+            child: SingleChildScrollView(
+              // ✅ Ensures content is scrollable
+              child: Stack(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height *
+                        0.7, // ✅ Prevents overflow
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: List.generate(7, (index) {
+                        DateTime day =
+                            _currentWeekStart.add(Duration(days: index));
+                        return _buildShiftList(day);
+                      }),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: _buildCreateShiftButton(),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -77,7 +91,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
           IconButton(
             icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
-              _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
+              _currentWeekStart =
+                  _currentWeekStart.subtract(const Duration(days: 7));
             }),
           ),
           Expanded(
@@ -91,7 +106,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
           IconButton(
             icon: Icon(Icons.arrow_forward, color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
-              _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
+              _currentWeekStart =
+                  _currentWeekStart.add(const Duration(days: 7));
             }),
           ),
         ],
@@ -101,30 +117,42 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
 
   Widget _buildTabBar() {
     return Container(
-      color: AppColors.surface,
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.onPrimary,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicator: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        isScrollable: true,
-        tabs: List.generate(7, (index) {
-          DateTime day = _currentWeekStart.add(Duration(days: index));
-          return Tab(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-              child: Text(
+  height: 70, // ✅ Set fixed height for stability
+  color: AppColors.surface,
+  child: DefaultTabController(
+    length: 7,
+    child: TabBar(
+      controller: _tabController,
+      labelColor: AppColors.onPrimary,
+      unselectedLabelColor: AppColors.textSecondary,
+      indicator: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      isScrollable: true, // ✅ Ensures tabs remain scrollable
+      tabs: List.generate(7, (index) {
+        DateTime day = _currentWeekStart.add(Duration(days: index));
+        return SizedBox( // ✅ Correct way to set equal width
+          width: MediaQuery.of(context).size.width / 7, // ✅ Even width for all tabs
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
                 DateTimeUtils.getHebrewWeekdayName(day.weekday),
                 style: AppTheme.tabTextStyle,
               ),
-            ),
-          );
-        }),
-      ),
-    );
+              Text(
+                DateFormat('dd').format(day), 
+                style: AppTheme.bodyText.copyWith(fontSize: 14, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        );
+      }),
+    ),
+  ),
+);
+
   }
 
   Widget _buildShiftList(DateTime selectedDay) {
@@ -142,8 +170,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
         shifts = shifts.where((shift) {
           DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(shift.date);
           return shiftDate.day == selectedDay.day &&
-                 shiftDate.month == selectedDay.month &&
-                 shiftDate.year == selectedDay.year;
+              shiftDate.month == selectedDay.month &&
+              shiftDate.year == selectedDay.year;
         }).toList();
 
         if (shifts.isEmpty) {
@@ -154,11 +182,13 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
           padding: const EdgeInsets.only(bottom: 70),
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            children: shifts.map((shift) => ShiftCard(
-              shift: shift,
-              shiftService: _shiftService,
-              workerService: _workerService,
-            )).toList(),
+            children: shifts
+                .map((shift) => ShiftCard(
+                      shift: shift,
+                      shiftService: _shiftService,
+                      workerService: _workerService,
+                    ))
+                .toList(),
           ),
         );
       },
@@ -183,9 +213,13 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> with SingleTi
       backgroundColor: AppColors.primary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onPressed: () {
+        DateTime selectedDate = _currentWeekStart.add(Duration(
+            days: _tabController.index)); // ✅ Pass the selected tab's date
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CreateShiftScreen()),
+          MaterialPageRoute(
+              builder: (context) =>
+                  CreateShiftScreen(initialDate: selectedDate)),
         );
       },
       icon: const Icon(Icons.add, size: 30, color: Colors.white),
