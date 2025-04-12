@@ -227,9 +227,11 @@ void _removeWorker(String workerId) async {
       if (_workerCache.containsKey(id)) {
         workers.add(_workerCache[id]!);
       } else {
-        UserModel user = await widget.workerService.getUserDetails(id);
-        _workerCache[id] = user;
-        workers.add(user);
+        UserModel? user = await widget.workerService.getUserDetails(id);
+        if (user != null) {  // ✅ Ensure user is not null before adding
+          _workerCache[id] = user;
+          workers.add(user);
+        }
       }
     }
     return workers;
@@ -266,25 +268,30 @@ void _removeWorker(String workerId) async {
   );
 }
 
-  Widget _buildAddMessageSection() {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _messageController,
-            decoration: AppTheme.inputDecoration(hintText: "הוסף הודעה למשמרת"),
-          ),
-          const SizedBox(height: 10.0),
-          ElevatedButton(
-            style: AppTheme.primaryButtonStyle,
-            onPressed: _addMessage,
-            child: const Text("📩 שלח הודעה"),
-          ),
-        ],
-      ),
-    );
-  }
+Widget _buildAddMessageSection() {
+  return Padding(
+    padding: EdgeInsets.only(
+      left: 12,
+      right: 12,
+      top: 12,
+      bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+    ),
+    child: Column(
+      children: [
+        TextField(
+          controller: _messageController,
+          decoration: AppTheme.inputDecoration(hintText: "הוסף הודעה למשמרת"),
+        ),
+        const SizedBox(height: 10.0),
+        ElevatedButton(
+          style: AppTheme.primaryButtonStyle,
+          onPressed: _addMessage,
+          child: const Text("📩 שלח הודעה"),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildSubmitButton() {
     return Padding(

@@ -9,6 +9,8 @@ import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:park_janana/screens/shifts/shifts_screen.dart';
 import 'package:park_janana/screens/shifts/manager_shifts_screen.dart';
+import 'package:park_janana/screens/tasks/worker_tasks_screen.dart';
+import 'package:park_janana/screens/tasks/manager_tasks_screen.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -136,8 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-                    if (_roleData != null && _roleData![role] != null)
-                      ..._roleData![role].map<Widget>((operation) {
+                    if (_roleData != null && _roleData!.containsKey(role))
+                      ...(_roleData![role] as List<dynamic>).map<Widget>((operation) {
                         return CustomCard(
                           title: operation['title'],
                           icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
@@ -146,20 +148,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         );
                       }).toList(),
-                    if (role == 'manager')
+
+                    // 🟢 **Role-based Navigation**
+                    if (role == 'worker') ...[
                       CustomCard(
-                        title: 'ניהול משמרות',
-                        icon: Icons.schedule,
+                        title: 'משימות שלי',
+                        icon: Icons.task,
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ManagerShiftsScreen(),
+                              builder: (context) => const WorkerTasksScreen(),
                             ),
                           );
                         },
                       ),
-                    if (role == 'worker')
                       CustomCard(
                         title: 'משמרות',
                         icon: Icons.access_time,
@@ -172,6 +175,35 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         },
                       ),
+                    ],
+
+                    if (role == 'manager') ...[
+                      CustomCard(
+                        title: 'ניהול משמרות',
+                        icon: Icons.schedule,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ManagerShiftsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      CustomCard(
+                        title: 'ניהול משימות',
+                        icon: Icons.task,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ManagerTasksScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+
                     if (role == 'owner')
                       CustomCard(
                         title: 'דוחות עסקיים',
