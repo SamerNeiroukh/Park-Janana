@@ -5,6 +5,7 @@ import 'package:park_janana/constants/app_strings.dart';
 import '../home/home_screen.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/screens/auth/forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,75 +21,74 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
 
+  String? _emailError;
+  String? _passwordError;
+
   // ✅ Cache storage to store user roles after login
   static final Map<String, String> _userRoleCache = {};
 
-  // Function to handle login
-  Future<void> _login() async {
-    setState(() {
-      _isLoading = true;
-    });
+Future<void> _login() async {
+  setState(() {
+    _isLoading = true;
+    _emailError = null;
+    _passwordError = null;
+  });
 
-    try {
-      String email = _emailController.text.trim();
-      String password = _passwordController.text.trim();
+  try {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-      // Sign in using email and password
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      // Get user UID
-      String uid = userCredential.user!.uid;
+    String uid = userCredential.user!.uid;
 
-      // ✅ First check if user role is cached
-      if (_userRoleCache.containsKey(uid)) {
-        // ✅ Use cached role instead of Firestore
-        _navigateToHomeScreen(_userRoleCache[uid]!);
-        return;
-      }
-
-      // Fetch user data from Firestore
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(uid).get();
-
-      if (userDoc.exists) {
-        String role = userDoc.get('role') ?? 'worker';
-
-        // ✅ Store role in cache
-        _userRoleCache[uid] = role;
-
-        _navigateToHomeScreen(role);
-      } else {
-        throw Exception("User document does not exist.");
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'An error occurred';
-      if (e.code == 'user-not-found') {
-        errorMessage = 'User not found';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Wrong password';
-      }
-
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(errorMessage),
-        backgroundColor: Colors.red,
-      ));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error: $e'),
-        backgroundColor: Colors.red,
-      ));
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    if (_userRoleCache.containsKey(uid)) {
+      _navigateToHomeScreen(_userRoleCache[uid]!);
+      return;
     }
-  }
 
-  // ✅ Helper function to navigate to HomeScreen
+    DocumentSnapshot userDoc =
+        await _firestore.collection('users').doc(uid).get();
+
+    if (userDoc.exists) {
+      String role = userDoc.get('role') ?? 'worker';
+      _userRoleCache[uid] = role;
+      _navigateToHomeScreen(role);
+    } else {
+      throw Exception("User document does not exist.");
+    }
+  } on FirebaseAuthException catch (e) {
+    setState(() {
+      if (e.code == 'user-not-found') {
+        _emailError = 'האימייל לא נמצא במערכת';
+      } else if (e.code == 'wrong-password') {
+        _passwordError = 'הסיסמה שגויה';
+      } else {
+        // unexpected firebase error (e.g. invalid-email, too-many-requests)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('מייל או סיסמה לא נכונים.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('שגיאה: $e'),
+      backgroundColor: Colors.red,
+    ));
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
+
   void _navigateToHomeScreen(String role) {
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
@@ -118,6 +118,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32.0),
+
+                /// Email
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -136,8 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
                         hintText: 'הכנס את כתובת האימייל שלך',
                         hintStyle: AppTheme.hintTextStyle,
                         focusedBorder: OutlineInputBorder(
@@ -147,13 +148,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           borderRadius: BorderRadius.circular(12.0),
                         ),
+                        errorText: _emailError,
                       ),
                       textAlign: TextAlign.center,
                       keyboardType: TextInputType.emailAddress,
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16.0),
+
+                /// Password
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -173,8 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
                         hintText: 'הכנס את הסיסמה שלך',
                         hintStyle: AppTheme.hintTextStyle,
                         focusedBorder: OutlineInputBorder(
@@ -184,16 +188,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           borderRadius: BorderRadius.circular(12.0),
                         ),
+                        errorText: _passwordError,
                       ),
                       textAlign: TextAlign.center,
                       autofillHints: const [AutofillHints.password],
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16.0),
+
+                /// Forgot Password
                 GestureDetector(
                   onTap: () {
-                    // Handle "Forgot Password" action
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen(),
+                      ),
+                    );
                   },
                   child: Text(
                     AppStrings.forgotPassword,
@@ -202,7 +215,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
+
                 const SizedBox(height: 32.0),
+
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
@@ -211,7 +226,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text('כניסה',
                             style: AppTheme.buttonTextStyle),
                       ),
+
                 const SizedBox(height: 16.0),
+
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);

@@ -22,10 +22,60 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final TextEditingController _idNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _isLoading = false;
 
+  String? _nameError;
+  String? _phoneError;
+  String? _idError;
+  String? _emailError;
+  String? _passwordError;
+
+  final RegExp _hebrewRegex = RegExp(r'^[א-ת\s]+$');
+  final RegExp _phoneRegex = RegExp(r'^\d{10}$');
+  final RegExp _idRegex = RegExp(r'^\d{9}$');
+  final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
   Future<void> _registerUser() async {
+    setState(() {
+      _nameError = !_hebrewRegex.hasMatch(_fullNameController.text.trim())
+          ? 'יש להזין שם בעברית בלבד'
+          : null;
+
+      _phoneError = !_phoneRegex.hasMatch(_phoneNumberController.text.trim())
+          ? 'מספר טלפון חייב להכיל בדיוק 10 ספרות'
+          : null;
+
+      _idError = !_idRegex.hasMatch(_idNumberController.text.trim())
+          ? 'תעודת זהות חייבת להכיל בדיוק 9 ספרות'
+          : null;
+
+      _emailError = !_emailRegex.hasMatch(_emailController.text.trim())
+          ? 'כתובת אימייל אינה תקינה'
+          : null;
+
+      final password = _passwordController.text.trim();
+      final confirmPassword = _confirmPasswordController.text.trim();
+
+      if (password.length < 6) {
+        _passwordError = 'הסיסמה חייבת להכיל לפחות 6 תווים';
+      } else if (password != confirmPassword) {
+        _passwordError = 'הסיסמאות אינן תואמות';
+      } else {
+        _passwordError = null;
+      }
+    });
+
+    // Stop if any error exists
+    if (_nameError != null ||
+        _phoneError != null ||
+        _idError != null ||
+        _emailError != null ||
+        _passwordError != null) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -71,60 +121,65 @@ class _RegistrationFormState extends State<RegistrationForm> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0), // Better spacing for UI
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('טופס הרשמה', style: AppTheme.titleStyle), // ✅ Apply theme
-            const SizedBox(height: 16.0),
-            _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא'),
-            _buildTextField(_phoneNumberController, 'מספר טלפון', 'הכנס את מספר הטלפון שלך'),
-            _buildTextField(_idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך'),
-            _buildTextField(_emailController, 'אימייל', 'הכנס את כתובת האימייל שלך'),
-            _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה', obscureText: true),
-            const SizedBox(height: 24.0),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary, // ✅ Use themed color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 600),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('טופס הרשמה', style: AppTheme.titleStyle),
+              const SizedBox(height: 16.0),
+              _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא', errorText: _nameError),
+              _buildTextField(_phoneNumberController, 'מספר טלפון', 'הכנס את מספר הטלפון שלך', errorText: _phoneError),
+              _buildTextField(_idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך', errorText: _idError),
+              _buildTextField(_emailController, 'אימייל', 'הכנס את כתובת האימייל שלך', errorText: _emailError),
+              _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה', obscureText: true, errorText: _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים' ? _passwordError : null),
+              _buildTextField(_confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה', obscureText: true, errorText: _passwordError == 'הסיסמאות אינן תואמות' ? _passwordError : null),
+              const SizedBox(height: 24.0),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
                       ),
+                      onPressed: _registerUser,
+                      child: Text('שלח', style: AppTheme.buttonTextStyle),
                     ),
-                    onPressed: _registerUser,
-                    child: Text('שלח', style: AppTheme.buttonTextStyle), // ✅ Apply theme
-                  ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text(
-                'חזור',
-                style: AppTheme.secondaryButtonTextStyle, // ✅ Use secondary button style
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildTextField(
-      TextEditingController controller, String label, String hint,
-      {bool obscureText = false}) {
+    TextEditingController controller,
+    String label,
+    String hint, {
+    bool obscureText = false,
+    String? errorText,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(label, style: AppTheme.bodyText), // ✅ Apply body text style
+          Text(label, style: AppTheme.bodyText),
           const SizedBox(height: 8.0),
           TextField(
             controller: controller,
             obscureText: obscureText,
-            decoration: InputDecoration( // ✅ Use correct way to apply input decoration
+            decoration: InputDecoration(
               filled: AppTheme.inputDecorationTheme.filled,
               fillColor: AppTheme.inputDecorationTheme.fillColor,
               contentPadding: AppTheme.inputDecorationTheme.contentPadding,
@@ -133,6 +188,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               focusedBorder: AppTheme.inputDecorationTheme.focusedBorder,
               hintText: hint,
               hintStyle: AppTheme.inputDecorationTheme.hintStyle,
+              errorText: errorText,
             ),
             textAlign: TextAlign.right,
           ),
