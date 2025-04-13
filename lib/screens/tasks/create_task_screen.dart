@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/task_service.dart';
 import '../../models/task_model.dart';
 import '../../models/user_model.dart';
-import '../../services/task_service.dart';
-import '../../services/worker_service.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_theme.dart';
-import '../../widgets/date_time_picker.dart';
 import '../../widgets/user_header.dart';
-import '../../widgets/worker_row.dart';
+import '../../constants/app_theme.dart';
+import '../../constants/app_colors.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   const CreateTaskScreen({super.key});
@@ -18,239 +17,267 @@ class CreateTaskScreen extends StatefulWidget {
 }
 
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
-  final TaskService _taskService = TaskService();
-  final WorkerService _workerService = WorkerService();
-
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  DateTime _selectedDeadline = DateTime.now();
-  UserModel? _selectedWorker;
-  TaskPriority _selectedPriority = TaskPriority.medium;
-  List<UserModel> _workers = [];
-  bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
+
+  DateTime? _dueDate;
+  TimeOfDay? _dueTime;
+  String _priority = 'medium';
+  String _department = 'general';
+
+  final TaskService _taskService = TaskService();
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  List<UserModel> _allUsers = [];
+  List<UserModel> _filteredUsers = [];
+  final List<UserModel> _selectedWorkers = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchWorkers();
+    _loadAllUsers();
   }
 
-  // ✅ Fetch Workers List
-  void _fetchWorkers() async {
-    try {
-      List<UserModel> workers = await _workerService.fetchAllWorkers();
-      if (mounted) {
-        setState(() {
-          _workers = workers;
-          _isLoading = false;
-        });
+  Future<void> _loadAllUsers() async {
+    final query = await _firestore.collection('users').get();
+    final users = query.docs.map((doc) {
+      final data = doc.data();
+      return UserModel.fromMap({...data, 'uid': doc.id});
+    }).toList();
+
+    setState(() {
+      _allUsers = users;
+      _filteredUsers = users;
+    });
+  }
+
+  void _filterUsers(String query) {
+    final lower = query.toLowerCase();
+    final filtered = _allUsers.where((user) {
+      return user.fullName.toLowerCase().contains(lower) || user.role.toLowerCase().contains(lower);
+    }).toList();
+    setState(() => _filteredUsers = filtered);
+  }
+
+  void _toggleUser(UserModel user) {
+    setState(() {
+      if (_selectedWorkers.any((u) => u.uid == user.uid)) {
+        _selectedWorkers.removeWhere((u) => u.uid == user.uid);
+      } else {
+        _selectedWorkers.add(user);
       }
-    } catch (e) {
-      debugPrint("Error fetching workers: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("⚠️ שגיאה בטעינת רשימת העובדים")),
-        );
-      }
-    }
+    });
   }
 
-  // ✅ Create Task
-  void _createTask() async {
-    if (_titleController.text.isEmpty || _selectedWorker == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("⚠️ נא למלא את כל השדות!")),
-      );
-      return;
-    }
-
-    TaskModel newTask = TaskModel(
-      id: FirebaseFirestore.instance.collection('tasks').doc().id,
-      title: _titleController.text,
-      description: _descriptionController.text.isNotEmpty
-          ? _descriptionController.text
-          : "אין תיאור",
-      assignedWorkerId: _selectedWorker!.uid,
-      deadline: _selectedDeadline,
-      priority: _selectedPriority,
-      status: TaskStatus.notStarted,
-    );
-
-    await _taskService.createTask(newTask);
-
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ המשימה נוספה בהצלחה!")),
-      );
-    }
-  }
-
-  // ✅ Show Worker Selection Modal
-  void _showWorkerSelectionModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return SizedBox(
-          height: 500,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: const Text(
-                  "בחר עובד",
-                  style: AppTheme.sectionTitle,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Expanded(
-                child: _workers.isEmpty
-                    ? const Center(child: Text("לא נמצאו עובדים"))
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        itemCount: _workers.length,
-                        itemBuilder: (context, index) {
-                          UserModel worker = _workers[index];
-                          return WorkerRow(
-                            worker: worker,
-                            shiftId: "", // 🔥 Fixed missing required argument
-                            isAssigned: false, // 🔥 Fixed missing required argument
-                            workerService: _workerService, // 🔥 Fixed missing required argument
-                            isApproved: false, // 🔥 Fixed missing required argument
-                            onApproveToggle: (bool approved) {}, // 🔥 Corrected function type
-                            showRemoveIcon: false, // 🔥 Fixed missing required argument
-                            onTap: () { // ✅ Ensure onTap is correctly handled
-                              setState(() {
-                                _selectedWorker = worker;
-                              });
-                              Navigator.pop(context);
-                            },
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  bool _isSelected(UserModel user) {
+    return _selectedWorkers.any((u) => u.uid == user.uid);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(70),
-        child: UserHeader(),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Directionality(
-                textDirection: TextDirection.rtl,
+      body: Column(
+        children: [
+          const UserHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // 📝 Task Title
-                    const Text("כותרת המשימה", style: AppTheme.sectionTitle),
-                    const SizedBox(height: 8),
-                    TextField(
+                    Text("פרטי משימה", style: AppTheme.sectionTitle),
+                    const SizedBox(height: 10),
+                    TextFormField(
                       controller: _titleController,
-                      decoration: AppTheme.inputDecoration(hintText: "הזן כותרת"),
+                      decoration: AppTheme.inputDecoration(hintText: "כותרת המשימה"),
+                      validator: (val) => val == null || val.isEmpty ? "שדה חובה" : null,
                     ),
-                    const SizedBox(height: 20),
-
-                    // 📜 Task Description (Optional)
-                    const Text("תיאור המשימה (לא חובה)", style: AppTheme.sectionTitle),
-                    const SizedBox(height: 8),
-                    TextField(
+                    const SizedBox(height: 12),
+                    TextFormField(
                       controller: _descriptionController,
-                      decoration: AppTheme.inputDecoration(hintText: "הזן תיאור (לא חובה)"),
                       maxLines: 3,
+                      decoration: AppTheme.inputDecoration(hintText: "תיאור המשימה"),
+                      validator: (val) => val == null || val.isEmpty ? "שדה חובה" : null,
                     ),
-                    const SizedBox(height: 20),
-
-                    // 👥 Assign Worker (Now using Modal)
-                    const Text("הקצה לעובד", style: AppTheme.sectionTitle),
+                    const SizedBox(height: 16),
+                    Text("הקצאת עובדים", style: AppTheme.sectionTitle),
                     const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: _showWorkerSelectionModal,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 14, horizontal: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.border),
-                          color: Colors.white,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _selectedWorker != null
-                                  ? _selectedWorker!.fullName
-                                  : "בחר עובד",
-                              style: AppTheme.bodyText,
+
+                    // Search field
+                    TextField(
+                      controller: _searchController,
+                      onChanged: _filterUsers,
+                      decoration: AppTheme.inputDecoration(hintText: "🔍 חיפוש לפי שם או תפקיד"),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Chips for selected workers
+                    if (_selectedWorkers.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        children: _selectedWorkers.map((user) {
+                          return Chip(
+                            label: Text(user.fullName),
+                            deleteIcon: const Icon(Icons.close),
+                            onDeleted: () => _toggleUser(user),
+                          );
+                        }).toList(),
+                      ),
+
+                    const SizedBox(height: 12),
+
+                    // Worker cards
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _filteredUsers.length,
+                      itemBuilder: (context, index) {
+                        final user = _filteredUsers[index];
+                        final selected = _isSelected(user);
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: user.profilePicture.isNotEmpty
+                                  ? NetworkImage(user.profilePicture)
+                                  : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                             ),
-                            const Icon(Icons.arrow_drop_down),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ⏳ Deadline Picker
-                    const Text("מועד סיום", style: AppTheme.sectionTitle),
-                    const SizedBox(height: 8),
-                    DatePickerWidget(
-                      initialDate: _selectedDeadline,
-                      onDateSelected: (date) => setState(() {
-                        _selectedDeadline = date;
-                      }),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 🔥 Priority Selection
-                    const Text("עדיפות", style: AppTheme.sectionTitle),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<TaskPriority>(
-                      value: _selectedPriority,
-                      decoration: AppTheme.inputDecoration(hintText: "בחר עדיפות"),
-                      isExpanded: true,
-                      onChanged: (TaskPriority? newValue) {
-                        setState(() {
-                          _selectedPriority = newValue!;
-                        });
+                            title: Text(user.fullName, textAlign: TextAlign.right),
+                            subtitle: Text(user.role, textAlign: TextAlign.right),
+                            trailing: IconButton(
+                              icon: Icon(
+                                selected ? Icons.person_remove : Icons.person_add,
+                                color: selected ? Colors.red : Colors.green,
+                              ),
+                              onPressed: () => _toggleUser(user),
+                            ),
+                          ),
+                        );
                       },
-                      items: TaskPriority.values
-                          .map((priority) => DropdownMenuItem(
-                                value: priority,
-                                child: Text(priority.name.toUpperCase()),
-                              ))
-                          .toList(),
                     ),
-                    const SizedBox(height: 30),
 
-                    // ✅ Create Task Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: AppTheme.primaryButtonStyle,
-                        onPressed: _createTask,
-                        icon: const Icon(Icons.add_task),
-                        label: const Text("צור משימה"),
-                      ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _priority,
+                      decoration: AppTheme.inputDecoration(hintText: "עדיפות"),
+                      items: const [
+                        DropdownMenuItem(value: 'low', child: Text('נמוכה')),
+                        DropdownMenuItem(value: 'medium', child: Text('בינונית')),
+                        DropdownMenuItem(value: 'high', child: Text('גבוהה')),
+                      ],
+                      onChanged: (val) => setState(() => _priority = val ?? 'medium'),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: _department,
+                      decoration: AppTheme.inputDecoration(hintText: "מחלקה"),
+                      items: const [
+                        DropdownMenuItem(value: 'general', child: Text('כללי')),
+                        DropdownMenuItem(value: 'paintball', child: Text('פיינטבול')),
+                        DropdownMenuItem(value: 'ropes', child: Text('פארק חבלים')),
+                        DropdownMenuItem(value: 'carting', child: Text('קרטינג')),
+                        DropdownMenuItem(value: 'water_park', child: Text('פארק מים')),
+                        DropdownMenuItem(value: 'jimbory', child: Text('ג׳ימבורי')),
+                      ],
+                      onChanged: (val) => setState(() => _department = val ?? 'general'),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _pickDate,
+                            child: Text(_dueDate == null
+                                ? "בחר תאריך"
+                                : "${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}"),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _pickTime,
+                            child: Text(_dueTime == null
+                                ? "בחר שעה"
+                                : "${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}"),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _submitTask,
+                      style: AppTheme.primaryButtonStyle,
+                      child: const Text("יצירת משימה"),
                     ),
                   ],
                 ),
               ),
             ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) setState(() => _dueDate = picked);
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked != null) setState(() => _dueTime = picked);
+  }
+
+  Future<void> _submitTask() async {
+    if (!_formKey.currentState!.validate() ||
+        _dueDate == null ||
+        _dueTime == null ||
+        _currentUser == null ||
+        _selectedWorkers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("יש למלא את כל השדות ולבחור עובדים")),
+      );
+      return;
+    }
+
+    final dueDateTime = DateTime(
+      _dueDate!.year,
+      _dueDate!.month,
+      _dueDate!.day,
+      _dueTime!.hour,
+      _dueTime!.minute,
+    );
+
+    final newTask = TaskModel(
+      id: const Uuid().v4(),
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      department: _department,
+      createdBy: _currentUser!.uid,
+      assignedTo: _selectedWorkers.map((u) => u.uid).toList(),
+      dueDate: Timestamp.fromDate(dueDateTime),
+      priority: _priority,
+      status: 'pending',
+      attachments: [],
+      comments: [],
+      createdAt: Timestamp.now(),
+    );
+
+    await _taskService.createTask(newTask);
+    if (mounted) Navigator.pop(context);
   }
 }
