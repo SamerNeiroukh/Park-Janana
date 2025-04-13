@@ -158,4 +158,15 @@ class WorkerService {
       return snapshot.docs.map((doc) => UserModel.fromMap(doc.data())).toList();
     });
   }
+
+  Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
+    List<UserModel> users = [];
+    for (String id in userIds) {
+      final doc = await _firestore.collection('users').doc(id).get();
+      if (doc.exists && doc.data() != null) {
+        users.add(UserModel.fromMap(doc.data()!));
+      }
+    }
+    return users;
+  }
 }

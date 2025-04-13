@@ -9,8 +9,8 @@ import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:park_janana/screens/shifts/shifts_screen.dart';
 import 'package:park_janana/screens/shifts/manager_shifts_screen.dart';
-import 'package:park_janana/screens/tasks/worker_tasks_screen.dart';
-import 'package:park_janana/screens/tasks/manager_tasks_screen.dart';
+import 'package:park_janana/screens/tasks/worker_task_screen.dart';
+import 'package:park_janana/screens/tasks/manager_task_dashboard.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const WorkerTasksScreen(),
+                              builder: (context) => const WorkerTaskScreen(),
                             ),
                           );
                         },
@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ManagerTasksScreen(),
+                              builder: (context) => const ManagerTaskDashboard(),
                             ),
                           );
                         },
