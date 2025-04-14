@@ -64,13 +64,17 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
 
                       List<TaskModel> tasks = snapshot.data!;
                       if (selectedStatus != 'all') {
-                        tasks = tasks.where((t) => t.status == selectedStatus).toList();
+                        tasks = tasks
+                            .where((t) => t.status == selectedStatus)
+                            .toList();
                       }
 
                       return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         itemCount: tasks.length,
-                        itemBuilder: (context, index) => _buildTaskCard(tasks[index]),
+                        itemBuilder: (context, index) =>
+                            _buildTaskCard(tasks[index]),
                       );
                     },
                   ),
@@ -106,11 +110,14 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isSelected ? color : color.withOpacity(0.3),
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: isSelected ? 4 : 0,
                 ),
                 child: FittedBox(
-                  child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(label,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -121,119 +128,126 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   }
 
   Widget _buildTaskCard(TaskModel task) {
-  final DateTime date = task.dueDate.toDate();
-  final String time = DateFormat('HH:mm').format(date);
-  final String dateFormatted = DateFormat('dd/MM/yyyy').format(date);
+    final DateTime date = task.dueDate.toDate();
+    final String time = DateFormat('HH:mm').format(date);
+    final String dateFormatted = DateFormat('dd/MM/yyyy').format(date);
 
-  return InkWell(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => TaskDetailsScreen(task: task)),
-      );
-    },
-    child: Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatusChip(task.status),
-              Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => EditTaskScreen(task: task)));
-                  } else if (value == 'delete') {
-                    _confirmDeleteTask(task);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'edit', child: Text("✏️ ערוך")),
-                  const PopupMenuItem(value: 'delete', child: Text("🗑️ מחק")),
-                ],
-              )
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            task.title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => TaskDetailsScreen(task: task)),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            task.description,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.black87,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              FutureBuilder<List<UserModel>>(
-                future: _workerService.getUsersByIds(task.assignedTo),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
-                  return Row(
-                    children: snapshot.data!.take(3).map((user) {
-                      return Container(
-                        margin: const EdgeInsets.only(left: 6),
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundImage: user.profilePicture.isNotEmpty
-                              ? NetworkImage(user.profilePicture)
-                              : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-              Text(
-                dateFormatted,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildStatusChip(task.status),
+                Text(
+                  time,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => EditTaskScreen(task: task)));
+                    } else if (value == 'delete') {
+                      _confirmDeleteTask(task);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'edit', child: Text("✏️ ערוך")),
+                    const PopupMenuItem(
+                        value: 'delete', child: Text("🗑️ מחק")),
+                  ],
+                )
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              task.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-            ],
-          )
-        ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              task.description,
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.black87,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                FutureBuilder<List<UserModel>>(
+                  future: _workerService.getUsersByIds(task.assignedTo),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data!.isEmpty)
+                      return const SizedBox.shrink();
+                    return Row(
+                      children: snapshot.data!.take(3).map((user) {
+                        return Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundImage: user.profilePicture.isNotEmpty
+                                ? NetworkImage(user.profilePicture)
+                                : const AssetImage(
+                                        'assets/images/default_profile.png')
+                                    as ImageProvider,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                Text(
+                  dateFormatted,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildStatusChip(String status) {
     Color color;
@@ -253,7 +267,8 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     }
     return Chip(
       backgroundColor: color.withOpacity(0.15),
-      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      label: Text(label,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold)),
     );
   }
 
