@@ -120,6 +120,11 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       _dueTime!.minute,
     );
 
+    // Initialize each selected worker with 'pending' status
+    final Map<String, String> workerStatuses = {
+      for (var u in _selectedWorkers) u['uid'] as String: 'pending'
+    };
+
     final updatedTask = TaskModel(
       id: widget.task.id,
       title: _titleController.text.trim(),
@@ -133,6 +138,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       attachments: widget.task.attachments,
       comments: widget.task.comments,
       createdAt: widget.task.createdAt,
+      workerStatuses: workerStatuses, // NEW
     );
 
     await _taskService.updateTask(updatedTask.id, updatedTask.toMap());
@@ -170,13 +176,11 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       validator: (val) => val == null || val.isEmpty ? "שדה חובה" : null,
                     ),
                     const SizedBox(height: 12),
-
                     TextFormField(
                       controller: _searchController,
                       decoration: AppTheme.inputDecoration(hintText: "חפש שם משתמש"),
                       onChanged: _searchUsernames,
                     ),
-
                     if (_usernameSuggestions.isNotEmpty)
                       ..._usernameSuggestions.map((user) => ListTile(
                             title: Text(user['username']),
@@ -191,7 +195,6 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                               }
                             },
                           )),
-
                     Wrap(
                       spacing: 8.0,
                       children: _selectedWorkers
@@ -206,7 +209,6 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                               ))
                           .toList(),
                     ),
-
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: _priority,

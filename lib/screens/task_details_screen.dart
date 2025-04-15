@@ -31,35 +31,24 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   void initState() {
     super.initState();
     task = widget.task;
-    _fetchAssignedUsers();
+    _fetchTaskAndWorkers();
   }
 
-  Future<void> _fetchAssignedUsers() async {
-    final workers = await _workerService.getUsersByIds(task.assignedTo);
-    setState(() {
-      _assignedWorkers = workers;
-      _isWorker = task.assignedTo.contains(_currentUser?.uid ?? "");
-    });
+  Future<void> _fetchTaskAndWorkers() async {
+    final updatedTask = await _taskService.getTaskById(widget.task.id);
+    if (updatedTask != null) {
+      final workers = await _workerService.getUsersByIds(updatedTask.assignedTo);
+      setState(() {
+        task = updatedTask;
+        _assignedWorkers = workers;
+        _isWorker = task.assignedTo.contains(_currentUser?.uid ?? "");
+      });
+    }
   }
 
-  Future<void> _updateStatus(String status) async {
-    await _taskService.updateTaskStatus(task.id, status, _currentUser!.uid);
-    setState(() {
-      task = TaskModel(
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        department: task.department,
-        createdBy: task.createdBy,
-        assignedTo: task.assignedTo,
-        dueDate: task.dueDate,
-        priority: task.priority,
-        status: status,
-        attachments: task.attachments,
-        comments: task.comments,
-        createdAt: task.createdAt,
-      );
-    });
+  Future<void> _updateWorkerStatus(String newStatus) async {
+    await _taskService.updateWorkerStatus(task.id, _currentUser!.uid, newStatus);
+    await _fetchTaskAndWorkers();
   }
 
   Future<void> _addComment() async {
@@ -70,28 +59,62 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
     _commentController.clear();
-    setState(() {}); // trigger UI refresh
+    await _fetchTaskAndWorkers();
   }
 
   Widget _buildStatusChip(String status) {
     Color color;
     switch (status) {
-      case 'pending':
-        color = Colors.grey;
-        break;
       case 'in_progress':
         color = Colors.orange;
         break;
       case 'done':
         color = Colors.green;
         break;
+      case 'pending':
       default:
         color = Colors.grey;
     }
     return Chip(
       label: Text(_getStatusText(status)),
-      backgroundColor: color.withOpacity(0.2),
-      labelStyle: TextStyle(color: color),
+      backgroundColor: color.withOpacity(0.15),
+      labelStyle: TextStyle(color: color, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildWorkerStatusBadge(String status) {
+    Color bgColor;
+    String label;
+    switch (status) {
+      case 'in_progress':
+        bgColor = Colors.orange;
+        label = 'בתהליך';
+        break;
+      case 'done':
+        bgColor = Colors.green;
+        label = 'הושלם';
+        break;
+      case 'pending':
+      default:
+        bgColor = Colors.grey;
+        label = 'טרם התחיל';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: bgColor),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: bgColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
     );
   }
 
@@ -110,6 +133,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentWorkerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -117,78 +142,132 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
           children: [
             const UserHeader(),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(task.title, style: AppTheme.screenTitle),
-                    const SizedBox(height: 8),
-                    _buildStatusChip(task.status),
-                    const SizedBox(height: 16),
-                    Text(task.description, style: AppTheme.bodyText),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("מחלקה: ${task.department}", style: AppTheme.bodyText),
-                        Text("דחיפות: ${task.priority}", style: AppTheme.bodyText),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "מועד סיום: ${DateFormat('dd/MM/yyyy – HH:mm').format(task.dueDate.toDate())}",
-                      style: AppTheme.bodyText,
-                    ),
-                    const Divider(height: 32),
-                    Text("עובדים שהוקצו למשימה:", style: AppTheme.sectionTitle),
-                    const SizedBox(height: 8),
-                    ..._assignedWorkers.map((user) => ListTile(
-                          title: Text(user.fullName, textAlign: TextAlign.right),
-                          leading: CircleAvatar(backgroundImage: NetworkImage(user.profilePicture)),
-                        )),
-                    const Divider(height: 32),
-                    Text("תגובות:", style: AppTheme.sectionTitle),
-                    const SizedBox(height: 8),
-                    if (task.comments.isEmpty)
-                      Text("אין תגובות עדיין", style: AppTheme.bodyText)
-                    else
-                      ...task.comments.map((comment) {
-                        final message = comment['message'] ?? '';
-                        final timestamp = comment['timestamp'];
-                        final time = timestamp is int
-                            ? DateTime.fromMillisecondsSinceEpoch(timestamp)
-                            : DateTime.now();
-                        return ListTile(
-                          title: Text(message.toString(), textAlign: TextAlign.right),
-                          subtitle: Text(DateFormat('dd/MM/yyyy HH:mm').format(time)),
-                          trailing: const Icon(Icons.comment),
+              child: RefreshIndicator(
+                onRefresh: _fetchTaskAndWorkers,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildStatusChip(task.status),
+                          const SizedBox(width: 8),
+                        ],
+                      ),
+                      Text(task.title,
+                          style: AppTheme.screenTitle.copyWith(fontSize: 24)),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(task.description, style: AppTheme.bodyText),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("מחלקה: ${_getDepartmentName(task.department)}",
+                                    style: AppTheme.bodyText),
+                                Text("דחיפות: ${_getPriorityName(task.priority)}",
+                                    style: AppTheme.bodyText),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "מועד סיום: ${DateFormat('dd/MM/yyyy – HH:mm').format(task.dueDate.toDate())}",
+                              style: AppTheme.bodyText,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text("עובדים שהוקצו למשימה", style: AppTheme.sectionTitle),
+                      const SizedBox(height: 8),
+                      ..._assignedWorkers.map((user) {
+                        final workerStatus = task.workerStatuses[user.uid] ?? 'pending';
+                        return Card(
+                          color: Colors.grey.shade100,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(user.profilePicture),
+                            ),
+                            title: Text(user.fullName),
+                            trailing: _buildWorkerStatusBadge(workerStatus),
+                          ),
                         );
                       }),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _commentController,
-                      decoration: AppTheme.inputDecoration(hintText: "הוסף תגובה..."),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: _addComment,
-                      child: const Text("💬 שלח תגובה"),
-                    ),
-                    const Divider(height: 32),
-                    if (_isWorker && task.status == 'pending')
-                      ElevatedButton(
-                        onPressed: () => _updateStatus('in_progress'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                        child: const Text("🚧 התחל משימה"),
+                      const SizedBox(height: 24),
+                      Text("תגובות", style: AppTheme.sectionTitle),
+                      const SizedBox(height: 8),
+                      if (task.comments.isEmpty)
+                        Text("אין תגובות עדיין", style: AppTheme.bodyText)
+                      else
+                        ...task.comments.map((comment) {
+                          final message = comment['message'] ?? '';
+                          final timestamp = comment['timestamp'];
+                          final time = timestamp is int
+                              ? DateTime.fromMillisecondsSinceEpoch(timestamp)
+                              : DateTime.now();
+                          return Card(
+                            elevation: 1,
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListTile(
+                              leading: const Icon(Icons.comment, color: AppColors.primary),
+                              title: Text(message.toString(), textAlign: TextAlign.right),
+                              subtitle: Text(
+                                DateFormat('dd/MM/yyyy HH:mm').format(time),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          );
+                        }),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _commentController,
+                        decoration: AppTheme.inputDecoration(hintText: "הוסף תגובה..."),
                       ),
-                    if (_isWorker && task.status == 'in_progress')
+                      const SizedBox(height: 8),
                       ElevatedButton(
-                        onPressed: () => _updateStatus('done'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        child: const Text("✅ סיים משימה"),
+                        onPressed: _addComment,
+                        style: AppTheme.primaryButtonStyle,
+                        child: const Text("💬 שלח תגובה"),
                       ),
-                  ],
+                      const SizedBox(height: 32),
+                      if (_isWorker && currentWorkerStatus == 'pending')
+                        ElevatedButton(
+                          onPressed: () => _updateWorkerStatus('in_progress'),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                          child: const Text("🚧 התחל משימה"),
+                        ),
+                      if (_isWorker && currentWorkerStatus == 'in_progress')
+                        ElevatedButton(
+                          onPressed: () => _updateWorkerStatus('done'),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                          child: const Text("✅ סיים משימה"),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -196,5 +275,33 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         ),
       ),
     );
+  }
+
+  String _getPriorityName(String key) {
+    switch (key) {
+      case 'high':
+        return 'גבוהה';
+      case 'low':
+        return 'נמוכה';
+      default:
+        return 'בינונית';
+    }
+  }
+
+  String _getDepartmentName(String key) {
+    switch (key) {
+      case 'paintball':
+        return 'פיינטבול';
+      case 'ropes':
+        return 'פארק חבלים';
+      case 'carting':
+        return 'קארטינג';
+      case 'water_park':
+        return 'פארק מים';
+      case 'jimbory':
+        return 'גִימבורי';
+      default:
+        return 'כללי';
+    }
   }
 }

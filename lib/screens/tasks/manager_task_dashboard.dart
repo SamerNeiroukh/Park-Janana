@@ -24,7 +24,9 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   final TaskService _taskService = TaskService();
   final WorkerService _workerService = WorkerService();
   final User? _currentUser = FirebaseAuth.instance.currentUser;
+
   String selectedStatus = 'all';
+  DateTime selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
             padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: Text("ניהול משימות", style: AppTheme.screenTitle),
           ),
+          _buildDateNavigation(),
           _buildFilterButtons(),
           Expanded(
             child: _currentUser == null
@@ -63,6 +66,14 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       }
 
                       List<TaskModel> tasks = snapshot.data!;
+
+                      tasks = tasks.where((t) {
+                        final tDate = t.dueDate.toDate();
+                        return tDate.year == selectedDate.year &&
+                            tDate.month == selectedDate.month &&
+                            tDate.day == selectedDate.day;
+                      }).toList();
+
                       if (selectedStatus != 'all') {
                         tasks = tasks
                             .where((t) => t.status == selectedStatus)
@@ -82,6 +93,78 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         ],
       ),
     );
+  }
+
+  Widget _buildDateNavigation() {
+    final String formattedDate =
+        DateFormat('dd/MM/yyyy').format(selectedDate);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0, bottom: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left, size: 30),
+            onPressed: () => _changeDate(-1),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Text(
+                  formattedDate,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: const Icon(Icons.calendar_today,
+                      size: 20, color: AppColors.primary),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right, size: 30),
+            onPressed: () => _changeDate(1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _changeDate(int days) {
+    setState(() {
+      selectedDate = selectedDate.add(Duration(days: days));
+    });
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      locale: const Locale("he", "IL"),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
 
   Widget _buildFilterButtons() {

@@ -6,8 +6,8 @@ import 'screens/home/home_screen.dart';
 import 'screens/home/personal_area_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'constants/app_theme.dart'; // Import your theme file
-
+import 'constants/app_theme.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // ✅ Added
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +53,15 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      localizationsDelegates: const [ // ✅ Added
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [ // ✅ Added
+        Locale('he'),
+        Locale('en'),
+      ],
       home: _showSplashScreen
           ? const SplashScreen()
           : StreamBuilder<User?>(
