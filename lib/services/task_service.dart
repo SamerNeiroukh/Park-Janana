@@ -26,7 +26,7 @@ class TaskService {
             snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList());
   }
 
-  // 🟢 Get tasks created by a manager (fixed: removed orderBy to prevent disappearing)
+  // 🟢 Get tasks created by a manager
   Stream<List<TaskModel>> getTasksCreatedBy(String creatorId) {
     return _firestore
         .collection(_collection)
@@ -36,19 +36,12 @@ class TaskService {
             snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList());
   }
 
-  // 🟢 Update task status and log comment
+  // 🟢 Update general task status (manager only)
   Future<void> updateTaskStatus(String taskId, String status, String userId) async {
     try {
       final ref = _firestore.collection(_collection).doc(taskId);
       await ref.update({
         'status': status,
-        'comments': FieldValue.arrayUnion([
-          {
-            'by': userId,
-            'status': status,
-            'timestamp': DateTime.now().toUtc().millisecondsSinceEpoch,
-          }
-        ])
       });
     } catch (e) {
       throw CustomException('שגיאה בעדכון סטטוס המשימה.');
@@ -76,11 +69,62 @@ class TaskService {
     }
   }
 
+  // 🟢 Update entire task with partial data
   Future<void> updateTask(String taskId, Map<String, dynamic> updatedData) async {
-  try {
-    await _firestore.collection(_collection).doc(taskId).update(updatedData);
-  } catch (e) {
-    throw CustomException('שגיאה בעדכון המשימה.');
+    try {
+      await _firestore.collection(_collection).doc(taskId).update(updatedData);
+    } catch (e) {
+      throw CustomException('שגיאה בעדכון המשימה.');
+    }
   }
-}
+
+  // ✅ Update worker-specific status inside the task
+  Future<void> updateWorkerStatus(String taskId, String userId, String newStatus) async {
+    final taskRef = _firestore.collection(_collection).doc(taskId);
+    final snapshot = await taskRef.get();
+
+    if (!snapshot.exists) {
+      print('❌ Task not found: $taskId');
+      return;
+    }
+
+    final data = snapshot.data()!;
+    final workerStatusesRaw = data['workerStatuses'];
+    final Map<String, dynamic> workerStatuses = workerStatusesRaw is Map<String, dynamic>
+        ? Map<String, dynamic>.from(workerStatusesRaw)
+        : {};
+
+    print('✅ [Before] workerStatuses: $workerStatuses');
+    print('👤 Updating status for $userId → $newStatus');
+
+    workerStatuses[userId] = newStatus;
+
+    // Aggregate overall task status
+    String updatedStatus = data['status'];
+    final values = workerStatuses.values.map((v) => v.toString()).toList();
+
+    if (values.contains('in_progress')) {
+      updatedStatus = 'in_progress';
+    }
+    if (values.isNotEmpty && values.every((status) => status == 'done')) {
+      updatedStatus = 'done';
+    }
+
+    await taskRef.update({
+      'workerStatuses': workerStatuses,
+      'status': updatedStatus,
+    });
+
+    print('✅ [After] workerStatuses: $workerStatuses');
+    print('📦 Firestore task updated successfully.');
+  }
+
+  // 🟢 Get task by ID
+  Future<TaskModel?> getTaskById(String taskId) async {
+    final doc = await _firestore.collection(_collection).doc(taskId).get();
+    if (doc.exists) {
+      return TaskModel.fromMap(doc.id, doc.data()!);
+    }
+    return null;
+  }
 }

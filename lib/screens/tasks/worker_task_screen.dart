@@ -87,35 +87,35 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
- Widget _buildFilterButton(String status, String label, Color color) {
-  final isSelected = _selectedStatus == status;
+  Widget _buildFilterButton(String status, String label, Color color) {
+    final isSelected = _selectedStatus == status;
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 4),
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? color : color.withOpacity(0.2),
-        foregroundColor: isSelected ? Colors.white : color,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        minimumSize: const Size(80, 40), // 💡 Ensures enough space for text
-      ),
-      onPressed: () => setState(() => _selectedStatus = status),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            overflow: TextOverflow.ellipsis,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? color : color.withOpacity(0.2),
+          foregroundColor: isSelected ? Colors.white : color,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          minimumSize: const Size(80, 40),
+        ),
+        onPressed: () => setState(() => _selectedStatus = status),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              overflow: TextOverflow.ellipsis,
+            ),
+            softWrap: false,
           ),
-          softWrap: false,
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildTaskCard(TaskModel task) {
     return Card(
@@ -188,9 +188,10 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
+  // ✅ FIXED: Now calls updateWorkerStatus instead of updateTaskStatus
   Future<void> _updateStatus(TaskModel task, String status) async {
     if (_currentUser == null) return;
-    await _taskService.updateTaskStatus(task.id, status, _currentUser!.uid);
+    await _taskService.updateWorkerStatus(task.id, _currentUser!.uid, status);
   }
 
   String _formatTimestamp(Timestamp timestamp) {

@@ -275,6 +275,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       attachments: [],
       comments: [],
       createdAt: Timestamp.now(),
+      workerStatuses: {
+      for (var user in _selectedWorkers) user.uid: 'pending'
+    },
     );
 
     await _taskService.createTask(newTask);
