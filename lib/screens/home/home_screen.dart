@@ -27,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _profilePictureUrl;
   Map<String, dynamic>? _roleData;
 
-  // ✅ Cache for user data
   static final Map<String, Map<String, dynamic>> _userCache = {};
 
   @override
@@ -38,13 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadRolesData() async {
     final String rolesJson = await rootBundle.loadString('lib/config/roles.json');
+    if (!mounted) return;
     setState(() {
       _roleData = json.decode(rolesJson);
     });
   }
 
   Future<Map<String, dynamic>> _fetchUserData(String uid) async {
-    // ✅ First check if user data is cached
     if (_userCache.containsKey(uid)) {
       return _userCache[uid]!;
     }
@@ -54,10 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
-        
-        // ✅ Store user data in cache
         _userCache[uid] = userData;
-
         return userData;
       }
     } catch (e) {
@@ -73,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (currentUser == null) {
       return Scaffold(
         body: Center(
-          child: Text('לא נמצא משתמש מחובר', style: AppTheme.bodyText), // ✅ Use themed text
+          child: Text('לא נמצא משתמש מחובר', style: AppTheme.bodyText),
         ),
       );
     }
@@ -117,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   'פעולות',
-                  style: AppTheme.sectionTitle, // ✅ Use the theme for section titles
+                  style: AppTheme.sectionTitle,
                 ),
               ),
               SizedBox(
@@ -130,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: 'פרופיל',
                       icon: Icons.person,
                       onTap: () {
+                        if (!mounted) return;
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -149,12 +146,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }).toList(),
 
-                    // 🟢 **Role-based Navigation**
                     if (role == 'worker') ...[
                       CustomCard(
                         title: 'משימות שלי',
                         icon: Icons.task,
                         onTap: () {
+                          if (!mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -167,6 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'משמרות',
                         icon: Icons.access_time,
                         onTap: () {
+                          if (!mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -182,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'ניהול משמרות',
                         icon: Icons.schedule,
                         onTap: () {
+                          if (!mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -194,6 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'ניהול משימות',
                         icon: Icons.task,
                         onTap: () {
+                          if (!mounted) return;
                           Navigator.push(
                             context,
                             MaterialPageRoute(

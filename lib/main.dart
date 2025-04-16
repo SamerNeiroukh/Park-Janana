@@ -62,6 +62,12 @@ class _MyAppState extends State<MyApp> {
         Locale('he'),
         Locale('en'),
       ],
+      builder: (context, child) { // ✅ NEW: Force RTL layout globally
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: child!,
+        );
+      },
       home: _showSplashScreen
           ? const SplashScreen()
           : StreamBuilder<User?>(

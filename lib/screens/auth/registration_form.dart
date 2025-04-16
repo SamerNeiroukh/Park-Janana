@@ -67,12 +67,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
       }
     });
 
-    // Stop if any error exists
-    if (_nameError != null ||
-        _phoneError != null ||
-        _idError != null ||
-        _emailError != null ||
-        _passwordError != null) {
+    if (_nameError != null || _phoneError != null || _idError != null || _emailError != null || _passwordError != null) {
       return;
     }
 
@@ -100,17 +95,18 @@ class _RegistrationFormState extends State<RegistrationForm> {
 
       await _firestore.collection('users').doc(uid).set(userModel.toMap());
 
-      if (context.mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        );
-      }
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     } finally {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });

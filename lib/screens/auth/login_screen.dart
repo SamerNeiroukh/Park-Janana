@@ -24,70 +24,71 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _emailError;
   String? _passwordError;
 
-  // ✅ Cache storage to store user roles after login
   static final Map<String, String> _userRoleCache = {};
 
-Future<void> _login() async {
-  setState(() {
-    _isLoading = true;
-    _emailError = null;
-    _passwordError = null;
-  });
-
-  try {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-
-    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    String uid = userCredential.user!.uid;
-
-    if (_userRoleCache.containsKey(uid)) {
-      _navigateToHomeScreen(_userRoleCache[uid]!);
-      return;
-    }
-
-    DocumentSnapshot userDoc =
-        await _firestore.collection('users').doc(uid).get();
-
-    if (userDoc.exists) {
-      String role = userDoc.get('role') ?? 'worker';
-      _userRoleCache[uid] = role;
-      _navigateToHomeScreen(role);
-    } else {
-      throw Exception("User document does not exist.");
-    }
-  } on FirebaseAuthException catch (e) {
+  Future<void> _login() async {
     setState(() {
-      if (e.code == 'user-not-found') {
-        _emailError = 'האימייל לא נמצא במערכת';
-      } else if (e.code == 'wrong-password') {
-        _passwordError = 'הסיסמה שגויה';
-      } else {
-        // unexpected firebase error (e.g. invalid-email, too-many-requests)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('מייל או סיסמה לא נכונים.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      _isLoading = true;
+      _emailError = null;
+      _passwordError = null;
+    });
+
+    try {
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
+
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String uid = userCredential.user!.uid;
+
+      if (_userRoleCache.containsKey(uid)) {
+        if (!mounted) return;
+        _navigateToHomeScreen(_userRoleCache[uid]!);
+        return;
       }
-    });
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('שגיאה: $e'),
-      backgroundColor: Colors.red,
-    ));
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-}
 
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+
+      if (userDoc.exists) {
+        String role = userDoc.get('role') ?? 'worker';
+        _userRoleCache[uid] = role;
+        if (!mounted) return;
+        _navigateToHomeScreen(role);
+      } else {
+        throw Exception("User document does not exist.");
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (e.code == 'user-not-found') {
+          _emailError = 'האימייל לא נמצא במערכת';
+        } else if (e.code == 'wrong-password') {
+          _passwordError = 'הסיסמה שגויה';
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('מייל או סיסמה לא נכונים.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('שגיאה: $e'),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   void _navigateToHomeScreen(String role) {
     if (context.mounted) {
@@ -118,8 +119,6 @@ Future<void> _login() async {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32.0),
-
-                /// Email
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -155,10 +154,7 @@ Future<void> _login() async {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16.0),
-
-                /// Password
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -195,10 +191,7 @@ Future<void> _login() async {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16.0),
-
-                /// Forgot Password
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -210,25 +203,19 @@ Future<void> _login() async {
                   },
                   child: Text(
                     AppStrings.forgotPassword,
-                    style: AppTheme.linkTextStyle
-                        .copyWith(color: AppColors.primary),
+                    style: AppTheme.linkTextStyle.copyWith(color: AppColors.primary),
                     textAlign: TextAlign.center,
                   ),
                 ),
-
                 const SizedBox(height: 32.0),
-
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
                         style: AppTheme.primaryButtonStyle,
                         onPressed: _login,
-                        child: const Text('כניסה',
-                            style: AppTheme.buttonTextStyle),
+                        child: const Text('כניסה', style: AppTheme.buttonTextStyle),
                       ),
-
                 const SizedBox(height: 16.0),
-
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);

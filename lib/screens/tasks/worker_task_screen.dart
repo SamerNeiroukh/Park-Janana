@@ -1,6 +1,9 @@
+// 💡 Modernized UI Enhancements for WorkerTaskScreen
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../../models/task_model.dart';
 import '../../services/task_service.dart';
 import '../../widgets/user_header.dart';
@@ -19,6 +22,14 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   String _selectedStatus = 'all';
+  DateTime _selectedDate = DateTime.now();
+  List<TaskModel> _tasks = [];
+
+  Future<void> _refreshTasks() async {
+    if (_currentUser == null) return;
+    final snapshot = await _taskService.getTasksForUser(_currentUser!.uid).first;
+    setState(() => _tasks = snapshot);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +39,10 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
         children: [
           const UserHeader(),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Text("המשימות שלי", style: AppTheme.screenTitle),
           ),
+          _buildDateNavigation(),
           _buildStatusFilterButtons(),
           Expanded(
             child: _currentUser == null
@@ -41,28 +53,29 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.task_alt, size: 60, color: AppColors.textSecondary),
-                              const SizedBox(height: 10),
-                              Text("אין משימות פעילות כרגע.", style: AppTheme.bodyText),
-                            ],
-                          ),
-                        );
+                        return const Center(child: Text("אין משימות פעילות."));
                       }
-
                       List<TaskModel> tasks = snapshot.data!;
+                      tasks = tasks.where((t) {
+                        final tDate = t.dueDate.toDate();
+                        return tDate.year == _selectedDate.year &&
+                            tDate.month == _selectedDate.month &&
+                            tDate.day == _selectedDate.day;
+                      }).toList();
                       if (_selectedStatus != 'all') {
-                        tasks = tasks.where((t) => t.status == _selectedStatus).toList();
+                        tasks = tasks.where((t) {
+                          final workerStatus = t.workerStatuses[_currentUser!.uid] ?? 'pending';
+                          return workerStatus == _selectedStatus;
+                        }).toList();
                       }
-
-                      return ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        children: tasks.map((task) => _buildTaskCard(task)).toList(),
+                      return RefreshIndicator(
+                        onRefresh: _refreshTasks,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          itemCount: tasks.length,
+                          itemBuilder: (context, index) => _buildTaskCard(tasks[index]),
+                        ),
                       );
                     },
                   ),
@@ -72,83 +85,169 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
-  Widget _buildStatusFilterButtons() {
+  Widget _buildDateNavigation() {
+    final String formattedDate = DateFormat('dd/MM/yyyy').format(_selectedDate);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+      padding: const EdgeInsets.only(top: 4.0, bottom: 10.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildFilterButton('all', 'הכל', Colors.grey),
-          _buildFilterButton('pending', 'ממתין', Colors.red),
-          _buildFilterButton('in_progress', 'בתהליך', Colors.orange),
-          _buildFilterButton('done', 'הושלם', Colors.green),
+          IconButton(icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => _changeDate(-1)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [Colors.white, Colors.grey.shade100]),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10)],
+            ),
+            child: Row(
+              children: [
+                Text(formattedDate, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: const Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
+                ),
+              ],
+            ),
+          ),
+          IconButton(icon: const Icon(Icons.chevron_right, size: 30), onPressed: () => _changeDate(1)),
         ],
       ),
     );
   }
 
-  Widget _buildFilterButton(String status, String label, Color color) {
-    final isSelected = _selectedStatus == status;
+  void _changeDate(int days) {
+    setState(() {
+      _selectedDate = _selectedDate.add(Duration(days: days));
+    });
+  }
 
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      locale: const Locale("he", "IL"),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Widget _buildStatusFilterButtons() {
+    final List<Map<String, dynamic>> buttonData = [
+      {'label': 'הכל', 'value': 'all', 'color': Colors.grey},
+      {'label': 'ממתין', 'value': 'pending', 'color': Colors.red},
+      {'label': 'בתהליך', 'value': 'in_progress', 'color': Colors.orange},
+      {'label': 'הושלם', 'value': 'done', 'color': Colors.green},
+    ];
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? color : color.withOpacity(0.2),
-          foregroundColor: isSelected ? Colors.white : color,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          minimumSize: const Size(80, 40),
-        ),
-        onPressed: () => setState(() => _selectedStatus = status),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              overflow: TextOverflow.ellipsis,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: buttonData.map((data) {
+          final isSelected = _selectedStatus == data['value'];
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                child: ElevatedButton(
+                  onPressed: () => setState(() => _selectedStatus = data['value']),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isSelected ? data['color'] : data['color'].withOpacity(0.2),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    elevation: isSelected ? 4 : 0,
+                  ),
+                  child: FittedBox(
+                    child: Text(data['label'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ),
             ),
-            softWrap: false,
-          ),
-        ),
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _buildTaskCard(TaskModel task) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(task.title, style: AppTheme.sectionTitle.copyWith(fontSize: 18)),
-            const SizedBox(height: 6),
-            Text(task.description, style: AppTheme.bodyText.copyWith(fontSize: 14)),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "⏰ עד: ${_formatTimestamp(task.dueDate)}",
-                  style: AppTheme.bodyText.copyWith(color: AppColors.textSecondary),
+    final workerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
+    final DateTime date = task.dueDate.toDate();
+    final String time = DateFormat('HH:mm').format(date);
+    Color bgColor = workerStatus == 'done'
+        ? Colors.green.shade50
+        : workerStatus == 'in_progress'
+            ? Colors.orange.shade50
+            : Colors.white;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildWorkerStatusChip(workerStatus),
+              Text(
+                time,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
                 ),
-                _buildStatusChip(task.status),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            task.title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            if (task.status != 'done') _buildActionButtons(task),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            task.description,
+            style: const TextStyle(fontSize: 15, color: Colors.black87),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (workerStatus != 'done') LiveCountdownTimer(dueDate: task.dueDate.toDate()),
+              if (workerStatus != 'done') _buildActionButtons(task, workerStatus),
+            ],
+          )
+        ],
       ),
     );
   }
 
-  Widget _buildStatusChip(String status) {
+  Widget _buildWorkerStatusChip(String status) {
     Color color;
     String label;
     switch (status) {
@@ -165,37 +264,109 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
         label = 'ממתין';
     }
     return Chip(
-      backgroundColor: color,
-      label: Text(label, style: const TextStyle(color: Colors.white)),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+      backgroundColor: color.withOpacity(0.15),
+      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
     );
   }
 
-  Widget _buildActionButtons(TaskModel task) {
+  Widget _buildActionButtons(TaskModel task, String currentStatus) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        ElevatedButton(
-          onPressed: () => _updateStatus(task, 'in_progress'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
-          child: const Text("התחל"),
-        ),
-        ElevatedButton(
-          onPressed: () => _updateStatus(task, 'done'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
-          child: const Text("סיום"),
-        ),
+        if (currentStatus == 'pending')
+          ElevatedButton(
+            onPressed: () => _updateStatus(task, 'in_progress'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("התחל"),
+          ),
+        if (currentStatus == 'in_progress')
+          ElevatedButton(
+            onPressed: () => _updateStatus(task, 'done'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("סיום"),
+          ),
       ],
     );
   }
 
-  // ✅ FIXED: Now calls updateWorkerStatus instead of updateTaskStatus
   Future<void> _updateStatus(TaskModel task, String status) async {
     if (_currentUser == null) return;
     await _taskService.updateWorkerStatus(task.id, _currentUser!.uid, status);
+    await _refreshTasks();
+  }
+}
+
+class LiveCountdownTimer extends StatefulWidget {
+  final DateTime dueDate;
+  const LiveCountdownTimer({super.key, required this.dueDate});
+
+  @override
+  State<LiveCountdownTimer> createState() => _LiveCountdownTimerState();
+}
+
+class _LiveCountdownTimerState extends State<LiveCountdownTimer> {
+  late Timer _timer;
+  late Duration _remaining;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateRemainingTime();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateRemainingTime());
   }
 
-  String _formatTimestamp(Timestamp timestamp) {
-    final date = timestamp.toDate();
-    return "${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+  void _updateRemainingTime() {
+    final now = DateTime.now();
+    setState(() {
+      _remaining = widget.dueDate.difference(now);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final isToday = widget.dueDate.day == now.day &&
+        widget.dueDate.month == now.month &&
+        widget.dueDate.year == now.year;
+
+    String label;
+    Color color;
+
+    if (!isToday) {
+      final days = widget.dueDate.difference(now).inDays;
+      label = days >= 0 ? "בעוד $days ימים" : "איחור של ${days.abs()} ימים";
+      color = days >= 0 ? Colors.black : Colors.red;
+    } else if (_remaining.isNegative) {
+      label = "⏰ איחור";
+      color = Colors.red;
+    } else {
+      final hours = _remaining.inHours;
+      final minutes = _remaining.inMinutes % 60;
+      final seconds = _remaining.inSeconds % 60;
+      label = "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+      color = _remaining.inMinutes < 60 ? Colors.red : Colors.green;
+    }
+
+    return Row(
+      children: [
+        Image.asset('assets/gifs/sand_watch1.gif', height: 28, width: 28),
+        const SizedBox(width: 6),
+        Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
+      ],
+    );
   }
 }
