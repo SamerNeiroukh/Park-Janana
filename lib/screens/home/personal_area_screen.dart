@@ -22,15 +22,16 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   final AuthService _authService = AuthService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isUploading = false;
 
-  // ✅ Cache for user profile data
   static final Map<String, Map<String, dynamic>> _userCache = {};
 
-  // ✅ Set a valid default profile picture
   static const String defaultProfilePictureUrl =
       "https://firebasestorage.googleapis.com/v0/b/park-janana-app.appspot.com/o/profile_pictures%2Fdefault_profile.png?alt=media";
 
   Future<void> _pickImage(ImageSource source) async {
+    if (_isUploading) return;
+
     final pickedFile = await ImagePicker().pickImage(source: source);
 
     if (pickedFile != null) {
@@ -42,7 +43,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   }
 
   Future<void> _uploadImage() async {
-    if (_imageFile != null) {
+    if (_imageFile != null && !_isUploading) {
+      setState(() => _isUploading = true);
       try {
         final storageRef =
             _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
@@ -50,7 +52,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
 
-        // ✅ Update cache to reflect changes
         _userCache[widget.uid]?['profile_picture'] = downloadUrl;
 
         if (mounted) {
@@ -60,7 +61,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               backgroundColor: AppColors.success,
             ),
           );
-          setState(() {}); // Refresh UI
+          setState(() {});
         }
       } catch (e) {
         if (mounted) {
@@ -68,11 +69,15 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             SnackBar(content: Text("שגיאה בהעלאת תמונה: $e")),
           );
         }
+      } finally {
+        if (mounted) setState(() => _isUploading = false);
       }
     }
   }
 
   void _showOptions() {
+    if (_isUploading) return;
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -105,6 +110,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   }
 
   void _confirmUpload() {
+    if (_isUploading) return;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -131,7 +138,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   }
 
   Future<Map<String, dynamic>> _fetchUserData() async {
-    // ✅ Use cached data if available
     if (_userCache.containsKey(widget.uid)) {
       return Future.value(_userCache[widget.uid]!);
     }
@@ -142,8 +148,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
-
-        // ✅ Store fetched data in cache
         _userCache[widget.uid] = userData;
         return userData;
       }
@@ -151,7 +155,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       debugPrint('Error fetching user data: $e');
     }
 
-    return {}; // Return empty if failed
+    return {};
   }
 
   @override

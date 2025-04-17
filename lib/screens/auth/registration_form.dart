@@ -38,80 +38,82 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
   Future<void> _registerUser() async {
-    setState(() {
-      _nameError = !_hebrewRegex.hasMatch(_fullNameController.text.trim())
-          ? 'יש להזין שם בעברית בלבד'
-          : null;
+  if (_isLoading) return; // ✅ Prevent double submit
 
-      _phoneError = !_phoneRegex.hasMatch(_phoneNumberController.text.trim())
-          ? 'מספר טלפון חייב להכיל בדיוק 10 ספרות'
-          : null;
+  setState(() {
+    _nameError = !_hebrewRegex.hasMatch(_fullNameController.text.trim())
+        ? 'יש להזין שם בעברית בלבד'
+        : null;
 
-      _idError = !_idRegex.hasMatch(_idNumberController.text.trim())
-          ? 'תעודת זהות חייבת להכיל בדיוק 9 ספרות'
-          : null;
+    _phoneError = !_phoneRegex.hasMatch(_phoneNumberController.text.trim())
+        ? 'מספר טלפון חייב להכיל בדיוק 10 ספרות'
+        : null;
 
-      _emailError = !_emailRegex.hasMatch(_emailController.text.trim())
-          ? 'כתובת אימייל אינה תקינה'
-          : null;
+    _idError = !_idRegex.hasMatch(_idNumberController.text.trim())
+        ? 'תעודת זהות חייבת להכיל בדיוק 9 ספרות'
+        : null;
 
-      final password = _passwordController.text.trim();
-      final confirmPassword = _confirmPasswordController.text.trim();
+    _emailError = !_emailRegex.hasMatch(_emailController.text.trim())
+        ? 'כתובת אימייל אינה תקינה'
+        : null;
 
-      if (password.length < 6) {
-        _passwordError = 'הסיסמה חייבת להכיל לפחות 6 תווים';
-      } else if (password != confirmPassword) {
-        _passwordError = 'הסיסמאות אינן תואמות';
-      } else {
-        _passwordError = null;
-      }
-    });
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (_nameError != null || _phoneError != null || _idError != null || _emailError != null || _passwordError != null) {
-      return;
+    if (password.length < 6) {
+      _passwordError = 'הסיסמה חייבת להכיל לפחות 6 תווים';
+    } else if (password != confirmPassword) {
+      _passwordError = 'הסיסמאות אינן תואמות';
+    } else {
+      _passwordError = null;
     }
+  });
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      String uid = userCredential.user!.uid;
-
-      UserModel userModel = UserModel(
-        fullName: _fullNameController.text.trim(),
-        email: _emailController.text.trim(),
-        idNumber: _idNumberController.text.trim(),
-        phoneNumber: _phoneNumberController.text.trim(),
-        uid: uid,
-        profilePicture: 'https://firebasestorage.googleapis.com/v0/b/park-janana-app.firebasestorage.app/o/profile_pictures%2Fdefault_profile.png?alt=media&token=918661c9-90a5-4197-8649-d2498d8ef4cd',
-        role: 'worker',
-      );
-
-      await _firestore.collection('users').doc(uid).set(userModel.toMap());
-
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  if (_nameError != null || _phoneError != null || _idError != null || _emailError != null || _passwordError != null) {
+    return;
   }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
+
+    String uid = userCredential.user!.uid;
+
+    UserModel userModel = UserModel(
+      fullName: _fullNameController.text.trim(),
+      email: _emailController.text.trim(),
+      idNumber: _idNumberController.text.trim(),
+      phoneNumber: _phoneNumberController.text.trim(),
+      uid: uid,
+      profilePicture: 'https://firebasestorage.googleapis.com/v0/b/park-janana-app.firebasestorage.app/o/profile_pictures%2Fdefault_profile.png?alt=media&token=918661c9-90a5-4197-8649-d2498d8ef4cd',
+      role: 'worker',
+    );
+
+    await _firestore.collection('users').doc(uid).set(userModel.toMap());
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+    );
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  } finally {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {

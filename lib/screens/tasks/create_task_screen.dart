@@ -32,8 +32,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<UserModel> _allUsers = [];
-  List<UserModel> _filteredUsers = [];
   final List<UserModel> _selectedWorkers = [];
+  bool _isSubmitting = false; // ✅ To prevent double submissions
 
   @override
   void initState() {
@@ -50,16 +50,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
     setState(() {
       _allUsers = users;
-      _filteredUsers = users;
     });
-  }
-
-  void _filterUsers(String query) {
-    final lower = query.toLowerCase();
-    final filtered = _allUsers.where((user) {
-      return user.fullName.toLowerCase().contains(lower) || user.role.toLowerCase().contains(lower);
-    }).toList();
-    setState(() => _filteredUsers = filtered);
   }
 
   void _toggleUser(UserModel user) {
@@ -103,22 +94,62 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       controller: _descriptionController,
                       maxLines: 3,
                       decoration: AppTheme.inputDecoration(hintText: "תיאור המשימה"),
-                      validator: (val) => val == null || val.isEmpty ? "שדה חובה" : null,
+                      // Optional field: no validation
                     ),
                     const SizedBox(height: 16),
                     Text("הקצאת עובדים", style: AppTheme.sectionTitle),
                     const SizedBox(height: 8),
-
-                    // Search field
-                    TextField(
-                      controller: _searchController,
-                      onChanged: _filterUsers,
-                      decoration: AppTheme.inputDecoration(hintText: "🔍 חיפוש לפי שם או תפקיד"),
+                    Autocomplete<UserModel>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return const Iterable<UserModel>.empty();
+                        }
+                        return _allUsers.where((user) =>
+                          user.fullName.toLowerCase().contains(textEditingValue.text.toLowerCase()) ||
+                          user.role.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                      },
+                      displayStringForOption: (UserModel user) => user.fullName,
+                      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                        _searchController.text = controller.text;
+                        return TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: AppTheme.inputDecoration(hintText: "🔍 חיפוש לפי שם או תפקיד"),
+                        );
+                      },
+                      onSelected: (UserModel user) {
+                        _toggleUser(user);
+                      },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topRight,
+                          child: Material(
+                            elevation: 4.0,
+                            child: SizedBox(
+                              height: 200.0,
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final UserModel user = options.elementAt(index);
+                                  final selected = _isSelected(user);
+                                  return ListTile(
+                                    title: Text(user.fullName),
+                                    subtitle: Text(user.role),
+                                    trailing: Icon(
+                                      selected ? Icons.check_circle : Icons.person_add,
+                                      color: selected ? Colors.green : null,
+                                    ),
+                                    onTap: () => onSelected(user),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-
                     const SizedBox(height: 8),
-
-                    // Chips for selected workers
                     if (_selectedWorkers.isNotEmpty)
                       Wrap(
                         spacing: 8,
@@ -130,40 +161,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           );
                         }).toList(),
                       ),
-
-                    const SizedBox(height: 12),
-
-                    // Worker cards
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _filteredUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = _filteredUsers[index];
-                        final selected = _isSelected(user);
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: user.profilePicture.isNotEmpty
-                                  ? NetworkImage(user.profilePicture)
-                                  : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                            ),
-                            title: Text(user.fullName, textAlign: TextAlign.right),
-                            subtitle: Text(user.role, textAlign: TextAlign.right),
-                            trailing: IconButton(
-                              icon: Icon(
-                                selected ? Icons.person_remove : Icons.person_add,
-                                color: selected ? Colors.red : Colors.green,
-                              ),
-                              onPressed: () => _toggleUser(user),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: _priority,
@@ -213,9 +210,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _submitTask,
+                      onPressed: _isSubmitting ? null : _submitTask, // ✅ Prevent double tap
                       style: AppTheme.primaryButtonStyle,
-                      child: const Text("יצירת משימה"),
+                      child: _isSubmitting
+                          ? const CircularProgressIndicator()
+                          : const Text("יצירת משימה"),
                     ),
                   ],
                 ),
@@ -243,6 +242,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }
 
   Future<void> _submitTask() async {
+    if (_isSubmitting) return; // ✅ Prevent spam clicks
+
     if (!_formKey.currentState!.validate() ||
         _dueDate == null ||
         _dueTime == null ||
@@ -253,6 +254,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       );
       return;
     }
+
+    setState(() => _isSubmitting = true);
 
     final dueDateTime = DateTime(
       _dueDate!.year,
@@ -276,11 +279,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       comments: [],
       createdAt: Timestamp.now(),
       workerStatuses: {
-      for (var user in _selectedWorkers) user.uid: 'pending'
-    },
+        for (var user in _selectedWorkers) user.uid: 'pending'
+      },
     );
 
     await _taskService.createTask(newTask);
-    if (mounted) Navigator.pop(context);
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+
+    setState(() => _isSubmitting = false);
   }
 }

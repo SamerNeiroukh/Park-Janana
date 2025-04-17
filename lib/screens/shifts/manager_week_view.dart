@@ -22,6 +22,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
   final WorkerService _workerService = WorkerService();
 
   DateTime _currentWeekStart = DateTimeUtils.startOfWeek(DateTime.now());
+  bool _isNavigating = false; // ✅ Prevent multiple taps
 
   @override
   Widget build(BuildContext context) {
@@ -126,12 +127,16 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateShiftScreen()),
-          );
-        },
+        onPressed: _isNavigating
+            ? null
+            : () async {
+                setState(() => _isNavigating = true);
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CreateShiftScreen()),
+                );
+                if (mounted) setState(() => _isNavigating = false);
+              },
         style: AppTheme.primaryButtonStyle,
         child: const Text("➕ יצירת משמרת"),
       ),

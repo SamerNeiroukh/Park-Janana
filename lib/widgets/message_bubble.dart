@@ -29,134 +29,130 @@ class _MessageBubbleState extends State<MessageBubble> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isEditing = false;
   final TextEditingController _messageController = TextEditingController();
+
   String? _currentUserId;
   String? _currentUserRole;
+
+  String senderName = "מנהל";
+  String profileImage = AppConstants.defaultProfileImage;
 
   @override
   void initState() {
     super.initState();
     _messageController.text = widget.message;
     _getCurrentUser();
+    _getSenderData();
   }
 
   Future<void> _getCurrentUser() async {
     User? user = _auth.currentUser;
     if (user != null) {
-      setState(() {
-        _currentUserId = user.uid;
-      });
-
+      _currentUserId = user.uid;
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (userDoc.exists) {
-        setState(() {
-          _currentUserRole = userDoc['role']; // ✅ Fetch current user role
-        });
+        _currentUserRole = userDoc['role'];
       }
+      if (mounted) setState(() {});
     }
+  }
+
+  Future<void> _getSenderData() async {
+    final userDoc = await FirebaseService().getUser(widget.senderId);
+    if (userDoc.exists) {
+      final userData = userDoc.data() as Map<String, dynamic>;
+      senderName = userData['fullName'] ?? "מנהל";
+      profileImage = (userData['profile_picture'] != null && userData['profile_picture'].isNotEmpty)
+          ? userData['profile_picture']
+          : AppConstants.defaultProfileImage;
+    }
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseService().getUser(widget.senderId),
-      builder: (context, snapshot) {
-        String senderName = "מנהל";
-        String profileImage = AppConstants.defaultProfileImage;
+    DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(widget.timestamp);
+    String formattedTime =
+        "${messageTime.hour.toString().padLeft(2, '0')}:${messageTime.minute.toString().padLeft(2, '0')}";
 
-        if (snapshot.hasData && snapshot.data!.exists) {
-          var userData = snapshot.data!.data() as Map<String, dynamic>;
-          senderName = userData['fullName'] ?? "מנהל";
-          profileImage = (userData['profile_picture'] != null && userData['profile_picture'].isNotEmpty)
-              ? userData['profile_picture']
-              : AppConstants.defaultProfileImage;
-        }
+    bool canEditOrDelete = (_currentUserId == widget.senderId) || (_currentUserRole == "owner");
 
-        DateTime messageTime = DateTime.fromMillisecondsSinceEpoch(widget.timestamp);
-        String formattedTime =
-            "${messageTime.hour.toString().padLeft(2, '0')}:${messageTime.minute.toString().padLeft(2, '0')}";
-
-        bool canEditOrDelete =
-            (_currentUserId == widget.senderId) || (_currentUserRole == "owner"); // ✅ Only owner or message sender
-
-        return Directionality(
-          textDirection: TextDirection.rtl, // ✅ Ensure Right-to-Left alignment
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 25.0,
-                  backgroundImage: profileImage.startsWith('http')
-                      ? NetworkImage(profileImage)
-                      : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        senderName,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 25.0,
+              backgroundImage: profileImage.startsWith('http')
+                  ? NetworkImage(profileImage)
+                  : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    senderName,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    textAlign: TextAlign.right,
+                  ),
+                  if (_isEditing)
+                    TextField(
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.save, color: Colors.green),
+                          onPressed: _updateMessage,
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Text(
+                        widget.message,
+                        style: const TextStyle(fontSize: 14),
                         textAlign: TextAlign.right,
                       ),
-                      if (_isEditing)
-                        TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.save, color: Colors.green),
-                              onPressed: _updateMessage,
-                            ),
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.all(10.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: Text(
-                            widget.message,
-                            style: const TextStyle(fontSize: 14),
-                            textAlign: TextAlign.right,
-                          ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "🕒 $formattedTime ${messageTime.day}/${messageTime.month}/${messageTime.year}",
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          textAlign: TextAlign.right,
                         ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "🕒 $formattedTime ${messageTime.day}/${messageTime.month}/${messageTime.year}",
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
-                              textAlign: TextAlign.right,
-                            ),
-                            if (canEditOrDelete) ...[
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.orange, size: 18),
-                                onPressed: () => setState(() => _isEditing = true),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red, size: 18),
-                                onPressed: _deleteMessage,
-                              ),
-                            ]
-                          ],
-                        ),
-                      ),
-                    ],
+                        if (canEditOrDelete) ...[
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.orange, size: 18),
+                            onPressed: () => setState(() => _isEditing = true),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red, size: 18),
+                            onPressed: _deleteMessage,
+                          ),
+                        ]
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
