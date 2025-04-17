@@ -1,9 +1,10 @@
+// unchanged import statements
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/task_model.dart';
 import '../../models/user_model.dart';
-import '../../screens/task_details_screen.dart';
+import 'task_details_screen.dart';
 import '../../screens/tasks/create_task_screen.dart';
 import '../../screens/tasks/edit_task_screen.dart';
 import '../../services/task_service.dart';
@@ -28,18 +29,15 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   String selectedStatus = 'all';
   DateTime selectedDate = DateTime.now();
 
+  bool _isNavigating = false; // ✅ prevent multiple FAB presses
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primary,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateTaskScreen()),
-          );
-        },
+        onPressed: _handleCreateTaskPress,
         label: const Text("יצירת משימה", style: TextStyle(color: Colors.white)),
         icon: const Icon(Icons.add, color: Colors.white),
       ),
@@ -75,17 +73,13 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       }).toList();
 
                       if (selectedStatus != 'all') {
-                        tasks = tasks
-                            .where((t) => t.status == selectedStatus)
-                            .toList();
+                        tasks = tasks.where((t) => t.status == selectedStatus).toList();
                       }
 
                       return ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         itemCount: tasks.length,
-                        itemBuilder: (context, index) =>
-                            _buildTaskCard(tasks[index]),
+                        itemBuilder: (context, index) => _buildTaskCard(tasks[index]),
                       );
                     },
                   ),
@@ -95,9 +89,22 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     );
   }
 
+  void _handleCreateTaskPress() async {
+    if (_isNavigating) return;
+    setState(() => _isNavigating = true);
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateTaskScreen()),
+    );
+
+    if (mounted) {
+      setState(() => _isNavigating = false);
+    }
+  }
+
   Widget _buildDateNavigation() {
-    final String formattedDate =
-        DateFormat('dd/MM/yyyy').format(selectedDate);
+    final String formattedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
 
     return Padding(
       padding: const EdgeInsets.only(top: 4.0, bottom: 10.0),
@@ -125,14 +132,12 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               children: [
                 Text(
                   formattedDate,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _pickDate,
-                  child: const Icon(Icons.calendar_today,
-                      size: 20, color: AppColors.primary),
+                  child: const Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
                 ),
               ],
             ),
@@ -193,14 +198,11 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isSelected ? color : color.withOpacity(0.3),
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: isSelected ? 4 : 0,
                 ),
                 child: FittedBox(
-                  child: Text(label,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -219,8 +221,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-              builder: (context) => TaskDetailsScreen(task: task)),
+          MaterialPageRoute(builder: (context) => TaskDetailsScreen(task: task)),
         );
       },
       child: Container(
@@ -256,17 +257,16 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                   onSelected: (value) {
                     if (value == 'edit') {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => EditTaskScreen(task: task)));
+                        context,
+                        MaterialPageRoute(builder: (_) => EditTaskScreen(task: task)),
+                      );
                     } else if (value == 'delete') {
                       _confirmDeleteTask(task);
                     }
                   },
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: 'edit', child: Text("✏️ ערוך")),
-                    const PopupMenuItem(
-                        value: 'delete', child: Text("🗑️ מחק")),
+                    const PopupMenuItem(value: 'delete', child: Text("🗑️ מחק")),
                   ],
                 )
               ],
@@ -274,19 +274,12 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
             const SizedBox(height: 10),
             Text(
               task.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             const SizedBox(height: 4),
             Text(
               task.description,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 15, color: Colors.black87),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -297,8 +290,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 FutureBuilder<List<UserModel>>(
                   future: _workerService.getUsersByIds(task.assignedTo),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty)
-                      return const SizedBox.shrink();
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
                     return Row(
                       children: snapshot.data!.take(3).map((user) {
                         return Container(
@@ -307,9 +299,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                             radius: 16,
                             backgroundImage: user.profilePicture.isNotEmpty
                                 ? NetworkImage(user.profilePicture)
-                                : const AssetImage(
-                                        'assets/images/default_profile.png')
-                                    as ImageProvider,
+                                : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                           ),
                         );
                       }).toList(),
@@ -318,11 +308,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 ),
                 Text(
                   dateFormatted,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
                 ),
               ],
             )
@@ -350,8 +336,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     }
     return Chip(
       backgroundColor: color.withOpacity(0.15),
-      label: Text(label,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
     );
   }
 

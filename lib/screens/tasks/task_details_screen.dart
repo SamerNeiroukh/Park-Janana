@@ -5,6 +5,8 @@ import 'package:park_janana/models/task_model.dart';
 import 'package:park_janana/models/user_model.dart';
 import 'package:park_janana/services/task_service.dart';
 import 'package:park_janana/services/worker_service.dart';
+import 'package:park_janana/widgets/task/task_description_section.dart';
+import 'package:park_janana/widgets/task/task_comments_section.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +28,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   List<UserModel> _assignedWorkers = [];
   bool _isWorker = false;
   late TaskModel task;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -52,14 +55,25 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.isEmpty) return;
-    await _taskService.addComment(task.id, {
-      'by': _currentUser!.uid,
-      'message': _commentController.text,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
-    _commentController.clear();
-    await _fetchTaskAndWorkers();
+    if (_commentController.text.isEmpty || _isSubmitting) return;
+    setState(() => _isSubmitting = true);
+
+    try {
+      await _taskService.addComment(task.id, {
+        'by': _currentUser!.uid,
+        'message': _commentController.text,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+      _commentController.clear();
+      await _fetchTaskAndWorkers();
+    } catch (e) {
+      debugPrint("Failed to submit comment: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("שגיאה בשליחת תגובה")),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   Widget _buildStatusChip(String status) {
@@ -134,6 +148,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final currentWorkerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
+    final String time = DateFormat('HH:mm').format(task.dueDate.toDate());
+    final String dateFormatted = DateFormat('dd/MM/yyyy').format(task.dueDate.toDate());
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -160,40 +176,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       Text(task.title,
                           style: AppTheme.screenTitle.copyWith(fontSize: 24)),
                       const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(task.description, style: AppTheme.bodyText),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("מחלקה: ${_getDepartmentName(task.department)}",
-                                    style: AppTheme.bodyText),
-                                Text("דחיפות: ${_getPriorityName(task.priority)}",
-                                    style: AppTheme.bodyText),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "מועד סיום: ${DateFormat('dd/MM/yyyy – HH:mm').format(task.dueDate.toDate())}",
-                              style: AppTheme.bodyText,
-                            ),
-                          ],
-                        ),
+                      TaskDescriptionSection(
+                        description: task.description,
+                        time: time,
+                        dateFormatted: dateFormatted,
+                        isManager: false,
+                        task: task,
                       ),
                       const SizedBox(height: 24),
                       Text("עובדים שהוקצו למשימה", style: AppTheme.sectionTitle),
@@ -215,33 +203,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         );
                       }),
                       const SizedBox(height: 24),
-                      Text("תגובות", style: AppTheme.sectionTitle),
-                      const SizedBox(height: 8),
-                      if (task.comments.isEmpty)
-                        Text("אין תגובות עדיין", style: AppTheme.bodyText)
-                      else
-                        ...task.comments.map((comment) {
-                          final message = comment['message'] ?? '';
-                          final timestamp = comment['timestamp'];
-                          final time = timestamp is int
-                              ? DateTime.fromMillisecondsSinceEpoch(timestamp)
-                              : DateTime.now();
-                          return Card(
-                            elevation: 1,
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              leading: const Icon(Icons.comment, color: AppColors.primary),
-                              title: Text(message.toString(), textAlign: TextAlign.right),
-                              subtitle: Text(
-                                DateFormat('dd/MM/yyyy HH:mm').format(time),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                          );
-                        }),
+                      TaskCommentsSection(
+                        taskId: task.id,
+                        comments: task.comments,
+                      ),
                       const SizedBox(height: 16),
                       TextField(
                         controller: _commentController,
@@ -249,9 +214,18 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton(
-                        onPressed: _addComment,
+                        onPressed: _isSubmitting ? null : _addComment,
                         style: AppTheme.primaryButtonStyle,
-                        child: const Text("💬 שלח תגובה"),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text("💬 שלח תגובה"),
                       ),
                       const SizedBox(height: 32),
                       if (_isWorker && currentWorkerStatus == 'pending')

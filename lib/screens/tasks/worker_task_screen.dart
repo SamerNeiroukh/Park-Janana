@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:park_janana/screens/tasks/worker_task_details.dart';
 import '../../models/task_model.dart';
 import '../../services/task_service.dart';
 import '../../widgets/user_header.dart';
@@ -178,16 +179,25 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
   }
 
   Widget _buildTaskCard(TaskModel task) {
-    final workerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
-    final DateTime date = task.dueDate.toDate();
-    final String time = DateFormat('HH:mm').format(date);
-    Color bgColor = workerStatus == 'done'
-        ? Colors.green.shade50
-        : workerStatus == 'in_progress'
-            ? Colors.orange.shade50
-            : Colors.white;
+  final workerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
+  final DateTime date = task.dueDate.toDate();
+  final String time = DateFormat('HH:mm').format(date);
+  Color bgColor = workerStatus == 'done'
+      ? Colors.green.shade50
+      : workerStatus == 'in_progress'
+          ? Colors.orange.shade50
+          : Colors.white;
 
-    return Container(
+  return InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WorkerTaskDetailsScreen(task: task),
+        ),
+      );
+    },
+    child: Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -244,8 +254,9 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
           )
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildWorkerStatusChip(String status) {
     Color color;
@@ -351,7 +362,7 @@ class _LiveCountdownTimerState extends State<LiveCountdownTimer> {
       label = days >= 0 ? "בעוד $days ימים" : "איחור של ${days.abs()} ימים";
       color = days >= 0 ? Colors.black : Colors.red;
     } else if (_remaining.isNegative) {
-      label = "⏰ איחור";
+      label = "איחור";
       color = Colors.red;
     } else {
       final hours = _remaining.inHours;

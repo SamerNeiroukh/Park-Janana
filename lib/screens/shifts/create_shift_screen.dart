@@ -24,6 +24,8 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
 
+  bool _isCreating = false;
+
   final List<String> departments = [
     "פארק חבלים",
     "פיינטבול",
@@ -39,22 +41,38 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   }
 
   void _createShift() async {
-    await _shiftService.createShift(
-      date: DateTimeUtils.formatDate(_selectedDate),
-      startTime: DateTimeUtils.formatTime(_startTime),
-      endTime: DateTimeUtils.formatTime(_endTime),
-      department: _selectedDepartment,
-      maxWorkers: _maxWorkers,
-    );
+    if (_isCreating) return;
+    setState(() => _isCreating = true);
 
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("✅ משמרת נוצרה בהצלחה!", style: AppTheme.bodyText),
-          backgroundColor: AppColors.success,
-        ),
+    try {
+      await _shiftService.createShift(
+        date: DateTimeUtils.formatDate(_selectedDate),
+        startTime: DateTimeUtils.formatTime(_startTime),
+        endTime: DateTimeUtils.formatTime(_endTime),
+        department: _selectedDepartment,
+        maxWorkers: _maxWorkers,
       );
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("✅ משמרת נוצרה בהצלחה!", style: AppTheme.bodyText),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("שגיאה ביצירת משמרת: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCreating = false);
     }
   }
 
@@ -72,7 +90,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             Text("יצירת משמרת חדשה", style: AppTheme.screenTitle),
             const SizedBox(height: 20),
 
-            // 📅 **Select Date**
             Align(
               alignment: Alignment.centerRight,
               child: Text("בחר תאריך", style: AppTheme.sectionTitle),
@@ -85,7 +102,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             const SizedBox(height: 20),
 
-            // 🏢 **Select Department**
             Align(
               alignment: Alignment.centerRight,
               child: Text("בחר מחלקה", style: AppTheme.sectionTitle),
@@ -108,7 +124,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             const SizedBox(height: 20),
 
-            // 👥 **Select Maximum Workers**
             Align(
               alignment: Alignment.centerRight,
               child: Text("מספר מקסימלי של עובדים", style: AppTheme.sectionTitle),
@@ -128,7 +143,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             const SizedBox(height: 20),
 
-            // ⏰ **Select Start Time**
             Align(
               alignment: Alignment.centerRight,
               child: Text("זמן התחלה", style: AppTheme.sectionTitle),
@@ -141,7 +155,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             const SizedBox(height: 20),
 
-            // ⏰ **Select End Time**
             Align(
               alignment: Alignment.centerRight,
               child: Text("זמן סיום", style: AppTheme.sectionTitle),
@@ -154,15 +167,15 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             const SizedBox(height: 30),
 
-            // ✅ **Create Shift Button**
             ElevatedButton(
               style: AppTheme.primaryButtonStyle,
-              onPressed: _createShift,
-              child: Text("צור משמרת", style: AppTheme.buttonTextStyle),
+              onPressed: _isCreating ? null : _createShift,
+              child: _isCreating
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text("צור משמרת", style: AppTheme.buttonTextStyle),
             ),
             const SizedBox(height: 15),
 
-            // ❌ **Cancel Button**
             TextButton(
               onPressed: () {
                 Navigator.pop(context);

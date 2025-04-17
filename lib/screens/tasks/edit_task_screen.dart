@@ -1,18 +1,16 @@
+// unchanged import statements
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uuid/uuid.dart';
-import 'package:intl/intl.dart';
-
-import '../../models/task_model.dart';
 import '../../services/task_service.dart';
+import '../../models/task_model.dart';
+import '../../models/user_model.dart';
 import '../../widgets/user_header.dart';
-import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
+import '../../constants/app_colors.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final TaskModel task;
-
   const EditTaskScreen({super.key, required this.task});
 
   @override
@@ -30,120 +28,63 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   String _priority = 'medium';
   String _department = 'general';
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TaskService _taskService = TaskService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<Map<String, dynamic>> _usernameSuggestions = [];
-  final List<Map<String, dynamic>> _selectedWorkers = [];
+  List<UserModel> _allUsers = [];
+  List<UserModel> _filteredUsers = [];
+  List<UserModel> _selectedWorkers = [];
+
+  bool _isSubmitting = false; // ✅ Anti-double-tap flag
 
   @override
   void initState() {
     super.initState();
-    _titleController.text = widget.task.title;
-    _descriptionController.text = widget.task.description;
-    _dueDate = widget.task.dueDate.toDate();
-    _dueTime = TimeOfDay.fromDateTime(_dueDate!);
-    _priority = widget.task.priority;
-    _department = widget.task.department;
-
-    for (String uid in widget.task.assignedTo) {
-      _firestore.collection('users').doc(uid).get().then((doc) {
-        if (doc.exists) {
-          setState(() {
-            _selectedWorkers.add({
-              'uid': doc.id,
-              'username': doc['username'] ?? '',
-            });
-          });
-        }
-      });
-    }
+    _initializeForm();
   }
 
-  Future<void> _searchUsernames(String query) async {
-    if (query.isEmpty) {
-      setState(() => _usernameSuggestions = []);
-      return;
-    }
+  Future<void> _initializeForm() async {
+    _titleController.text = widget.task.title;
+    _descriptionController.text = widget.task.description;
+    _department = widget.task.department;
+    _priority = widget.task.priority;
+    final due = widget.task.dueDate.toDate();
+    _dueDate = DateTime(due.year, due.month, due.day);
+    _dueTime = TimeOfDay(hour: due.hour, minute: due.minute);
 
-    final results = await _firestore
-        .collection('users')
-        .where('username', isGreaterThanOrEqualTo: query)
-        .where('username', isLessThanOrEqualTo: '$query\uf8ff')
-        .limit(5)
-        .get();
+    final query = await _firestore.collection('users').get();
+    final users = query.docs.map((doc) {
+      final data = doc.data();
+      return UserModel.fromMap({...data, 'uid': doc.id});
+    }).toList();
 
     setState(() {
-      _usernameSuggestions = results.docs
-          .map((doc) => {
-                'uid': doc.id,
-                'username': doc['username'] ?? '',
-              })
-          .toList();
+      _allUsers = users;
+      _filteredUsers = users;
+      _selectedWorkers = users.where((u) => widget.task.assignedTo.contains(u.uid)).toList();
     });
   }
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _dueDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (picked != null) setState(() => _dueDate = picked);
+  void _filterUsers(String query) {
+    final lower = query.toLowerCase();
+    final filtered = _allUsers.where((user) {
+      return user.fullName.toLowerCase().contains(lower) || user.role.toLowerCase().contains(lower);
+    }).toList();
+    setState(() => _filteredUsers = filtered);
   }
 
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: _dueTime ?? TimeOfDay.now(),
-    );
-    if (picked != null) setState(() => _dueTime = picked);
+  void _toggleUser(UserModel user) {
+    setState(() {
+      if (_selectedWorkers.any((u) => u.uid == user.uid)) {
+        _selectedWorkers.removeWhere((u) => u.uid == user.uid);
+      } else {
+        _selectedWorkers.add(user);
+      }
+    });
   }
 
-  Future<void> _submitTask() async {
-    if (!_formKey.currentState!.validate() ||
-        _dueDate == null ||
-        _dueTime == null ||
-        _selectedWorkers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("יש למלא את כל השדות ולבחור עובדים")),
-      );
-      return;
-    }
-
-    final dueDateTime = DateTime(
-      _dueDate!.year,
-      _dueDate!.month,
-      _dueDate!.day,
-      _dueTime!.hour,
-      _dueTime!.minute,
-    );
-
-    // Initialize each selected worker with 'pending' status
-    final Map<String, String> workerStatuses = {
-      for (var u in _selectedWorkers) u['uid'] as String: 'pending'
-    };
-
-    final updatedTask = TaskModel(
-      id: widget.task.id,
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      department: _department,
-      createdBy: widget.task.createdBy,
-      assignedTo: _selectedWorkers.map((u) => u['uid'] as String).toList(),
-      dueDate: Timestamp.fromDate(dueDateTime),
-      priority: _priority,
-      status: widget.task.status,
-      attachments: widget.task.attachments,
-      comments: widget.task.comments,
-      createdAt: widget.task.createdAt,
-      workerStatuses: workerStatuses, // NEW
-    );
-
-    await _taskService.updateTask(updatedTask.id, updatedTask.toMap());
-
-    if (mounted) Navigator.pop(context);
+  bool _isSelected(UserModel user) {
+    return _selectedWorkers.any((u) => u.uid == user.uid);
   }
 
   @override
@@ -155,14 +96,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           const UserHeader(),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text("עריכת משימה", style: AppTheme.screenTitle),
-                    const SizedBox(height: 16),
+                    Text("עריכת משימה", style: AppTheme.sectionTitle),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _titleController,
                       decoration: AppTheme.inputDecoration(hintText: "כותרת המשימה"),
@@ -173,43 +114,73 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       controller: _descriptionController,
                       maxLines: 3,
                       decoration: AppTheme.inputDecoration(hintText: "תיאור המשימה"),
-                      validator: (val) => val == null || val.isEmpty ? "שדה חובה" : null,
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _searchController,
-                      decoration: AppTheme.inputDecoration(hintText: "חפש שם משתמש"),
-                      onChanged: _searchUsernames,
-                    ),
-                    if (_usernameSuggestions.isNotEmpty)
-                      ..._usernameSuggestions.map((user) => ListTile(
-                            title: Text(user['username']),
-                            trailing: const Icon(Icons.person_add, color: AppColors.primary),
-                            onTap: () {
-                              if (!_selectedWorkers.any((u) => u['uid'] == user['uid'])) {
-                                setState(() {
-                                  _selectedWorkers.add(user);
-                                  _searchController.clear();
-                                  _usernameSuggestions.clear();
-                                });
-                              }
-                            },
-                          )),
-                    Wrap(
-                      spacing: 8.0,
-                      children: _selectedWorkers
-                          .map((user) => Chip(
-                                label: Text(user['username']),
-                                deleteIcon: const Icon(Icons.close),
-                                onDeleted: () {
-                                  setState(() {
-                                    _selectedWorkers.removeWhere((u) => u['uid'] == user['uid']);
-                                  });
+                    const SizedBox(height: 16),
+                    Text("הקצאת עובדים", style: AppTheme.sectionTitle),
+                    const SizedBox(height: 8),
+                    Autocomplete<UserModel>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return const Iterable<UserModel>.empty();
+                        }
+                        return _allUsers.where((user) =>
+                          user.fullName.toLowerCase().contains(textEditingValue.text.toLowerCase()) ||
+                          user.role.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                      },
+                      displayStringForOption: (UserModel user) => user.fullName,
+                      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                        _searchController.text = controller.text;
+                        return TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: AppTheme.inputDecoration(hintText: "🔍 חיפוש לפי שם או תפקיד"),
+                        );
+                      },
+                      onSelected: (UserModel user) {
+                        _toggleUser(user);
+                      },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topRight,
+                          child: Material(
+                            elevation: 4.0,
+                            child: SizedBox(
+                              height: 200.0,
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final UserModel user = options.elementAt(index);
+                                  final selected = _isSelected(user);
+                                  return ListTile(
+                                    title: Text(user.fullName),
+                                    subtitle: Text(user.role),
+                                    trailing: Icon(
+                                      selected ? Icons.check_circle : Icons.person_add,
+                                      color: selected ? Colors.green : null,
+                                    ),
+                                    onTap: () => onSelected(user),
+                                  );
                                 },
-                              ))
-                          .toList(),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    if (_selectedWorkers.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        children: _selectedWorkers.map((user) {
+                          return Chip(
+                            label: Text(user.fullName),
+                            deleteIcon: const Icon(Icons.close),
+                            onDeleted: () => _toggleUser(user),
+                          );
+                        }).toList(),
+                      ),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: _priority,
                       decoration: AppTheme.inputDecoration(hintText: "עדיפות"),
@@ -240,39 +211,103 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: _pickDate,
-                            child: Text(
-                              _dueDate == null
-                                  ? "בחר תאריך"
-                                  : "${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}",
-                            ),
+                            child: Text(_dueDate == null
+                                ? "בחר תאריך"
+                                : "${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}"),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: OutlinedButton(
                             onPressed: _pickTime,
-                            child: Text(
-                              _dueTime == null
-                                  ? "בחר שעה"
-                                  : "${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}",
-                            ),
+                            child: Text(_dueTime == null
+                                ? "בחר שעה"
+                                : "${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}"),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _submitTask,
+                      onPressed: _isSubmitting ? null : _submitEdit, // ✅ Disabled during submission
                       style: AppTheme.primaryButtonStyle,
-                      child: const Text("💾 שמור שינויים"),
+                      child: _isSubmitting
+                          ? const CircularProgressIndicator()
+                          : const Text("עדכון משימה"),
                     ),
                   ],
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) setState(() => _dueDate = picked);
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _dueTime ?? TimeOfDay.now());
+    if (picked != null) setState(() => _dueTime = picked);
+  }
+
+  Future<void> _submitEdit() async {
+    if (_isSubmitting) return; // ✅ Prevent double submission
+
+    if (!_formKey.currentState!.validate() ||
+        _dueDate == null ||
+        _dueTime == null ||
+        _selectedWorkers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("יש למלא את כל השדות ולבחור עובדים")),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final dueDateTime = DateTime(
+      _dueDate!.year,
+      _dueDate!.month,
+      _dueDate!.day,
+      _dueTime!.hour,
+      _dueTime!.minute,
+    );
+
+    final updatedTask = TaskModel(
+      id: widget.task.id,
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      department: _department,
+      createdBy: widget.task.createdBy,
+      assignedTo: _selectedWorkers.map((u) => u.uid).toList(),
+      dueDate: Timestamp.fromDate(dueDateTime),
+      priority: _priority,
+      status: widget.task.status,
+      attachments: widget.task.attachments,
+      comments: widget.task.comments,
+      createdAt: widget.task.createdAt,
+      workerStatuses: {
+        for (var user in _selectedWorkers)
+          user.uid: widget.task.workerStatuses[user.uid] ?? 'pending'
+      },
+    );
+
+    await _taskService.updateTask(widget.task.id, updatedTask.toMap());
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+
+    setState(() => _isSubmitting = false);
   }
 }

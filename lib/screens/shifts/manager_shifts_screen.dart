@@ -23,16 +23,16 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
   final WorkerService _workerService = WorkerService();
   late TabController _tabController;
   DateTime _currentWeekStart = DateTimeUtils.startOfWeek(DateTime.now());
-  late DateTime _selectedDay; // ✅ Stores the selected day for shift creation
+  late DateTime _selectedDay;
+
+  bool _isNavigating = false; // ✅ Add tap-spam prevention flag
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = DateTime.now(); // ✅ Default selected day is today
-    int initialTabIndex = _selectedDay.weekday %
-        7; // ✅ Ensures correct tab selection (Sunday is index 0)
-    _tabController =
-        TabController(length: 7, vsync: this, initialIndex: initialTabIndex);
+    _selectedDay = DateTime.now();
+    int initialTabIndex = _selectedDay.weekday % 7;
+    _tabController = TabController(length: 7, vsync: this, initialIndex: initialTabIndex);
   }
 
   @override
@@ -52,17 +52,14 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
           _buildTabBar(),
           Expanded(
             child: SingleChildScrollView(
-              // ✅ Ensures content is scrollable
               child: Stack(
                 children: [
                   SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.7, // ✅ Prevents overflow
+                    height: MediaQuery.of(context).size.height * 0.7,
                     child: TabBarView(
                       controller: _tabController,
                       children: List.generate(7, (index) {
-                        DateTime day =
-                            _currentWeekStart.add(Duration(days: index));
+                        DateTime day = _currentWeekStart.add(Duration(days: index));
                         return _buildShiftList(day);
                       }),
                     ),
@@ -91,8 +88,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
           IconButton(
             icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
-              _currentWeekStart =
-                  _currentWeekStart.subtract(const Duration(days: 7));
+              _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
             }),
           ),
           Expanded(
@@ -106,8 +102,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
           IconButton(
             icon: Icon(Icons.arrow_forward, color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
-              _currentWeekStart =
-                  _currentWeekStart.add(const Duration(days: 7));
+              _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
             }),
           ),
         ],
@@ -117,42 +112,41 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
 
   Widget _buildTabBar() {
     return Container(
-  height: 70, // ✅ Set fixed height for stability
-  color: AppColors.surface,
-  child: DefaultTabController(
-    length: 7,
-    child: TabBar(
-      controller: _tabController,
-      labelColor: AppColors.onPrimary,
-      unselectedLabelColor: AppColors.textSecondary,
-      indicator: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      isScrollable: true, // ✅ Ensures tabs remain scrollable
-      tabs: List.generate(7, (index) {
-        DateTime day = _currentWeekStart.add(Duration(days: index));
-        return SizedBox( // ✅ Correct way to set equal width
-          width: MediaQuery.of(context).size.width / 7, // ✅ Even width for all tabs
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                DateTimeUtils.getHebrewWeekdayName(day.weekday),
-                style: AppTheme.tabTextStyle,
-              ),
-              Text(
-                DateFormat('dd').format(day), 
-                style: AppTheme.bodyText.copyWith(fontSize: 14, color: AppColors.textSecondary),
-              ),
-            ],
+      height: 70,
+      color: AppColors.surface,
+      child: DefaultTabController(
+        length: 7,
+        child: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.onPrimary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicator: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }),
-    ),
-  ),
-);
-
+          isScrollable: true,
+          tabs: List.generate(7, (index) {
+            DateTime day = _currentWeekStart.add(Duration(days: index));
+            return SizedBox(
+              width: MediaQuery.of(context).size.width / 7,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    DateTimeUtils.getHebrewWeekdayName(day.weekday),
+                    style: AppTheme.tabTextStyle,
+                  ),
+                  Text(
+                    DateFormat('dd').format(day),
+                    style: AppTheme.bodyText.copyWith(fontSize: 14, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
   }
 
   Widget _buildShiftList(DateTime selectedDay) {
@@ -212,16 +206,19 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
     return FloatingActionButton.extended(
       backgroundColor: AppColors.primary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onPressed: () {
-        DateTime selectedDate = _currentWeekStart.add(Duration(
-            days: _tabController.index)); // ✅ Pass the selected tab's date
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  CreateShiftScreen(initialDate: selectedDate)),
-        );
-      },
+      onPressed: _isNavigating
+          ? null
+          : () async {
+              setState(() => _isNavigating = true);
+              DateTime selectedDate =
+                  _currentWeekStart.add(Duration(days: _tabController.index));
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CreateShiftScreen(initialDate: selectedDate)),
+              );
+              if (mounted) setState(() => _isNavigating = false);
+            },
       icon: const Icon(Icons.add, size: 30, color: Colors.white),
       label: Text("יצירת משמרת", style: AppTheme.buttonTextStyle),
     );

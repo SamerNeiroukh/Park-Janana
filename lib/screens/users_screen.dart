@@ -21,6 +21,9 @@ class _UsersScreenState extends State<UsersScreen> {
   final WorkerService _workerService = WorkerService();
   bool _isLoading = true;
 
+  // ✅ Track which workers are being processed to prevent double taps
+  final Set<String> _inProgressWorkerIds = {};
+
   // ✅ Cache storage to store fetched users
   static final Map<String, List<UserModel>> _userCache = {};
 
@@ -32,7 +35,6 @@ class _UsersScreenState extends State<UsersScreen> {
 
   Future<void> fetchAllUsers({bool forceRefresh = false}) async {
     if (!forceRefresh && _userCache.containsKey('allUsers')) {
-      // ✅ Use cached users instead of refetching
       setState(() {
         users = _userCache['allUsers']!;
         filteredUsers = users;
@@ -52,14 +54,12 @@ class _UsersScreenState extends State<UsersScreen> {
           users = fetchedUsers;
           filteredUsers = users;
           _isLoading = false;
-          _userCache['allUsers'] = users; // ✅ Store in cache
+          _userCache['allUsers'] = users;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -78,25 +78,41 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   Future<void> assignWorkerToShift(String workerId) async {
-    await _workerService.assignWorkerToShift(widget.shiftId, workerId);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("✔️ עובד נוסף למשמרת בהצלחה"),
-    ));
+    if (_inProgressWorkerIds.contains(workerId)) return;
+    setState(() => _inProgressWorkerIds.add(workerId));
 
-    setState(() {
-      widget.assignedWorkerIds.add(workerId);
-    });
+    try {
+      await _workerService.assignWorkerToShift(widget.shiftId, workerId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✔️ עובד נוסף למשמרת בהצלחה")),
+        );
+        setState(() {
+          widget.assignedWorkerIds.add(workerId);
+        });
+      }
+    } finally {
+      setState(() => _inProgressWorkerIds.remove(workerId));
+    }
   }
 
   Future<void> removeWorkerFromShift(String workerId) async {
-    await _workerService.removeWorkerFromShift(widget.shiftId, workerId);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("❌ עובד הוסר מהמשמרת"),
-    ));
+    if (_inProgressWorkerIds.contains(workerId)) return;
+    setState(() => _inProgressWorkerIds.add(workerId));
 
-    setState(() {
-      widget.assignedWorkerIds.remove(workerId);
-    });
+    try {
+      await _workerService.removeWorkerFromShift(widget.shiftId, workerId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ עובד הוסר מהמשמרת")),
+        );
+        setState(() {
+          widget.assignedWorkerIds.remove(workerId);
+        });
+      }
+    } finally {
+      setState(() => _inProgressWorkerIds.remove(workerId));
+    }
   }
 
   @override
@@ -105,7 +121,6 @@ class _UsersScreenState extends State<UsersScreen> {
       body: Column(
         children: [
           const UserHeader(),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TextField(
@@ -120,10 +135,7 @@ class _UsersScreenState extends State<UsersScreen> {
               onChanged: filterUsers,
             ),
           ),
-
           const SizedBox(height: 10.0),
-
-          // ✅ Pull-to-refresh added
           Expanded(
             child: RefreshIndicator(
               onRefresh: () => fetchAllUsers(forceRefresh: true),
@@ -135,12 +147,11 @@ class _UsersScreenState extends State<UsersScreen> {
                           itemCount: filteredUsers.length,
                           itemBuilder: (context, index) {
                             final worker = filteredUsers[index];
-                            final bool isAssigned = widget.assignedWorkerIds.contains(worker.uid);
+                            final isAssigned = widget.assignedWorkerIds.contains(worker.uid);
+                            final isProcessing = _inProgressWorkerIds.contains(worker.uid);
 
                             return Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
                               elevation: 3,
                               margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                               child: ListTile(
@@ -159,16 +170,24 @@ class _UsersScreenState extends State<UsersScreen> {
                                 ),
                                 subtitle: Text(worker.role, textAlign: TextAlign.right),
                                 leading: IconButton(
-                                  icon: Icon(
-                                    isAssigned ? Icons.person_remove : Icons.person_add,
-                                    color: isAssigned ? Colors.red : Colors.green,
-                                    size: 24,
-                                  ),
-                                  onPressed: () {
-                                    isAssigned
-                                        ? removeWorkerFromShift(worker.uid)
-                                        : assignWorkerToShift(worker.uid);
-                                  },
+                                  icon: isProcessing
+                                      ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : Icon(
+                                          isAssigned ? Icons.person_remove : Icons.person_add,
+                                          color: isAssigned ? Colors.red : Colors.green,
+                                          size: 24,
+                                        ),
+                                  onPressed: isProcessing
+                                      ? null
+                                      : () {
+                                          isAssigned
+                                              ? removeWorkerFromShift(worker.uid)
+                                              : assignWorkerToShift(worker.uid);
+                                        },
                                 ),
                               ),
                             );
