@@ -23,4 +23,5 @@ class AppColors {
   static const Color surface = Color(0xFFFFFFFF);
   static const Color onPrimary = Colors.white;
   static const Color border = Color(0xFFD1D1D1);
+  static const Color lightGreen = Color.fromARGB(255, 117, 192, 119);
 }

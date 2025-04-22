@@ -13,34 +13,36 @@ class AuthService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // 🟢 Create a new user with a default profile picture uploaded to Firebase
-  Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
-    try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      String uid = userCredential.user!.uid;
+Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
+  try {
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    String uid = userCredential.user!.uid;
 
-      // ✅ Upload default profile picture to Firebase Storage
-      String defaultProfilePictureUrl = await _uploadDefaultProfilePicture(uid);
+    // ✅ Upload default profile picture to Firebase Storage
+    String defaultProfilePictureUrl = await _uploadDefaultProfilePicture(uid);
 
-      await _firebaseService.addUser({
-        'uid': uid,
-        'email': email,
-        'fullName': fullName,
-        'idNumber': idNumber,
-        'phoneNumber': phoneNumber,
-        'profile_picture': defaultProfilePictureUrl,
-        'role': 'worker',
-      });
+    // ✅ Add user to Firestore with approved: false
+    await _firebaseService.addUser({
+      'uid': uid,
+      'email': email,
+      'fullName': fullName,
+      'idNumber': idNumber,
+      'phoneNumber': phoneNumber,
+      'profile_picture': defaultProfilePictureUrl,
+      'role': 'worker',
+      'approved': false, // 🔥 This line is required
+    });
 
-      // ✅ Cache user role
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userRole', 'worker');
-    } catch (e) {
-      throw CustomException('שגיאה ביצירת משתמש.');
-    }
+    // ✅ Cache user role
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userRole', 'worker');
+  } catch (e) {
+    throw CustomException('שגיאה ביצירת משתמש.');
   }
+}
 
   // 🟢 Upload default profile picture to Firebase Storage
   Future<String> _uploadDefaultProfilePicture(String uid) async {

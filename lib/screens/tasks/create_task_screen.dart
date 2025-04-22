@@ -270,7 +270,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       department: _department,
-      createdBy: _currentUser!.uid,
+      createdBy: _currentUser.uid,
       assignedTo: _selectedWorkers.map((u) => u.uid).toList(),
       dueDate: Timestamp.fromDate(dueDateTime),
       priority: _priority,

@@ -5,7 +5,8 @@ class UserModel {
   final String idNumber;
   final String phoneNumber;
   final String profilePicture;
-  final String role; // Added role field
+  final String role;
+  final List<String> licensedDepartments; // 🆕 New field
 
   UserModel({
     required this.uid,
@@ -15,6 +16,7 @@ class UserModel {
     required this.phoneNumber,
     required this.profilePicture,
     required this.role,
+    this.licensedDepartments = const [], // Default: not licensed for any department
   });
 
   Map<String, dynamic> toMap() {
@@ -26,7 +28,8 @@ class UserModel {
       'idNumber': idNumber,
       'phoneNumber': phoneNumber,
       'profile_picture': profilePicture,
-      'role': role, 
+      'role': role,
+      'licensedDepartments': licensedDepartments, // 🆕 Save licenses to Firestore
     };
   }
 
@@ -40,6 +43,7 @@ class UserModel {
       phoneNumber: map['phoneNumber'] ?? '',
       profilePicture: map['profile_picture'] ?? '',
       role: map['role'] ?? 'worker',
+      licensedDepartments: List<String>.from(map['licensedDepartments'] ?? []), // 🆕 Read licenses
     );
   }
 }

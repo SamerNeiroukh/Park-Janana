@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:park_janana/config/departments.dart';
 import 'package:park_janana/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/user_header.dart';
@@ -35,10 +37,31 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     final pickedFile = await ImagePicker().pickImage(source: source);
 
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-      _confirmUpload();
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 90,
+        aspectRatioPresets: [CropAspectRatioPreset.square],
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'חתוך תמונה',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'חתוך תמונה',
+            aspectRatioLockEnabled: true,
+          ),
+        ],
+      );
+
+      if (croppedFile != null) {
+        setState(() {
+          _imageFile = File(croppedFile.path);
+        });
+        _confirmUpload();
+      }
     }
   }
 
@@ -46,8 +69,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     if (_imageFile != null && !_isUploading) {
       setState(() => _isUploading = true);
       try {
-        final storageRef =
-            _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
+        final storageRef = _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
         await storageRef.putFile(_imageFile!);
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
@@ -143,8 +165,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     }
 
     try {
-      final DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(widget.uid).get();
+      final DocumentSnapshot userDoc = await _firestore.collection('users').doc(widget.uid).get();
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
@@ -224,6 +245,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                         _buildInfoRow(Icons.badge, "תעודת זהות", idNumber),
                         _buildInfoRow(Icons.phone, "מספר טלפון", phoneNumber),
                       ]),
+                      const SizedBox(height: 20),
+                      _buildLicensesSection(userData),
                     ],
                   ),
                 );
@@ -266,6 +289,72 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLicensesSection(Map<String, dynamic> userData) {
+    final List<String> licensed = List<String>.from(userData['licensedDepartments'] ?? []);
+    final List<String> departments = allDepartments;
+
+    final Map<String, IconData> departmentIcons = {
+      "פארק חבלים": Icons.hiking,
+      "פיינטבול": Icons.sports_esports,
+      "קרטינג": Icons.sports_score,
+      "פארק מים": Icons.pool,
+      "ג'ימבורי": Icons.sports_gymnastics,
+      "תפעול": Icons.handyman,
+    };
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      elevation: 4,
+      color: AppColors.background,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text("הרשאות עבודה לפי מחלקה", style: AppTheme.sectionTitle),
+            const SizedBox(height: 10),
+            ...departments.map((dept) {
+              final bool isLicensed = licensed.contains(dept);
+              final IconData icon = departmentIcons[dept] ?? Icons.help_outline;
+
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 6.0),
+                decoration: BoxDecoration(
+                  color: isLicensed ? AppColors.lightGreen.withOpacity(0.15) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(
+                    color: isLicensed ? AppColors.success : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        dept,
+                        style: AppTheme.bodyText.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Icon(icon, color: AppColors.accent, size: 26),
+                    ],
+                  ),
+                  leading: Icon(
+                    isLicensed ? Icons.lock_open : Icons.lock_outline,
+                    color: isLicensed ? AppColors.success : Colors.redAccent,
+                    size: 26,
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

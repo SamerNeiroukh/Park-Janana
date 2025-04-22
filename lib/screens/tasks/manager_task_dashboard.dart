@@ -54,7 +54,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
             child: _currentUser == null
                 ? const Center(child: Text("שגיאה בזיהוי המשתמש."))
                 : StreamBuilder<List<TaskModel>>(
-                    stream: _taskService.getTasksCreatedBy(_currentUser!.uid),
+                    stream: _taskService.getTasksCreatedBy(_currentUser.uid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());

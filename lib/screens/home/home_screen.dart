@@ -13,6 +13,7 @@ import 'package:park_janana/screens/tasks/worker_task_screen.dart';
 import 'package:park_janana/screens/tasks/manager_task_dashboard.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -33,10 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadRolesData();
+    
   }
 
   Future<void> _loadRolesData() async {
-    final String rolesJson = await rootBundle.loadString('lib/config/roles.json');
+    final String rolesJson =
+        await rootBundle.loadString('lib/config/roles.json');
     if (!mounted) return;
     setState(() {
       _roleData = json.decode(rolesJson);
@@ -93,8 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
           debugPrint('Fetched User Role: $role');
 
           final String userName = userData['fullName'] ?? 'משתמש';
-          final String profilePictureUrl =
-              _profilePictureUrl ?? userData['profile_picture'] ?? 'https://via.placeholder.com/150';
+          final String profilePictureUrl = _profilePictureUrl ??
+              userData['profile_picture'] ??
+              'https://via.placeholder.com/150';
           final String currentDate =
               DateFormat('dd/MM/yyyy').format(DateTime.now());
           final int daysWorked = userData['daysWorked'] ?? 0;
@@ -110,7 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 hoursWorked: hoursWorked,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   'פעולות',
                   style: AppTheme.sectionTitle,
@@ -130,22 +135,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PersonalAreaScreen(uid: currentUser.uid),
+                            builder: (context) =>
+                                PersonalAreaScreen(uid: currentUser.uid),
                           ),
                         );
                       },
                     ),
                     if (_roleData != null && _roleData!.containsKey(role))
-                      ...(_roleData![role] as List<dynamic>).map<Widget>((operation) {
+                      ...(_roleData![role] as List<dynamic>)
+                          .map<Widget>((operation) {
                         return CustomCard(
                           title: operation['title'],
-                          icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
+                          icon: IconData(operation['icon'],
+                              fontFamily: 'MaterialIcons'),
                           onTap: () {
                             debugPrint('${operation['title']} tapped');
                           },
                         );
-                      }).toList(),
-
+                      }),
                     if (role == 'worker') ...[
                       CustomCard(
                         title: 'משימות שלי',
@@ -174,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ],
-
                     if (role == 'manager') ...[
                       CustomCard(
                         title: 'ניהול משמרות',
@@ -197,13 +203,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ManagerTaskDashboard(),
+                              builder: (context) =>
+                                  const ManagerTaskDashboard(),
+                            ),
+                          );
+                        },
+                      ),
+                      CustomCard(
+                        title: 'ניהול עובדים',
+                        icon: Icons.manage_accounts,
+                        onTap: () {
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ManageWorkersScreen(),
                             ),
                           );
                         },
                       ),
                     ],
-
                     if (role == 'owner')
                       CustomCard(
                         title: 'דוחות עסקיים',
