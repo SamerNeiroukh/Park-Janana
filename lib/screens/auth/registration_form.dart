@@ -22,7 +22,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final TextEditingController _idNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isLoading = false;
 
@@ -38,82 +39,92 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
   Future<void> _registerUser() async {
-  if (_isLoading) return; // ✅ Prevent double submit
+    if (_isLoading) return;
 
-  setState(() {
-    _nameError = !_hebrewRegex.hasMatch(_fullNameController.text.trim())
-        ? 'יש להזין שם בעברית בלבד'
-        : null;
-
-    _phoneError = !_phoneRegex.hasMatch(_phoneNumberController.text.trim())
-        ? 'מספר טלפון חייב להכיל בדיוק 10 ספרות'
-        : null;
-
-    _idError = !_idRegex.hasMatch(_idNumberController.text.trim())
-        ? 'תעודת זהות חייבת להכיל בדיוק 9 ספרות'
-        : null;
-
-    _emailError = !_emailRegex.hasMatch(_emailController.text.trim())
-        ? 'כתובת אימייל אינה תקינה'
-        : null;
-
-    final password = _passwordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
-
-    if (password.length < 6) {
-      _passwordError = 'הסיסמה חייבת להכיל לפחות 6 תווים';
-    } else if (password != confirmPassword) {
-      _passwordError = 'הסיסמאות אינן תואמות';
-    } else {
-      _passwordError = null;
-    }
-  });
-
-  if (_nameError != null || _phoneError != null || _idError != null || _emailError != null || _passwordError != null) {
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
-
-    String uid = userCredential.user!.uid;
-
-    UserModel userModel = UserModel(
-      fullName: _fullNameController.text.trim(),
-      email: _emailController.text.trim(),
-      idNumber: _idNumberController.text.trim(),
-      phoneNumber: _phoneNumberController.text.trim(),
-      uid: uid,
-      profilePicture: 'https://firebasestorage.googleapis.com/v0/b/park-janana-app.firebasestorage.app/o/profile_pictures%2Fdefault_profile.png?alt=media&token=918661c9-90a5-4197-8649-d2498d8ef4cd',
-      role: 'worker',
-    );
-
-    await _firestore.collection('users').doc(uid).set(userModel.toMap());
-
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-    );
-  } catch (e) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e')),
-    );
-  } finally {
-    if (!mounted) return;
     setState(() {
-      _isLoading = false;
+      _nameError = !_hebrewRegex.hasMatch(_fullNameController.text.trim())
+          ? 'יש להזין שם בעברית בלבד'
+          : null;
+
+      _phoneError = !_phoneRegex.hasMatch(_phoneNumberController.text.trim())
+          ? 'מספר טלפון חייב להכיל בדיוק 10 ספרות'
+          : null;
+
+      _idError = !_idRegex.hasMatch(_idNumberController.text.trim())
+          ? 'תעודת זהות חייבת להכיל בדיוק 9 ספרות'
+          : null;
+
+      _emailError = !_emailRegex.hasMatch(_emailController.text.trim())
+          ? 'כתובת אימייל אינה תקינה'
+          : null;
+
+      final password = _passwordController.text.trim();
+      final confirmPassword = _confirmPasswordController.text.trim();
+
+      if (password.length < 6) {
+        _passwordError = 'הסיסמה חייבת להכיל לפחות 6 תווים';
+      } else if (password != confirmPassword) {
+        _passwordError = 'הסיסמאות אינן תואמות';
+      } else {
+        _passwordError = null;
+      }
     });
+
+    if (_nameError != null ||
+        _phoneError != null ||
+        _idError != null ||
+        _emailError != null ||
+        _passwordError != null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      String uid = userCredential.user!.uid;
+
+      UserModel userModel = UserModel(
+        fullName: _fullNameController.text.trim(),
+        email: _emailController.text.trim(),
+        idNumber: _idNumberController.text.trim(),
+        phoneNumber: _phoneNumberController.text.trim(),
+        uid: uid,
+        profilePicture:
+            'https://firebasestorage.googleapis.com/v0/b/park-janana-app.firebasestorage.app/o/profile_pictures%2Fdefault_profile.png?alt=media&token=918661c9-90a5-4197-8649-d2498d8ef4cd',
+        role: 'worker',
+      );
+
+      // ✅ Add "approved": false here explicitly
+      await _firestore.collection('users').doc(uid).set({
+        ...userModel.toMap(),
+        'approved': false,
+      });
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -128,12 +139,29 @@ class _RegistrationFormState extends State<RegistrationForm> {
             children: [
               Text('טופס הרשמה', style: AppTheme.titleStyle),
               const SizedBox(height: 16.0),
-              _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא', errorText: _nameError),
-              _buildTextField(_phoneNumberController, 'מספר טלפון', 'הכנס את מספר הטלפון שלך', errorText: _phoneError),
-              _buildTextField(_idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך', errorText: _idError),
-              _buildTextField(_emailController, 'אימייל', 'הכנס את כתובת האימייל שלך', errorText: _emailError),
-              _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה', obscureText: true, errorText: _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים' ? _passwordError : null),
-              _buildTextField(_confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה', obscureText: true, errorText: _passwordError == 'הסיסמאות אינן תואמות' ? _passwordError : null),
+              _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
+                  errorText: _nameError),
+              _buildTextField(_phoneNumberController, 'מספר טלפון',
+                  'הכנס את מספר הטלפון שלך',
+                  errorText: _phoneError),
+              _buildTextField(
+                  _idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך',
+                  errorText: _idError),
+              _buildTextField(
+                  _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
+                  errorText: _emailError),
+              _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה',
+                  obscureText: true,
+                  errorText:
+                      _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים'
+                          ? _passwordError
+                          : null),
+              _buildTextField(
+                  _confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה',
+                  obscureText: true,
+                  errorText: _passwordError == 'הסיסמאות אינן תואמות'
+                      ? _passwordError
+                      : null),
               const SizedBox(height: 24.0),
               _isLoading
                   ? const CircularProgressIndicator()

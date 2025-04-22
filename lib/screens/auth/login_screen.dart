@@ -44,22 +44,35 @@ class _LoginScreenState extends State<LoginScreen> {
 
       String uid = userCredential.user!.uid;
 
-      if (_userRoleCache.containsKey(uid)) {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(uid).get();
+
+      if (!userDoc.exists) {
+        throw Exception("מסמך המשתמש לא קיים.");
+      }
+
+      final data = userDoc.data() as Map<String, dynamic>;
+
+      // 🔒 Check if account is approved
+      bool isApproved = data['approved'] ?? false;
+
+      if (!isApproved) {
+        await _auth.signOut(); // Important: Sign out the user immediately
         if (!mounted) return;
-        _navigateToHomeScreen(_userRoleCache[uid]!);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('החשבון שלך עדיין לא אושר על ידי ההנהלה.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
         return;
       }
 
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+      String role = data['role'] ?? 'worker';
+      _userRoleCache[uid] = role;
 
-      if (userDoc.exists) {
-        String role = userDoc.get('role') ?? 'worker';
-        _userRoleCache[uid] = role;
-        if (!mounted) return;
-        _navigateToHomeScreen(role);
-      } else {
-        throw Exception("User document does not exist.");
-      }
+      if (!mounted) return;
+      _navigateToHomeScreen(role);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -69,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _passwordError = 'הסיסמה שגויה';
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('מייל או סיסמה לא נכונים.'),
               backgroundColor: Colors.red,
             ),
@@ -137,7 +150,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 16.0),
                         hintText: 'הכנס את כתובת האימייל שלך',
                         hintStyle: AppTheme.hintTextStyle,
                         focusedBorder: OutlineInputBorder(
@@ -174,7 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 16.0),
                         hintText: 'הכנס את הסיסמה שלך',
                         hintStyle: AppTheme.hintTextStyle,
                         focusedBorder: OutlineInputBorder(
@@ -203,7 +218,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text(
                     AppStrings.forgotPassword,
-                    style: AppTheme.linkTextStyle.copyWith(color: AppColors.primary),
+                    style: AppTheme.linkTextStyle
+                        .copyWith(color: AppColors.primary),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -213,7 +229,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     : ElevatedButton(
                         style: AppTheme.primaryButtonStyle,
                         onPressed: _login,
-                        child: const Text('כניסה', style: AppTheme.buttonTextStyle),
+                        child: const Text('כניסה',
+                            style: AppTheme.buttonTextStyle),
                       ),
                 const SizedBox(height: 16.0),
                 TextButton(

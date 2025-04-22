@@ -10,10 +10,16 @@ class FirebaseService {
     return _firestore.collection(collection).doc().id;
   }
 
-  // 🟢 Create a new user in Firestore
+  // ✅ Create a new user in Firestore with fallback for `approved`
   Future<void> addUser(Map<String, dynamic> userData) async {
     try {
-      await _firestore.collection(AppConstants.usersCollection).doc(userData['uid']).set(userData);
+      // 🔒 Ensure approved is set
+      userData['approved'] = userData['approved'] ?? false;
+
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(userData['uid'])
+          .set(userData);
     } on FirebaseException catch (e) {
       throw CustomException('שגיאה ביצירת משתמש: ${e.message}');
     }
@@ -37,7 +43,7 @@ class FirebaseService {
     }
   }
 
-  // 🟢 NEW: Update Profile Picture
+  // 🟢 Update Profile Picture
   Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
     try {
       await updateUser(uid, {'profile_picture': profilePictureUrl});
@@ -46,7 +52,7 @@ class FirebaseService {
     }
   }
 
-  // 🟢 NEW: Assign Role to User
+  // 🟢 Assign Role to User
   Future<void> assignRole(String uid, String role) async {
     try {
       await updateUser(uid, {'role': role});

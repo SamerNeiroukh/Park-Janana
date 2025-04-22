@@ -28,7 +28,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
 
   Future<void> _refreshTasks() async {
     if (_currentUser == null) return;
-    final snapshot = await _taskService.getTasksForUser(_currentUser!.uid).first;
+    final snapshot = await _taskService.getTasksForUser(_currentUser.uid).first;
     setState(() => _tasks = snapshot);
   }
 
@@ -49,7 +49,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
             child: _currentUser == null
                 ? const Center(child: Text("שגיאה בזיהוי המשתמש."))
                 : StreamBuilder<List<TaskModel>>(
-                    stream: _taskService.getTasksForUser(_currentUser!.uid),
+                    stream: _taskService.getTasksForUser(_currentUser.uid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -66,7 +66,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                       }).toList();
                       if (_selectedStatus != 'all') {
                         tasks = tasks.where((t) {
-                          final workerStatus = t.workerStatuses[_currentUser!.uid] ?? 'pending';
+                          final workerStatus = t.workerStatuses[_currentUser.uid] ?? 'pending';
                           return workerStatus == _selectedStatus;
                         }).toList();
                       }
@@ -310,7 +310,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
 
   Future<void> _updateStatus(TaskModel task, String status) async {
     if (_currentUser == null) return;
-    await _taskService.updateWorkerStatus(task.id, _currentUser!.uid, status);
+    await _taskService.updateWorkerStatus(task.id, _currentUser.uid, status);
     await _refreshTasks();
   }
 }

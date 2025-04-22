@@ -46,7 +46,7 @@ class _UsersScreenState extends State<UsersScreen> {
     try {
       var snapshot = await FirebaseFirestore.instance.collection('users').get();
       List<UserModel> fetchedUsers = snapshot.docs.map((doc) {
-        return UserModel.fromMap(doc.data() as Map<String, dynamic>);
+        return UserModel.fromMap(doc.data());
       }).toList();
 
       if (mounted) {

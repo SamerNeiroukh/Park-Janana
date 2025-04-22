@@ -260,7 +260,7 @@ void _removeWorker(String workerId) async {
                 senderId: msg['senderId'],
                 shiftId: widget.shift.id,
               );
-            }).toList(),
+            }),
           ],
         ),
       );
