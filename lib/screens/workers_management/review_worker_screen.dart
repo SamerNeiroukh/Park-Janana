@@ -4,6 +4,8 @@ import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/workers_management/edit_worker_licenses_screen.dart';
 import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/screens/workers_management/management_buttons/shifts_button.dart';
+
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -41,11 +43,23 @@ class ReviewWorkerScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _buildSoftCard("🧭 פעולות מנהל", [
                       _buildActionCard(
-                        icon: Icons.calendar_today_outlined,
-                        label: "הצג משמרות",
-                        color: Colors.teal,
-                        onTap: () => _snack(context, "הצגת משמרות - בפיתוח"),
-                      ),
+  icon: Icons.calendar_today_outlined,
+  label: "הצג משמרות",
+  color: Colors.teal,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShiftsButtonScreen(
+          uid: userData['uid'],
+          fullName: userData['fullName'] ?? '',
+          profilePicture: userData['profile_picture'] ?? '',
+        ),
+      ),
+    );
+  },
+),
+
                       _buildActionCard(
                         icon: Icons.task_alt,
                         label: "שייך משימה",
