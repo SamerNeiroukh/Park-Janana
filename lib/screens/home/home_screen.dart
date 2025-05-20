@@ -1,3 +1,4 @@
+// (Keep your existing imports)
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +15,9 @@ import 'package:park_janana/screens/tasks/manager_task_dashboard.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
+
+// NEW: Import the widget
+import 'package:park_janana/widgets/clock_in_out_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -34,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadRolesData();
-    
   }
 
   Future<void> _loadRolesData() async {
@@ -234,6 +237,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+              const Spacer(),
+              const ClockInOutWidget(), // ⬅️ NEW CLOCK IN/OUT WIDGET
             ],
           );
         },
