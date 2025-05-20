@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
 class UserCard extends StatelessWidget {
   final String userName;
@@ -18,69 +19,180 @@ class UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      elevation: 4.0,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color.fromARGB(255, 255, 140, 0).withOpacity(0.8), // Orange
-              const Color.fromARGB(255, 63, 94, 251).withOpacity(0.8), // Blue
-              const Color.fromARGB(255, 255, 0, 0).withOpacity(0.8), // Red
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+    return Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
           children: [
-            // User Name and Info
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  userName,
-                  style: const TextStyle(
-                    fontFamily: 'SuezOne',
-                    fontSize: 18.0,
-                    color: Colors.white,
+            // Background with wave and gradient
+            ClipPath(
+              clipper: BottomWaveClipper(),
+              child: Container(
+                height: 220,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFFFF8C00), // Orange
+                      Color(0xFF3F5EFB), // Blue
+                      Color(0xFFFF0000), // Red
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                Text(
-                  currentDate,
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                    color: Color.fromARGB(255, 255, 255, 255),
-                  ),
+                child: Stack(
+                  children: [
+                    // Glassmorphism overlay
+                    BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        color: Colors.white.withOpacity(0.05),
+                      ),
+                    ),
+
+                    // Settings button (top-right)
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: Icon(
+                        Icons.settings,
+                        color: Colors.white.withOpacity(0.8),
+                        size: 24,
+                      ),
+                    ),
+
+                    // User name and date
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 70.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              userName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontFamily: 'SuezOne',
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              currentDate,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8.0),
-                Text(
-                  'ימים שעבדת: $daysWorked | שעות שעבדת: $hoursWorked',
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+              ),
             ),
-            const SizedBox(width: 16.0),
-            // Profile Picture
-            CircleAvatar(
-              radius: 30.0,
-              backgroundImage: NetworkImage(profilePictureUrl),
+
+            // Profile picture with glowing border + progress ring
+            Positioned(
+              bottom: -50,
+              left: 0,
+              right: 0,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer progress ring (optional: use shift % progress)
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(
+                      value: 0.7, // Custom progress value (e.g. 70%)
+                      strokeWidth: 5,
+                      backgroundColor: Colors.white24,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
+                    ),
+                  ),
+                  // Avatar with glow
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.8),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 42,
+                      backgroundImage: NetworkImage(profilePictureUrl),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ),
+
+        const SizedBox(height: 65),
+
+        // Stats row
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildStatItem('🗓️', 'ימים שעבדת', daysWorked.toString()),
+              _buildStatItem('⏱️', 'שעות שעבדת', hoursWorked.toString()),
+            ],
+          ),
+        ),
+      ],
     );
   }
+
+  Widget _buildStatItem(String emoji, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$emoji $label',
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class BottomWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height - 50);
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height + 40,
+      size.width,
+      size.height - 50,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
