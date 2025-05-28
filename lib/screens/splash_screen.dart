@@ -33,26 +33,24 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     // Define background color sequence animation
-    _backgroundColorAnimation = TweenSequence<Color?>(
-      [
-        TweenSequenceItem(
-          tween: ColorTween(begin: Colors.white, end: Colors.blue),
-          weight: 1.0,
-        ),
-        TweenSequenceItem(
-          tween: ColorTween(begin: Colors.blue, end: Colors.red),
-          weight: 1.0,
-        ),
-        TweenSequenceItem(
-          tween: ColorTween(begin: Colors.red, end: Colors.yellow),
-          weight: 1.0,
-        ),
-        TweenSequenceItem(
-          tween: ColorTween(begin: Colors.yellow, end: Colors.white),
-          weight: 1.0,
-        ),
-      ],
-    ).animate(
+    _backgroundColorAnimation = TweenSequence<Color?>([
+      TweenSequenceItem(
+        tween: ColorTween(begin: Colors.white, end: Colors.blue),
+        weight: 1.0,
+      ),
+      TweenSequenceItem(
+        tween: ColorTween(begin: Colors.blue, end: Colors.red),
+        weight: 1.0,
+      ),
+      TweenSequenceItem(
+        tween: ColorTween(begin: Colors.red, end: Colors.yellow),
+        weight: 1.0,
+      ),
+      TweenSequenceItem(
+        tween: ColorTween(begin: Colors.yellow, end: Colors.white),
+        weight: 1.0,
+      ),
+    ]).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeInOut, // Smooth transitions between colors
@@ -64,6 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Navigate to the WelcomeScreen after the animation
     Future.delayed(const Duration(seconds: 6), () {
+      if (!mounted) return; // Prevent navigation if widget was disposed
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
       );

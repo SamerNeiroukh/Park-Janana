@@ -6,7 +6,7 @@ class UserCard extends StatelessWidget {
   final String profilePictureUrl;
   final String currentDate;
   final int daysWorked;
-  final int hoursWorked;
+  final double hoursWorked;
 
   const UserCard({
     super.key,
@@ -51,17 +51,6 @@ class UserCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Settings button (top-right)
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: Icon(
-                        Icons.settings,
-                        color: Colors.white.withOpacity(0.8),
-                        size: 24,
-                      ),
-                    ),
-
                     // User name and date
                     Align(
                       alignment: Alignment.center,
@@ -94,7 +83,7 @@ class UserCard extends StatelessWidget {
               ),
             ),
 
-            // Profile picture with glowing border + progress ring
+            // Profile picture with static yellow ring
             Positioned(
               bottom: -50,
               left: 0,
@@ -102,18 +91,17 @@ class UserCard extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Outer progress ring (optional: use shift % progress)
-                  SizedBox(
+                  Container(
                     width: 100,
                     height: 100,
-                    child: CircularProgressIndicator(
-                      value: 0.7, // Custom progress value (e.g. 70%)
-                      strokeWidth: 5,
-                      backgroundColor: Colors.white24,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 255, 195, 64),
+                        width: 5,
+                      ),
                     ),
                   ),
-                  // Avatar with glow
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -144,8 +132,8 @@ class UserCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatItem('🗓️', 'ימים שעבדת', daysWorked.toString()),
-              _buildStatItem('⏱️', 'שעות שעבדת', hoursWorked.toString()),
+              _buildStatItem('', 'ימים שעבדת', daysWorked.toString()),
+              _buildStatItem('', 'שעות שעבדת', hoursWorked.toStringAsFixed(1)),
             ],
           ),
         ),
