@@ -18,7 +18,7 @@ class ClockInOutWidget extends StatefulWidget {
 class _ClockInOutWidgetState extends State<ClockInOutWidget>
     with SingleTickerProviderStateMixin {
   final ClockService _clockService = ClockService();
-  AttendanceModel? _ongoingSession;
+  AttendanceRecord? _ongoingSession;
   bool _loading = true;
   final GlobalKey<SlideActionState> _key = GlobalKey();
   Timer? _timer;
@@ -54,13 +54,23 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   }
 
   Future<void> _fetchSession() async {
-    final session = await _clockService.getOngoingClockIn();
-    if (!mounted) return;
-    setState(() {
-      _ongoingSession = session;
-      _loading = false;
-      _now = DateTime.now();
-    });
+    try {
+      final session = await _clockService.getOngoingClockIn();
+      if (!mounted) return;
+      setState(() {
+        _ongoingSession = session;
+        _loading = false;
+        _now = DateTime.now();
+      });
+    } catch (e) {
+      debugPrint('Error fetching session: $e');
+      if (mounted) {
+        setState(() {
+          _ongoingSession = null;
+          _loading = false;
+        });
+      }
+    }
   }
 
   Future<void> _handleAction() async {
@@ -69,7 +79,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     if (_ongoingSession == null) {
       await _clockService.clockIn(userName);
     } else {
-      await _clockService.clockOut(_ongoingSession!);
+      await _clockService.clockOut();
     }
 
     await _fetchSession();
@@ -86,7 +96,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     }
 
     final isClockedIn = _ongoingSession != null;
-    final clockInTime = isClockedIn ? DateFormat.Hm().format(_ongoingSession!.clockIn) : '';
+    final clockInTime = isClockedIn
+        ? DateFormat.Hm().format(_ongoingSession!.clockIn)
+        : '';
     final nowTime = DateFormat.Hm().format(_now);
 
     final label = isClockedIn ? 'החלק כדי לצאת' : 'החלק כדי להתחיל';

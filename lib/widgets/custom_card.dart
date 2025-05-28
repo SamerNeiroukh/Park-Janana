@@ -14,42 +14,48 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox( // ✅ Use SizedBox to ensure proper constraints
-        width: 80.0, // Slightly increased to accommodate text
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // ✅ Prevents overflow by using min size
-          children: [
-            Container(
-              height: 60.0,
-              width: 60.0,
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 207, 228, 241), // Sky blue
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: Icon(
-                icon,
-                size: 40.0,
-                color: const Color.fromARGB(255, 0, 182, 254),
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Flexible( // ✅ Wrap Text in Flexible to prevent text overflow
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.bold,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+            height: 64,
+            width: 64,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(2, 4),
                 ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis, // ✅ Ensures long text does not overflow
-                maxLines: 2, // ✅ Allows text wrapping if necessary
-              ),
+              ],
             ),
-          ],
+            child: Icon(
+              icon,
+              color: const Color(0xFF2196F3),
+              size: 30,
+            ),
+          ),
         ),
-      ),
+        const SizedBox(height: 4),
+        SizedBox(
+          width: 72,
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

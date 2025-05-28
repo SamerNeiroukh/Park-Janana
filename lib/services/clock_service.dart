@@ -6,66 +6,118 @@ class ClockService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String collectionName = 'attendance_logs';
 
-  Future<AttendanceModel?> getOngoingClockIn() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
-
-    final now = DateTime.now();
-    final yesterday = now.subtract(const Duration(days: 1));
-
-    final query = await _firestore
-        .collection(collectionName)
-        .where('userId', isEqualTo: user.uid)
-        .where('clockIn', isGreaterThanOrEqualTo: Timestamp.fromDate(yesterday))
-        .where('clockOut', isNull: true)
-        .orderBy('clockIn', descending: true)
-        .limit(1)
-        .get();
-
-    if (query.docs.isEmpty) return null;
-
-    return AttendanceModel.fromMap(query.docs.first.data(), query.docs.first.id);
-  }
-
-  Future<List<AttendanceModel>> getTodayClockSessions() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return [];
-
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
-
-    final query = await _firestore
-        .collection(collectionName)
-        .where('userId', isEqualTo: user.uid)
-        .where('clockIn', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-        .orderBy('clockIn', descending: true)
-        .get();
-
-    return query.docs
-        .map((doc) => AttendanceModel.fromMap(doc.data(), doc.id))
-        .toList();
-  }
+  String _getDocId(String userId, DateTime date) =>
+      '${userId}_${date.year}_${date.month.toString().padLeft(2, '0')}';
 
   Future<void> clockIn(String userName) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final data = AttendanceModel(
-      id: '',
-      userId: user.uid,
-      userName: userName,
-      clockIn: DateTime.now(),
-      clockOut: null,
-    );
+    final now = DateTime.now();
+    final docId = _getDocId(user.uid, now);
+    final docRef = _firestore.collection(collectionName).doc(docId);
+    final snapshot = await docRef.get();
 
-    await _firestore.collection(collectionName).add(data.toMap());
+    final newSession = AttendanceRecord(clockIn: now, clockOut: now); // placeholder for clockOut
+
+    if (snapshot.exists) {
+      await docRef.update({
+        'sessions': FieldValue.arrayUnion([newSession.toMap()])
+      });
+    } else {
+      final newModel = AttendanceModel(
+        id: docId,
+        userId: user.uid,
+        userName: userName,
+        year: now.year,
+        month: now.month,
+        sessions: [newSession],
+      );
+      await docRef.set(newModel.toMap());
+    }
   }
 
-  Future<void> clockOut(AttendanceModel session) async {
-    final docRef = _firestore.collection(collectionName).doc(session.id);
+  Future<void> clockOut() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-    await docRef.update({
-      'clockOut': Timestamp.fromDate(DateTime.now()),
-    });
+    final now = DateTime.now();
+    final docId = _getDocId(user.uid, now);
+    final docRef = _firestore.collection(collectionName).doc(docId);
+    final snapshot = await docRef.get();
+
+    if (!snapshot.exists) return;
+
+    final data = snapshot.data();
+    if (data == null || data['sessions'] == null) return;
+
+    try {
+      final model = AttendanceModel.fromMap(data, docId);
+      final updatedSessions = [...model.sessions];
+      if (updatedSessions.isEmpty) return;
+
+      final last = updatedSessions.last;
+      if (last.clockIn != last.clockOut) return; // already clocked out
+
+      final newRecord = AttendanceRecord(
+        clockIn: last.clockIn,
+        clockOut: now,
+      );
+
+      updatedSessions.removeLast();
+      updatedSessions.add(newRecord);
+
+      await docRef.update({
+        'sessions': updatedSessions.map((r) => r.toMap()).toList()
+      });
+    } catch (e) {
+      print('Error clocking out: $e');
+    }
   }
+
+  Future<AttendanceRecord?> getOngoingClockIn() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    final now = DateTime.now();
+    final docId = _getDocId(user.uid, now);
+    final snapshot = await _firestore.collection(collectionName).doc(docId).get();
+
+    if (!snapshot.exists) return null;
+
+    final data = snapshot.data();
+    if (data == null || data['sessions'] == null) return null;
+
+    try {
+      final model = AttendanceModel.fromMap(data, docId);
+      final sessions = model.sessions;
+      if (sessions.isEmpty) return null;
+
+      final last = sessions.last;
+      return last.clockIn == last.clockOut ? last : null;
+    } catch (e) {
+      print('Error parsing attendance model: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, int>> getMonthlyWorkStats(String userId) async {
+  final now = DateTime.now();
+  final docId = _getDocId(userId, now);
+
+  final snapshot = await _firestore.collection(collectionName).doc(docId).get();
+  if (!snapshot.exists) {
+    return {
+      'hoursWorked': 0,
+      'daysWorked': 0,
+    };
+  }
+
+  final model = AttendanceModel.fromMap(snapshot.data()!, docId);
+  return {
+    'hoursWorked': model.totalHoursWorked.floor(), // ✅ return as int
+    'daysWorked': model.daysWorked,
+  };
+}
+
 }
