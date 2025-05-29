@@ -10,7 +10,9 @@ import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
 
 class CreateTaskScreen extends StatefulWidget {
-  const CreateTaskScreen({super.key});
+  final List<UserModel>? initialSelectedUsers;
+
+  const CreateTaskScreen({super.key, this.initialSelectedUsers});
 
   @override
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
@@ -33,12 +35,20 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   List<UserModel> _allUsers = [];
   final List<UserModel> _selectedWorkers = [];
-  bool _isSubmitting = false; // ✅ To prevent double submissions
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAllUsers();
+    _loadAllUsers().then((_) {
+      if (widget.initialSelectedUsers != null) {
+        for (var user in widget.initialSelectedUsers!) {
+          if (!_selectedWorkers.any((u) => u.uid == user.uid)) {
+            _selectedWorkers.add(user);
+          }
+        }
+      }
+    });
   }
 
   Future<void> _loadAllUsers() async {
@@ -94,7 +104,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       controller: _descriptionController,
                       maxLines: 3,
                       decoration: AppTheme.inputDecoration(hintText: "תיאור המשימה"),
-                      // Optional field: no validation
                     ),
                     const SizedBox(height: 16),
                     Text("הקצאת עובדים", style: AppTheme.sectionTitle),
@@ -210,7 +219,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submitTask, // ✅ Prevent double tap
+                      onPressed: _isSubmitting ? null : _submitTask,
                       style: AppTheme.primaryButtonStyle,
                       child: _isSubmitting
                           ? const CircularProgressIndicator()
@@ -242,7 +251,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }
 
   Future<void> _submitTask() async {
-    if (_isSubmitting) return; // ✅ Prevent spam clicks
+    if (_isSubmitting) return;
 
     if (!_formKey.currentState!.validate() ||
         _dueDate == null ||
