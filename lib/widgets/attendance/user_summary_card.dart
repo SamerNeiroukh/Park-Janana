@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:park_janana/constants/app_theme.dart';
 
 class UserSummaryCard extends StatelessWidget {
   final String userName;
@@ -6,6 +8,7 @@ class UserSummaryCard extends StatelessWidget {
   final int daysWorked;
   final double totalHours;
   final String month;
+  final VoidCallback? onTap; // Optional tap handler
 
   const UserSummaryCard({
     super.key,
@@ -14,59 +17,86 @@ class UserSummaryCard extends StatelessWidget {
     required this.daysWorked,
     required this.totalHours,
     required this.month,
+    this.onTap,
   });
+
+  ImageProvider _getProfileImage(String url) {
+    return (url.isNotEmpty && url.startsWith('http'))
+        ? CachedNetworkImageProvider(url)
+        : const AssetImage('assets/images/default_profile.png');
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundImage: profileUrl.isNotEmpty
-                  ? NetworkImage(profileUrl)
-                  : const AssetImage('assets/images/default_profile.png')
-                      as ImageProvider,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeIn,
+        child: Card(
+          key: ValueKey('$userName-$month-$daysWorked-$totalHours'),
+          elevation: 3,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+              child: Row(
                 children: [
-                  Text(
-                    userName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.grey.shade300,
+                    backgroundImage: _getProfileImage(profileUrl),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          style: AppTheme.bodyText.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          month,
+                          style: AppTheme.bodyText.copyWith(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    month,
-                    style: const TextStyle(color: Colors.grey),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$daysWorked ימים',
+                        style: AppTheme.bodyText.copyWith(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        '${totalHours.toStringAsFixed(1)} שעות',
+                        style: AppTheme.bodyText.copyWith(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            Column(
-              children: [
-                Text(
-                  '$daysWorked ימים',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  '${totalHours.toStringAsFixed(1)} שעות',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

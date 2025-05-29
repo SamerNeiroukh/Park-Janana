@@ -17,12 +17,10 @@ class PdfExportService {
   }) async {
     final pdf = pw.Document();
 
-    // ✅ Load Hebrew-compatible font
     final ttf = pw.Font.ttf(
       await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'),
     );
 
-    // ✅ Load logo
     final imageLogo = await imageFromAssetBundle('assets/images/park_logo.png');
 
     final formattedMonth = DateFormat.yMMMM('he').format(month);
@@ -33,7 +31,7 @@ class PdfExportService {
           base: ttf,
           bold: ttf,
         ),
-        textDirection: pw.TextDirection.rtl, // ✅ RTL rendering
+        textDirection: pw.TextDirection.rtl,
         build: (pw.Context context) => [
           _buildHeader(userName, formattedMonth, imageLogo, ttf),
           pw.SizedBox(height: 10),
@@ -54,15 +52,17 @@ class PdfExportService {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        pw.Image(logo, width: 60),
+        // 📝 Hebrew Text on the left
         pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text('דו״ח נוכחות חודשי', style: pw.TextStyle(font: font, fontSize: 22, fontWeight: pw.FontWeight.bold)),
             pw.Text('שם העובד: $userName', style: pw.TextStyle(font: font, fontSize: 14)),
             pw.Text('חודש: $month', style: pw.TextStyle(font: font, fontSize: 14)),
           ],
         ),
+        // 🖼 Logo on the right
+        pw.Image(logo, width: 60),
       ],
     );
   }
@@ -86,14 +86,16 @@ class PdfExportService {
 
   static pw.Widget _buildSessionTable(AttendanceModel attendance, pw.Font font) {
     return pw.Table.fromTextArray(
-      headers: ['תאריך', 'כניסה', 'יציאה', 'משך'],
+      headers: ['משך', 'יציאה', 'כניסה', 'תאריך'], // ✅ RTL column order
       data: attendance.sessions.map((s) {
         final date = DateFormat('dd/MM/yyyy').format(s.clockIn);
         final inTime = DateFormat('HH:mm').format(s.clockIn);
         final outTime = DateFormat('HH:mm').format(s.clockOut);
         final duration = s.clockOut.difference(s.clockIn);
         final durationStr = '${duration.inHours}ש׳ ${duration.inMinutes.remainder(60)}ד׳';
-        return [date, inTime, outTime, durationStr];
+
+        // ✅ Reverse the row to match RTL column order
+        return [durationStr, outTime, inTime, date];
       }).toList(),
       headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
       cellStyle: pw.TextStyle(font: font, fontSize: 12),

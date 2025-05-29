@@ -5,7 +5,6 @@ import 'package:park_janana/services/attendance_service.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/attendance/month_selector.dart';
 import 'package:park_janana/widgets/attendance/user_summary_card.dart';
-import 'package:park_janana/widgets/attendance/session_card.dart';
 import 'package:park_janana/services/pdf_export_service.dart';
 
 class AttendanceSummaryScreen extends StatefulWidget {
@@ -69,55 +68,114 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
   Widget build(BuildContext context) {
     final formattedMonth = DateFormat.yMMMM('he').format(selectedMonth);
     return Scaffold(
-      appBar: const UserHeader(), // Adjusted to remove title param
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          MonthSelector(
-            selectedMonth: selectedMonth,
-            onMonthChanged: _onMonthChanged,
-          ),
-          if (isLoading)
-            const Expanded(
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (attendanceData == null)
-            const Expanded(
-              child: Center(child: Text('אין נתוני נוכחות זמינים לחודש זה')),
-            )
-          else ...[
+      appBar: const UserHeader(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            MonthSelector(
+              selectedMonth: selectedMonth,
+              onMonthChanged: _onMonthChanged,
+            ),
             UserSummaryCard(
               userName: widget.userName,
               profileUrl: widget.profileUrl,
-              daysWorked: attendanceData!.daysWorked,
-              totalHours: attendanceData!.totalHoursWorked,
+              daysWorked: attendanceData?.daysWorked ?? 0,
+              totalHours: attendanceData?.totalHoursWorked ?? 0.0,
               month: formattedMonth,
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: attendanceData!.sessions.length,
-                itemBuilder: (context, index) {
-                  final session = attendanceData!.sessions[index];
-                  return SessionCard(session: session);
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: ElevatedButton.icon(
-                onPressed: _exportToPdf,
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('ייצא כ-PDF'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            if (isLoading)
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (attendanceData == null)
+              const Expanded(
+                child: Center(child: Text('אין נתוני נוכחות זמינים לחודש זה')),
+              )
+            else
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: attendanceData!.sessions.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final session = attendanceData!.sessions[index];
+                            final date = DateFormat('dd/MM/yyyy').format(session.clockIn);
+                            final clockIn = DateFormat('HH:mm').format(session.clockIn);
+                            final clockOut = DateFormat('HH:mm').format(session.clockOut);
+                            final duration = session.clockOut.difference(session.clockIn);
+                            final hours = duration.inHours;
+                            final minutes = duration.inMinutes.remainder(60);
+
+                            return Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'תאריך: $date',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'שעת כניסה: $clockIn',
+                                      textAlign: TextAlign.right,
+                                    ),
+                                    Text(
+                                      'שעת יציאה: $clockOut',
+                                      textAlign: TextAlign.right,
+                                    ),
+                                    Text(
+                                      'משך העבודה: ${hours}ש׳ ${minutes}ד׳',
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _exportToPdf,
+                          icon: const Icon(Icons.picture_as_pdf),
+                          label: const Text('צור PDF'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }
