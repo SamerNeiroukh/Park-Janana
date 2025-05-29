@@ -35,6 +35,9 @@ dependencies:
   slide_to_act: ^2.0.1
   shimmer: ^3.0.0
   fl_chart: ^0.64.0
+  pdf: ^3.10.1
+  printing: ^5.10.2
+  bidi: ^2.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -85,3 +88,4 @@ flutter:
     - family: SuezOne
       fonts:
         - asset: assets/fonts/SuezOne-Regular.ttf
+        - asset: assets/fonts/NotoSansHebrew-Regular.ttf
