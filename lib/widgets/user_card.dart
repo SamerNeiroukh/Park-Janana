@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:park_janana/screens/home/personal_area_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserCard extends StatelessWidget {
   final String userName;
@@ -96,20 +98,33 @@ class UserCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withOpacity(0.8),
-                          blurRadius: 12,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 42,
-                      backgroundImage: NetworkImage(profilePictureUrl),
+                  GestureDetector(
+                    onTap: () {
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+                      if (uid != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PersonalAreaScreen(uid: uid),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.8),
+                            blurRadius: 12,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: 42,
+                        backgroundImage: NetworkImage(profilePictureUrl),
+                      ),
                     ),
                   ),
                 ],

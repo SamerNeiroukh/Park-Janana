@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
 import 'package:park_janana/widgets/clock_in_out_widget.dart';
+import 'package:park_janana/screens/attendance/attendance_summary_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -159,6 +160,24 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => PersonalAreaScreen(uid: uid),
+            ),
+          );
+        },
+      ),
+
+      // ✅ New Attendance Summary Button
+      CustomCard(
+        title: 'דו״ח נוכחות',
+        icon: Icons.history_toggle_off,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AttendanceSummaryScreen(
+                userId: uid,
+                userName: _userData!['fullName'] ?? 'משתמש',
+                profileUrl: _userData!['profile_picture'] ?? '',
+              ),
             ),
           );
         },
