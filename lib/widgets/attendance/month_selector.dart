@@ -21,16 +21,25 @@ class MonthSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final thisMonth = DateTime(now.year, now.month);
+    final isCurrentMonth = DateTime(selectedMonth.year, selectedMonth.month)
+        .isAtSameMomentAs(thisMonth);
     final formatted = DateFormat.yMMMM('he').format(selectedMonth);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () => _changeMonth(-1),
-          ),
+          // ➡️ Show NEXT only if not in current month
+          if (!isCurrentMonth)
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              onPressed: () => _changeMonth(1),
+            )
+          else
+            const SizedBox(width: 48), // keep spacing even when hidden
           Text(
             formatted,
             style: const TextStyle(
@@ -39,8 +48,8 @@ class MonthSelector extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () => _changeMonth(1),
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () => _changeMonth(-1),
           ),
         ],
       ),
