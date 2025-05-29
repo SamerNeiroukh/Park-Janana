@@ -101,23 +101,24 @@ class ClockService {
     }
   }
 
-  Future<Map<String, int>> getMonthlyWorkStats(String userId) async {
+  Future<Map<String, double>> getMonthlyWorkStats(String userId) async {
   final now = DateTime.now();
   final docId = _getDocId(userId, now);
 
   final snapshot = await _firestore.collection(collectionName).doc(docId).get();
   if (!snapshot.exists) {
     return {
-      'hoursWorked': 0,
-      'daysWorked': 0,
+      'hoursWorked': 0.0,
+      'daysWorked': 0.0,
     };
   }
 
   final model = AttendanceModel.fromMap(snapshot.data()!, docId);
   return {
-    'hoursWorked': model.totalHoursWorked.floor(), // ✅ return as int
-    'daysWorked': model.daysWorked,
+    'hoursWorked': model.totalHoursWorked,
+    'daysWorked': model.daysWorked.toDouble(), // ⬅ ensure both are double
   };
 }
+
 
 }
