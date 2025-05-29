@@ -24,7 +24,6 @@ class UserCard extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            // Background with wave and gradient
             ClipPath(
               clipper: BottomWaveClipper(),
               child: Container(
@@ -43,15 +42,12 @@ class UserCard extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Glassmorphism overlay
                     BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
                         color: Colors.white.withOpacity(0.05),
                       ),
                     ),
-
-                    // User name and date
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
@@ -82,8 +78,6 @@ class UserCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Profile picture with static yellow ring
             Positioned(
               bottom: -50,
               left: 0,
@@ -123,10 +117,7 @@ class UserCard extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 65),
-
-        // Stats row
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Row(
