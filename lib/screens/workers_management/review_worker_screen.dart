@@ -5,7 +5,8 @@ import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/workers_management/edit_worker_licenses_screen.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/screens/workers_management/management_buttons/shifts_button.dart';
-
+import 'package:park_janana/screens/tasks/create_task_screen.dart';
+import 'package:park_janana/models/user_model.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -20,6 +21,17 @@ class ReviewWorkerScreen extends StatelessWidget {
     final String id = userData['idNumber'] ?? '';
     final String profilePicture = userData['profile_picture'] ?? '';
     final String uid = userData['uid'] ?? '';
+    final String role = userData['role'] ?? '';
+
+    final worker = UserModel(
+      uid: uid,
+      fullName: fullName,
+      email: email,
+      phoneNumber: phone,
+      idNumber: id,
+      profilePicture: profilePicture,
+      role: role,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFC),
@@ -43,28 +55,36 @@ class ReviewWorkerScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _buildSoftCard("🧭 פעולות מנהל", [
                       _buildActionCard(
-  icon: Icons.calendar_today_outlined,
-  label: "הצג משמרות",
-  color: Colors.teal,
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ShiftsButtonScreen(
-          uid: userData['uid'],
-          fullName: userData['fullName'] ?? '',
-          profilePicture: userData['profile_picture'] ?? '',
-        ),
-      ),
-    );
-  },
-),
-
+                        icon: Icons.calendar_today_outlined,
+                        label: "הצג משמרות",
+                        color: Colors.teal,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ShiftsButtonScreen(
+                                uid: userData['uid'],
+                                fullName: userData['fullName'] ?? '',
+                                profilePicture: userData['profile_picture'] ?? '',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       _buildActionCard(
                         icon: Icons.task_alt,
                         label: "שייך משימה",
                         color: Colors.indigo,
-                        onTap: () => _snack(context, "שייך משימה - בפיתוח"),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CreateTaskScreen(
+                                initialSelectedUsers: [worker],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       _buildActionCard(
                         icon: Icons.show_chart,
@@ -195,9 +215,10 @@ class ReviewWorkerScreen extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
           const SizedBox(width: 8),
           Expanded(
-              child: Text(value,
-                  style: const TextStyle(fontSize: 15),
-                  overflow: TextOverflow.ellipsis)),
+            child: Text(value,
+                style: const TextStyle(fontSize: 15),
+                overflow: TextOverflow.ellipsis),
+          ),
         ],
       ),
     );
@@ -249,7 +270,8 @@ class ReviewWorkerScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Text(
             label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
           ),
         ),
         style: ElevatedButton.styleFrom(
@@ -274,7 +296,9 @@ class ReviewWorkerScreen extends StatelessWidget {
         content: const Text("האם אתה בטוח שברצונך למחוק את העובד הזה?"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("ביטול")),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("מחק", style: TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text("מחק", style: TextStyle(color: Colors.red))),
         ],
       ),
     );

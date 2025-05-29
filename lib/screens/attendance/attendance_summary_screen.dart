@@ -155,7 +155,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         child: ElevatedButton.icon(
                           onPressed: _exportToPdf,
                           icon: const Icon(Icons.picture_as_pdf),
-                          label: const Text('צור PDF'),
+                          label: const Text('צור קובץ'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent,
                             foregroundColor: Colors.white,
