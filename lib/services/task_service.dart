@@ -15,7 +15,7 @@ class TaskService {
     }
   }
 
-  // 🟢 Get tasks assigned to a specific worker
+  // 🟢 Get tasks assigned to a specific worker (live stream)
   Stream<List<TaskModel>> getTasksForUser(String userId) {
     return _firestore
         .collection(_collection)
@@ -126,4 +126,36 @@ class TaskService {
     }
     return null;
   }
+
+  // ✅ Get tasks assigned to a user by selected month
+  static Future<List<TaskModel>> getTasksForUserByMonth(String userId, DateTime month) async {
+  try {
+    final firstDay = DateTime(month.year, month.month, 1);
+    final lastDay = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+
+    print('📅 Fetching tasks for user: $userId');
+    print('🔍 Filtering between: $firstDay → $lastDay');
+
+    final query = await FirebaseFirestore.instance
+        .collection('tasks')
+        .where('assignedTo', arrayContains: userId)
+        .where('dueDate', isGreaterThanOrEqualTo: firstDay)
+        .where('dueDate', isLessThanOrEqualTo: lastDay)
+        .get();
+
+    print('✅ Found ${query.docs.length} tasks');
+
+    final tasks = query.docs.map((doc) {
+      final data = doc.data();
+      print('📦 Task: ${data['title']} | dueDate: ${data['dueDate']}');
+      return TaskModel.fromMap(doc.id, data);
+    }).toList();
+
+    return tasks;
+  } catch (e) {
+    print('❌ Error fetching tasks for month: $e');
+    return [];
+  }
+}
+
 }
