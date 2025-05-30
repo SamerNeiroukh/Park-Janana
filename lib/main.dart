@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // ✅ For locking orientation
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
@@ -7,18 +8,23 @@ import 'screens/home/personal_area_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'constants/app_theme.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'; // ✅ Added
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Lock orientation to portrait only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   try {
     // Initialize Firebase
     print("firebase logs: await Firebase.initializeApp(");
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-   
   } catch (e) {
     print('Error initializing Firebase or App Check: $e');
   }
@@ -53,16 +59,16 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      localizationsDelegates: const [ // ✅ Added
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [ // ✅ Added
+      supportedLocales: const [
         Locale('he'),
         Locale('en'),
       ],
-      builder: (context, child) { // ✅ NEW: Force RTL layout globally
+      builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: child!,
