@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/screens/reports/worker_reports_screen.dart';
 import 'package:park_janana/services/clock_service.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/user_card.dart';
@@ -16,7 +17,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
 import 'package:park_janana/widgets/clock_in_out_widget.dart';
-import 'package:park_janana/screens/attendance/attendance_summary_screen.dart';
+import 'package:park_janana/screens/reports/attendance_summary_report.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -165,23 +166,23 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
 
-      // ✅ New Attendance Summary Button
       CustomCard(
-        title: 'דו״ח נוכחות',
-        icon: Icons.history_toggle_off,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AttendanceSummaryScreen(
-                userId: uid,
-                userName: _userData!['fullName'] ?? 'משתמש',
-                profileUrl: _userData!['profile_picture'] ?? '',
-              ),
-            ),
-          );
-        },
+  title: 'דוחות',
+  icon: Icons.bar_chart,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkerReportsScreen(
+          userId: uid,
+          userName: _userData!['fullName'] ?? 'משתמש',
+          profileUrl: _userData!['profile_picture'] ?? '',
+        ),
       ),
+    );
+  },
+),
+
     ];
 
     if (_roleData != null && _roleData!.containsKey(role)) {

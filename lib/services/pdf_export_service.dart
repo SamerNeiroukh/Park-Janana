@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // for Timestamp
 import 'package:park_janana/models/attendance_model.dart';
+import 'package:park_janana/models/task_model.dart';
 
 class PdfExportService {
   static Future<void> exportAttendancePdf({
@@ -22,7 +24,6 @@ class PdfExportService {
     );
 
     final imageLogo = await imageFromAssetBundle('assets/images/park_logo.png');
-
     final formattedMonth = DateFormat.yMMMM('he').format(month);
 
     pdf.addPage(
@@ -33,7 +34,7 @@ class PdfExportService {
         ),
         textDirection: pw.TextDirection.rtl,
         build: (pw.Context context) => [
-          _buildHeader(userName, formattedMonth, imageLogo, ttf),
+          _buildHeader('דו״ח נוכחות חודשי', userName, formattedMonth, imageLogo, ttf),
           pw.SizedBox(height: 10),
           _buildSummary(attendance, ttf),
           pw.SizedBox(height: 10),
@@ -48,20 +49,61 @@ class PdfExportService {
     );
   }
 
-  static pw.Widget _buildHeader(String userName, String month, pw.ImageProvider logo, pw.Font font) {
+  static Future<void> exportTaskReportPdf({
+    required flutter.BuildContext context,
+    required String userName,
+    required String profileUrl,
+    required List<TaskModel> tasks,
+    required DateTime month,
+  }) async {
+    final pdf = pw.Document();
+
+    final ttf = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'),
+    );
+
+    final imageLogo = await imageFromAssetBundle('assets/images/park_logo.png');
+    final formattedMonth = DateFormat.yMMMM('he').format(month);
+
+    pdf.addPage(
+      pw.MultiPage(
+        theme: pw.ThemeData.withFont(
+          base: ttf,
+          bold: ttf,
+        ),
+        textDirection: pw.TextDirection.rtl,
+        build: (pw.Context context) => [
+          _buildHeader('דו״ח משימות', userName, formattedMonth, imageLogo, ttf),
+          pw.SizedBox(height: 10),
+          _buildTaskTable(tasks, ttf),
+        ],
+      ),
+    );
+
+    await Printing.sharePdf(
+      bytes: await pdf.save(),
+      filename: 'דו״ח משימות - $formattedMonth.pdf',
+    );
+  }
+
+  static pw.Widget _buildHeader(
+    String title,
+    String userName,
+    String month,
+    pw.ImageProvider logo,
+    pw.Font font,
+  ) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        // 📝 Hebrew Text on the left
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text('דו״ח נוכחות חודשי', style: pw.TextStyle(font: font, fontSize: 22, fontWeight: pw.FontWeight.bold)),
+            pw.Text(title, style: pw.TextStyle(font: font, fontSize: 22, fontWeight: pw.FontWeight.bold)),
             pw.Text('שם העובד: $userName', style: pw.TextStyle(font: font, fontSize: 14)),
             pw.Text('חודש: $month', style: pw.TextStyle(font: font, fontSize: 14)),
           ],
         ),
-        // 🖼 Logo on the right
         pw.Image(logo, width: 60),
       ],
     );
@@ -85,8 +127,8 @@ class PdfExportService {
   }
 
   static pw.Widget _buildSessionTable(AttendanceModel attendance, pw.Font font) {
-    return pw.Table.fromTextArray(
-      headers: ['משך', 'יציאה', 'כניסה', 'תאריך'], // ✅ RTL column order
+    return pw.TableHelper.fromTextArray(
+      headers: ['משך', 'יציאה', 'כניסה', 'תאריך'],
       data: attendance.sessions.map((s) {
         final date = DateFormat('dd/MM/yyyy').format(s.clockIn);
         final inTime = DateFormat('HH:mm').format(s.clockIn);
@@ -94,8 +136,30 @@ class PdfExportService {
         final duration = s.clockOut.difference(s.clockIn);
         final durationStr = '${duration.inHours}ש׳ ${duration.inMinutes.remainder(60)}ד׳';
 
-        // ✅ Reverse the row to match RTL column order
         return [durationStr, outTime, inTime, date];
+      }).toList(),
+      headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
+      cellStyle: pw.TextStyle(font: font, fontSize: 12),
+      cellAlignment: pw.Alignment.centerRight,
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+      border: pw.TableBorder.all(color: PdfColors.grey),
+    );
+  }
+
+  static pw.Widget _buildTaskTable(List<TaskModel> tasks, pw.Font font) {
+    return pw.TableHelper.fromTextArray(
+      headers: ['סטטוס', 'תאריך יעד', 'תיאור', 'שם משימה'],
+      data: tasks.map((task) {
+        final dueDate = task.dueDate is Timestamp
+            ? (task.dueDate as Timestamp).toDate()
+            : task.dueDate as DateTime;
+
+        return [
+          task.status,
+          DateFormat('dd/MM/yyyy').format(dueDate),
+          task.description,
+          task.title,
+        ];
       }).toList(),
       headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
       cellStyle: pw.TextStyle(font: font, fontSize: 12),
