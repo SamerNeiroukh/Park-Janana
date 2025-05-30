@@ -77,7 +77,7 @@ class TaskService {
     }
   }
 
-  // ✅ Update worker-specific status inside the task
+  // ✅ Update only the specific worker's entry in workerProgress
   Future<void> updateWorkerStatus(String taskId, String userId, String newStatus) async {
     final taskRef = _firestore.collection(_collection).doc(taskId);
     final snapshot = await taskRef.get();
@@ -88,34 +88,35 @@ class TaskService {
     }
 
     final data = snapshot.data()!;
-    final workerStatusesRaw = data['workerStatuses'];
-    final Map<String, dynamic> workerStatuses = workerStatusesRaw is Map<String, dynamic>
-        ? Map<String, dynamic>.from(workerStatusesRaw)
-        : {};
+    final now = Timestamp.now();
 
-    print('✅ [Before] workerStatuses: $workerStatuses');
+    final progressEntry = Map<String, dynamic>.from(
+      (data['workerProgress'] ?? {})[userId] ?? {
+        'submittedAt': now,
+        'startedAt': null,
+        'endedAt': null,
+        'status': 'pending',
+      },
+    );
+
+    // Update status timestamps
+    progressEntry['status'] = newStatus;
+    if (newStatus == 'pending') {
+      progressEntry['submittedAt'] = now;
+    } else if (newStatus == 'in_progress') {
+      progressEntry['startedAt'] = now;
+    } else if (newStatus == 'done') {
+      progressEntry['endedAt'] = now;
+    }
+
     print('👤 Updating status for $userId → $newStatus');
-
-    workerStatuses[userId] = newStatus;
-
-    // Aggregate overall task status
-    String updatedStatus = data['status'];
-    final values = workerStatuses.values.map((v) => v.toString()).toList();
-
-    if (values.contains('in_progress')) {
-      updatedStatus = 'in_progress';
-    }
-    if (values.isNotEmpty && values.every((status) => status == 'done')) {
-      updatedStatus = 'done';
-    }
+    print('📦 Entry → $progressEntry');
 
     await taskRef.update({
-      'workerStatuses': workerStatuses,
-      'status': updatedStatus,
+      'workerProgress.$userId': progressEntry,
     });
 
-    print('✅ [After] workerStatuses: $workerStatuses');
-    print('📦 Firestore task updated successfully.');
+    print('✅ Firestore: updated workerProgress.$userId successfully');
   }
 
   // 🟢 Get task by ID
@@ -129,33 +130,32 @@ class TaskService {
 
   // ✅ Get tasks assigned to a user by selected month
   static Future<List<TaskModel>> getTasksForUserByMonth(String userId, DateTime month) async {
-  try {
-    final firstDay = DateTime(month.year, month.month, 1);
-    final lastDay = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+    try {
+      final firstDay = DateTime(month.year, month.month, 1);
+      final lastDay = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
 
-    print('📅 Fetching tasks for user: $userId');
-    print('🔍 Filtering between: $firstDay → $lastDay');
+      print('📅 Fetching tasks for user: $userId');
+      print('🔍 Filtering between: $firstDay → $lastDay');
 
-    final query = await FirebaseFirestore.instance
-        .collection('tasks')
-        .where('assignedTo', arrayContains: userId)
-        .where('dueDate', isGreaterThanOrEqualTo: firstDay)
-        .where('dueDate', isLessThanOrEqualTo: lastDay)
-        .get();
+      final query = await FirebaseFirestore.instance
+          .collection('tasks')
+          .where('assignedTo', arrayContains: userId)
+          .where('dueDate', isGreaterThanOrEqualTo: firstDay)
+          .where('dueDate', isLessThanOrEqualTo: lastDay)
+          .get();
 
-    print('✅ Found ${query.docs.length} tasks');
+      print('✅ Found ${query.docs.length} tasks');
 
-    final tasks = query.docs.map((doc) {
-      final data = doc.data();
-      print('📦 Task: ${data['title']} | dueDate: ${data['dueDate']}');
-      return TaskModel.fromMap(doc.id, data);
-    }).toList();
+      final tasks = query.docs.map((doc) {
+        final data = doc.data();
+        print('📦 Task: ${data['title']} | dueDate: ${data['dueDate']}');
+        return TaskModel.fromMap(doc.id, data);
+      }).toList();
 
-    return tasks;
-  } catch (e) {
-    print('❌ Error fetching tasks for month: $e');
-    return [];
+      return tasks;
+    } catch (e) {
+      print('❌ Error fetching tasks for month: $e');
+      return [];
+    }
   }
-}
-
 }

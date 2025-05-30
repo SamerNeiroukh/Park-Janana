@@ -13,7 +13,9 @@ class TaskModel {
   final List<String> attachments;
   final List<Map<String, dynamic>> comments;
   final Timestamp createdAt;
-  final Map<String, String> workerStatuses;
+
+  /// New structure to track per-worker progress with dates and status
+  final Map<String, Map<String, dynamic>> workerProgress;
 
   TaskModel({
     required this.id,
@@ -28,7 +30,7 @@ class TaskModel {
     required this.attachments,
     required this.comments,
     required this.createdAt,
-    required this.workerStatuses,
+    required this.workerProgress,
   });
 
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
@@ -46,7 +48,7 @@ class TaskModel {
       attachments: List<String>.from(data['attachments'] ?? []),
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
       createdAt: data['createdAt'],
-      workerStatuses: _parseWorkerStatuses(data['workerStatuses']),
+      workerProgress: _parseWorkerProgress(data['workerProgress']),
     );
   }
 
@@ -64,7 +66,7 @@ class TaskModel {
       attachments: List<String>.from(data['attachments'] ?? []),
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
       createdAt: data['createdAt'],
-      workerStatuses: _parseWorkerStatuses(data['workerStatuses']),
+      workerProgress: _parseWorkerProgress(data['workerProgress']),
     );
   }
 
@@ -81,15 +83,16 @@ class TaskModel {
       'attachments': attachments,
       'comments': comments,
       'createdAt': createdAt,
-      'workerStatuses': workerStatuses,
+      'workerProgress': workerProgress,
     };
   }
 
-  static Map<String, String> _parseWorkerStatuses(dynamic raw) {
-    if (raw is Map) {
-      return Map<String, String>.fromEntries(
-        raw.entries.map((e) => MapEntry(e.key.toString(), e.value.toString())),
-      );
+  static Map<String, Map<String, dynamic>> _parseWorkerProgress(dynamic raw) {
+    if (raw is Map<String, dynamic>) {
+      return raw.map((key, value) => MapEntry(
+        key,
+        Map<String, dynamic>.from(value as Map),
+      ));
     }
     return {};
   }

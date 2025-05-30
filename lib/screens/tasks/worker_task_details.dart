@@ -77,7 +77,8 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentWorkerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
+    final String userId = _currentUser?.uid ?? '';
+    final currentWorkerStatus = task.workerProgress[userId]?['status'] ?? 'pending';
 
     return Scaffold(
       backgroundColor: AppColors.background,

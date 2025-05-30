@@ -66,7 +66,8 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                       }).toList();
                       if (_selectedStatus != 'all') {
                         tasks = tasks.where((t) {
-                          final workerStatus = t.workerStatuses[_currentUser.uid] ?? 'pending';
+                          final workerStatus =
+                              t.workerProgress[_currentUser!.uid]?['status'] ?? 'pending';
                           return workerStatus == _selectedStatus;
                         }).toList();
                       }
@@ -179,84 +180,84 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
   }
 
   Widget _buildTaskCard(TaskModel task) {
-  final workerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
-  final DateTime date = task.dueDate.toDate();
-  final String time = DateFormat('HH:mm').format(date);
-  Color bgColor = workerStatus == 'done'
-      ? Colors.green.shade50
-      : workerStatus == 'in_progress'
-          ? Colors.orange.shade50
-          : Colors.white;
+    final String workerStatus = task.workerProgress[_currentUser?.uid ?? '']?['status'] ?? 'pending';
+    final DateTime date = task.dueDate.toDate();
+    final String time = DateFormat('HH:mm').format(date);
+    Color bgColor = workerStatus == 'done'
+        ? Colors.green.shade50
+        : workerStatus == 'in_progress'
+            ? Colors.orange.shade50
+            : Colors.white;
 
-  return InkWell(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WorkerTaskDetailsScreen(task: task),
-        ),
-      );
-    },
-    child: Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WorkerTaskDetailsScreen(task: task),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildWorkerStatusChip(workerStatus),
-              Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            task.title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            task.description,
-            style: const TextStyle(fontSize: 15, color: Colors.black87),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (workerStatus != 'done') LiveCountdownTimer(dueDate: task.dueDate.toDate()),
-              if (workerStatus != 'done') _buildActionButtons(task, workerStatus),
-            ],
-          )
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildWorkerStatusChip(workerStatus),
+                Text(
+                  time,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              task.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              task.description,
+              style: const TextStyle(fontSize: 15, color: Colors.black87),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (workerStatus != 'done') LiveCountdownTimer(dueDate: task.dueDate.toDate()),
+                if (workerStatus != 'done') _buildActionButtons(task, workerStatus),
+              ],
+            )
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildWorkerStatusChip(String status) {
     Color color;
