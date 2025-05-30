@@ -274,6 +274,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       _dueTime!.minute,
     );
 
+    final now = Timestamp.now();
+
+    final Map<String, Map<String, dynamic>> workerProgress = {
+      for (var user in _selectedWorkers)
+        user.uid: {
+          'status': 'pending',
+          'submittedAt': now,
+          'startedAt': null,
+          'endedAt': null,
+        }
+    };
+
     final newTask = TaskModel(
       id: const Uuid().v4(),
       title: _titleController.text.trim(),
@@ -286,10 +298,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       status: 'pending',
       attachments: [],
       comments: [],
-      createdAt: Timestamp.now(),
-      workerStatuses: {
-        for (var user in _selectedWorkers) user.uid: 'pending'
-      },
+      createdAt: now,
+      workerProgress: workerProgress,
     );
 
     await _taskService.createTask(newTask);

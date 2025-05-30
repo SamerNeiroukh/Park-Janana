@@ -147,7 +147,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentWorkerStatus = task.workerStatuses[_currentUser?.uid ?? ''] ?? 'pending';
+    final String userId = _currentUser?.uid ?? '';
+    final currentWorkerStatus = task.workerProgress[userId]?['status'] ?? 'pending';
     final String time = DateFormat('HH:mm').format(task.dueDate.toDate());
     final String dateFormatted = DateFormat('dd/MM/yyyy').format(task.dueDate.toDate());
 
@@ -187,7 +188,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       Text("עובדים שהוקצו למשימה", style: AppTheme.sectionTitle),
                       const SizedBox(height: 8),
                       ..._assignedWorkers.map((user) {
-                        final workerStatus = task.workerStatuses[user.uid] ?? 'pending';
+                        final workerStatus = task.workerProgress[user.uid]?['status'] ?? 'pending';
                         return Card(
                           color: Colors.grey.shade100,
                           shape: RoundedRectangleBorder(

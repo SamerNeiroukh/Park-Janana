@@ -1,4 +1,3 @@
-// unchanged import statements
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/task_service.dart';
@@ -34,7 +33,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   List<UserModel> _filteredUsers = [];
   List<UserModel> _selectedWorkers = [];
 
-  bool _isSubmitting = false; // ✅ Anti-double-tap flag
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -228,7 +227,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submitEdit, // ✅ Disabled during submission
+                      onPressed: _isSubmitting ? null : _submitEdit,
                       style: AppTheme.primaryButtonStyle,
                       child: _isSubmitting
                           ? const CircularProgressIndicator()
@@ -260,7 +259,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   }
 
   Future<void> _submitEdit() async {
-    if (_isSubmitting) return; // ✅ Prevent double submission
+    if (_isSubmitting) return;
 
     if (!_formKey.currentState!.validate() ||
         _dueDate == null ||
@@ -282,6 +281,19 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       _dueTime!.minute,
     );
 
+    final now = Timestamp.now();
+    final Map<String, Map<String, dynamic>> updatedWorkerProgress = {};
+
+    for (var user in _selectedWorkers) {
+      final existing = widget.task.workerProgress[user.uid];
+      updatedWorkerProgress[user.uid] = {
+        'status': existing?['status'] ?? 'pending',
+        'submittedAt': existing?['submittedAt'] ?? now,
+        'startedAt': existing?['startedAt'],
+        'endedAt': existing?['endedAt'],
+      };
+    }
+
     final updatedTask = TaskModel(
       id: widget.task.id,
       title: _titleController.text.trim(),
@@ -295,10 +307,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       attachments: widget.task.attachments,
       comments: widget.task.comments,
       createdAt: widget.task.createdAt,
-      workerStatuses: {
-        for (var user in _selectedWorkers)
-          user.uid: widget.task.workerStatuses[user.uid] ?? 'pending'
-      },
+      workerProgress: updatedWorkerProgress,
     );
 
     await _taskService.updateTask(widget.task.id, updatedTask.toMap());
