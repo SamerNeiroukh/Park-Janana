@@ -62,6 +62,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       profileUrl: widget.profileUrl,
       tasks: tasks,
       month: selectedMonth,
+      userId: widget.userId,
     );
   }
 
@@ -69,6 +70,13 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
     return (url.isNotEmpty && url.startsWith('http'))
         ? CachedNetworkImageProvider(url)
         : const AssetImage('assets/images/default_profile.png');
+  }
+
+  String _formatTimestamp(dynamic ts) {
+    if (ts is Timestamp) {
+      return DateFormat('dd/MM/yyyy HH:mm').format(ts.toDate());
+    }
+    return 'unknown';
   }
 
   @override
@@ -85,70 +93,65 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
               selectedMonth: selectedMonth,
               onMonthChanged: _onMonthChanged,
             ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: Curves.easeIn,
-              child: Card(
-                key: ValueKey('${widget.userName}-$formattedMonth-${tasks.length}-$completed'),
-                elevation: 3,
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: Colors.grey.shade300,
-                        backgroundImage: _getProfileImage(widget.profileUrl),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.userName,
-                              style: AppTheme.bodyText.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              formattedMonth,
-                              style: AppTheme.bodyText.copyWith(
-                                fontSize: 14,
-                                color: Colors.grey.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+            Card(
+              elevation: 3,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage: _getProfileImage(widget.profileUrl),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'סה״כ משימות: ${tasks.length}',
+                            widget.userName,
                             style: AppTheme.bodyText.copyWith(
-                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                               color: Colors.black,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
-                            'הושלמו: $completed',
+                            formattedMonth,
                             style: AppTheme.bodyText.copyWith(
                               fontSize: 14,
-                              color: Colors.black,
+                              color: Colors.grey.shade700,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'סה״כ משימות: ${tasks.length}',
+                          style: AppTheme.bodyText.copyWith(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          'הושלמו: $completed',
+                          style: AppTheme.bodyText.copyWith(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -173,6 +176,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                                 ? (task.dueDate as Timestamp).toDate()
                                 : task.dueDate as DateTime;
                             final formattedDate = DateFormat('dd/MM/yyyy').format(dueDate);
+                            final entry = task.workerProgress?[widget.userId] ?? {};
 
                             return Card(
                               elevation: 2,
@@ -184,18 +188,18 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      'משימה: ${task.title}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                      textAlign: TextAlign.right,
-                                    ),
+                                    Text('משימה: ${task.title}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 16)),
                                     const SizedBox(height: 4),
-                                    Text('תיאור: ${task.description}', textAlign: TextAlign.right),
-                                    Text('תאריך יעד: $formattedDate', textAlign: TextAlign.right),
-                                    Text('סטטוס: ${task.status}', textAlign: TextAlign.right),
+                                    Text('תיאור: ${task.description}'),
+                                    Text('תאריך יעד: $formattedDate'),
+                                    Text('סטטוס כללי: ${task.status}'),
+                                    const SizedBox(height: 6),
+                                    Text('סטטוס עובד: ${entry['status'] ?? 'unknown'}'),
+                                    Text('הוגשה ב: ${_formatTimestamp(entry['submittedAt'])}'),
+                                    Text('התחילה ב: ${_formatTimestamp(entry['startedAt'])}'),
+                                    Text('הסתיימה ב: ${_formatTimestamp(entry['endedAt'])}'),
                                   ],
                                 ),
                               ),
