@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // for Timestamp
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/models/attendance_model.dart';
 import 'package:park_janana/models/task_model.dart';
 
@@ -55,6 +55,7 @@ class PdfExportService {
     required String profileUrl,
     required List<TaskModel> tasks,
     required DateTime month,
+    required String userId,
   }) async {
     final pdf = pw.Document();
 
@@ -75,7 +76,7 @@ class PdfExportService {
         build: (pw.Context context) => [
           _buildHeader('דו״ח משימות', userName, formattedMonth, imageLogo, ttf),
           pw.SizedBox(height: 10),
-          _buildTaskTable(tasks, ttf),
+          _buildExpandedTaskTable(tasks, userId, ttf),
         ],
       ),
     );
@@ -146,28 +147,48 @@ class PdfExportService {
     );
   }
 
-  static pw.Widget _buildTaskTable(List<TaskModel> tasks, pw.Font font) {
-    return pw.TableHelper.fromTextArray(
-      headers: ['סטטוס', 'תאריך יעד', 'תיאור', 'שם משימה'],
-      data: tasks.map((task) {
-        final dueDate = task.dueDate is Timestamp
-            ? (task.dueDate as Timestamp).toDate()
-            : task.dueDate as DateTime;
+  static pw.Widget _buildExpandedTaskTable(List<TaskModel> tasks, String userId, pw.Font font) {
+  return pw.TableHelper.fromTextArray(
+    headers: ['סיום', 'התחלה', 'הוגש', 'סטטוס עובד', 'תאריך יעד', 'תיאור', 'משימה'],
+    data: tasks.map((task) {
+      final dueDate = (task.dueDate as Timestamp).toDate();
+      final progress = task.workerProgress[userId] ?? {};
 
-        return [
-          task.status,
-          DateFormat('dd/MM/yyyy').format(dueDate),
-          task.description,
-          task.title,
-        ];
-      }).toList(),
-      headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
-      cellStyle: pw.TextStyle(font: font, fontSize: 12),
-      cellAlignment: pw.Alignment.centerRight,
-      headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
-      border: pw.TableBorder.all(color: PdfColors.grey),
-    );
-  }
+      String formatTs(dynamic ts) {
+        if (ts is Timestamp) {
+          return DateFormat('dd/MM/yy HH:mm').format(ts.toDate());
+        }
+        return 'לא ידוע';
+      }
+
+      return [
+        formatTs(progress['endedAt']),
+        formatTs(progress['startedAt']),
+        formatTs(progress['submittedAt']),
+        progress['status'] ?? 'לא ידוע',
+        DateFormat('dd/MM/yy HH:mm').format(dueDate),
+        task.description,
+        task.title,
+      ];
+    }).toList(),
+    columnWidths: {
+      0: const pw.FlexColumnWidth(1.3),
+      1: const pw.FlexColumnWidth(1.3),
+      2: const pw.FlexColumnWidth(1.3),
+      3: const pw.FlexColumnWidth(1.2),
+      4: const pw.FlexColumnWidth(1.8), // ⬅ Wider column for date+time
+      5: const pw.FlexColumnWidth(2.2),
+      6: const pw.FlexColumnWidth(2.2),
+    },
+    headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
+    cellStyle: pw.TextStyle(font: font, fontSize: 11),
+    cellAlignment: pw.Alignment.centerRight,
+    headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+    border: pw.TableBorder.all(color: PdfColors.grey),
+  );
+}
+
+
 
   static Future<pw.ImageProvider> imageFromAssetBundle(String path) async {
     final byteData = await rootBundle.load(path);
