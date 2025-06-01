@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart' as flutter;
 import 'package:intl/intl.dart';

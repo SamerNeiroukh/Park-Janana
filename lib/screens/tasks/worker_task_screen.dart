@@ -1,6 +1,5 @@
 // 💡 Modernized UI Enhancements for WorkerTaskScreen
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -24,12 +23,10 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
 
   String _selectedStatus = 'all';
   DateTime _selectedDate = DateTime.now();
-  List<TaskModel> _tasks = [];
 
   Future<void> _refreshTasks() async {
     if (_currentUser == null) return;
     final snapshot = await _taskService.getTasksForUser(_currentUser.uid).first;
-    setState(() => _tasks = snapshot);
   }
 
   @override
