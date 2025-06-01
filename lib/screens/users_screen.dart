@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/user_model.dart';
 import '../services/worker_service.dart';
 import '../widgets/user_header.dart';
@@ -21,10 +21,7 @@ class _UsersScreenState extends State<UsersScreen> {
   final WorkerService _workerService = WorkerService();
   bool _isLoading = true;
 
-  // ✅ Track which workers are being processed to prevent double taps
   final Set<String> _inProgressWorkerIds = {};
-
-  // ✅ Cache storage to store fetched users
   static final Map<String, List<UserModel>> _userCache = {};
 
   @override
@@ -44,11 +41,7 @@ class _UsersScreenState extends State<UsersScreen> {
     }
 
     try {
-      var snapshot = await FirebaseFirestore.instance.collection('users').get();
-      List<UserModel> fetchedUsers = snapshot.docs.map((doc) {
-        return UserModel.fromMap(doc.data());
-      }).toList();
-
+      List<UserModel> fetchedUsers = await _workerService.fetchAllWorkers();
       if (mounted) {
         setState(() {
           users = fetchedUsers;
@@ -58,9 +51,8 @@ class _UsersScreenState extends State<UsersScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
+      print("⚠️ Error loading users: $e");
     }
   }
 
@@ -126,7 +118,7 @@ class _UsersScreenState extends State<UsersScreen> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                labelText: "🔍 חיפוש לפי שם או תפקיד",
+                labelText: " חיפוש לפי שם או תפקיד",
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -160,7 +152,7 @@ class _UsersScreenState extends State<UsersScreen> {
                                   radius: 30.0,
                                   backgroundImage: worker.profilePicture.isNotEmpty &&
                                           worker.profilePicture.startsWith('http')
-                                      ? NetworkImage(worker.profilePicture)
+                                      ? CachedNetworkImageProvider(worker.profilePicture)
                                       : const AssetImage('assets/images/default_profile.png') as ImageProvider,
                                 ),
                                 title: Text(

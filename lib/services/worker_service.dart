@@ -1,58 +1,114 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/models/user_model.dart';
 import '../utils/custom_exception.dart';
 import '../constants/app_constants.dart';
 
 class WorkerService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // 🔵 Cache for storing worker details (reduces Firestore reads)
   final Map<String, UserModel> _workerCache = {};
 
-  // 🟢 Approve a worker for a shift
   Future<void> approveWorker(String shiftId, String workerId) async {
     try {
-      DocumentReference shiftRef =
-          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) throw CustomException("משתמש לא מחובר");
+
+      final userDoc = await _firestore.collection(AppConstants.usersCollection).doc(workerId).get();
+      final userData = userDoc.data();
+
+      if (userData == null) return;
+
+      final assignedWorkerEntry = {
+        'userId': workerId,
+        'fullName': userData['fullName'] ?? '',
+        'profilePicture': userData['profile_picture'] ?? '',
+        'requestedAt': Timestamp.now(),
+        'decision': 'accepted',
+        'decisionBy': currentUser.uid,
+        'decisionAt': Timestamp.now(),
+        'roleAtAssignment': userData['role'] ?? 'worker',
+        'uuid': DateTime.now().microsecondsSinceEpoch.toString(),
+      };
+
+      final shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
 
       await shiftRef.update({
         'requestedWorkers': FieldValue.arrayRemove([workerId]),
         'assignedWorkers': FieldValue.arrayUnion([workerId]),
+        'assignedWorkerData': FieldValue.arrayUnion([assignedWorkerEntry]),
       });
     } catch (e) {
       throw CustomException('שגיאה באישור העובד למשמרת.');
     }
   }
 
-  // 🟢 Reject a worker's request
   Future<void> rejectWorker(String shiftId, String workerId) async {
     try {
-      DocumentReference shiftRef =
-          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) throw CustomException("משתמש לא מחובר");
+
+      final userDoc = await _firestore.collection(AppConstants.usersCollection).doc(workerId).get();
+      final userData = userDoc.data();
+
+      if (userData == null) return;
+
+      final rejectionEntry = {
+        'userId': workerId,
+        'fullName': userData['fullName'] ?? '',
+        'profilePicture': userData['profile_picture'] ?? '',
+        'requestedAt': Timestamp.now(),
+        'decision': 'rejected',
+        'decisionBy': currentUser.uid,
+        'decisionAt': Timestamp.now(),
+        'roleAtAssignment': userData['role'] ?? 'worker',
+        'uuid': DateTime.now().microsecondsSinceEpoch.toString(),
+      };
+
+      final shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
 
       await shiftRef.update({
         'requestedWorkers': FieldValue.arrayRemove([workerId]),
+        'rejectedWorkerData': FieldValue.arrayUnion([rejectionEntry]),
       });
     } catch (e) {
       throw CustomException('שגיאה בדחיית בקשת העובד.');
     }
   }
 
-  // 🟢 Remove an assigned worker from a shift
   Future<void> removeWorker(String shiftId, String workerId) async {
     try {
-      DocumentReference shiftRef =
-          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final shiftSnap = await shiftRef.get();
+      final shiftData = shiftSnap.data() as Map<String, dynamic>;
+
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw CustomException("המשתמש לא מחובר");
+      }
+
+      List<dynamic> assignedWorkerData = shiftData['assignedWorkerData'] ?? [];
+
+      List updatedWorkerData = assignedWorkerData.map((entry) {
+        if (entry['userId'] == workerId) {
+          return {
+            ...entry,
+            'decision': 'removed',
+            'removedAt': Timestamp.now(),
+            'removedBy': currentUser.uid,
+          };
+        }
+        return entry;
+      }).toList();
 
       await shiftRef.update({
         'assignedWorkers': FieldValue.arrayRemove([workerId]),
+        'assignedWorkerData': updatedWorkerData,
       });
     } catch (e) {
       throw CustomException('שגיאה בהסרת עובד מהמשמרת.');
     }
   }
 
-  // 🟢 Bulk approve multiple workers for a shift
   Future<void> bulkApproveWorkers(String shiftId, List<String> workerIds) async {
     try {
       DocumentReference shiftRef =
@@ -67,37 +123,112 @@ class WorkerService {
     }
   }
 
-  // 🟢 Assign worker to a shift
   Future<void> assignWorkerToShift(String shiftId, String workerId) async {
     try {
-      DocumentReference shiftRef =
-          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final userDoc = await _firestore.collection(AppConstants.usersCollection).doc(workerId).get();
+      final userData = userDoc.data();
+
+      if (userData == null) return;
+
+      final user = UserModel.fromMap(userData);
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return;
+
+      final assignedWorkerEntry = {
+        'userId': user.uid,
+        'fullName': user.fullName,
+        'profilePicture': user.profilePicture,
+        'requestedAt': Timestamp.now(),
+        'decision': 'accepted',
+        'decisionBy': currentUser.uid,
+        'decisionAt': Timestamp.now(),
+        'roleAtAssignment': user.role,
+        'uuid': DateTime.now().microsecondsSinceEpoch.toString(),
+      };
+
+      final shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
 
       await shiftRef.update({
-        'assignedWorkers': FieldValue.arrayUnion([workerId])
+        'assignedWorkers': FieldValue.arrayUnion([workerId]),
+        'assignedWorkerData': FieldValue.arrayUnion([assignedWorkerEntry]),
       });
     } catch (e) {
       print("Error assigning worker to shift: $e");
     }
   }
 
-  // 🟢 Remove worker from a shift
   Future<void> removeWorkerFromShift(String shiftId, String workerId) async {
     try {
-      DocumentReference shiftRef =
-          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final shiftSnap = await shiftRef.get();
+      final shiftData = shiftSnap.data() as Map<String, dynamic>;
+
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw CustomException("המשתמש לא מחובר");
+      }
+
+      List<dynamic> assignedWorkerData = shiftData['assignedWorkerData'] ?? [];
+
+      List updatedWorkerData = assignedWorkerData.map((entry) {
+        if (entry['userId'] == workerId) {
+          return {
+            ...entry,
+            'decision': 'removed',
+            'removedAt': Timestamp.now(),
+            'removedBy': currentUser.uid,
+          };
+        }
+        return entry;
+      }).toList();
 
       await shiftRef.update({
-        'assignedWorkers': FieldValue.arrayRemove([workerId])
+        'assignedWorkers': FieldValue.arrayRemove([workerId]),
+        'assignedWorkerData': updatedWorkerData,
       });
     } catch (e) {
-      print("Error removing worker from shift: $e");
+      print("❌ Error removing worker from shift: $e");
+      throw CustomException("שגיאה בהסרת העובד מהמשמרת.");
     }
   }
 
-  // 🟢 Get worker details with caching
+  Future<void> moveWorkerBackToRequested(String shiftId, String workerId) async {
+    final manager = FirebaseAuth.instance.currentUser;
+    if (manager == null) throw CustomException("Manager not logged in");
+
+    try {
+      DocumentReference shiftRef = _firestore.collection('shifts').doc(shiftId);
+      DocumentSnapshot doc = await shiftRef.get();
+
+      if (!doc.exists) throw CustomException("Shift not found");
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      List<dynamic> currentAssignedData = data['assignedWorkerData'] ?? [];
+
+      List<dynamic> updatedAssignedData = currentAssignedData.map((entry) {
+        if (entry['userId'] == workerId) {
+          return {
+            ...entry,
+            'decision': 'undo',
+            'undoAt': Timestamp.now(),
+            'undoBy': manager.uid,
+          };
+        }
+        return entry;
+      }).toList();
+
+      await shiftRef.update({
+        'assignedWorkers': FieldValue.arrayRemove([workerId]),
+        'requestedWorkers': FieldValue.arrayUnion([workerId]),
+        'assignedWorkerData': updatedAssignedData,
+      });
+    } catch (e) {
+      print("❌ Error moving worker back to requested: $e");
+      throw CustomException('שגיאה בהעברת העובד חזרה לרשימת המבקשים.');
+    }
+  }
+
   Future<UserModel?> getUserDetails(String userId) async {
-    // ✅ Check if user is already in cache
     if (_workerCache.containsKey(userId)) {
       return _workerCache[userId]!;
     }
@@ -106,12 +237,8 @@ class WorkerService {
       DocumentSnapshot userDoc =
           await _firestore.collection(AppConstants.usersCollection).doc(userId).get();
       if (userDoc.exists) {
-        UserModel user =
-            UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-
-        // ✅ Store in cache
+        UserModel user = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
         _workerCache[userId] = user;
-
         return user;
       } else {
         print("⚠️ User not found: $userId");
@@ -122,42 +249,22 @@ class WorkerService {
     }
   }
 
-  // 🟢 Fetch all active workers (for assigning tasks)
   Future<List<UserModel>> fetchAllWorkers() async {
-    try {
-      QuerySnapshot snapshot = await _firestore
-          .collection(AppConstants.usersCollection)
-          .where('role', isEqualTo: 'worker')
-          .get();
+  try {
+    QuerySnapshot snapshot = await _firestore
+        .collection(AppConstants.usersCollection)
+        .where('role', isEqualTo: 'worker')
+        .where('approved', isEqualTo: true) // ✅ Only approved workers
+        .get();
 
-      return snapshot.docs
-          .map((doc) => UserModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception("Error fetching all workers: $e");
-    }
+    return snapshot.docs
+        .map((doc) => UserModel.fromMap(doc.data() as Map<String, dynamic>))
+        .toList();
+  } catch (e) {
+    throw Exception("Error fetching all workers: $e");
   }
+}
 
-  // 🟢 Move a worker back to "Requested" list from "Assigned"
-  Future<void> moveWorkerBackToRequested(String shiftId, String workerId) async {
-    try {
-      DocumentReference shiftRef =
-          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
-
-      await shiftRef.update({
-        'assignedWorkers': FieldValue.arrayRemove([workerId]), // ✅ Remove from assigned
-        'requestedWorkers': FieldValue.arrayUnion([workerId]), // ✅ Add back to requested
-      });
-    } catch (e) {
-      print("❌ Error moving worker back to requested: $e");
-      throw CustomException('שגיאה בהעברת העובד חזרה לרשימת המבקשים.');
-    }
-  }
-   Stream<List<UserModel>> getAllWorkersStream() {
-    return _firestore.collection('users').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => UserModel.fromMap(doc.data())).toList();
-    });
-  }
 
   Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
     List<UserModel> users = [];
