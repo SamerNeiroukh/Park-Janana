@@ -139,7 +139,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                                       textAlign: TextAlign.right,
                                     ),
                                     Text(
-                                      'משך העבודה: ${hours}ש׳ ${minutes}ד׳',
+                                      'משך העבודה: $hoursש׳ $minutesד׳',
                                       textAlign: TextAlign.right,
                                     ),
                                   ],

@@ -173,10 +173,10 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                           itemBuilder: (context, index) {
                             final task = tasks[index];
                             final dueDate = task.dueDate is Timestamp
-                                ? (task.dueDate as Timestamp).toDate()
+                                ? (task.dueDate).toDate()
                                 : task.dueDate as DateTime;
                             final formattedDate = DateFormat('dd/MM/yyyy').format(dueDate);
-                            final entry = task.workerProgress?[widget.userId] ?? {};
+                            final entry = task.workerProgress[widget.userId] ?? {};
 
                             return Card(
                               elevation: 2,
