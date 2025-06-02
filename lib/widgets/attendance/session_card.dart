@@ -28,7 +28,7 @@ class SessionCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text('שעת כניסה: $clockIn'),
             Text('שעת יציאה: $clockOut'),
-            Text('משך העבודה: ${hours}ש׳ ${minutes}ד׳'),
+            Text('משך העבודה: $hoursש׳ $minutesד׳'),
           ],
         ),
       ),

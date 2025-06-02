@@ -64,7 +64,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                       if (_selectedStatus != 'all') {
                         tasks = tasks.where((t) {
                           final workerStatus =
-                              t.workerProgress[_currentUser!.uid]?['status'] ?? 'pending';
+                              t.workerProgress[_currentUser.uid]?['status'] ?? 'pending';
                           return workerStatus == _selectedStatus;
                         }).toList();
                       }
