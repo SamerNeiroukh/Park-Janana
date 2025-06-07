@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/screens/reports/attendance_summary_report.dart';
 import 'package:park_janana/screens/reports/task_summary_report.dart';
+import 'package:park_janana/screens/reports/worker_shift_report.dart';
 import 'package:park_janana/widgets/user_header.dart';
 
 class WorkerReportsScreen extends StatelessWidget {
@@ -81,6 +82,27 @@ class WorkerReportsScreen extends StatelessWidget {
                     },
                     gradient: const LinearGradient(
                       colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ),
+                  ),
+                  _ReportCard(
+                    icon: Icons.schedule_rounded,
+                    label: 'דו״ח משמרות',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WorkerShiftReport(
+                            uid: userId,
+                            fullName: userName,
+                            profilePicture: profileUrl,
+                          ),
+                        ),
+                      );
+                    },
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF43A047), Color(0xFF1B5E20)],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                     ),
