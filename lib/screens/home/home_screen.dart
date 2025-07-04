@@ -7,7 +7,6 @@ import 'package:park_janana/screens/reports/worker_reports_screen.dart';
 import 'package:park_janana/services/clock_service.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/user_card.dart';
-import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:park_janana/screens/shifts/shifts_screen.dart';
 import 'package:park_janana/screens/shifts/manager_shifts_screen.dart';
@@ -17,6 +16,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
 import 'package:park_janana/widgets/clock_in_out_widget.dart';
+import 'package:park_janana/widgets/custom_card.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -101,93 +101,71 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: const UserHeader(),
-      body: RefreshIndicator(
-        onRefresh: _loadData,
-        child: _userData == null || _workStats == null
-            ? const Center(child: CircularProgressIndicator())
-            : LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 32),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                      child: IntrinsicHeight(
-                        child: Column(
-                          children: [
-                            UserCard(
-                              userName: _userData!['fullName'] ?? 'משתמש',
-                              profilePictureUrl: _profilePictureUrl ??
-                                  _userData!['profile_picture'] ??
-                                  'https://via.placeholder.com/150',
-                              currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                              daysWorked: _workStats!['daysWorked']!.toInt(),
-                              hoursWorked: _workStats!['hoursWorked']!,
-                            ),
-                            const SizedBox(height: 16),
-                            Center(
-                              child: Wrap(
-                                alignment: WrapAlignment.center,
-                                spacing: 16,
-                                runSpacing: 16,
-                                children: _buildActionButtons(
-                                  _userData!['role'] ?? 'worker',
-                                  currentUser.uid,
-                                ).reversed.toList(),
-                              ),
-                            ),
-                            const Spacer(),
-                            const ClockInOutWidget(),
-                          ],
-                        ),
-                      ),
+      body: _userData == null || _workStats == null
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                UserCard(
+                  userName: _userData!['fullName'] ?? 'משתמש',
+                  profilePictureUrl: _profilePictureUrl ??
+                      _userData!['profile_picture'] ??
+                      'https://via.placeholder.com/150',
+                  currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                  daysWorked: _workStats!['daysWorked']!.toInt(),
+                  hoursWorked: _workStats!['hoursWorked']!,
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: ActionButtonGridPager(
+                      buttons: _buildActionButtons(_userData!['role'] ?? 'worker', currentUser.uid),
                     ),
-                  );
-                },
-              ),
-      ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: ClockInOutWidget(),
+                ),
+              ],
+            ),
     );
   }
 
-  List<Widget> _buildActionButtons(String role, String uid) {
-    List<Widget> buttons = [
-      CustomCard(
+  List<ActionButton> _buildActionButtons(String role, String uid) {
+    List<ActionButton> buttons = [
+      ActionButton(
         title: 'פרופיל',
-        icon: Icons.person,
+        icon: Icons.person_rounded,
         onTap: () {
-          if (!mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PersonalAreaScreen(uid: uid)),
+          );
+        },
+      ),
+      ActionButton(
+        title: 'הדו\"חות שלי',
+        icon: Icons.stacked_bar_chart_rounded,
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PersonalAreaScreen(uid: uid),
+              builder: (context) => WorkerReportsScreen(
+                userId: uid,
+                userName: _userData!['fullName'] ?? 'משתמש',
+                profileUrl: _userData!['profile_picture'] ?? '',
+              ),
             ),
           );
         },
       ),
-
-      CustomCard(
-  title: 'דוחות',
-  icon: Icons.bar_chart,
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WorkerReportsScreen(
-          userId: uid,
-          userName: _userData!['fullName'] ?? 'משתמש',
-          profileUrl: _userData!['profile_picture'] ?? '',
-        ),
-      ),
-    );
-  },
-),
-
     ];
 
     if (_roleData != null && _roleData!.containsKey(role)) {
       buttons.addAll(
-        (_roleData![role] as List<dynamic>).map<Widget>((operation) {
-          return CustomCard(
+        (_roleData![role] as List<dynamic>).map<ActionButton>((operation) {
+          return ActionButton(
             title: operation['title'],
             icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
             onTap: () {
@@ -200,28 +178,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (role == 'worker') {
       buttons.addAll([
-        CustomCard(
-          title: 'משימות שלי',
-          icon: Icons.task,
+        ActionButton(
+          title: 'המשימות שלי',
+          icon: Icons.check_circle_outline_rounded,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const WorkerTaskScreen(),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkerTaskScreen()));
           },
         ),
-        CustomCard(
-          title: 'משמרות',
-          icon: Icons.access_time,
+        ActionButton(
+          title: 'המשמרות שלי',
+          icon: Icons.schedule_outlined,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ShiftsScreen(),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ShiftsScreen()));
           },
         ),
       ]);
@@ -229,40 +197,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (role == 'manager') {
       buttons.addAll([
-        CustomCard(
+        ActionButton(
           title: 'ניהול משמרות',
-          icon: Icons.schedule,
+          icon: Icons.manage_history_rounded,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ManagerShiftsScreen(),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
           },
         ),
-        CustomCard(
+        ActionButton(
           title: 'ניהול משימות',
-          icon: Icons.task,
+          icon: Icons.assignment_turned_in_rounded,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ManagerTaskDashboard(),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ManagerTaskDashboard()));
           },
         ),
-        CustomCard(
+        ActionButton(
           title: 'ניהול עובדים',
-          icon: Icons.manage_accounts,
+          icon: Icons.group,
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ManageWorkersScreen(),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageWorkersScreen()));
           },
         ),
       ]);
@@ -270,12 +223,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (role == 'owner') {
       buttons.add(
-        CustomCard(
-          title: 'דוחות עסקיים',
-          icon: Icons.bar_chart,
-          onTap: () {
-            debugPrint('דוחות tapped');
-          },
+        ActionButton(
+          title: 'דו\"חות עסקיים',
+          icon: Icons.bar_chart_rounded,
+          onTap: () => debugPrint('דוחות עסקיים tapped'),
         ),
       );
     }

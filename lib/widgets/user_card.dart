@@ -35,7 +35,7 @@ class UserCard extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       Color(0xFFFF8C00), // Orange
-                      Color(0xFF3F5EFB), // Blue
+                      Color.fromARGB(255, 63, 163, 251), // Blue
                       Color(0xFFFF0000), // Red
                     ],
                     begin: Alignment.topLeft,
