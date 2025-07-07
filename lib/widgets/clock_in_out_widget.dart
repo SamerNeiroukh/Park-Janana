@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
+import '../utils/location_utils.dart'; // ✅ NEW
 
 class ClockInOutWidget extends StatefulWidget {
   const ClockInOutWidget({super.key});
@@ -136,24 +137,53 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   }
 
   Future<void> _handleAction() async {
-    final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
+  final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
 
-    if (_ongoingSession == null) {
-      await _clockService.clockIn(userName);
-    } else {
-      await _clockService.clockOut();
+  final insidePark = await LocationUtils.isInsidePark();
+
+  // ✅ Show confirmation if user is OUTSIDE the park area
+  if (!insidePark) {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('אינך בגבולות הפארק'),
+        content: const Text('האם ברצונך להמשיך בכל זאת?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('לא'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('כן'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) {
+      _key.currentState?.reset();
+      return;
     }
-
-    setState(() => _justSubmitted = true);
-    _cardPulseController.forward(from: 0).then((_) {
-      _cardPulseController.reverse().then((_) {
-        setState(() => _justSubmitted = false);
-      });
-    });
-
-    await _fetchSession();
-    _key.currentState?.reset();
   }
+
+  if (_ongoingSession == null) {
+    await _clockService.clockIn(userName);
+  } else {
+    await _clockService.clockOut();
+  }
+
+  setState(() => _justSubmitted = true);
+  _cardPulseController.forward(from: 0).then((_) {
+    _cardPulseController.reverse().then((_) {
+      setState(() => _justSubmitted = false);
+    });
+  });
+
+  await _fetchSession();
+  _key.currentState?.reset();
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +213,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
               gradient: LinearGradient(
                 colors: isClockedIn
                     ? [Color(0xFFFF6A6A), Color(0xFFFFB88C)]
-                    : [Color(0xFF4facfe), Color(0xFF00f2fe)],
+                    : [Color.fromARGB(255, 79, 88, 254), Color(0xFF00f2fe)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
