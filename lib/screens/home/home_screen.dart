@@ -17,6 +17,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
 import 'package:park_janana/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/widgets/custom_card.dart';
+import 'package:park_janana/services/weather_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _roleData;
   Map<String, dynamic>? _userData;
   Map<String, double>? _workStats;
+  Map<String, dynamic>? _weatherData;
 
   static final Map<String, Map<String, dynamic>> _userCache = {};
 
@@ -56,10 +58,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final userData = await _fetchUserData(uid);
     final stats = await ClockService().getMonthlyWorkStats(uid);
+    final weather = await WeatherService().fetchWeather(); // ✅ NEW
 
     if (mounted) {
       setState(() {
         _userData = userData;
+        _weatherData = weather;
         _workStats = {
           'hoursWorked': stats['hoursWorked']?.toDouble() ?? 0.0,
           'daysWorked': stats['daysWorked']?.toDouble() ?? 0.0,
@@ -90,6 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final User? currentUser = FirebaseAuth.instance.currentUser;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     if (currentUser == null) {
       return Scaffold(
@@ -105,27 +111,37 @@ class _HomeScreenState extends State<HomeScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                UserCard(
-                  userName: _userData!['fullName'] ?? 'משתמש',
-                  profilePictureUrl: _profilePictureUrl ??
-                      _userData!['profile_picture'] ??
-                      'https://via.placeholder.com/150',
-                  currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                  daysWorked: _workStats!['daysWorked']!.toInt(),
-                  hoursWorked: _workStats!['hoursWorked']!,
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.00,
+                    vertical: screenHeight * 0.01,
+                  ),
+                  child: UserCard(
+                    userName: _userData!['fullName'] ?? 'משתמש',
+                    profilePictureUrl: _profilePictureUrl ?? _userData!['profile_picture'] ?? '',
+                    currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                    daysWorked: _workStats!['daysWorked']!.toInt(),
+                    hoursWorked: _workStats!['hoursWorked']!,
+                    weatherDescription: _weatherData?['description'],
+                    temperature: _weatherData?['temperature']?.toString(),
+                    weatherIcon: _weatherData?['icon'],
+                  ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: screenHeight * 0.01),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                     child: ActionButtonGridPager(
                       buttons: _buildActionButtons(_userData!['role'] ?? 'worker', currentUser.uid),
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: ClockInOutWidget(),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.005,
+                  ),
+                  child: const ClockInOutWidget(),
                 ),
               ],
             ),
@@ -172,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
               debugPrint('${operation['title']} tapped');
             },
           );
-        }),
+        }).toList(),
       );
     }
 

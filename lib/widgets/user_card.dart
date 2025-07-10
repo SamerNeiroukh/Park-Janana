@@ -9,6 +9,9 @@ class UserCard extends StatelessWidget {
   final String currentDate;
   final int daysWorked;
   final double hoursWorked;
+  final String? weatherDescription;
+  final String? temperature;
+  final String? weatherIcon; // still accepted for fallback, but not used
 
   const UserCard({
     super.key,
@@ -17,10 +20,15 @@ class UserCard extends StatelessWidget {
     required this.currentDate,
     required this.daysWorked,
     required this.hoursWorked,
+    this.weatherDescription,
+    this.temperature,
+    this.weatherIcon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final String emoji = _mapDescriptionToEmoji(weatherDescription ?? '');
+
     return Column(
       children: [
         Stack(
@@ -34,9 +42,9 @@ class UserCard extends StatelessWidget {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFFFF8C00), // Orange
-                      Color.fromARGB(255, 63, 163, 251), // Blue
-                      Color(0xFFFF0000), // Red
+                      Color(0xFFFF8C00),
+                      Color.fromARGB(255, 63, 163, 251),
+                      Color(0xFFFF0000),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -50,6 +58,29 @@ class UserCard extends StatelessWidget {
                         color: Colors.white.withOpacity(0.05),
                       ),
                     ),
+                    // ✅ Weather - emoji version
+                    if (temperature != null && weatherDescription != null)
+                      Positioned(
+                        top: 14,
+                        right: 14,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white30),
+                          ),
+                          child: Text(
+                            '$emoji $temperature°C | $weatherDescription',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
@@ -168,6 +199,20 @@ class UserCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// ✅ Emoji based on weather description (Hebrew keywords)
+  String _mapDescriptionToEmoji(String description) {
+    final desc = description.trim();
+    if (desc.contains('בהיר') || desc.contains('שמש')) return '☀️';
+    if (desc.contains('מעונן חלקית')) return '🌤️';
+    if (desc.contains('מעונן')) return '☁️';
+    if (desc.contains('גשם')) return '🌧️';
+    if (desc.contains('סערה')) return '⛈️';
+    if (desc.contains('שלג')) return '❄️';
+    if (desc.contains('ערפל')) return '🌫️';
+    if (desc.contains('רוחות')) return '💨';
+    return '🌡️'; // default emoji
   }
 }
 
