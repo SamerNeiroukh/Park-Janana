@@ -34,8 +34,10 @@ class _ActionButtonGridPagerState extends State<ActionButtonGridPager> {
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
+        SizedBox( // ✅ replaces Expanded to avoid crash
+          height: 180, // fixed height for button pager
           child: PageView.builder(
             reverse: true,
             controller: _controller,

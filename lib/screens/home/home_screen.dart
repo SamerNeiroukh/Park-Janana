@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final userData = await _fetchUserData(uid);
     final stats = await ClockService().getMonthlyWorkStats(uid);
-    final weather = await WeatherService().fetchWeather(); // ✅ NEW
+    final weather = await WeatherService().fetchWeather();
 
     if (mounted) {
       setState(() {
@@ -109,41 +109,43 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: const UserHeader(),
       body: _userData == null || _workStats == null
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.00,
-                    vertical: screenHeight * 0.01,
+          : SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.00,
+                      vertical: screenHeight * 0.01,
+                    ),
+                    child: UserCard(
+                      userName: _userData!['fullName'] ?? 'משתמש',
+                      profilePictureUrl:
+                          _profilePictureUrl ?? _userData!['profile_picture'] ?? '',
+                      currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                      daysWorked: _workStats!['daysWorked']!.toInt(),
+                      hoursWorked: _workStats!['hoursWorked']!,
+                      weatherDescription: _weatherData?['description'],
+                      temperature: _weatherData?['temperature']?.toString(),
+                      weatherIcon: _weatherData?['icon'],
+                    ),
                   ),
-                  child: UserCard(
-                    userName: _userData!['fullName'] ?? 'משתמש',
-                    profilePictureUrl: _profilePictureUrl ?? _userData!['profile_picture'] ?? '',
-                    currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                    daysWorked: _workStats!['daysWorked']!.toInt(),
-                    hoursWorked: _workStats!['hoursWorked']!,
-                    weatherDescription: _weatherData?['description'],
-                    temperature: _weatherData?['temperature']?.toString(),
-                    weatherIcon: _weatherData?['icon'],
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.01),
-                Expanded(
-                  child: Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                     child: ActionButtonGridPager(
                       buttons: _buildActionButtons(_userData!['role'] ?? 'worker', currentUser.uid),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.04,
-                    vertical: screenHeight * 0.005,
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.04,
+                      vertical: screenHeight * 0.005,
+                    ),
+                    child: const ClockInOutWidget(),
                   ),
-                  child: const ClockInOutWidget(),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }
