@@ -44,7 +44,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
                     child: Text(
-                      'אין משמרות זמינות לשבוע זה.',
+                      'אין משמרות זמינות לשבוע זה',
                       style: AppTheme.bodyText,
                     ),
                   );

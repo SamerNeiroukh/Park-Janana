@@ -328,7 +328,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("👥 עובדים מוקצים:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                  const Text("👥 עובדים מוקצים", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
                   const SizedBox(height: 12),
                   Expanded(
                     child: isLoadingWorkers
@@ -366,7 +366,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("📩 הודעות מהמנהלים:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                  const Text("📩 הודעות מהמנהלים", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
                   const SizedBox(height: 12),
                   Expanded(
                     child: isLoadingMessages

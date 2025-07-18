@@ -79,45 +79,64 @@ class TaskService {
 
   // ✅ Update only the specific worker's entry in workerProgress
   Future<void> updateWorkerStatus(String taskId, String userId, String newStatus) async {
-    final taskRef = _firestore.collection(_collection).doc(taskId);
-    final snapshot = await taskRef.get();
+  final taskRef = _firestore.collection(_collection).doc(taskId);
+  final snapshot = await taskRef.get();
 
-    if (!snapshot.exists) {
-      print('❌ Task not found: $taskId');
-      return;
-    }
-
-    final data = snapshot.data()!;
-    final now = Timestamp.now();
-
-    final progressEntry = Map<String, dynamic>.from(
-      (data['workerProgress'] ?? {})[userId] ?? {
-        'submittedAt': now,
-        'startedAt': null,
-        'endedAt': null,
-        'status': 'pending',
-      },
-    );
-
-    // Update status timestamps
-    progressEntry['status'] = newStatus;
-    if (newStatus == 'pending') {
-      progressEntry['submittedAt'] = now;
-    } else if (newStatus == 'in_progress') {
-      progressEntry['startedAt'] = now;
-    } else if (newStatus == 'done') {
-      progressEntry['endedAt'] = now;
-    }
-
-    print('👤 Updating status for $userId → $newStatus');
-    print('📦 Entry → $progressEntry');
-
-    await taskRef.update({
-      'workerProgress.$userId': progressEntry,
-    });
-
-    print('✅ Firestore: updated workerProgress.$userId successfully');
+  if (!snapshot.exists) {
+    print('❌ Task not found: $taskId');
+    return;
   }
+
+  final data = snapshot.data()!;
+  final now = Timestamp.now();
+
+  final workerProgress = Map<String, dynamic>.from(data['workerProgress'] ?? {});
+
+  final progressEntry = Map<String, dynamic>.from(
+    workerProgress[userId] ?? {
+      'submittedAt': now,
+      'startedAt': null,
+      'endedAt': null,
+      'status': 'pending',
+    },
+  );
+
+  // Update timestamps based on new status
+  progressEntry['status'] = newStatus;
+  if (newStatus == 'pending') {
+    progressEntry['submittedAt'] = now;
+  } else if (newStatus == 'in_progress') {
+    progressEntry['startedAt'] = now;
+  } else if (newStatus == 'done') {
+    progressEntry['endedAt'] = now;
+  }
+
+  // Update Firestore with the user's updated progress
+  await taskRef.update({'workerProgress.$userId': progressEntry});
+  print('✅ Firestore: updated workerProgress.$userId successfully');
+
+  // Now determine global task status
+  workerProgress[userId] = progressEntry;
+
+  final allStatuses = workerProgress.values
+      .map((entry) => (entry as Map<String, dynamic>)['status'] as String)
+      .toList();
+
+  String overallStatus;
+  if (allStatuses.every((s) => s == 'done')) {
+    overallStatus = 'done';
+  } else if (allStatuses.any((s) => s == 'in_progress')) {
+    overallStatus = 'in_progress';
+  } else {
+    overallStatus = 'pending';
+  }
+
+  print('📊 New task status → $overallStatus');
+
+  // Update task global status
+  await taskRef.update({'status': overallStatus});
+}
+
 
   // 🟢 Get task by ID
   Future<TaskModel?> getTaskById(String taskId) async {

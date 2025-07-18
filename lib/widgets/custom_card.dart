@@ -90,7 +90,7 @@ class _ActionButtonGridPagerState extends State<ActionButtonGridPager> {
   Widget _buildTile(ActionButton button) {
     return SizedBox(
       width: 140,
-      height: 80,
+      height: 75,
       child: ElevatedButton(
         onPressed: button.onTap,
         style: ElevatedButton.styleFrom(

@@ -44,6 +44,100 @@ class ShiftCardState extends State<ShiftCard> {
   });
 }
 
+
+void _showCommentBottomSheet(BuildContext context) {
+  final TextEditingController controller = TextEditingController();
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          left: 20,
+          right: 20,
+          top: 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 60,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: const [
+                Icon(Icons.chat_rounded, color: Color(0xFF1976D2), size: 28),
+                SizedBox(width: 10),
+                Text(
+                  "הודעה למשמרת",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              maxLines: 4,
+              textDirection: TextDirection.rtl,
+              decoration: InputDecoration(
+                hintText: "כתוב את הודעתך כאן...",
+                hintTextDirection: TextDirection.rtl,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976D2),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              onPressed: () async {
+                if (controller.text.isNotEmpty && _currentUser != null) {
+                  await widget.shiftService.addMessageToShift(
+                    widget.shift.id,
+                    controller.text,
+                    _currentUser!.uid,
+                  );
+                  Navigator.of(context).pop();
+                }
+              },
+              icon: const Icon(Icons.send_rounded, color: Colors.white),
+              label: const Text(
+                "שלח הודעה",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -90,7 +184,7 @@ class ShiftCardState extends State<ShiftCard> {
             style: AppTheme.bodyText.copyWith(color: Colors.white70),
           ),
           Text(
-            "👥 עובדים מוקצים: ${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers}",
+            "👥 עובדים מוקצים ${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers}",
             style: AppTheme.bodyText.copyWith(color: Colors.white),
           ),
         ],
@@ -167,7 +261,7 @@ class ShiftCardState extends State<ShiftCard> {
               (workers == null || workers.isEmpty)
                   ? Align(
                       alignment: Alignment.centerRight,
-                      child: Text("אין עובדים מוקצים למשמרת זו.", style: AppTheme.bodyText),
+                      child: Text("אין עובדים מוקצים למשמרת זו", style: AppTheme.bodyText),
                     )
                   : Column(
                       children: workers.map((worker) {
@@ -250,9 +344,9 @@ void _removeWorker(String workerId) async {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text("📩 הודעות מנהלים:", style: AppTheme.sectionTitle),
+            Text("📩 הודעות מנהלים", style: AppTheme.sectionTitle),
             if (messages.isEmpty)
-              Text("אין הודעות זמינות.", style: AppTheme.bodyText),
+              Text("אין הודעות זמינות", style: AppTheme.bodyText),
             ...messages.map((msg) {
               return MessageBubble(
                 message: msg['message'],
@@ -270,25 +364,44 @@ void _removeWorker(String workerId) async {
 
 Widget _buildAddMessageSection() {
   return Padding(
-    padding: EdgeInsets.only(
-      left: 12,
-      right: 12,
-      top: 12,
-      bottom: MediaQuery.of(context).viewInsets.bottom + 12,
-    ),
-    child: Column(
-      children: [
-        TextField(
-          controller: _messageController,
-          decoration: AppTheme.inputDecoration(hintText: "הוסף הודעה למשמרת"),
+    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      onPressed: () => _showCommentBottomSheet(context),
+      child: Ink(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF42A5F5), Color(0xFF1976D2)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+          borderRadius: BorderRadius.circular(16),
         ),
-        const SizedBox(height: 10.0),
-        ElevatedButton(
-          style: AppTheme.primaryButtonStyle,
-          onPressed: _addMessage,
-          child: const Text("📩 שלח הודעה"),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.chat_bubble_outline, color: Colors.white),
+              SizedBox(width: 8),
+              Text(
+                "הוסף/נהל הודעות",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     ),
   );
 }
