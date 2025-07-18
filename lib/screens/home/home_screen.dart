@@ -131,12 +131,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       weatherIcon: _weatherData?['icon'],
                     ),
                   ),
+                  
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                     child: ActionButtonGridPager(
                       buttons: _buildActionButtons(_userData!['role'] ?? 'worker', currentUser.uid),
                     ),
                   ),
+                  
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.04,

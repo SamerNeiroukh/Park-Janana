@@ -14,7 +14,7 @@ class WeatherService {
         final data = json.decode(response.body);
         return {
           'description': data['weather'][0]['description'],
-          'temperature': data['main']['temp'].toDouble(),
+          'temperature': data['main']['temp'].round(),
           'icon': data['weather'][0]['icon'],
         };
       } else {

@@ -58,22 +58,46 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text("אין משימות פעילות."));
-                      }
+                      if (!snapshot.hasData) {
+  return const Center(child: CircularProgressIndicator());
+}
 
-                      List<TaskModel> tasks = snapshot.data!;
+List<TaskModel> tasks = snapshot.data!;
 
-                      tasks = tasks.where((t) {
-                        final tDate = t.dueDate.toDate();
-                        return tDate.year == selectedDate.year &&
-                            tDate.month == selectedDate.month &&
-                            tDate.day == selectedDate.day;
-                      }).toList();
+// Filter by date first
+tasks = tasks.where((t) {
+  final tDate = t.dueDate.toDate();
+  return tDate.year == selectedDate.year &&
+      tDate.month == selectedDate.month &&
+      tDate.day == selectedDate.day;
+}).toList();
 
-                      if (selectedStatus != 'all') {
-                        tasks = tasks.where((t) => t.status == selectedStatus).toList();
-                      }
+// Then filter by status
+if (selectedStatus != 'all') {
+  tasks = tasks.where((t) => t.status == selectedStatus).toList();
+}
+
+// 👉 Handle empty filtered list
+if (tasks.isEmpty) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const SizedBox(height: 40),
+      
+      const SizedBox(height: 20),
+      const Text(
+        "אין משימות ליום זה",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        "השתמש בכפתור 'יצירת משימה' כדי להוסיף אחת חדשה",
+        style: TextStyle(fontSize: 14, color: Colors.grey),
+      ),
+    ],
+  );
+}
+
 
                       return ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

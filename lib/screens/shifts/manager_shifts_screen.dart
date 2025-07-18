@@ -196,7 +196,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
         children: [
           Icon(Icons.work_off, size: 50, color: AppColors.textSecondary),
           const SizedBox(height: 10),
-          Text('אין משמרות זמינות ליום זה.', style: AppTheme.bodyText),
+          Text('אין משמרות זמינות ליום זה', style: AppTheme.bodyText),
         ],
       ),
     );

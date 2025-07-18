@@ -127,7 +127,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('אין משמרות זמינות כרגע.', style: AppTheme.bodyText));
+          return Center(child: Text('אין משמרות זמינות כרגע', style: AppTheme.bodyText));
         }
 
         // 🟢 Filter shifts for the selected day
@@ -136,7 +136,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         }).toList();
 
         if (filteredShifts.isEmpty) {
-          return Center(child: Text('אין משמרות ליום זה.', style: AppTheme.bodyText));
+          return Center(child: Text('אין משמרות ליום זה', style: AppTheme.bodyText));
         }
 
         return ListView.builder(
