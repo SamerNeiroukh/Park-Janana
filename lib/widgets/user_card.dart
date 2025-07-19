@@ -11,7 +11,8 @@ class UserCard extends StatelessWidget {
   final double hoursWorked;
   final String? weatherDescription;
   final String? temperature;
-  final String? weatherIcon; // still accepted for fallback, but not used
+  final String? weatherIcon;
+  final VoidCallback? onProfileUpdated; // ✅ NEW
 
   const UserCard({
     super.key,
@@ -23,6 +24,7 @@ class UserCard extends StatelessWidget {
     this.weatherDescription,
     this.temperature,
     this.weatherIcon,
+    this.onProfileUpdated, // ✅ NEW
   });
 
   @override
@@ -58,7 +60,6 @@ class UserCard extends StatelessWidget {
                         color: Colors.white.withOpacity(0.05),
                       ),
                     ),
-                    // ✅ Weather - emoji version
                     if (temperature != null && weatherDescription != null)
                       Positioned(
                         top: 14,
@@ -80,7 +81,6 @@ class UserCard extends StatelessWidget {
                           ),
                         ),
                       ),
-
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
@@ -138,7 +138,11 @@ class UserCard extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => PersonalAreaScreen(uid: uid),
                           ),
-                        );
+                        ).then((_) {
+                          if (onProfileUpdated != null) {
+                            onProfileUpdated!(); // ✅ Call to refresh
+                          }
+                        });
                       }
                     },
                     child: Container(
@@ -201,7 +205,6 @@ class UserCard extends StatelessWidget {
     );
   }
 
-  /// ✅ Emoji based on weather description (Hebrew keywords)
   String _mapDescriptionToEmoji(String description) {
     final desc = description.trim();
     if (desc.contains('בהיר') || desc.contains('שמש')) return '☀️';
@@ -212,7 +215,7 @@ class UserCard extends StatelessWidget {
     if (desc.contains('שלג')) return '❄️';
     if (desc.contains('ערפל')) return '🌫️';
     if (desc.contains('רוחות')) return '💨';
-    return '🌡️'; // default emoji
+    return '🌡️';
   }
 }
 

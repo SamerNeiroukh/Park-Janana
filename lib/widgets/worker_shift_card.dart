@@ -334,7 +334,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                     child: isLoadingWorkers
                         ? const Center(child: CircularProgressIndicator())
                         : assignedWorkers.isEmpty
-                            ? const Center(child: Text("אין עובדים מוקצים.", style: TextStyle(fontSize: 16)))
+                            ? const Center(child: Text("אין עובדים מוקצים", style: TextStyle(fontSize: 16)))
                             : ListView.separated(
                                 itemCount: assignedWorkers.length,
                                 separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
@@ -372,7 +372,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                     child: isLoadingMessages
                         ? const Center(child: CircularProgressIndicator())
                         : (_messagesCache[widget.shift.id]?.isEmpty ?? true)
-                            ? const Center(child: Text("אין הודעות זמינות.", style: TextStyle(fontSize: 16)))
+                            ? const Center(child: Text("אין הודעות זמינות", style: TextStyle(fontSize: 16)))
                             : ListView(
                                 children: _messagesCache[widget.shift.id]!
                                     .map((msg) => MessageBubble(
