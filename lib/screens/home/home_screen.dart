@@ -45,7 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadRolesData() async {
-    final String rolesJson = await rootBundle.loadString('lib/config/roles.json');
+    final String rolesJson =
+        await rootBundle.loadString('lib/config/roles.json');
     if (!mounted) return;
     setState(() {
       _roleData = json.decode(rolesJson);
@@ -121,9 +122,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: UserCard(
                       userName: _userData!['fullName'] ?? 'משתמש',
-                      profilePictureUrl:
-                          _profilePictureUrl ?? _userData!['profile_picture'] ?? '',
-                      currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                      profilePictureUrl: _userData!['profile_picture'] ?? '',
+                      currentDate:
+                          DateFormat('dd/MM/yyyy').format(DateTime.now()),
                       daysWorked: _workStats!['daysWorked']!.toInt(),
                       hoursWorked: _workStats!['hoursWorked']!,
                       weatherDescription: _weatherData?['description'],
@@ -131,14 +132,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       weatherIcon: _weatherData?['icon'],
                     ),
                   ),
-                  
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                     child: ActionButtonGridPager(
-                      buttons: _buildActionButtons(_userData!['role'] ?? 'worker', currentUser.uid),
+                      buttons: _buildActionButtons(
+                          _userData!['role'] ?? 'worker', currentUser.uid),
                     ),
                   ),
-                  
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.04,
@@ -160,7 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => PersonalAreaScreen(uid: uid)),
+            MaterialPageRoute(
+                builder: (context) => PersonalAreaScreen(uid: uid)),
           );
         },
       ),
@@ -202,14 +204,16 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'המשימות שלי',
           icon: Icons.check_circle_outline_rounded,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkerTaskScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const WorkerTaskScreen()));
           },
         ),
         ActionButton(
           title: 'המשמרות שלי',
           icon: Icons.schedule_outlined,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ShiftsScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const ShiftsScreen()));
           },
         ),
       ]);
@@ -221,21 +225,26 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'ניהול משמרות',
           icon: Icons.manage_history_rounded,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
           },
         ),
         ActionButton(
           title: 'ניהול משימות',
           icon: Icons.assignment_turned_in_rounded,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ManagerTaskDashboard()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ManagerTaskDashboard()));
           },
         ),
         ActionButton(
           title: 'ניהול עובדים',
           icon: Icons.group,
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageWorkersScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const ManageWorkersScreen()));
           },
         ),
       ]);
