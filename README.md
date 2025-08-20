@@ -41,8 +41,9 @@ Requirements were gathered from real park operations:
 - Role-based access: Worker, Manager, Department Manager, Owner  
 - New worker registration flow  
 
-<img width="655" height="1296" alt="image" src="https://github.com/user-attachments/assets/81123351-357b-492f-beb6-2b93d2db275c" />
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/81123351-357b-492f-beb6-2b93d2db275c" width="280" />
+</div>
 
 ---
 
@@ -51,10 +52,10 @@ Requirements were gathered from real park operations:
 - Manager dashboard: Approvals, staff status, shift management  
 - Owner dashboard: Analytics and reporting  
 
-<img width="329" height="650" alt="image" src="https://github.com/user-attachments/assets/727af802-722a-4d1a-a69e-d054a50438c2" />
-  
-<img width="329" height="650" alt="image" src="https://github.com/user-attachments/assets/8410ad61-f2ea-49b3-803c-6ad1d2543f3b" />
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/727af802-722a-4d1a-a69e-d054a50438c2" width="250" />
+  <img src="https://github.com/user-attachments/assets/8410ad61-f2ea-49b3-803c-6ad1d2543f3b" width="250" />
+</div>
 
 ---
 
@@ -64,10 +65,10 @@ Requirements were gathered from real park operations:
 - Role-based worker assignment  
 - Real-time updates with Firebase  
 
-<img width="329" height="650" alt="image" src="https://github.com/user-attachments/assets/c0c52538-f432-4c7d-bc35-3986e05d2884" />
-  
-<img width="329" height="650" alt="image" src="https://github.com/user-attachments/assets/aca22dc0-c268-4a73-adef-3c047aa9ae75" />
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/c0c52538-f432-4c7d-bc35-3986e05d2884" width="250" />
+  <img src="https://github.com/user-attachments/assets/4dd306c8-2d3a-49af-842e-3d06d6082833" width="250" />
+</div>
 
 ---
 
@@ -78,10 +79,10 @@ Requirements were gathered from real park operations:
 - Manager dashboard: "All Tasks" with filtering  
 - Edit and delete tasks  
 
-<img width="329" height="650" alt="image" src="https://github.com/user-attachments/assets/b09a7c80-7342-46b4-b74b-338bac02cc49" />
-  
-<img width="328" height="650" alt="image" src="https://github.com/user-attachments/assets/44246e50-7004-4661-b3c2-68287cb003da" />
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b09a7c80-7342-46b4-b74b-338bac02cc49" width="250" />
+  <img src="https://github.com/user-attachments/assets/44246e50-7004-4661-b3c2-68287cb003da" width="250" />
+</div>
 
 ---
 
@@ -93,10 +94,11 @@ Requirements were gathered from real park operations:
   - Hours worked (decimal precision)  
 - Motivational design with animations  
 
-<img width="656" height="1296" alt="image" src="https://github.com/user-attachments/assets/f8edea74-ea21-4bd6-9935-f24a64324a6c" />
-<img width="655" height="1296" alt="image" src="https://github.com/user-attachments/assets/48a1b84a-1a16-4f9b-b86d-6c87340774b3" />
-<img width="655" height="1296" alt="image" src="https://github.com/user-attachments/assets/fa9f2004-3dd4-4948-91ce-3b9b969c07bf" />
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f8edea74-ea21-4bd6-9935-f24a64324a6c" width="250" />
+  <img src="https://github.com/user-attachments/assets/48a1b84a-1a16-4f9b-b86d-6c87340774b3" width="250" />
+  <img src="https://github.com/user-attachments/assets/fa9f2004-3dd4-4948-91ce-3b9b969c07bf" width="250" />
+</div>
 
 ---
 
@@ -106,13 +108,17 @@ Requirements were gathered from real park operations:
 - Worker Shift Report with approval history  
 - Data organized per month for historical records  
 
-<img width="329" height="650" alt="image" src="https://github.com/user-attachments/assets/90831832-63f3-4d1b-b38c-8f31445edf5f" />
-<img width="328" height="650" alt="image" src="https://github.com/user-attachments/assets/076b0a41-1ae7-4bf8-aff4-17b39945b741" />
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/90831832-63f3-4d1b-b38c-8f31445edf5f" width="250" />
+  <img src="https://github.com/user-attachments/assets/076b0a41-1ae7-4bf8-aff4-17b39945b741" width="250" />
+</div>
 
 ---
 
 ### Flow Process
-<img width="1074" height="1039" alt="image" src="https://github.com/user-attachments/assets/4e8ad6b2-fff9-4189-8b14-9e93f0825793" />
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/4e8ad6b2-fff9-4189-8b14-9e93f0825793" width="600" />
+</div>
 
 ---
 
@@ -128,8 +134,9 @@ Flutter (UI)
 ↘ Firestore (Realtime DB)
 ↘ Firebase Functions (triggers, logic)
 
-<img width="817" height="581" alt="image" src="https://github.com/user-attachments/assets/3b805a40-fb64-4a35-9de7-9f22b8c54269" />
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/3b805a40-fb64-4a35-9de7-9f22b8c54269" width="500" />
+</div>
 
 ---
 
