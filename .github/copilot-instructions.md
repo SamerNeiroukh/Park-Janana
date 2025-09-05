@@ -84,11 +84,43 @@ Always reference these instructions first and fallback to search or bash command
 - **ALWAYS manually validate any new code changes by running through complete user scenarios.**
 - **CRITICAL**: After making changes, ALWAYS run `flutter analyze` and `flutter test` before committing.
 - **SCENARIO VALIDATION**: Test these key user workflows after making changes:
-  1. **Authentication Flow**: User registration → login → role assignment
-  2. **Shift Management**: Worker requests shift → Manager approves/rejects → Worker sees updated status
-  3. **Task Assignment**: Manager creates task → Worker receives task → Worker marks complete
-  4. **Attendance Tracking**: Worker clocks in → performs work → clocks out → View attendance summary
-  5. **Reporting**: Generate PDF reports → Verify data accuracy and formatting
+
+#### 1. Authentication Flow (lib/screens/auth/)
+- User registration via `new_worker_screen.dart` → validation → role assignment
+- Login via `login_screen.dart` → Firebase Auth → home dashboard redirect
+- Password reset via `forgot_password_screen.dart` → email verification
+- **Test data**: Create test user with known credentials, verify role-based dashboard access
+
+#### 2. Shift Management Flow (lib/screens/shifts/)
+- Worker requests shift via `shifts_screen.dart` → Firebase update
+- Manager approves/rejects via `manager_shifts_screen.dart` → worker notification
+- Manager creates new shift via `create_shift_screen.dart` → availability updates
+- **Test scenario**: Request shift → approve → verify worker sees updated status
+
+#### 3. Task Assignment Flow (lib/screens/tasks/)
+- Manager creates task via `create_task_screen.dart` → assigns to worker(s)
+- Worker views task via `worker_task_screen.dart` → marks in progress/complete
+- Manager monitors via `manager_task_dashboard.dart` → tracks completion
+- **Test scenario**: Create task → assign → worker completes → verify status updates
+
+#### 4. Attendance Tracking Flow (lib/widgets/clock_in_out_widget.dart)
+- Worker slides to clock in → `ClockService.clockIn()` → session starts
+- Worker performs work → real-time elapsed time tracking
+- Worker slides to clock out → `ClockService.clockOut()` → session ends
+- **Test scenario**: Clock in → wait 30 seconds → clock out → verify time calculation
+
+#### 5. Reporting System (lib/screens/reports/)
+- Generate attendance report via `attendance_summary_report.dart` → PDF export
+- Generate task report via `task_summary_report.dart` → data verification
+- Worker shift report via `worker_shift_report.dart` → approval history
+- **Test scenario**: Generate reports → verify data accuracy and PDF formatting
+
+#### 6. Role-Based Dashboard Access
+- Worker: Basic dashboard with tasks, shifts, attendance
+- Shift Manager: Task monitoring, issue reporting
+- Department Manager: Full shift/task management
+- Owner: Complete system analytics and user management
+- **Test scenario**: Login as different roles → verify permission-restricted access
 
 ### Build and Test Validation
 - Always run the complete validation suite:
@@ -229,19 +261,34 @@ lib/
 ```
 
 ### Key Files and Their Purpose
-- `lib/main.dart` - Application entry point with Firebase initialization
-- `lib/services/firebase_service.dart` - Core Firebase operations
-- `lib/services/auth_service.dart` - Authentication management
-- `lib/config/roles.json` - Role-based permission configuration
+- `lib/main.dart` - Application entry point with Firebase initialization and orientation lock
+- `lib/services/firebase_service.dart` - Core Firebase operations (CRUD for users, shifts, tasks)
+- `lib/services/auth_service.dart` - Authentication management and user session handling
+- `lib/services/clock_service.dart` - Attendance tracking with clock in/out functionality
+- `lib/services/shift_service.dart` - Shift management, worker assignments, approvals
+- `lib/services/task_service.dart` - Task creation, assignment, progress tracking
+- `lib/services/pdf_export_service.dart` - PDF report generation for attendance/tasks
+- `lib/config/roles.json` - Role-based permission configuration (4 roles)
 - `lib/constants/app_constants.dart` - Firebase collection names and asset paths
+- `lib/constants/app_strings.dart` - Hebrew UI strings (primary language)
+- `lib/constants/app_colors.dart` - App color scheme and theme colors
+- `lib/widgets/clock_in_out_widget.dart` - Slide-to-act clock in/out interface
+- `lib/widgets/user_header.dart` - User profile display with role-based info
+- `lib/models/` - Data models for User, Shift, Task, Attendance with Firestore integration
 - `pubspec.yaml` - Flutter dependencies and project configuration
 - `analysis_options.yaml` - Dart analysis and linting rules
 
 ### Firebase Collections Structure
 - `users` - User profiles with role-based permissions
-- `shifts` - Shift scheduling and worker assignments
+  - Fields: uid, email, fullName, idNumber, phoneNumber, profile_picture, role, licensedDepartments[]
+- `shifts` - Shift scheduling and worker assignments  
+  - Fields: id, date, department, startTime, endTime, maxWorkers, requestedWorkers[], assignedWorkers[], messages[], createdBy, createdAt, lastUpdatedBy, lastUpdatedAt, status, cancelReason, shiftManager, assignedWorkerData[], rejectedWorkerData[]
 - `tasks` - Task assignment and completion tracking
-- `attendance` - Clock in/out records and time tracking
+  - Fields: id, title, description, department, createdBy, assignedTo[], dueDate, priority, status, attachments[], comments[], createdAt, workerProgress{workerId: {status, date}}
+- `attendance_logs` - Clock in/out records and time tracking
+  - Fields: id (userId_year_month), userId, userName, year, month, sessions[{clockIn, clockOut}]
+  - Automatic calculations: daysWorked, totalHoursWorked (computed in AttendanceModel)
+- Additional collections: `notifications`, `reports`, `departments`
 
 ### Role-Based Permission System
 - **Worker**: View tasks, complete tasks, clock in/out, request shifts
@@ -283,10 +330,16 @@ flutter pub deps                        # Show dependency tree
 
 ### Troubleshooting Common Issues
 - **Build failures**: Run `flutter clean && flutter pub get` before rebuilding
-- **Dependency conflicts**: Check `pubspec.yaml` for version conflicts
+- **Dependency conflicts**: Check `pubspec.yaml` for version conflicts, ensure Flutter SDK ^3.5.4
 - **Firebase connection issues**: Verify Firebase config files are present and valid
 - **Analysis errors**: Run `dart format .` to fix formatting issues
 - **Missing dependencies**: Run `flutter doctor` to check for missing SDK components
+- **Hebrew text rendering**: Ensure `NotoSansHebrew-Regular.ttf` font is properly loaded
+- **Clock in/out issues**: Check location permissions and Firebase Auth state
+- **PDF export failures**: Verify `printing` and `pdf` package versions in pubspec.yaml
+- **Role permission errors**: Validate user role matches entries in `lib/config/roles.json`
+- **Firestore security rules**: Ensure proper read/write permissions for user roles
+- **DateTime parsing errors**: Use consistent `dd/MM/yyyy` format throughout app
 
 ### Development Environment Notes
 - **CRITICAL**: This environment may have network restrictions affecting:
@@ -295,6 +348,12 @@ flutter pub deps                        # Show dependency tree
   - If flutter commands fail with network errors, document the limitation
 - **UI Testing**: Cannot interact with actual device UI, but can validate builds complete successfully
 - **Web Testing**: Limited browser access, use `flutter run -d web-server` for headless testing
+- **Orientation Lock**: App is locked to portrait mode only (configured in main.dart)
+- **Primary Language**: Hebrew (RTL) with Arabic and English support
+- **Location Services**: App uses Geolocator for attendance tracking (requires permissions)
+- **Slide-to-Act**: Clock in/out uses `slide_to_act` package for gesture-based time tracking
+- **PDF Generation**: Reports use `pdf` and `printing` packages for export functionality
+- **Firebase Requirements**: Auth, Firestore, and Storage must be configured
 
 ### Performance Expectations
 - **Initial `flutter pub get`**: 2-5 minutes
@@ -319,3 +378,12 @@ flutter pub deps                        # Show dependency tree
 - Test UI layout with different language directions
 
 Always check `lib/services/firebase_service.dart` and related service files after making changes to data models or Firebase operations.
+
+### Critical File Dependencies
+When modifying any part of the app, always check these interconnected files:
+- **User changes**: Check `auth_service.dart`, `firebase_service.dart`, `user_model.dart`
+- **Shift changes**: Check `shift_service.dart`, `shift_model.dart`, manager/worker shift screens
+- **Task changes**: Check `task_service.dart`, `task_model.dart`, task dashboard screens
+- **Attendance changes**: Check `clock_service.dart`, `attendance_model.dart`, `clock_in_out_widget.dart`
+- **UI changes**: Check corresponding widgets in `lib/widgets/` and constants in `lib/constants/`
+- **Permission changes**: Update `lib/config/roles.json` and verify role-based access in screens
