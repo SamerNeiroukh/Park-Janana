@@ -140,6 +140,46 @@ Flutter (UI)
 
 ---
 
+## Setup Instructions
+
+### Prerequisites
+- Flutter SDK 3.5.4 or higher
+- Dart SDK
+- Firebase project with Authentication and Firestore enabled
+
+### Firebase Configuration
+1. **Create a Firebase project** at [Firebase Console](https://console.firebase.google.com/)
+2. **Enable Authentication** (Email/Password provider)
+3. **Enable Firestore Database** 
+4. **Generate Firebase configuration**:
+   - Run `flutter pub global activate flutterfire_cli`
+   - Run `flutterfire configure`
+   - This will create `lib/firebase_options.dart` with your project configuration
+   
+   **Alternative**: Copy `lib/firebase_options_template.dart` to `lib/firebase_options.dart` and manually configure with your Firebase project settings.
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/SamerNeiroukh/Park-Janana.git
+cd Park-Janana
+
+# Install dependencies
+flutter pub get
+
+# Configure Firebase (see Firebase Configuration above)
+
+# Run the app
+flutter run
+```
+
+### Running Tests
+```bash
+flutter test
+```
+
+---
+
 ## Future Enhancements
 - Push notifications for shift and task updates  
 - In-app chat between managers and workers  
