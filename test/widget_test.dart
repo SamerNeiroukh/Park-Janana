@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
+// Widget tests for Park Janana app.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Tests the basic functionality of the app including the splash screen
+// and initial app state.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:park_janana/main.dart';
+import 'package:park_janana/screens/splash_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App starts with splash screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the splash screen is displayed initially.
+    expect(find.byType(SplashScreen), findsOneWidget);
+    
+    // Verify that the splash screen has expected elements.
+    expect(find.byType(AnimatedBuilder), findsAtLeastNWidgets(1));
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('Splash screen displays correctly', (WidgetTester tester) async {
+    // Test the splash screen widget directly.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SplashScreen(),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the splash screen renders without errors.
+    expect(find.byType(SplashScreen), findsOneWidget);
+    expect(find.byType(Scaffold), findsOneWidget);
   });
 }

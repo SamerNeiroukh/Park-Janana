@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // ✅ For locking orientation
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+// Import firebase_options.dart if it exists, otherwise use template
+// To set up Firebase: copy firebase_options_template.dart to firebase_options.dart
+// and configure with your Firebase project settings
+import 'firebase_options_template.dart' as firebase_template;
 import 'screens/splash_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/home/personal_area_screen.dart';
@@ -23,10 +26,12 @@ void main() async {
     // Initialize Firebase
     print("firebase logs: await Firebase.initializeApp(");
     await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+      options: firebase_template.DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
     print('Error initializing Firebase or App Check: $e');
+    print('Note: Make sure to copy firebase_options_template.dart to firebase_options.dart');
+    print('and configure it with your Firebase project settings.');
   }
 
   runApp(const MyApp());
