@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     // Validate form
-    if (!_formKey.currentState!.validate()) {
+    if (_formKey.currentState?.validate() != true) {
       return;
     }
 
