@@ -134,54 +134,58 @@ class _RegistrationFormState extends State<RegistrationForm> {
         constraints: const BoxConstraints(maxHeight: 600),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('טופס הרשמה', style: AppTheme.titleStyle),
-              const SizedBox(height: 16.0),
-              _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
-                  errorText: _nameError),
-              _buildTextField(_phoneNumberController, 'מספר טלפון',
-                  'הכנס את מספר הטלפון שלך',
-                  errorText: _phoneError),
-              _buildTextField(
-                  _idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך',
-                  errorText: _idError),
-              _buildTextField(
-                  _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
-                  errorText: _emailError),
-              _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה',
-                  obscureText: true,
-                  errorText:
-                      _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים'
-                          ? _passwordError
-                          : null),
-              _buildTextField(
-                  _confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה',
-                  obscureText: true,
-                  errorText: _passwordError == 'הסיסמאות אינן תואמות'
-                      ? _passwordError
-                      : null),
-              const SizedBox(height: 24.0),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
+          child: AutofillGroup(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('טופס הרשמה', style: AppTheme.titleStyle),
+                const SizedBox(height: 16.0),
+                _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
+                    errorText: _nameError, autofillHints: [AutofillHints.name]),
+                _buildTextField(_phoneNumberController, 'מספר טלפון',
+                    'הכנס את מספר הטלפון שלך',
+                    errorText: _phoneError, autofillHints: [AutofillHints.telephoneNumber]),
+                _buildTextField(
+                    _idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך',
+                    errorText: _idError),
+                _buildTextField(
+                    _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
+                    errorText: _emailError, autofillHints: [AutofillHints.email]),
+                _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה',
+                    obscureText: true,
+                    errorText:
+                        _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים'
+                            ? _passwordError
+                            : null,
+                    autofillHints: [AutofillHints.newPassword]),
+                _buildTextField(
+                    _confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה',
+                    obscureText: true,
+                    errorText: _passwordError == 'הסיסמאות אינן תואמות'
+                        ? _passwordError
+                        : null,
+                    autofillHints: [AutofillHints.newPassword]),
+                const SizedBox(height: 24.0),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
                         ),
+                        onPressed: _registerUser,
+                        child: Text('שלח', style: AppTheme.buttonTextStyle),
                       ),
-                      onPressed: _registerUser,
-                      child: Text('שלח', style: AppTheme.buttonTextStyle),
-                    ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
-              ),
-            ],
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -194,6 +198,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
     String hint, {
     bool obscureText = false,
     String? errorText,
+    List<String>? autofillHints,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -205,6 +210,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
           TextField(
             controller: controller,
             obscureText: obscureText,
+            autofillHints: autofillHints,
             decoration: InputDecoration(
               filled: AppTheme.inputDecorationTheme.filled,
               fillColor: AppTheme.inputDecorationTheme.fillColor,
