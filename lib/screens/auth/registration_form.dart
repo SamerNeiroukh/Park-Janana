@@ -5,6 +5,7 @@ import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import '../../models/user_model.dart';
 import '../welcome_screen.dart';
+import 'package:flutter/services.dart';
 
 class RegistrationForm extends StatefulWidget {
   const RegistrationForm({super.key});
@@ -142,11 +143,24 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 const SizedBox(height: 16.0),
                 _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
                     errorText: _nameError, autofillHints: [AutofillHints.name]),
-                _buildTextField(_phoneNumberController, 'מספר טלפון',
-                    'הכנס את מספר הטלפון שלך',
-                    errorText: _phoneError, autofillHints: [AutofillHints.telephoneNumber]),
                 _buildTextField(
-                    _idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך',
+                  _phoneNumberController,
+                  'מספר טלפון',
+                  'הכנס את מספר הטלפון שלך',
+                  errorText: _phoneError,
+                  // keep local suffix; also include full telephoneNumber as a hint fallback
+                  autofillHints: const [
+                    AutofillHints.telephoneNumberLocalSuffix,
+                    AutofillHints.telephoneNumber,
+                    AutofillHints.telephoneNumberNational,
+                  ],
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    IlLocalPhoneFormatter(),
+                  ],
+                ),
+                _buildTextField(_idNumberController, 'תעודת זהות',
+                    'הכנס את תעודת הזהות שלך',
                     errorText: _idError),
                 _buildTextField(
                     _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
@@ -199,6 +213,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
     bool obscureText = false,
     String? errorText,
     List<String>? autofillHints,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -209,6 +225,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
           const SizedBox(height: 8.0),
           TextField(
             controller: controller,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             obscureText: obscureText,
             autofillHints: autofillHints,
             decoration: InputDecoration(
@@ -226,6 +244,38 @@ class _RegistrationFormState extends State<RegistrationForm> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class IlLocalPhoneFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String t = newValue.text;
+
+    // remove spaces, hyphens, parentheses, plus
+    t = t.replaceAll(RegExp(r'[\s\-\(\)\+]'), '');
+
+    // if it starts with country code 972 → convert to local (drop 972, add leading 0)
+    if (t.startsWith('972')) {
+      t = '0${t.substring(3)}';
+    }
+
+    // if we got a local suffix (9 digits, no leading 0), e.g. 503006771 → 0503006771
+    if (t.length == 9 && !t.startsWith('0')) {
+      t = '0$t';
+    }
+
+    // keep digits only and cap at 10
+    t = t.replaceAll(RegExp(r'\D'), '');
+    if (t.length > 10) t = t.substring(0, 10);
+
+    return TextEditingValue(
+      text: t,
+      selection: TextSelection.collapsed(offset: t.length),
     );
   }
 }
