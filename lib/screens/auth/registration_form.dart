@@ -150,8 +150,6 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   errorText: _phoneError,
                   // keep local suffix; also include full telephoneNumber as a hint fallback
                   autofillHints: const [
-                    AutofillHints.telephoneNumberLocalSuffix,
-                    AutofillHints.telephoneNumber,
                     AutofillHints.telephoneNumberNational,
                   ],
                   keyboardType: TextInputType.phone,
