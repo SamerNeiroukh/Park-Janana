@@ -5,6 +5,7 @@ import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import '../../models/user_model.dart';
 import '../welcome_screen.dart';
+import 'package:flutter/services.dart';
 
 class RegistrationForm extends StatefulWidget {
   const RegistrationForm({super.key});
@@ -134,54 +135,70 @@ class _RegistrationFormState extends State<RegistrationForm> {
         constraints: const BoxConstraints(maxHeight: 600),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('טופס הרשמה', style: AppTheme.titleStyle),
-              const SizedBox(height: 16.0),
-              _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
-                  errorText: _nameError),
-              _buildTextField(_phoneNumberController, 'מספר טלפון',
+          child: AutofillGroup(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('טופס הרשמה', style: AppTheme.titleStyle),
+                const SizedBox(height: 16.0),
+                _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
+                    errorText: _nameError, autofillHints: [AutofillHints.name]),
+                _buildTextField(
+                  _phoneNumberController,
+                  'מספר טלפון',
                   'הכנס את מספר הטלפון שלך',
-                  errorText: _phoneError),
-              _buildTextField(
-                  _idNumberController, 'תעודת זהות', 'הכנס את תעודת הזהות שלך',
-                  errorText: _idError),
-              _buildTextField(
-                  _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
-                  errorText: _emailError),
-              _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה',
-                  obscureText: true,
-                  errorText:
-                      _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים'
-                          ? _passwordError
-                          : null),
-              _buildTextField(
-                  _confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה',
-                  obscureText: true,
-                  errorText: _passwordError == 'הסיסמאות אינן תואמות'
-                      ? _passwordError
-                      : null),
-              const SizedBox(height: 24.0),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
+                  errorText: _phoneError,
+                  // keep local suffix; also include full telephoneNumber as a hint fallback
+                  autofillHints: const [
+                    AutofillHints.telephoneNumber,
+                    AutofillHints.telephoneNumberNational,
+                  ],
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    IlLocalPhoneFormatter(),
+                  ],
+                ),
+                _buildTextField(_idNumberController, 'תעודת זהות',
+                    'הכנס את תעודת הזהות שלך',
+                    errorText: _idError),
+                _buildTextField(
+                    _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
+                    errorText: _emailError, autofillHints: [AutofillHints.email]),
+                _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה',
+                    obscureText: true,
+                    errorText:
+                        _passwordError == 'הסיסמה חייבת להכיל לפחות 6 תווים'
+                            ? _passwordError
+                            : null,
+                    autofillHints: [AutofillHints.newPassword]),
+                _buildTextField(
+                    _confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה',
+                    obscureText: true,
+                    errorText: _passwordError == 'הסיסמאות אינן תואמות'
+                        ? _passwordError
+                        : null,
+                    autofillHints: [AutofillHints.newPassword]),
+                const SizedBox(height: 24.0),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
                         ),
+                        onPressed: _registerUser,
+                        child: Text('שלח', style: AppTheme.buttonTextStyle),
                       ),
-                      onPressed: _registerUser,
-                      child: Text('שלח', style: AppTheme.buttonTextStyle),
-                    ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
-              ),
-            ],
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -194,6 +211,9 @@ class _RegistrationFormState extends State<RegistrationForm> {
     String hint, {
     bool obscureText = false,
     String? errorText,
+    List<String>? autofillHints,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -204,7 +224,10 @@ class _RegistrationFormState extends State<RegistrationForm> {
           const SizedBox(height: 8.0),
           TextField(
             controller: controller,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             obscureText: obscureText,
+            autofillHints: autofillHints,
             decoration: InputDecoration(
               filled: AppTheme.inputDecorationTheme.filled,
               fillColor: AppTheme.inputDecorationTheme.fillColor,
@@ -220,6 +243,38 @@ class _RegistrationFormState extends State<RegistrationForm> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class IlLocalPhoneFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String t = newValue.text;
+
+    // remove spaces, hyphens, parentheses, plus
+    t = t.replaceAll(RegExp(r'[\s\-\(\)\+]'), '');
+
+    // if it starts with country code 972 → convert to local (drop 972, add leading 0)
+    if (t.startsWith('972')) {
+      t = '0${t.substring(3)}';
+    }
+
+    // if we got a local suffix (9 digits, no leading 0), e.g. 503006771 → 0503006771
+    if (t.length == 9 && !t.startsWith('0')) {
+      t = '0$t';
+    }
+
+    // keep digits only and cap at 10
+    t = t.replaceAll(RegExp(r'\D'), '');
+    if (t.length > 10) t = t.substring(0, 10);
+
+    return TextEditingValue(
+      text: t,
+      selection: TextSelection.collapsed(offset: t.length),
     );
   }
 }

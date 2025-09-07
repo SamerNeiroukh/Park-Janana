@@ -19,7 +19,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   String? _emailError;
   String? _passwordError;
@@ -27,10 +29,19 @@ class _LoginScreenState extends State<LoginScreen> {
   static final Map<String, String> _userRoleCache = {};
 
   Future<void> _login() async {
+    // Clear previous errors
     setState(() {
-      _isLoading = true;
       _emailError = null;
       _passwordError = null;
+    });
+
+    // Validate form
+    if (_formKey.currentState?.validate() != true) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
     });
 
     try {
@@ -80,6 +91,15 @@ class _LoginScreenState extends State<LoginScreen> {
           _emailError = 'האימייל לא נמצא במערכת';
         } else if (e.code == 'wrong-password') {
           _passwordError = 'הסיסמה שגויה';
+        } else if (e.code == 'invalid-email') {
+          _emailError = 'כתובת האימייל לא תקינה';
+        } else if (e.code == 'too-many-requests') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -118,128 +138,338 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: AutofillGroup(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'שלום עובדים יקרים',
-                  style: AppTheme.titleStyle.copyWith(color: AppColors.primary),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'אימייל',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Form(
+              key: _formKey,
+              child: AutofillGroup(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  padding: const EdgeInsets.all(32.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8.0),
-                    TextField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // App Logo or Icon
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(40),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16.0),
-                        hintText: 'הכנס את כתובת האימייל שלך',
-                        hintStyle: AppTheme.hintTextStyle,
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 24.0),
+                      
+                      // Welcome Text
+                      Text(
+                        'שלום עובדים יקרים',
+                        style: AppTheme.titleStyle.copyWith(
+                          color: AppColors.primary,
+                          fontSize: 28,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      const SizedBox(height: 8.0),
+                      Text(
+                        'אנא הכנס את פרטי הכניסה שלך',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      const SizedBox(height: 40.0),
+                      
+                      // Email Field
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'אימייל',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8.0),
+                                Icon(
+                                  Icons.email_outlined,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                              ],
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        errorText: _emailError,
-                      ),
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'סיסמה',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8.0),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 16.0),
-                        hintText: 'הכנס את הסיסמה שלך',
-                        hintStyle: AppTheme.hintTextStyle,
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2.0,
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: AppColors.background,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.primary,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.error,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.error,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 16.0,
+                                horizontal: 16.0,
+                              ),
+                              hintText: 'הכנס את כתובת האימייל שלך',
+                              hintStyle: AppTheme.hintTextStyle,
+                              errorText: _emailError,
+                            ),
+                            textAlign: TextAlign.right,
+                            keyboardType: TextInputType.emailAddress,
+                            autofillHints: const [AutofillHints.email],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'אנא הכנס כתובת אימייל';
+                              }
+                              if (!value.contains('@')) {
+                                return 'אנא הכנס כתובת אימייל תקינה';
+                              }
+                              return null;
+                            },
                           ),
-                          borderRadius: BorderRadius.circular(12.0),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 24.0),
+                      
+                      // Password Field
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'סיסמה',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8.0),
+                                Icon(
+                                  Icons.lock_outlined,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                              ],
+                            ),
+                          ),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: AppColors.background,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.primary,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.error,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: AppColors.error,
+                                  width: 2.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 16.0,
+                                horizontal: 16.0,
+                              ),
+                              hintText: 'הכנס את הסיסמה שלך',
+                              hintStyle: AppTheme.hintTextStyle,
+                              errorText: _passwordError,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: AppColors.textSecondary,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            textAlign: TextAlign.right,
+                            autofillHints: const [AutofillHints.password],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'אנא הכנס סיסמה';
+                              }
+                              if (value.length < 6) {
+                                return 'הסיסמה חייבת להכיל לפחות 6 תווים';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16.0),
+                      
+                      // Forgot Password Link
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ForgotPasswordScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            AppStrings.forgotPassword,
+                            style: AppTheme.linkTextStyle.copyWith(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
-                        errorText: _passwordError,
                       ),
-                      textAlign: TextAlign.center,
-                      autofillHints: const [AutofillHints.password],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ForgotPasswordScreen(),
+                      
+                      const SizedBox(height: 32.0),
+                      
+                      // Login Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            elevation: 2,
+                            shadowColor: AppColors.primary.withOpacity(0.3),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                          ),
+                          onPressed: _isLoading ? null : _login,
+                          child: _isLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  'כניסה',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
                       ),
-                    );
-                  },
-                  child: Text(
-                    AppStrings.forgotPassword,
-                    style: AppTheme.linkTextStyle
-                        .copyWith(color: AppColors.primary),
-                    textAlign: TextAlign.center,
+                      
+                      const SizedBox(height: 24.0),
+                      
+                      // Back Button
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12.0,
+                            horizontal: 24.0,
+                          ),
+                        ),
+                        child: Text(
+                          'חזור',
+                          style: AppTheme.secondaryButtonTextStyle.copyWith(
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 32.0),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        style: AppTheme.primaryButtonStyle,
-                        onPressed: _login,
-                        child: const Text('כניסה',
-                            style: AppTheme.buttonTextStyle),
-                      ),
-                const SizedBox(height: 16.0),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
-                ),
-              ],
+              ),
             ),
           ),
         ),
