@@ -6,10 +6,12 @@ import 'firebase_service.dart';
 import '../constants/app_constants.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'notification_service.dart';
 
 class ShiftService {
   final FirebaseService _firebaseService = FirebaseService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final NotificationService _notificationService = NotificationService();
 
   final Map<String, UserModel> _workerCache = {};
 
@@ -160,6 +162,13 @@ Future<void> approveWorker(String shiftId, String workerId) async {
     final profilePicture = userData['profile_picture'] ?? '';
     final role = userData['role'] ?? 'worker';
 
+    // 2. Get shift details for notification
+    final shiftDoc = await FirebaseFirestore.instance.collection('shifts').doc(shiftId).get();
+    final shiftData = shiftDoc.data();
+    final shiftDate = shiftData?['date'] ?? '';
+    final shiftTime = '${shiftData?['startTime'] ?? ''}-${shiftData?['endTime'] ?? ''}';
+    final department = shiftData?['department'] ?? '';
+
     final decisionData = {
       'userId': workerId,
       'fullName': fullName,
@@ -176,6 +185,21 @@ Future<void> approveWorker(String shiftId, String workerId) async {
       'assignedWorkers': FieldValue.arrayUnion([workerId]),
       'assignedWorkerData': FieldValue.arrayUnion([decisionData]),
     });
+
+    // 🆕 Send notification to approved worker
+    await _notificationService.sendNotificationToUser(
+      userId: workerId,
+      title: 'אושרת להצטרף למשמרת!',
+      body: 'אושרת להצטרפות למשמרת ב$department ב$shiftDate בשעות $shiftTime',
+      type: 'shift_approved',
+      additionalData: {
+        'shiftId': shiftId,
+        'date': shiftDate,
+        'time': shiftTime,
+        'department': department,
+      },
+    );
+
   } catch (e) {
     throw CustomException("שגיאה באישור העובד: $e");
   }
@@ -225,6 +249,11 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
     if (!doc.exists) throw CustomException("Shift not found");
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
+    // Get shift details for notification
+    final shiftDate = data['date'] ?? '';
+    final shiftTime = '${data['startTime'] ?? ''}-${data['endTime'] ?? ''}';
+    final department = data['department'] ?? '';
+
     List<dynamic> currentAssignedData = data['assignedWorkerData'] ?? [];
 
     // Update the specific worker entry
@@ -244,6 +273,21 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
       'assignedWorkers': FieldValue.arrayRemove([workerId]),
       'assignedWorkerData': updatedAssignedData,
     });
+
+    // 🆕 Send notification to removed worker
+    await _notificationService.sendNotificationToUser(
+      userId: workerId,
+      title: 'הוסרת מהמשמרת',
+      body: 'הוסרת ממשמרת ב$department ב$shiftDate בשעות $shiftTime',
+      type: 'shift_removed',
+      additionalData: {
+        'shiftId': shiftId,
+        'date': shiftDate,
+        'time': shiftTime,
+        'department': department,
+      },
+    );
+
   } catch (e) {
     throw CustomException("שגיאה בהסרת העובד: $e");
   }
