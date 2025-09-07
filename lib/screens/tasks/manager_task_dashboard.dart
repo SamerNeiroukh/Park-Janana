@@ -12,6 +12,7 @@ import '../../widgets/user_header.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
 import 'package:intl/intl.dart';
+import '../../utils/alert_service.dart';
 
 class ManagerTaskDashboard extends StatefulWidget {
   const ManagerTaskDashboard({super.key});
@@ -363,26 +364,17 @@ if (tasks.isEmpty) {
     );
   }
 
-  void _confirmDeleteTask(TaskModel task) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("אישור מחיקה"),
-        content: Text("האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ביטול"),
-          ),
-          TextButton(
-            onPressed: () async {
-              await _taskService.deleteTask(task.id);
-              if (mounted) Navigator.pop(context);
-            },
-            child: const Text("מחק", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+  void _confirmDeleteTask(TaskModel task) async {
+    final confirmed = await AlertService.confirm(
+      context,
+      title: "אישור מחיקה",
+      message: "האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?",
+      confirmText: "מחק",
+      confirmColor: AppColors.error,
     );
+
+    if (confirmed == true) {
+      await _taskService.deleteTask(task.id);
+    }
   }
 }
