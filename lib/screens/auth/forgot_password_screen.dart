@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -19,12 +20,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _sendPasswordResetEmail() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("אנא הכנס כתובת אימייל תקינה"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AlertService.warning(context, "אנא הכנס כתובת אימייל תקינה");
       return;
     }
 
@@ -35,20 +31,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       await _auth.sendPasswordResetEmail(email: email);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("קישור לאיפוס הסיסמה נשלח למייל שלך"),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AlertService.success(context, "קישור לאיפוס הסיסמה נשלח למייל שלך");
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("שגיאה: ${e.message}"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AlertService.error(context, "שגיאה: ${e.message}");
     } finally {
       setState(() {
         _isSending = false;
