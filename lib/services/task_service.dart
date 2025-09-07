@@ -1,15 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/task_model.dart';
 import '../utils/custom_exception.dart';
+import 'notification_service.dart';
 
 class TaskService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'tasks';
+  final NotificationService _notificationService = NotificationService();
 
   // 🟢 Create a new task
   Future<void> createTask(TaskModel task) async {
     try {
       await _firestore.collection(_collection).doc(task.id).set(task.toMap());
+      
+      // 🆕 Send notification to assigned users
+      for (String userId in task.assignedTo) {
+        await _notificationService.sendNotificationToUser(
+          userId: userId,
+          title: 'הוקצתה לך משימה חדשה',
+          body: 'משימה: ${task.title}',
+          type: 'task_assigned',
+          additionalData: {
+            'taskId': task.id,
+            'taskTitle': task.title,
+            'dueDate': task.dueDate.millisecondsSinceEpoch.toString(),
+          },
+        );
+      }
     } catch (e) {
       throw CustomException('שגיאה ביצירת משימה.');
     }
@@ -72,6 +89,34 @@ class TaskService {
   Future<void> updateTask(String taskId, Map<String, dynamic> updatedData) async {
     try {
       await _firestore.collection(_collection).doc(taskId).update(updatedData);
+      
+      // 🆕 Send notification if task was updated with new assignments or important changes
+      if (updatedData.containsKey('assignedTo') || 
+          updatedData.containsKey('title') || 
+          updatedData.containsKey('description') ||
+          updatedData.containsKey('dueDate')) {
+        
+        // Get current task to find assigned users
+        final taskDoc = await _firestore.collection(_collection).doc(taskId).get();
+        if (taskDoc.exists) {
+          final taskData = taskDoc.data()!;
+          final assignedUsers = List<String>.from(taskData['assignedTo'] ?? []);
+          final taskTitle = taskData['title'] ?? 'משימה';
+          
+          for (String userId in assignedUsers) {
+            await _notificationService.sendNotificationToUser(
+              userId: userId,
+              title: 'המשימה שלך עודכנה',
+              body: 'משימה: $taskTitle עודכנה',
+              type: 'task_updated',
+              additionalData: {
+                'taskId': taskId,
+                'taskTitle': taskTitle,
+              },
+            );
+          }
+        }
+      }
     } catch (e) {
       throw CustomException('שגיאה בעדכון המשימה.');
     }

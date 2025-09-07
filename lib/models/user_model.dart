@@ -7,6 +7,8 @@ class UserModel {
   final String profilePicture;
   final String role;
   final List<String> licensedDepartments; // 🆕 New field
+  final String? fcmToken; // 🆕 FCM token for push notifications
+  final Map<String, bool> notificationPreferences; // 🆕 Notification preferences
 
   UserModel({
     required this.uid,
@@ -17,6 +19,12 @@ class UserModel {
     required this.profilePicture,
     required this.role,
     this.licensedDepartments = const [], // Default: not licensed for any department
+    this.fcmToken,
+    this.notificationPreferences = const {
+      'shifts': true,
+      'tasks': true,
+      'announcements': true,
+    }, // Default: all notifications enabled
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +38,8 @@ class UserModel {
       'profile_picture': profilePicture,
       'role': role,
       'licensedDepartments': licensedDepartments, // 🆕 Save licenses to Firestore
+      'fcmToken': fcmToken, // 🆕 Save FCM token
+      'notificationPreferences': notificationPreferences, // 🆕 Save notification preferences
     };
   }
 
@@ -44,6 +54,12 @@ class UserModel {
       profilePicture: map['profile_picture'] ?? '',
       role: map['role'] ?? 'worker',
       licensedDepartments: List<String>.from(map['licensedDepartments'] ?? []), // 🆕 Read licenses
+      fcmToken: map['fcmToken'], // 🆕 Read FCM token
+      notificationPreferences: Map<String, bool>.from(map['notificationPreferences'] ?? {
+        'shifts': true,
+        'tasks': true,
+        'announcements': true,
+      }), // 🆕 Read notification preferences
     );
   }
 }
