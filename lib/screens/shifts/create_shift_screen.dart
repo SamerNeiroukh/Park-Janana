@@ -5,6 +5,7 @@ import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/services/shift_service.dart';
 import 'package:park_janana/utils/datetime_utils.dart';
 import 'package:park_janana/widgets/date_time_picker.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class CreateShiftScreen extends StatefulWidget {
   final DateTime? initialDate; // ✅ Allows passing a preselected date
@@ -55,21 +56,11 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("✅ משמרת נוצרה בהצלחה!", style: AppTheme.bodyText),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        AlertService.success(context, "✅ משמרת נוצרה בהצלחה!");
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("שגיאה ביצירת משמרת: $e"),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AlertService.error(context, "שגיאה ביצירת משמרת: $e");
       }
     } finally {
       if (mounted) setState(() => _isCreating = false);

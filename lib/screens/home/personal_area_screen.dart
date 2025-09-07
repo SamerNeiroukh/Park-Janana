@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/user_header.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -77,19 +78,12 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         _userCache[widget.uid]?['profile_picture'] = downloadUrl;
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("תמונת הפרופיל עודכנה בהצלחה.", style: AppTheme.bodyText),
-              backgroundColor: AppColors.success,
-            ),
-          );
+          AlertService.success(context, "תמונת הפרופיל עודכנה בהצלחה.");
           setState(() {});
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("שגיאה בהעלאת תמונה: $e")),
-          );
+          AlertService.error(context, "שגיאה בהעלאת תמונה: $e");
         }
       } finally {
         if (mounted) setState(() => _isUploading = false);
