@@ -400,7 +400,7 @@ NOTICE: This software is the exclusive property of the copyright holder.
 No permission is granted to use, copy, modify, distribute, or sell this software
 without explicit written permission from the copyright holder.
 
-For licensing inquiries, please contact: samerneiroukh@gmail.com
+For licensing inquiries, please contact: samer.neiroukh@gmail.com
 ```
 
 ---
