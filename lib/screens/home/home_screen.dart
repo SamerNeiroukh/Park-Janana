@@ -10,6 +10,7 @@ import 'package:park_janana/widgets/user_card.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:park_janana/screens/shifts/shifts_screen.dart';
 import 'package:park_janana/screens/shifts/manager_shifts_screen.dart';
+import 'package:park_janana/screens/shifts/weekly_schedule_screen.dart';
 import 'package:park_janana/screens/tasks/worker_task_screen.dart';
 import 'package:park_janana/screens/tasks/manager_task_dashboard.dart';
 import 'dart:convert';
@@ -216,6 +217,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (_) => const ShiftsScreen()));
           },
         ),
+        ActionButton(
+          title: 'לוח שבועי',
+          icon: Icons.calendar_view_week,
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const WeeklyScheduleScreen()));
+          },
+        ),
       ]);
     }
 
@@ -227,6 +236,14 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
+          },
+        ),
+        ActionButton(
+          title: 'לוח שבועי',
+          icon: Icons.calendar_view_week,
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const WeeklyScheduleScreen()));
           },
         ),
         ActionButton(

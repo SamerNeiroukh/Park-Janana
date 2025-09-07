@@ -316,8 +316,8 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
     final weekEnd = weekStart.add(Duration(days: 6));
     final querySnapshot = await FirebaseFirestore.instance
         .collection('shifts')
-        .where('date', isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekStart))
-        .where('date', isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekEnd))
+        .where('date', isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekStart))
+        .where('date', isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekEnd))
         .get();
 
     return querySnapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList();
