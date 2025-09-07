@@ -9,8 +9,8 @@
   [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
   [![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
   
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+  [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](#-license)
+  [![Private Project](https://img.shields.io/badge/Project-Private-orange.svg)](https://github.com/SamerNeiroukh/Park-Janana)
   [![Top 5 Project](https://img.shields.io/badge/🏆%20Top%205-Final%20Project%202025-gold)](https://github.com/SamerNeiroukh/Park-Janana)
   
 </div>
@@ -343,24 +343,15 @@ Update Firebase configuration in:
 
 ## 🤝 Contributing
 
-We welcome contributions to the Park Janana Management App! Here's how you can help:
+This is a **private proprietary project**. Contributions are not accepted from external developers.
 
-### 🚀 How to Contribute
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
-
-### 📋 Contribution Guidelines
-- Follow the existing code style and conventions
-- Write clear, concise commit messages
-- Update documentation for any new features
-- Add tests for new functionality when applicable
-- Ensure your code works on both Android and iOS
+### 📧 Contact
+For inquiries regarding this project, please contact:
+- **Developer**: Samer Neiroukh
+- **Email**: samerneiroukh@gmail.com
 
 ### 🐛 Bug Reports
-Found a bug? Please create an issue with:
+If you are an authorized user and have found a bug, please contact the developer directly with:
 - Clear description of the problem
 - Steps to reproduce
 - Expected vs actual behavior
@@ -370,22 +361,18 @@ Found a bug? Please create an issue with:
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is **proprietary software** - all rights reserved. See the [LICENSE](LICENSE) file for details.
 
 ```
-MIT License
+PROPRIETARY LICENSE
 
-Copyright (c) 2025 Samer Neiroukh
+Copyright (c) 2025 Samer Neiroukh. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+NOTICE: This software is the exclusive property of the copyright holder. 
+No permission is granted to use, copy, modify, distribute, or sell this software 
+without explicit written permission from the copyright holder.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+For licensing inquiries, please contact: samerneiroukh@gmail.com
 ```
 
 ---
