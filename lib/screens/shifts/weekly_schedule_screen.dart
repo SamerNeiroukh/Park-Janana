@@ -1,3 +1,14 @@
+/// WeeklyScheduleScreen displays a weekly calendar view of shifts for all users.
+/// 
+/// Features:
+/// - RTL calendar grid layout with Hebrew day names
+/// - Week navigation (previous/next buttons)  
+/// - Color-coded shift display (assigned=green, requested=yellow, available=gray)
+/// - Tap on any day to view detailed shift information
+/// - Works for both workers and managers
+/// 
+/// This screen uses the existing ShiftService and ShiftModel classes,
+/// and follows the app's established theming and navigation patterns.
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/shift_model.dart';
@@ -29,6 +40,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
     _loadWeekShifts();
   }
 
+  /// Loads shifts for the current week from the ShiftService
   Future<void> _loadWeekShifts() async {
     if (mounted) {
       setState(() => _isLoading = true);
@@ -46,7 +58,15 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('שגיאה בטעינת המשמרות: $e')),
+          SnackBar(
+            content: Text('שגיאה בטעינת המשמרות: $e'),
+            backgroundColor: AppColors.error,
+            action: SnackBarAction(
+              label: 'נסה שוב',
+              textColor: Colors.white,
+              onPressed: _loadWeekShifts,
+            ),
+          ),
         );
       }
     }
@@ -66,9 +86,8 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
 
   void _onDayTap(DateTime day) {
     final dayShifts = _getShiftsForDay(day);
-    if (dayShifts.isEmpty) return;
-
-    // Show day details in a bottom sheet
+    
+    // Always show day details, even if no shifts
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -112,6 +131,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             icon: const Icon(Icons.arrow_back_ios),
             color: AppColors.primary,
             iconSize: 24,
+            tooltip: 'שבוע קודם',
             onPressed: () => _navigateWeek(-1),
           ),
           Text(
@@ -123,6 +143,7 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
             icon: const Icon(Icons.arrow_forward_ios),
             color: AppColors.primary,
             iconSize: 24,
+            tooltip: 'שבוע הבא',
             onPressed: () => _navigateWeek(1),
           ),
         ],
@@ -322,14 +343,44 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
           const Divider(height: 1),
           // Shifts list
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: shifts.length,
-              itemBuilder: (context, index) {
-                final shift = shifts[index];
-                return _buildDetailedShiftCard(shift);
-              },
-            ),
+            child: shifts.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 64,
+                          color: AppColors.textSecondary.withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'אין משמרות ביום זה',
+                          style: AppTheme.bodyText.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'לא נקבעו משמרות עבור התאריך הנבחר',
+                          style: AppTheme.bodyText.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: shifts.length,
+                    itemBuilder: (context, index) {
+                      final shift = shifts[index];
+                      return _buildDetailedShiftCard(shift);
+                    },
+                  ),
           ),
         ],
       ),
