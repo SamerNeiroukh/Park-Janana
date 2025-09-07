@@ -161,4 +161,53 @@ Future<void> createUser(String email, String password, String fullName, String i
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userRole', role);
   }
+
+  // 🟢 Update User Role (Enhanced for role management with validation)
+  Future<void> updateUserRole(String currentUserRole, String targetUid, String newRole) async {
+    // Validate if current user can perform role changes
+    if (!_canManageRoles(currentUserRole)) {
+      throw CustomException('אין לך הרשאה לשנות תפקידים');
+    }
+
+    // Validate if current user can assign this specific role
+    if (!_canAssignRole(currentUserRole, newRole)) {
+      throw CustomException('אין לך הרשאה להקצות את התפקיד הזה');
+    }
+
+    await _firebaseService.updateUserRole(targetUid, newRole);
+
+    // Update cache if it's the current user
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentUid = prefs.getString('currentUid');
+    if (currentUid == targetUid) {
+      await prefs.setString('userRole', newRole);
+    }
+  }
+
+  // 🟢 Check if user can manage roles
+  bool _canManageRoles(String role) {
+    return role == 'owner' || role == 'department_manager';
+  }
+
+  // 🟢 Check if user can assign specific role
+  bool _canAssignRole(String currentRole, String targetRole) {
+    if (currentRole == 'owner') {
+      return ['department_manager', 'shift_manager', 'worker'].contains(targetRole);
+    }
+    if (currentRole == 'department_manager') {
+      return ['shift_manager', 'worker'].contains(targetRole);
+    }
+    return false;
+  }
+
+  // 🟢 Get allowed roles for current user
+  List<String> getAllowedRolesToAssign(String currentRole) {
+    if (currentRole == 'owner') {
+      return ['owner', 'department_manager', 'shift_manager', 'worker'];
+    }
+    if (currentRole == 'department_manager') {
+      return ['shift_manager', 'worker'];
+    }
+    return [];
+  }
 }

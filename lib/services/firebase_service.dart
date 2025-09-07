@@ -61,6 +61,18 @@ class FirebaseService {
     }
   }
 
+  // 🟢 Update User Role (Enhanced for role management)
+  Future<void> updateUserRole(String uid, String newRole) async {
+    try {
+      await updateUser(uid, {
+        'role': newRole,
+        'roleUpdatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw CustomException('שגיאה בעדכון תפקיד המשתמש.');
+    }
+  }
+
   // 🟢 Fetch all shifts as a stream
   Stream<QuerySnapshot> getShiftsStream() {
     return _firestore.collection(AppConstants.shiftsCollection).snapshots();

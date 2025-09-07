@@ -2,25 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/screens/workers_management/edit_worker_licenses_screen.dart';
+import 'package:park_janana/screens/workers_management/user_profile_screen.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/screens/workers_management/management_buttons/shifts_button.dart';
 import 'package:park_janana/screens/tasks/create_task_screen.dart';
 import 'package:park_janana/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ReviewWorkerScreen extends StatelessWidget {
+class ReviewWorkerScreen extends StatefulWidget {
   final QueryDocumentSnapshot userData;
 
   const ReviewWorkerScreen({super.key, required this.userData});
 
   @override
+  State<ReviewWorkerScreen> createState() => _ReviewWorkerScreenState();
+}
+
+class _ReviewWorkerScreenState extends State<ReviewWorkerScreen> {
+  String _currentUserRole = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUserRole();
+  }
+
+  Future<void> _loadCurrentUserRole() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedRole = prefs.getString('userRole') ?? '';
+      setState(() {
+        _currentUserRole = cachedRole;
+      });
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  bool _canManageRoles() {
+    return _currentUserRole == 'owner' || _currentUserRole == 'department_manager';
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final String fullName = userData['fullName'] ?? '';
-    final String email = userData['email'] ?? '';
-    final String phone = userData['phoneNumber'] ?? '';
-    final String id = userData['idNumber'] ?? '';
-    final String profilePicture = userData['profile_picture'] ?? '';
-    final String uid = userData['uid'] ?? '';
-    final String role = userData['role'] ?? '';
+    final String fullName = widget.userData['fullName'] ?? '';
+    final String email = widget.userData['email'] ?? '';
+    final String phone = widget.userData['phoneNumber'] ?? '';
+    final String id = widget.userData['idNumber'] ?? '';
+    final String profilePicture = widget.userData['profile_picture'] ?? '';
+    final String uid = widget.userData['uid'] ?? '';
+    final String role = widget.userData['role'] ?? '';
 
     final worker = UserModel(
       uid: uid,
@@ -62,9 +93,9 @@ class ReviewWorkerScreen extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => ShiftsButtonScreen(
-                                uid: userData['uid'],
-                                fullName: userData['fullName'] ?? '',
-                                profilePicture: userData['profile_picture'] ?? '',
+                                uid: widget.userData['uid'],
+                                fullName: widget.userData['fullName'] ?? '',
+                                profilePicture: widget.userData['profile_picture'] ?? '',
                               ),
                             ),
                           );
@@ -94,6 +125,29 @@ class ReviewWorkerScreen extends StatelessWidget {
                     ]),
                     const SizedBox(height: 24),
                     _buildSoftCard("🛠 ניהול משא", [
+                      if (_canManageRoles()) ...[
+                        _buildFullWidthButton(
+                          context,
+                          label: "ניהול תפקיד ותפקידים",
+                          icon: Icons.admin_panel_settings_rounded,
+                          color: AppColors.accent,
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UserProfileScreen(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                            // Refresh if role was updated
+                            if (result == true && mounted) {
+                              setState(() {});
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       _buildFullWidthButton(
                         context,
                         label: "ניהול הרשאות ותפקיד",

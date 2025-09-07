@@ -1,0 +1,21 @@
+{
+  "role_management": {
+    "can_promote_demote": ["owner", "department_manager"],
+    "role_hierarchy": {
+      "owner": 4,
+      "department_manager": 3,
+      "shift_manager": 2,
+      "worker": 1
+    },
+    "promotion_rules": {
+      "owner": {
+        "can_promote_to": ["department_manager", "shift_manager", "worker"],
+        "can_demote_to": ["department_manager", "shift_manager", "worker"]
+      },
+      "department_manager": {
+        "can_promote_to": ["shift_manager"],
+        "can_demote_to": ["worker"]
+      }
+    }
+  }
+}
