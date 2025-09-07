@@ -5,13 +5,13 @@
     <strong>A comprehensive staff management solution for recreational parks</strong>
   </p>
   
-  [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-  [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
-  [![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+  [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white&labelColor=white&color=white)](https://flutter.dev)
+  [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black&labelColor=white&color=white)](https://firebase.google.com)
+  [![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=black&labelColor=white&color=white)](https://dart.dev)
   
-  [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](#-license)
-  [![Private Project](https://img.shields.io/badge/Project-Private-orange.svg)](https://github.com/SamerNeiroukh/Park-Janana)
-  [![Top 5 Project](https://img.shields.io/badge/🏆%20Top%205-Final%20Project%202025-gold)](https://github.com/SamerNeiroukh/Park-Janana)
+  [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg?labelColor=white&color=white)](#-license)
+  [![Private Project](https://img.shields.io/badge/Project-Private-orange.svg?labelColor=white&color=white)](https://github.com/SamerNeiroukh/Park-Janana)
+  [![Top 5 Project](https://img.shields.io/badge/🏆%20Top%205-Final%20Project%202025-gold?labelColor=white&color=white)](https://github.com/SamerNeiroukh/Park-Janana)
   
 </div>
 
@@ -336,8 +336,8 @@ Update Firebase configuration in:
 🌍 **Languages**: Arabic, Hebrew, English (Fluent)  
 
 ### 📞 Connect With Me
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SamerNeiroukh)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/samer-neiroukh-217ab1340)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=black&labelColor=white&color=white)](https://github.com/SamerNeiroukh)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=black&labelColor=white&color=white)](https://linkedin.com/in/samer-neiroukh-217ab1340)
 
 ---
 
