@@ -18,6 +18,7 @@
 ---
 
 ## 📋 Table of Contents
+
 - [🎯 Overview](#-overview)
 - [❗ Problem Statement](#-problem-statement)
 - [📋 Requirements](#-requirements)
@@ -35,6 +36,7 @@
 ---
 
 ## 🎯 Overview
+
 The **Park Janana App** is a full-stack mobile application developed in Flutter with a Firebase backend.  
 It streamlines staff management, shift scheduling, task tracking, and reporting for **Park Janana**, a large multi-department recreational park in Jerusalem.
 
@@ -43,37 +45,42 @@ It streamlines staff management, shift scheduling, task tracking, and reporting 
 ---
 
 ## ❗ Problem Statement
-Park Janana previously relied on WhatsApp, Excel, and Google Forms to manage:  
-- Shifts  
-- Worker communication  
-- Attendance tracking  
-- Task distribution  
 
-These tools were insufficient, leading to:  
-- Scheduling conflicts  
-- Miscommunication  
-- Lack of real-time data  
-- No centralized reporting system  
+Park Janana previously relied on WhatsApp, Excel, and Google Forms to manage:
+
+- Shifts
+- Worker communication
+- Attendance tracking
+- Task distribution
+
+These tools were insufficient, leading to:
+
+- Scheduling conflicts
+- Miscommunication
+- Lack of real-time data
+- No centralized reporting system
 
 ---
 
 ## 📋 Requirements
-Requirements were gathered from real park operations:  
 
-- **Workers**: View shifts, request to join, clock in/out, track hours  
-- **Shift Managers**: Approve/reject workers, assign tasks, monitor staff  
-- **Department Managers**: Oversee departmental operations  
-- **Park Manager**: Manage all departments, monitor resources  
-- **Owner**: Full visibility and analytics  
+Requirements were gathered from real park operations:
+
+- **Workers**: View shifts, request to join, clock in/out, track hours
+- **Shift Managers**: Approve/reject workers, assign tasks, monitor staff
+- **Department Managers**: Oversee departmental operations
+- **Park Manager**: Manage all departments, monitor resources
+- **Owner**: Full visibility and analytics
 
 ---
 
 ## ✨ Features
 
 ### 🔐 Authentication & User Management
-- Secure Firebase Authentication (Email/Password)  
-- Role-based access: Worker, Manager, Department Manager, Owner  
-- New worker registration flow  
+
+- Secure Firebase Authentication (Email/Password)
+- Role-based access: Worker, Manager, Department Manager, Owner
+- New worker registration flow
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/81123351-357b-492f-beb6-2b93d2db275c" width="280" />
@@ -82,9 +89,10 @@ Requirements were gathered from real park operations:
 ---
 
 ### 📊 Personalized Dashboards
-- Worker dashboard: Tasks, shifts, attendance summary  
-- Manager dashboard: Approvals, staff status, shift management  
-- Owner dashboard: Analytics and reporting  
+
+- Worker dashboard: Tasks, shifts, attendance summary
+- Manager dashboard: Approvals, staff status, shift management
+- Owner dashboard: Analytics and reporting
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/727af802-722a-4d1a-a69e-d054a50438c2" width="250" />
@@ -94,10 +102,11 @@ Requirements were gathered from real park operations:
 ---
 
 ### ⏰ Shift Management
-- Workers request to join shifts  
-- Managers approve or reject requests  
-- Role-based worker assignment  
-- Real-time updates with Firebase  
+
+- Workers request to join shifts
+- Managers approve or reject requests
+- Role-based worker assignment
+- Real-time updates with Firebase
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c0c52538-f432-4c7d-bc35-3986e05d2884" width="250" />
@@ -107,11 +116,12 @@ Requirements were gathered from real park operations:
 ---
 
 ### ✅ Task Management
-- Create tasks for single or multiple workers  
-- Track progress per worker  
-- Worker dashboard: "My Tasks"  
-- Manager dashboard: "All Tasks" with filtering  
-- Edit and delete tasks  
+
+- Create tasks for single or multiple workers
+- Track progress per worker
+- Worker dashboard: "My Tasks"
+- Manager dashboard: "All Tasks" with filtering
+- Edit and delete tasks
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/b09a7c80-7342-46b4-b74b-338bac02cc49" width="250" />
@@ -121,12 +131,13 @@ Requirements were gathered from real park operations:
 ---
 
 ### 🕐 Attendance (Clock In/Out)
-- Workers log attendance with one tap  
-- Real-time session tracking  
-- Automatic calculation of:  
-  - Days worked (per month)  
-  - Hours worked (decimal precision)  
-- Motivational design with animations  
+
+- Workers log attendance with one tap
+- Real-time session tracking
+- Automatic calculation of:
+  - Days worked (per month)
+  - Hours worked (decimal precision)
+- Motivational design with animations
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/f8edea74-ea21-4bd6-9935-f24a64324a6c" width="250" />
@@ -137,10 +148,11 @@ Requirements were gathered from real park operations:
 ---
 
 ### 📈 Reporting & Analytics
-- Export Attendance Reports (PDF/Excel)  
-- Export Task Reports (PDF)  
-- Worker Shift Report with approval history  
-- Data organized per month for historical records  
+
+- Export Attendance Reports (PDF/Excel)
+- Export Task Reports (PDF)
+- Worker Shift Report with approval history
+- Data organized per month for historical records
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/90831832-63f3-4d1b-b38c-8f31445edf5f" width="250" />
@@ -150,7 +162,8 @@ Requirements were gathered from real park operations:
 ---
 
 ### 🔄 Flow Process
-<div align="center">
+
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/4e8ad6b2-fff9-4189-8b14-9e93f0825793" width="600" />
 </div>
 
@@ -182,17 +195,18 @@ Requirements were gathered from real park operations:
 </table>
 
 ### 📦 Key Dependencies
+
 ```yaml
 dependencies:
-  firebase_core: ^3.8.0          # Firebase SDK
-  firebase_auth: ^5.3.4          # Authentication
-  cloud_firestore: ^5.4.0        # Database
-  google_fonts: ^6.1.0           # Typography
-  fl_chart: ^0.64.0              # Charts & Analytics
-  pdf: ^3.10.1                   # PDF Generation
-  slide_to_act: ^2.0.1           # Interactive UI
-  flutter_animate: ^4.5.2        # Animations
-```  
+  firebase_core: ^3.8.0 # Firebase SDK
+  firebase_auth: ^5.3.4 # Authentication
+  cloud_firestore: ^5.4.0 # Database
+  google_fonts: ^6.1.0 # Typography
+  fl_chart: ^0.64.0 # Charts & Analytics
+  pdf: ^3.10.1 # PDF Generation
+  slide_to_act: ^2.0.1 # Interactive UI
+  flutter_animate: ^4.5.2 # Animations
+```
 
 ---
 
@@ -205,11 +219,11 @@ graph TB
     A[📱 Flutter Mobile App] --> B[🔐 Firebase Auth]
     A --> C[🗄️ Firestore Database]
     A --> D[☁️ Firebase Functions]
-    
+
     B --> E[👤 User Management]
     C --> F[⚡ Real-time Sync]
     D --> G[🔧 Business Logic]
-    
+
     E --> H[📊 Role-based Access]
     F --> I[🔄 Live Updates]
     G --> J[📧 Notifications]
@@ -218,12 +232,13 @@ graph TB
 </div>
 
 **Architecture Flow:**
+
 - **Flutter (UI Layer)** → Provides cross-platform mobile interface
-- **Firebase Auth** → Handles secure user authentication and authorization  
+- **Firebase Auth** → Handles secure user authentication and authorization
 - **Firestore Database** → Real-time NoSQL database for data storage
 - **Firebase Functions** → Server-side logic for complex operations
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/3b805a40-fb64-4a35-9de7-9f22b8c54269" width="500" alt="Architecture Diagram" />
 </div>
 
@@ -232,6 +247,7 @@ graph TB
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - **Flutter SDK** (3.5.4 or higher)
 - **Dart SDK** (included with Flutter)
 - **Firebase Account** for backend services
@@ -240,17 +256,20 @@ graph TB
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/SamerNeiroukh/Park-Janana.git
    cd Park-Janana
    ```
 
 2. **Install dependencies**
+
    ```bash
    flutter pub get
    ```
 
 3. **Firebase Setup**
+
    - Create a new Firebase project
    - Enable Authentication (Email/Password)
    - Create Firestore database
@@ -263,7 +282,9 @@ graph TB
    ```
 
 ### 🔧 Configuration
+
 Update Firebase configuration in:
+
 - `android/app/google-services.json`
 - `ios/Runner/GoogleService-Info.plist`
 - `lib/services/firebase_service.dart`
@@ -279,45 +300,47 @@ Update Firebase configuration in:
 
 ### 📸 Key Features Preview
 
-| Feature | Screenshot | Description |
-|---------|------------|-------------|
-| 🔐 **Authentication** | [Login Screen] | Secure Firebase authentication |
-| 📊 **Dashboard** | [Dashboard View] | Role-based personalized interface |
-| ⏰ **Shift Management** | [Shift Screen] | Request and approve shifts |
-| 🕐 **Attendance** | [Clock Screen] | One-tap clock in/out system |
+| Feature                 | Screenshot       | Description                       |
+| ----------------------- | ---------------- | --------------------------------- |
+| 🔐 **Authentication**   | [Login Screen]   | Secure Firebase authentication    |
+| 📊 **Dashboard**        | [Dashboard View] | Role-based personalized interface |
+| ⏰ **Shift Management** | [Shift Screen]   | Request and approve shifts        |
+| 🕐 **Attendance**       | [Clock Screen]   | One-tap clock in/out system       |
 
 </div>
 
 ---
 
 ## 🔮 Future Enhancements
-- 📱 Push notifications for shift and task updates  
-- 💬 In-app chat between managers and workers  
-- 🤖 AI-based scheduling recommendations  
-- 🌐 Multi-language support (Hebrew, Arabic, English)  
-- 📍 GPS-based attendance verification
+
+- 📱 Push notifications for shift and task updates
+- 💬 In-app chat between managers and workers
+- 🤖 AI-based scheduling recommendations
+- 🌐 Multi-language support (Hebrew, Arabic, English)
 - 📊 Advanced analytics and reporting dashboards
-- 🔗 Integration with payroll systems  
+- 🔗 Integration with payroll systems
 
 ---
 
 ## 🏆 Achievements
 
 ### 🎯 Project Achievements
-- 🏆 **Selected as Top 5 Final Project** at Azrieli College (2025)  
-- ✅ **Real-world Testing** - Successfully deployed at Park Janana  
-- 🏗️ **Scalable Architecture** - Designed for growth and expansion  
+
+- 🏆 **Selected as Top 5 Final Project** at Azrieli College (2025)
+- ✅ **Real-world Testing** - Successfully deployed at Park Janana
+- 🏗️ **Scalable Architecture** - Designed for growth and expansion
 - 📈 **Performance Optimized** - Smooth real-time operations
 - 🔒 **Security Focused** - Role-based access and data protection
 
 ### 💼 Skills Gained
-- 📱 **Full-stack Development** with Flutter and Firebase  
-- 🎨 **UI/UX Design** and custom animations  
-- 🔐 **Authentication Systems** and role-based access control  
-- ⚡ **Real-time Synchronization** with Firestore  
-- 📊 **Data Export Solutions** (PDF/Excel generation)  
-- 🔄 **CI/CD Implementation** with Azure Pipelines  
-- 🧪 **Testing Strategies** for mobile applications  
+
+- 📱 **Full-stack Development** with Flutter and Firebase
+- 🎨 **UI/UX Design** and custom animations
+- 🔐 **Authentication Systems** and role-based access control
+- ⚡ **Real-time Synchronization** with Firestore
+- 📊 **Data Export Solutions** (PDF/Excel generation)
+- 🔄 **CI/CD Implementation** with Azure Pipelines
+- 🧪 **Testing Strategies** for mobile applications
 
 ---
 
@@ -333,9 +356,10 @@ Update Firebase configuration in:
 📚 **Education**: BSc in Software Engineering (2025), Azrieli College of Engineering  
 💻 **Specialization**: Flutter, React, Firebase, Full-Stack Development  
 🔧 **Technologies**: Java, C++, Python, Dart, JavaScript  
-🌍 **Languages**: Arabic, Hebrew, English (Fluent)  
+🌍 **Languages**: Arabic, Hebrew, English (Fluent)
 
 ### 📞 Connect With Me
+
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SamerNeiroukh)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/samer-neiroukh-217ab1340)
 
@@ -346,12 +370,16 @@ Update Firebase configuration in:
 This is a **private proprietary project**. Contributions are not accepted from external developers.
 
 ### 📧 Contact
+
 For inquiries regarding this project, please contact:
+
 - **Developer**: Samer Neiroukh
 - **Email**: samerneiroukh@gmail.com
 
 ### 🐛 Bug Reports
+
 If you are an authorized user and have found a bug, please contact the developer directly with:
+
 - Clear description of the problem
 - Steps to reproduce
 - Expected vs actual behavior
@@ -368,8 +396,8 @@ PROPRIETARY LICENSE
 
 Copyright (c) 2025 Samer Neiroukh. All rights reserved.
 
-NOTICE: This software is the exclusive property of the copyright holder. 
-No permission is granted to use, copy, modify, distribute, or sell this software 
+NOTICE: This software is the exclusive property of the copyright holder.
+No permission is granted to use, copy, modify, distribute, or sell this software
 without explicit written permission from the copyright holder.
 
 For licensing inquiries, please contact: samerneiroukh@gmail.com
@@ -383,6 +411,6 @@ For licensing inquiries, please contact: samerneiroukh@gmail.com
 
 **Made with ❤️ by [Samer Neiroukh](https://github.com/SamerNeiroukh)**
 
-*Transforming park management through innovative technology* 🏞️
+_Transforming park management through innovative technology_ 🏞️
 
-</div>  
+</div>
