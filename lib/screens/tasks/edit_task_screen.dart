@@ -6,6 +6,7 @@ import '../../models/user_model.dart';
 import '../../widgets/user_header.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
+import '../../utils/alert_service.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final TaskModel task;
@@ -265,9 +266,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         _dueDate == null ||
         _dueTime == null ||
         _selectedWorkers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("יש למלא את כל השדות ולבחור עובדים")),
-      );
+      AlertService.warning(context, "יש למלא את כל השדות ולבחור עובדים");
       return;
     }
 

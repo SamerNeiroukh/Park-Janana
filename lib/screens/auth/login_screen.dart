@@ -6,6 +6,7 @@ import '../home/home_screen.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/auth/forgot_password_screen.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -70,12 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!isApproved) {
         await _auth.signOut(); // Important: Sign out the user immediately
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('החשבון שלך עדיין לא אושר על ידי ההנהלה.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        AlertService.warning(context, 'החשבון שלך עדיין לא אושר על ידי ההנהלה.');
         return;
       }
 
@@ -94,27 +90,14 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (e.code == 'invalid-email') {
           _emailError = 'כתובת האימייל לא תקינה';
         } else if (e.code == 'too-many-requests') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          AlertService.warning(context, 'יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('מייל או סיסמה לא נכונים.'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AlertService.error(context, 'מייל או סיסמה לא נכונים.');
         }
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('שגיאה: $e'),
-        backgroundColor: Colors.red,
-      ));
+      AlertService.error(context, 'שגיאה: $e');
     } finally {
       if (!mounted) return;
       setState(() {
