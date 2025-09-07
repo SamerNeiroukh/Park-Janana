@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/services/auth_service.dart';
 import '../constants/app_constants.dart';
+import '../screens/settings/notification_settings_screen.dart';
 
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   const UserHeader({super.key});
@@ -29,6 +30,20 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
               builder: (BuildContext context) {
                 return ListView(
                   children: [
+                    ListTile(
+                      leading: const Icon(Icons.notifications),
+                      title: const Text('הגדרות התראות'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationSettingsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(),
                     ListTile(
                       leading: const Icon(Icons.logout),
                       title: const Text('התנתק'),
