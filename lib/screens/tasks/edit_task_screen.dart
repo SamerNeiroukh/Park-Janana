@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../services/task_service.dart';
 import '../../models/task_model.dart';
 import '../../models/user_model.dart';
 import '../../widgets/user_header.dart';
+import '../../widgets/image_picker_widget.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
 
@@ -34,6 +36,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   List<UserModel> _selectedWorkers = [];
 
   bool _isSubmitting = false;
+  List<String> _currentImages = [];
 
   @override
   void initState() {
@@ -60,6 +63,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       _allUsers = users;
       _filteredUsers = users;
       _selectedWorkers = users.where((u) => widget.task.assignedTo.contains(u.uid)).toList();
+      _currentImages = List.from(widget.task.attachments);
     });
   }
 
@@ -203,7 +207,18 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       ],
                       onChanged: (val) => setState(() => _department = val ?? 'general'),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    
+                    // Image picker section
+                    ImagePickerWidget(
+                      initialImages: _currentImages,
+                      taskId: widget.task.id, // Allow direct upload to existing task
+                      onImagesChanged: (imageUrls) {
+                        _currentImages = imageUrls;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    
                     Row(
                       children: [
                         Expanded(
@@ -304,7 +319,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       dueDate: Timestamp.fromDate(dueDateTime),
       priority: _priority,
       status: widget.task.status,
-      attachments: widget.task.attachments,
+      attachments: _currentImages,
       comments: widget.task.comments,
       createdAt: widget.task.createdAt,
       workerProgress: updatedWorkerProgress,

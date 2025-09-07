@@ -1,15 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/task_model.dart';
 import '../utils/custom_exception.dart';
+import 'image_service.dart';
 
 class TaskService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'tasks';
+  final ImageService _imageService = ImageService();
 
-  // 🟢 Create a new task
-  Future<void> createTask(TaskModel task) async {
+  // 🟢 Create a new task with optional images
+  Future<void> createTask(TaskModel task, {List<XFile>? imageFiles}) async {
     try {
-      await _firestore.collection(_collection).doc(task.id).set(task.toMap());
+      // Upload images first if provided
+      List<String> imageUrls = [];
+      if (imageFiles != null && imageFiles.isNotEmpty) {
+        imageUrls = await _imageService.uploadMultipleTaskImages(task.id, imageFiles);
+      }
+      
+      // Create task with image URLs
+      final taskData = task.toMap();
+      taskData['attachments'] = [...task.attachments, ...imageUrls];
+      
+      await _firestore.collection(_collection).doc(task.id).set(taskData);
     } catch (e) {
       throw CustomException('שגיאה ביצירת משימה.');
     }
@@ -68,12 +81,33 @@ class TaskService {
     }
   }
 
-  // 🟢 Update entire task with partial data
-  Future<void> updateTask(String taskId, Map<String, dynamic> updatedData) async {
+  // 🟢 Update entire task with partial data and optional new images
+  Future<void> updateTask(String taskId, Map<String, dynamic> updatedData, {List<XFile>? newImageFiles}) async {
     try {
+      // Upload new images if provided
+      if (newImageFiles != null && newImageFiles.isNotEmpty) {
+        final newImageUrls = await _imageService.uploadMultipleTaskImages(taskId, newImageFiles);
+        
+        // Get current attachments and add new ones
+        final currentTask = await getTaskById(taskId);
+        final currentAttachments = currentTask?.attachments ?? [];
+        updatedData['attachments'] = [...currentAttachments, ...newImageUrls];
+      }
+      
       await _firestore.collection(_collection).doc(taskId).update(updatedData);
     } catch (e) {
       throw CustomException('שגיאה בעדכון המשימה.');
+    }
+  }
+
+  // 🟢 Update task attachments (add/remove images)
+  Future<void> updateTaskAttachments(String taskId, List<String> imageUrls) async {
+    try {
+      await _firestore.collection(_collection).doc(taskId).update({
+        'attachments': imageUrls,
+      });
+    } catch (e) {
+      throw CustomException('שגיאה בעדכון תמונות המשימה.');
     }
   }
 
