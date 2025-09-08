@@ -344,12 +344,16 @@ Update Firebase configuration in:
 
 ---
 
-## 👨‍💻 About the Developer
+## 👨‍💻 About the Developers
 
 <div align="center">
   
 ### **Samer Neiroukh**
 *Full-Stack Developer | Mobile Application Developer*
+
+### **Mousa Tams**
+
+_Full-Stack Developer | Mobile Application Developer_
 
 </div>
 
@@ -358,10 +362,16 @@ Update Firebase configuration in:
 🔧 **Technologies**: Java, C++, Python, Dart, JavaScript  
 🌍 **Languages**: Arabic, Hebrew, English (Fluent)
 
-### 📞 Connect With Me
+### 📞 Connect With Us
 
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SamerNeiroukh)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/samer-neiroukh-217ab1340)
+[![GitHub Samer](https://img.shields.io/badge/GitHub-SamerNeiroukh-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SamerNeiroukh)
+[![LinkedIn Samer](https://img.shields.io/badge/LinkedIn-SamerNeiroukh-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/samer-neiroukh-217ab1340)
+
+[![GitHub Mousa](https://img.shields.io/badge/GitHub-MosheT01-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MosheT01)
+[![LinkedIn Mousa](https://img.shields.io/badge/LinkedIn-Mousa%20Tams-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mousa-tams)
+
+- **Mousa Tams**  
+  Email: mousatams@hotmail.com
 
 ---
 
@@ -375,10 +385,12 @@ For inquiries regarding this project, please contact:
 
 - **Developer**: Samer Neiroukh
 - **Email**: samerneiroukh@gmail.com
+- **Developer**: Mousa Tams
+- **Email**: mousatams@hotmail.com
 
 ### 🐛 Bug Reports
 
-If you are an authorized user and have found a bug, please contact the developer directly with:
+If you are an authorized user and have found a bug, please contact the developers directly with:
 
 - Clear description of the problem
 - Steps to reproduce
@@ -400,7 +412,7 @@ NOTICE: This software is the exclusive property of the copyright holder.
 No permission is granted to use, copy, modify, distribute, or sell this software
 without explicit written permission from the copyright holder.
 
-For licensing inquiries, please contact: samerneiroukh@gmail.com
+For licensing inquiries, please contact: samer.neiroukh@gmail.com
 ```
 
 ---
@@ -409,7 +421,7 @@ For licensing inquiries, please contact: samerneiroukh@gmail.com
 
 ### 🌟 Star this repository if you found it helpful!
 
-**Made with ❤️ by [Samer Neiroukh](https://github.com/SamerNeiroukh)**
+**Made with ❤️ by [Samer Neiroukh](https://github.com/SamerNeiroukh) & [Mousa Tams](https://github.com/MosheT01)**
 
 _Transforming park management through innovative technology_ 🏞️
 
