@@ -15,11 +15,22 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
   final AuthService _authService = AuthService();
+  final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   bool _isSending = false;
 
   Future<void> _sendPasswordResetEmail() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("אנא הכנס כתובת אימייל"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (!_emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("אנא הכנס כתובת אימייל תקינה"),
@@ -42,6 +53,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        // Clear the email field to prevent multiple sends
+        _emailController.clear();
       }
     } on CustomException catch (e) {
       if (mounted) {
