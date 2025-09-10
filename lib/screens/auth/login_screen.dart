@@ -140,6 +140,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 0, 42, 255),
+      appBar: AppBar(
+        title: const Text('Login'),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
