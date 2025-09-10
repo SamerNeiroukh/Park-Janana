@@ -161,4 +161,13 @@ Future<void> createUser(String email, String password, String fullName, String i
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userRole', role);
   }
+
+  // 🟢 Send Password Reset Email
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw CustomException('שגיאה בשליחת קישור לאיפוס סיסמה.');
+    }
+  }
 }
