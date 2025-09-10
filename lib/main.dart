@@ -9,6 +9,7 @@ import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'constants/app_theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +26,14 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    
+    // 🆕 Initialize Notification Service
+    print("firebase logs: Initializing NotificationService");
+    await NotificationService().initialize();
+    print("firebase logs: NotificationService initialized successfully");
+    
   } catch (e) {
-    print('Error initializing Firebase or App Check: $e');
+    print('Error initializing Firebase, App Check, or NotificationService: $e');
   }
 
   runApp(const MyApp());
