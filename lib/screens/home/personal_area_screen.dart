@@ -41,7 +41,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         sourcePath: pickedFile.path,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 90,
-        aspectRatioPresets: [CropAspectRatioPreset.square],
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: 'חתוך תמונה',
@@ -69,7 +69,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     if (_imageFile != null && !_isUploading) {
       setState(() => _isUploading = true);
       try {
-        final storageRef = _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
+        final storageRef =
+            _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
         await storageRef.putFile(_imageFile!);
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
@@ -79,7 +80,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("תמונת הפרופיל עודכנה בהצלחה.", style: AppTheme.bodyText),
+              content: Text("תמונת הפרופיל עודכנה בהצלחה.",
+                  style: AppTheme.bodyText),
               backgroundColor: AppColors.success,
             ),
           );
@@ -110,7 +112,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.black),
-                title: const Text("צלם תמונה", style: TextStyle(color: Colors.black)),
+                title: const Text("צלם תמונה",
+                    style: TextStyle(color: Colors.black)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -118,7 +121,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo, color: Colors.black),
-                title: const Text("העלה תמונה", style: TextStyle(color: Colors.black)),
+                title: const Text("העלה תמונה",
+                    style: TextStyle(color: Colors.black)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -165,7 +169,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     }
 
     try {
-      final DocumentSnapshot userDoc = await _firestore.collection('users').doc(widget.uid).get();
+      final DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(widget.uid).get();
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
@@ -200,7 +205,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 final userData = snapshot.data!;
                 String profilePicture = userData['profile_picture'] ?? '';
 
-                if (profilePicture.isEmpty || !profilePicture.startsWith('http')) {
+                if (profilePicture.isEmpty ||
+                    !profilePicture.startsWith('http')) {
                   profilePicture = defaultProfilePictureUrl;
                 }
 
@@ -232,7 +238,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                               child: const CircleAvatar(
                                 backgroundColor: AppColors.background,
                                 radius: 22,
-                                child: Icon(Icons.camera_alt, color: Colors.blue, size: 22),
+                                child: Icon(Icons.camera_alt,
+                                    color: Colors.blue, size: 22),
                               ),
                             ),
                           ),
@@ -283,7 +290,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(field, style: AppTheme.sectionTitle.copyWith(color: AppColors.accent)),
+                Text(field,
+                    style: AppTheme.sectionTitle
+                        .copyWith(color: AppColors.accent)),
                 Text(value, style: AppTheme.bodyText),
               ],
             ),
@@ -294,7 +303,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   }
 
   Widget _buildLicensesSection(Map<String, dynamic> userData) {
-    final List<String> licensed = List<String>.from(userData['licensedDepartments'] ?? []);
+    final List<String> licensed =
+        List<String>.from(userData['licensedDepartments'] ?? []);
     final List<String> departments = allDepartments;
 
     final Map<String, IconData> departmentIcons = {
@@ -325,21 +335,26 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 6.0),
                 decoration: BoxDecoration(
-                  color: isLicensed ? AppColors.lightGreen.withOpacity(0.15) : Colors.grey.shade100,
+                  color: isLicensed
+                      ? AppColors.lightGreen.withOpacity(0.15)
+                      : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(12.0),
                   border: Border.all(
-                    color: isLicensed ? AppColors.success : Colors.grey.shade300,
+                    color:
+                        isLicensed ? AppColors.success : Colors.grey.shade300,
                     width: 1.0,
                   ),
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 4.0),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         dept,
-                        style: AppTheme.bodyText.copyWith(fontWeight: FontWeight.bold),
+                        style: AppTheme.bodyText
+                            .copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(width: 8.0),
                       Icon(icon, color: AppColors.accent, size: 26),
