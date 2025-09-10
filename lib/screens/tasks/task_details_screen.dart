@@ -10,6 +10,7 @@ import 'package:park_janana/widgets/task/task_comments_section.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -68,9 +69,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       await _fetchTaskAndWorkers();
     } catch (e) {
       debugPrint("Failed to submit comment: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("שגיאה בשליחת תגובה")),
-      );
+      AlertService.error(context, "שגיאה בשליחת תגובה");
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

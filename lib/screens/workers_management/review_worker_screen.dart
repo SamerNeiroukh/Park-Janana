@@ -6,6 +6,7 @@ import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/screens/workers_management/management_buttons/shifts_button.dart';
 import 'package:park_janana/screens/tasks/create_task_screen.dart';
 import 'package:park_janana/models/user_model.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -284,31 +285,23 @@ class ReviewWorkerScreen extends StatelessWidget {
   }
 
   void _snack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    AlertService.info(context, msg);
   }
 
   Future<void> _deleteWorker(BuildContext context, String uid) async {
-    bool confirm = await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("מחיקת עובד"),
-        content: const Text("האם אתה בטוח שברצונך למחוק את העובד הזה?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("ביטול")),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text("מחק", style: TextStyle(color: Colors.red))),
-        ],
-      ),
+    final confirm = await AlertService.confirm(
+      context,
+      title: "מחיקת עובד",
+      message: "האם אתה בטוח שברצונך למחוק את העובד הזה?",
+      confirmText: "מחק",
+      confirmColor: AppColors.error,
     );
 
-    if (confirm) {
+    if (confirm == true) {
       await FirebaseFirestore.instance.collection('users').doc(uid).delete();
       if (context.mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("העובד נמחק בהצלחה")),
-        );
+        AlertService.success(context, "העובד נמחק בהצלחה");
       }
     }
   }

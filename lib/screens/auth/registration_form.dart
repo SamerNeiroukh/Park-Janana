@@ -6,6 +6,7 @@ import 'package:park_janana/constants/app_colors.dart';
 import '../../models/user_model.dart';
 import '../welcome_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class RegistrationForm extends StatefulWidget {
   const RegistrationForm({super.key});
@@ -116,9 +117,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      AlertService.error(context, 'Error: $e');
     } finally {
       if (!mounted) return;
       setState(() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/utils/alert_service.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -21,9 +22,7 @@ class ApproveWorkerScreen extends StatelessWidget {
     });
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('העובד אושר בהצלחה')),
-    );
+    AlertService.success(context, 'העובד אושר בהצלחה');
   }
 
   Future<void> _rejectWorker(BuildContext context) async {
@@ -31,9 +30,7 @@ class ApproveWorkerScreen extends StatelessWidget {
     await FirebaseFirestore.instance.collection('users').doc(uid).delete();
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('העובד נמחק מהמערכת')),
-    );
+    AlertService.info(context, 'העובד נמחק מהמערכת');
   }
 
   void _showConfirmationDialog({

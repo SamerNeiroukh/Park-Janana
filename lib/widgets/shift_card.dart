@@ -9,6 +9,7 @@ import '../services/shift_service.dart';
 import '../services/worker_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/message_bubble.dart';
+import '../utils/alert_service.dart';
 
 class ShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -454,7 +455,7 @@ Widget _buildAddMessageSection() {
   void _deleteShift() async {
     await widget.shiftService.deleteShift(widget.shift.id);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("🗑️ משמרת נמחקה")));
+      AlertService.success(context, "🗑️ משמרת נמחקה");
     }
   }
 }
