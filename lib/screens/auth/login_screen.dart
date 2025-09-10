@@ -96,7 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
         } else if (e.code == 'too-many-requests') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.'),
+              content:
+                  Text('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.'),
               backgroundColor: Colors.orange,
             ),
           );
@@ -138,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color.fromARGB(255, 0, 42, 255),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -178,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 24.0),
-                      
+
                       // Welcome Text
                       Text(
                         'שלום עובדים יקרים',
@@ -188,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
+
                       const SizedBox(height: 8.0),
                       Text(
                         'אנא הכנס את פרטי הכניסה שלך',
@@ -198,15 +199,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
+
                       const SizedBox(height: 40.0),
-                      
+
                       // Email Field
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+                            padding:
+                                const EdgeInsets.only(bottom: 8.0, right: 4.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -284,15 +286,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 24.0),
-                      
+
                       // Password Field
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+                            padding:
+                                const EdgeInsets.only(bottom: 8.0, right: 4.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -383,9 +386,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 16.0),
-                      
+
                       // Forgot Password Link
                       Align(
                         alignment: Alignment.centerRight,
@@ -394,7 +397,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ForgotPasswordScreen(),
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
                               ),
                             );
                           },
@@ -407,9 +411,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 32.0),
-                      
+
                       // Login Button
                       SizedBox(
                         width: double.infinity,
@@ -445,9 +449,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24.0),
-                      
+
                       // Back Button
                       TextButton(
                         onPressed: () {
