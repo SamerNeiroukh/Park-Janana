@@ -31,6 +31,23 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   static const String defaultProfilePictureUrl =
       "https://firebasestorage.googleapis.com/v0/b/park-janana-app.appspot.com/o/profile_pictures%2Fdefault_profile.png?alt=media";
 
+  // ✅ Static method to clear all user caches across the app
+  static void clearUserCache(String uid) {
+    _userCache.remove(uid);
+    // Clear SharedPreferences cache as well
+    _clearAuthServiceCache();
+  }
+
+  static void _clearAuthServiceCache() async {
+    try {
+      final authService = AuthService();
+      // Clear cached profile in AuthService
+      await authService.clearUserCache();
+    } catch (e) {
+      debugPrint('Error clearing auth cache: $e');
+    }
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     if (_isUploading) return;
 
@@ -75,7 +92,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         final downloadUrl = await storageRef.getDownloadURL();
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
 
+        // ✅ Clear all caches when profile picture is updated
         _userCache[widget.uid]?['profile_picture'] = downloadUrl;
+        clearUserCache(widget.uid);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

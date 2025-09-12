@@ -130,6 +130,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       weatherDescription: _weatherData?['description'],
                       temperature: _weatherData?['temperature']?.toString(),
                       weatherIcon: _weatherData?['icon'],
+                      onProfileUpdated: () {
+                        // Clear cache and reload data when profile is updated
+                        final uid = FirebaseAuth.instance.currentUser?.uid;
+                        if (uid != null) {
+                          _userCache.remove(uid);
+                          _loadData();
+                        }
+                      },
                     ),
                   ),
                   Padding(

@@ -153,6 +153,12 @@ Future<void> createUser(String email, String password, String fullName, String i
     }
   }
 
+  // 🟢 Clear User Cache (for profile updates)
+  Future<void> clearUserCache() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userProfile');
+  }
+
   // 🟢 Assign Role
   Future<void> assignRole(String uid, String role) async {
     await _firebaseService.assignRole(uid, role);
