@@ -38,7 +38,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     _clearAuthServiceCache();
   }
 
-  static void _clearAuthServiceCache() async {
+  static Future<void> _clearAuthServiceCache() async {
     try {
       final authService = AuthService();
       // Clear cached profile in AuthService
