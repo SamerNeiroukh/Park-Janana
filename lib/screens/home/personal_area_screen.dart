@@ -93,7 +93,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         await _authService.updateProfilePicture(widget.uid, downloadUrl);
 
         // ✅ Clear all caches when profile picture is updated
-        _userCache[widget.uid]?['profile_picture'] = downloadUrl;
         clearUserCache(widget.uid);
 
         if (mounted) {
