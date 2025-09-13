@@ -123,7 +123,7 @@ class _MyAppState extends State<MyApp> {
             ),
         '/login': (context) => const WelcomeScreen(),
         '/profile': (context) {
-          final user = FirebaseAuth.instance.currentUser;
+          final user = (widget.overrideHomeAuthInstance ?? FirebaseAuth.instance).currentUser;
           if (user != null) {
             return PersonalAreaScreen(uid: user.uid);
           } else {
