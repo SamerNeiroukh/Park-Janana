@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,7 +14,16 @@ import 'package:park_janana/constants/app_colors.dart';
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
 
-  const PersonalAreaScreen({required this.uid, super.key});
+  // Test seams:
+  final FirebaseAuth? firebaseAuth; // allow injected auth in tests
+  final bool testMode; // render minimal, no-Firebase UI in tests
+
+  const PersonalAreaScreen({
+    required this.uid,
+    this.firebaseAuth,
+    this.testMode = false,
+    super.key,
+  });
 
   @override
   _PersonalAreaScreenState createState() => _PersonalAreaScreenState();
@@ -21,10 +31,21 @@ class PersonalAreaScreen extends StatefulWidget {
 
 class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   File? _imageFile;
-  final AuthService _authService = AuthService();
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  AuthService? _authService; // lazy, avoid touching Firebase in tests
+
+  FirebaseStorage? _storage; // lazy to avoid Firebase in tests
+  FirebaseFirestore? _firestore; // lazy to avoid Firebase in tests
   bool _isUploading = false;
+  @override
+  void initState() {
+    super.initState();
+
+    // Only touch Firebase singletons when NOT in testMode
+    if (!widget.testMode) {
+      _storage = FirebaseStorage.instance;
+      _firestore = FirebaseFirestore.instance;
+    }
+  }
 
   static final Map<String, Map<String, dynamic>> _userCache = {};
 
@@ -70,10 +91,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       setState(() => _isUploading = true);
       try {
         final storageRef =
-            _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
+            _storage!.ref().child('profile_pictures/${widget.uid}/profile.jpg');
+
         await storageRef.putFile(_imageFile!);
         final downloadUrl = await storageRef.getDownloadURL();
-        await _authService.updateProfilePicture(widget.uid, downloadUrl);
+        final auth =
+            _authService ??= AuthService(firebaseAuth: widget.firebaseAuth);
+        await auth.updateProfilePicture(widget.uid, downloadUrl);
 
         _userCache[widget.uid]?['profile_picture'] = downloadUrl;
 
@@ -170,7 +194,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
     try {
       final DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(widget.uid).get();
+          await _firestore!.collection('users').doc(widget.uid).get();
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
@@ -186,6 +210,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.testMode) {
+      // Minimal, deterministic UI for tests (no Firebase, no timers)
+      return const Scaffold(
+        body: Center(child: Text('Profile (test)')),
+      );
+    }
+
     return Scaffold(
       body: Column(
         children: [

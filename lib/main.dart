@@ -123,9 +123,16 @@ class _MyAppState extends State<MyApp> {
             ),
         '/login': (context) => const WelcomeScreen(),
         '/profile': (context) {
-          final user = (widget.overrideHomeAuthInstance ?? FirebaseAuth.instance).currentUser;
+          final user =
+              (widget.overrideHomeAuthInstance ?? FirebaseAuth.instance)
+                  .currentUser;
           if (user != null) {
-            return PersonalAreaScreen(uid: user.uid);
+            return PersonalAreaScreen(
+              uid: user.uid,
+              firebaseAuth:
+                  widget.overrideHomeAuthInstance, // injected auth for tests
+              testMode: widget.enableHomeTestMode, // minimal UI in tests
+            );
           } else {
             return const Center(
               child: Text(
