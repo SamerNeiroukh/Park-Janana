@@ -53,19 +53,37 @@ class TaskModel {
   }
 
   factory TaskModel.fromMap(String id, Map<String, dynamic> data) {
+    Timestamp _validateTimestamp(dynamic value) {
+      if (value is Timestamp) {
+        try {
+          // Attempt to access seconds to validate range
+          value.seconds;
+          return value;
+        } catch (_) {
+          // Fallback to default if out of range
+          return Timestamp.fromDate(DateTime(1970, 1, 1));
+        }
+      }
+      return Timestamp.fromDate(DateTime(1970, 1, 1));
+    }
+
     return TaskModel(
       id: id,
-      title: data['title'] ?? '',
-      description: data['description'] ?? '',
-      department: data['department'] ?? '',
-      createdBy: data['createdBy'] ?? '',
-      assignedTo: List<String>.from(data['assignedTo'] ?? []),
-      dueDate: data['dueDate'] ?? Timestamp.fromDate(DateTime(1970, 1, 1)),
-      priority: data['priority'] ?? 'low',
-      status: data['status'] ?? 'pending',
-      attachments: List<String>.from(data['attachments'] ?? []),
-      comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
-      createdAt: data['createdAt'] ?? Timestamp.fromDate(DateTime(1970, 1, 1)),
+      title: data['title'] is String ? data['title'] : '',
+      description: data['description'] is String ? data['description'] : '',
+      department: data['department'] is String ? data['department'] : '',
+      createdBy: data['createdBy'] is String ? data['createdBy'] : '',
+      assignedTo: data['assignedTo'] is List<String> ? List<String>.from(data['assignedTo']) : [],
+      dueDate: _validateTimestamp(data['dueDate']),
+      priority: data['priority'] is String ? data['priority'] : 'low',
+      status: data['status'] is String ? data['status'] : 'pending',
+      attachments: data['attachments'] is List<String>
+          ? List<String>.from(data['attachments'])
+          : [],
+      comments: data['comments'] is List<Map<String, dynamic>>
+          ? List<Map<String, dynamic>>.from(data['comments'])
+          : [],
+      createdAt: _validateTimestamp(data['createdAt']),
       workerProgress: _parseWorkerProgress(data['workerProgress']),
     );
   }
