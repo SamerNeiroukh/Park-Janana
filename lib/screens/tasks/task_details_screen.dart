@@ -10,6 +10,7 @@ import 'package:park_janana/widgets/task/task_comments_section.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -204,6 +205,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         );
                       }),
                       const SizedBox(height: 24),
+                      
+                      // Image attachments section
+                      if (task.attachments.isNotEmpty) ...[
+                        Text("תמונות מצורפות", style: AppTheme.sectionTitle),
+                        const SizedBox(height: 8),
+                        _buildImageGallery(task.attachments),
+                        const SizedBox(height: 24),
+                      ],
+                      
                       TaskCommentsSection(
                         taskId: task.id,
                         comments: task.comments,
@@ -278,5 +288,90 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       default:
         return 'כללי';
     }
+  }
+
+  Widget _buildImageGallery(List<String> imageUrls) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1,
+      ),
+      itemCount: imageUrls.length,
+      itemBuilder: (context, index) {
+        return _buildImageThumbnail(imageUrls[index], index);
+      },
+    );
+  }
+
+  Widget _buildImageThumbnail(String imageUrl, int index) {
+    return GestureDetector(
+      onTap: () => _showFullImage(context, imageUrl),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.grey[200],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            placeholder: (context, url) => Container(
+              color: Colors.grey[200],
+              child: const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: Colors.grey[200],
+              child: const Icon(Icons.error, color: Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(
+                    Icons.error,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
