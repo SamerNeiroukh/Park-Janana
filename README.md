@@ -82,7 +82,7 @@ Requirements were gathered from real park operations:
 - Role-based access: Worker, Manager, Department Manager, Owner
 - New worker registration flow
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/81123351-357b-492f-beb6-2b93d2db275c" width="280" />
 </div>
 
@@ -94,7 +94,7 @@ Requirements were gathered from real park operations:
 - Manager dashboard: Approvals, staff status, shift management
 - Owner dashboard: Analytics and reporting
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/727af802-722a-4d1a-a69e-d054a50438c2" width="250" />
   <img src="https://github.com/user-attachments/assets/8410ad61-f2ea-49b3-803c-6ad1d2543f3b" width="250" />
 </div>
@@ -108,7 +108,7 @@ Requirements were gathered from real park operations:
 - Role-based worker assignment
 - Real-time updates with Firebase
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/c0c52538-f432-4c7d-bc35-3986e05d2884" width="250" />
   <img src="https://github.com/user-attachments/assets/4dd306c8-2d3a-49af-842e-3d06d6082833" width="250" />
 </div>
@@ -123,7 +123,7 @@ Requirements were gathered from real park operations:
 - Manager dashboard: "All Tasks" with filtering
 - Edit and delete tasks
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/b09a7c80-7342-46b4-b74b-338bac02cc49" width="250" />
   <img src="https://github.com/user-attachments/assets/44246e50-7004-4661-b3c2-68287cb003da" width="250" />
 </div>
@@ -139,7 +139,7 @@ Requirements were gathered from real park operations:
   - Hours worked (decimal precision)
 - Motivational design with animations
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/f8edea74-ea21-4bd6-9935-f24a64324a6c" width="250" />
   <img src="https://github.com/user-attachments/assets/48a1b84a-1a16-4f9b-b86d-6c87340774b3" width="250" />
   <img src="https://github.com/user-attachments/assets/fa9f2004-3dd4-4948-91ce-3b9b969c07bf" width="250" />
@@ -154,7 +154,7 @@ Requirements were gathered from real park operations:
 - Worker Shift Report with approval history
 - Data organized per month for historical records
 
-<div align="center">
+<div align="center" style="background:white; display:inline-block; padding:10px; border-radius:8px;">
   <img src="https://github.com/user-attachments/assets/90831832-63f3-4d1b-b38c-8f31445edf5f" width="250" />
   <img src="https://github.com/user-attachments/assets/076b0a41-1ae7-4bf8-aff4-17b39945b741" width="250" />
 </div>
