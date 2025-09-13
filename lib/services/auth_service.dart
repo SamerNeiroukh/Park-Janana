@@ -8,47 +8,60 @@ import '../utils/custom_exception.dart';
 import 'firebase_service.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseService _firebaseService = FirebaseService();
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth;
+  final FirebaseService _firebaseService;
+  FirebaseStorage? _storage; // lazy to avoid touching Firebase in tests
+
+  AuthService({
+    FirebaseAuth? firebaseAuth,
+    FirebaseService? firebaseService,
+    FirebaseStorage? storage,
+  })  : _auth = firebaseAuth ?? FirebaseAuth.instance,
+        _firebaseService = firebaseService ?? FirebaseService(),
+        _storage = storage;
 
   // 🟢 Create a new user with a default profile picture uploaded to Firebase
-Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
-  try {
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    String uid = userCredential.user!.uid;
+  Future<void> createUser(String email, String password, String fullName,
+      String idNumber, String phoneNumber) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      String uid = userCredential.user!.uid;
 
-    // ✅ Upload default profile picture to Firebase Storage
-    String defaultProfilePictureUrl = await _uploadDefaultProfilePicture(uid);
+      // ✅ Upload default profile picture to Firebase Storage
+      String defaultProfilePictureUrl = await _uploadDefaultProfilePicture(uid);
 
-    // ✅ Add user to Firestore with approved: false
-    await _firebaseService.addUser({
-      'uid': uid,
-      'email': email,
-      'fullName': fullName,
-      'idNumber': idNumber,
-      'phoneNumber': phoneNumber,
-      'profile_picture': defaultProfilePictureUrl,
-      'role': 'worker',
-      'approved': false, // 🔥 This line is required
-    });
+      // ✅ Add user to Firestore with approved: false
+      await _firebaseService.addUser({
+        'uid': uid,
+        'email': email,
+        'fullName': fullName,
+        'idNumber': idNumber,
+        'phoneNumber': phoneNumber,
+        'profile_picture': defaultProfilePictureUrl,
+        'role': 'worker',
+        'approved': false, // 🔥 This line is required
+      });
 
-    // ✅ Cache user role
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userRole', 'worker');
-  } catch (e) {
-    throw CustomException('שגיאה ביצירת משתמש.');
+      // ✅ Cache user role
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userRole', 'worker');
+    } catch (e) {
+      throw CustomException('שגיאה ביצירת משתמש.');
+    }
   }
-}
 
   // 🟢 Upload default profile picture to Firebase Storage
   Future<String> _uploadDefaultProfilePicture(String uid) async {
     try {
-      File defaultImageFile = File('assets/images/default_profile.png'); // 🔹 Load the asset
-      Reference storageRef = _storage.ref().child('profile_pictures/$uid/profile.jpg');
+      File defaultImageFile =
+          File('assets/images/default_profile.png'); // 🔹 Load the asset
+      final storage = _storage ?? FirebaseStorage.instance;
+      Reference storageRef =
+          storage.ref().child('profile_pictures/$uid/profile.jpg');
 
       await storageRef.putFile(defaultImageFile);
       return await storageRef.getDownloadURL();
@@ -89,7 +102,8 @@ Future<void> createUser(String email, String password, String fullName, String i
     String? cachedProfile = prefs.getString('userProfile');
 
     if (cachedProfile != null && cachedProfile.isNotEmpty) {
-      return Map<String, dynamic>.from(jsonDecode(cachedProfile)); // ✅ Return cached profile if available
+      return Map<String, dynamic>.from(
+          jsonDecode(cachedProfile)); // ✅ Return cached profile if available
     }
 
     try {
@@ -99,9 +113,11 @@ Future<void> createUser(String email, String password, String fullName, String i
         final data = userDoc.data() as Map<String, dynamic>;
 
         // Ensure profile picture URL is present
-        String profilePicture = (data['profile_picture'] != null && data['profile_picture'].isNotEmpty)
+        String profilePicture = (data['profile_picture'] != null &&
+                data['profile_picture'].isNotEmpty)
             ? data['profile_picture']
-            : await _uploadDefaultProfilePicture(uid); // ✅ Upload default if missing
+            : await _uploadDefaultProfilePicture(
+                uid); // ✅ Upload default if missing
 
         final profileData = {
           'uid': data['uid'] ?? '',
@@ -113,7 +129,8 @@ Future<void> createUser(String email, String password, String fullName, String i
           'role': data['role'] ?? '',
         };
 
-        await prefs.setString('userProfile', jsonEncode(profileData)); // ✅ Cache profile
+        await prefs.setString(
+            'userProfile', jsonEncode(profileData)); // ✅ Cache profile
 
         return profileData;
       } else {
@@ -139,7 +156,8 @@ Future<void> createUser(String email, String password, String fullName, String i
   }
 
   // 🟢 Update Profile Picture
-  Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
+  Future<void> updateProfilePicture(
+      String uid, String profilePictureUrl) async {
     await _firebaseService.updateProfilePicture(uid, profilePictureUrl);
 
     // ✅ Update Cached Profile Picture
