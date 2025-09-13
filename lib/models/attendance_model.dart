@@ -9,8 +9,10 @@ class AttendanceRecord {
     required this.clockOut,
   });
 
-  double get hoursWorked =>
-      clockOut.difference(clockIn).inMinutes / 60.0;
+  double get hoursWorked {
+    final duration = clockOut.difference(clockIn).inMinutes / 60.0;
+    return duration > 0 ? duration : 0.0;
+  }
 
   Map<String, dynamic> toMap() => {
         'clockIn': Timestamp.fromDate(clockIn),
@@ -19,8 +21,12 @@ class AttendanceRecord {
 
   factory AttendanceRecord.fromMap(Map<String, dynamic> map) {
     return AttendanceRecord(
-      clockIn: (map['clockIn'] as Timestamp).toDate(),
-      clockOut: (map['clockOut'] as Timestamp).toDate(),
+      clockIn: (map['clockIn'] is Timestamp)
+          ? (map['clockIn'] as Timestamp).toDate()
+          : DateTime.now(),
+      clockOut: (map['clockOut'] is Timestamp)
+          ? (map['clockOut'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 }
@@ -64,13 +70,15 @@ class AttendanceModel {
   factory AttendanceModel.fromMap(Map<String, dynamic> map, String documentId) {
     return AttendanceModel(
       id: documentId,
-      userId: map['userId'],
-      userName: map['userName'],
-      year: map['year'],
-      month: map['month'],
-      sessions: (map['sessions'] as List<dynamic>)
-          .map((r) => AttendanceRecord.fromMap(r as Map<String, dynamic>))
-          .toList(),
+      userId: map['userId'] ?? '',
+      userName: map['userName'] ?? '',
+      year: map['year'] is int ? map['year'] : 0,
+      month: map['month'] is int ? map['month'] : 0,
+      sessions: (map['sessions'] is List)
+          ? (map['sessions'] as List<dynamic>)
+              .map((r) => AttendanceRecord.fromMap(r as Map<String, dynamic>))
+              .toList()
+          : [],
     );
   }
 }
