@@ -60,12 +60,12 @@ class TaskModel {
       department: data['department'] ?? '',
       createdBy: data['createdBy'] ?? '',
       assignedTo: List<String>.from(data['assignedTo'] ?? []),
-      dueDate: data['dueDate'],
+      dueDate: data['dueDate'] ?? Timestamp.fromDate(DateTime(1970, 1, 1)),
       priority: data['priority'] ?? 'low',
       status: data['status'] ?? 'pending',
       attachments: List<String>.from(data['attachments'] ?? []),
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
-      createdAt: data['createdAt'],
+      createdAt: data['createdAt'] ?? Timestamp.fromDate(DateTime(1970, 1, 1)),
       workerProgress: _parseWorkerProgress(data['workerProgress']),
     );
   }
