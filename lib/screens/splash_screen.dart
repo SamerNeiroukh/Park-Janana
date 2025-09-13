@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'welcome_screen.dart'; // Import the WelcomeScreen
 
@@ -14,13 +15,16 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _logoFadeAnimation;
   late Animation<Color?> _backgroundColorAnimation;
 
+  Timer? _navTimer;
+
   @override
   void initState() {
     super.initState();
 
     // Initialize the animation controller
     _controller = AnimationController(
-      duration: const Duration(seconds: 5), // Total duration for all transitions
+      duration:
+          const Duration(seconds: 5), // Total duration for all transitions
       vsync: this,
     );
 
@@ -28,7 +32,8 @@ class _SplashScreenState extends State<SplashScreen>
     _logoFadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.8, 1.0, curve: Curves.easeOut), // Logo fades in the last part
+        curve: const Interval(0.8, 1.0,
+            curve: Curves.easeOut), // Logo fades in the last part
       ),
     );
 
@@ -61,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     // Navigate to the WelcomeScreen after the animation
-    Future.delayed(const Duration(seconds: 6), () {
+    _navTimer = Timer(const Duration(seconds: 6), () {
       if (!mounted) return; // Prevent navigation if widget was disposed
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
@@ -71,6 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
+    _navTimer?.cancel(); // <-- cancel the pending navigation timer
     _controller.dispose(); // Dispose the controller to free resources
     super.dispose();
   }
@@ -81,7 +87,8 @@ class _SplashScreenState extends State<SplashScreen>
       animation: _controller,
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: _backgroundColorAnimation.value, // Dynamic background color
+          backgroundColor:
+              _backgroundColorAnimation.value, // Dynamic background color
           body: Center(
             child: Opacity(
               opacity: _logoFadeAnimation.value, // Dynamic logo opacity

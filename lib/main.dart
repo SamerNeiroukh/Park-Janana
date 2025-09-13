@@ -33,7 +33,17 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+    this.overrideAuthStream, // test-only
+    this.overrideSplashDuration, // test-only
+  });
+
+  /// If provided, used instead of FirebaseAuth.instance.authStateChanges()
+  final Stream<User?>? overrideAuthStream;
+
+  /// If provided, used instead of 6 seconds
+  final Duration? overrideSplashDuration;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -46,8 +56,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    // Show splash screen for 2 seconds, then check login state
-    Future.delayed(const Duration(seconds: 6), () {
+    // Show splash screen for N seconds (override-able in tests)
+    final splash = widget.overrideSplashDuration ?? const Duration(seconds: 6);
+    Future.delayed(splash, () {
+      if (!mounted) return;
       setState(() {
         _showSplashScreen = false;
       });
@@ -56,6 +68,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final authStream =
+        widget.overrideAuthStream ?? FirebaseAuth.instance.authStateChanges();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
@@ -77,7 +92,7 @@ class _MyAppState extends State<MyApp> {
       home: _showSplashScreen
           ? const SplashScreen()
           : StreamBuilder<User?>(
-              stream: FirebaseAuth.instance.authStateChanges(),
+              stream: authStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
