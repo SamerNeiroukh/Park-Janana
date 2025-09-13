@@ -37,6 +37,8 @@ class MyApp extends StatefulWidget {
     super.key,
     this.overrideAuthStream, // test-only
     this.overrideSplashDuration, // test-only
+    this.overrideHomeAuthInstance, // test-only
+    this.enableHomeTestMode = false, // test-only
   });
 
   /// If provided, used instead of FirebaseAuth.instance.authStateChanges()
@@ -44,6 +46,12 @@ class MyApp extends StatefulWidget {
 
   /// If provided, used instead of 6 seconds
   final Duration? overrideSplashDuration;
+
+  /// Injected FirebaseAuth for HomeScreen (tests)
+  final FirebaseAuth? overrideHomeAuthInstance;
+
+  /// When true, HomeScreen skips async/Firebase work (tests)
+  final bool enableHomeTestMode;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -98,13 +106,21 @@ class _MyAppState extends State<MyApp> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasData) {
-                  return const HomeScreen(role: '');
+                  return HomeScreen(
+                    role: '',
+                    firebaseAuth: widget.overrideHomeAuthInstance,
+                    testMode: widget.enableHomeTestMode,
+                  );
                 }
                 return const WelcomeScreen();
               },
             ),
       routes: {
-        '/home': (context) => const HomeScreen(role: ''),
+        '/home': (context) => HomeScreen(
+              role: '',
+              firebaseAuth: widget.overrideHomeAuthInstance,
+              testMode: widget.enableHomeTestMode,
+            ),
         '/login': (context) => const WelcomeScreen(),
         '/profile': (context) {
           final user = FirebaseAuth.instance.currentUser;

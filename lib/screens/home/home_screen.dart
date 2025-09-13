@@ -19,10 +19,20 @@ import 'package:park_janana/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/services/weather_service.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 class HomeScreen extends StatefulWidget {
   final String role;
 
-  const HomeScreen({super.key, required this.role});
+  const HomeScreen({
+    super.key,
+    required this.role,
+    this.firebaseAuth, // <-- test seam
+    this.testMode = false, // <-- skip async + Firebase in tests
+  });
+
+  final FirebaseAuth? firebaseAuth; // <-- optional injected auth
+  final bool testMode;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -40,6 +50,28 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.testMode) {
+      // Minimal, deterministic state for widget tests (no Firebase/IO).
+      _roleData = null;
+      _userData = {
+        'fullName': 'QA User',
+        'profile_picture': '',
+        'role': 'worker',
+      };
+      _workStats = {
+        'hoursWorked': 0.0,
+        'daysWorked': 0.0,
+      };
+      _weatherData = {
+        'description': 'clear',
+        'temperature': '20',
+        'icon': null,
+      };
+      setState(() {}); // trigger first build
+      return; // <-- skip all async/Firebase calls
+    }
+
     _loadRolesData();
     _loadData();
   }
@@ -54,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final uid = (widget.firebaseAuth ?? FirebaseAuth.instance).currentUser?.uid;
     if (uid == null) return;
 
     final userData = await _fetchUserData(uid);
@@ -94,9 +126,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final User? currentUser = FirebaseAuth.instance.currentUser;
+    final User? currentUser =
+        (widget.firebaseAuth ?? FirebaseAuth.instance).currentUser;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+// In tests, avoid any animated/network/Firebase widgets entirely.
+    if (widget.testMode) {
+      return const Scaffold(
+        body: Center(child: Text('Home (test)')),
+      );
+    }
 
     if (currentUser == null) {
       return Scaffold(
@@ -120,17 +160,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       horizontal: screenWidth * 0.00,
                       vertical: screenHeight * 0.01,
                     ),
-                    child: UserCard(
-                      userName: _userData!['fullName'] ?? 'משתמש',
-                      profilePictureUrl: _userData!['profile_picture'] ?? '',
-                      currentDate:
-                          DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                      daysWorked: _workStats!['daysWorked']!.toInt(),
-                      hoursWorked: _workStats!['hoursWorked']!,
-                      weatherDescription: _weatherData?['description'],
-                      temperature: _weatherData?['temperature']?.toString(),
-                      weatherIcon: _weatherData?['icon'],
-                    ),
+                    child: widget.testMode
+                        ? const SizedBox(
+                            height: 1) // avoid NetworkImage in tests
+                        : UserCard(
+                            userName: _userData!['fullName'] ?? 'משתמש',
+                            profilePictureUrl:
+                                _userData!['profile_picture'] ?? '',
+                            currentDate:
+                                DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                            daysWorked: _workStats!['daysWorked']!.toInt(),
+                            hoursWorked: _workStats!['hoursWorked']!,
+                            weatherDescription: _weatherData?['description'],
+                            temperature:
+                                _weatherData?['temperature']?.toString(),
+                            weatherIcon: _weatherData?['icon'],
+                          ),
                   ),
                   Padding(
                     padding:
@@ -145,7 +190,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       horizontal: screenWidth * 0.04,
                       vertical: screenHeight * 0.005,
                     ),
-                    child: const ClockInOutWidget(),
+                    child: widget.testMode
+                        ? const SizedBox
+                            .shrink() // <-- avoid Firestore in tests
+                        : const ClockInOutWidget(),
                   ),
                 ],
               ),
