@@ -70,8 +70,8 @@ class ShiftModel {
     );
   }
 
-  factory ShiftModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
+  factory ShiftModel.fromFirestore(dynamic doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return ShiftModel(
       id: doc.id,
       date: data['date'] ?? '',
@@ -127,4 +127,26 @@ class ShiftModel {
   bool get isFull => assignedWorkers.length >= maxWorkers;
 
   bool isUserAssigned(String userId) => assignedWorkers.contains(userId);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'date': date,
+      'department': department,
+      'startTime': startTime,
+      'endTime': endTime,
+      'maxWorkers': maxWorkers,
+      'requestedWorkers': requestedWorkers,
+      'assignedWorkers': assignedWorkers,
+      'messages': messages,
+      'createdBy': createdBy,
+      'createdAt': createdAt,
+      'lastUpdatedBy': lastUpdatedBy,
+      'lastUpdatedAt': lastUpdatedAt,
+      'status': status,
+      'cancelReason': cancelReason,
+      'shiftManager': shiftManager,
+      'assignedWorkerData': assignedWorkerData,
+      'rejectedWorkerData': rejectedWorkerData,
+    };
+  }
 }
