@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      appBar: const UserHeader(),
+      appBar: const UserHeader(showLogoutButton: true),
       body: _userData == null || _workStats == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
