@@ -34,7 +34,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                       child: AlertDialog(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         title: Row(
-                          children: const [
+                          children:  [
                             Icon(Icons.logout, color: Colors.red),
                             SizedBox(width: 8),
                             Text('התנתקות', style: TextStyle(fontWeight: FontWeight.bold)),
