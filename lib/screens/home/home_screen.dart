@@ -26,11 +26,15 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.role,
     this.firebaseAuth, // <-- test seam
-    this.testMode = false, // <-- skip async + Firebase in tests
+    this.testMode = false, // hard test mode: minimal UI
+    this.skipAsync = false, // don't run _loadRolesData/_loadData
+    this.skipHeavyChildrenInTests =
+        false, // render buttons, skip UserCard/Clock
   });
-
   final FirebaseAuth? firebaseAuth; // <-- optional injected auth
   final bool testMode;
+  final bool skipAsync;
+  final bool skipHeavyChildrenInTests;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -43,6 +47,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _weatherData;
 
   static final Map<String, Map<String, dynamic>> _userCache = {};
+
+// === Test-only helper (enabled in debug/tests) ===
+  void debugSetDataForTest({
+    Map<String, dynamic>? userData,
+    Map<String, double>? workStats,
+    Map<String, dynamic>? weatherData,
+    Map<String, dynamic>? roleData,
+  }) {
+    assert(() {
+      if (userData != null) _userData = userData;
+      if (workStats != null) _workStats = workStats;
+      if (weatherData != null) _weatherData = weatherData;
+      if (roleData != null) _roleData = roleData;
+      return true;
+    }());
+    if (mounted) setState(() {});
+  }
 
   @override
   void initState() {
@@ -68,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {}); // trigger first build
       return; // <-- skip all async/Firebase calls
     }
-
+    if (widget.skipAsync) {
+      return; // don't start async loads in tests
+    }
     _loadRolesData();
     _loadData();
   }
@@ -144,7 +167,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      appBar: const UserHeader(),
+      appBar: (widget.testMode || widget.skipHeavyChildrenInTests)
+          ? AppBar(title: const Text('Home'))
+          : const UserHeader(),
       body: _userData == null || _workStats == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -157,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       horizontal: screenWidth * 0.00,
                       vertical: screenHeight * 0.01,
                     ),
-                    child: widget.testMode
+                    child: (widget.testMode || widget.skipHeavyChildrenInTests)
                         ? const SizedBox(
                             height: 1) // avoid NetworkImage in tests
                         : UserCard(
@@ -177,17 +202,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
-                    child: ActionButtonGridPager(
-                      buttons: _buildActionButtons(
-                          _userData!['role'] ?? 'worker', currentUser.uid),
-                    ),
+                    child: (widget.testMode || widget.skipHeavyChildrenInTests)
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _buildActionButtons(
+                              _userData!['role'] ?? 'worker',
+                              currentUser.uid,
+                            )
+                                .map((b) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4),
+                                      child: Text(b.title),
+                                    ))
+                                .toList(),
+                          )
+                        : ActionButtonGridPager(
+                            buttons: _buildActionButtons(
+                              _userData!['role'] ?? 'worker',
+                              currentUser.uid,
+                            ),
+                          ),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenWidth * 0.04,
                       vertical: screenHeight * 0.005,
                     ),
-                    child: widget.testMode
+                    child: (widget.testMode || widget.skipHeavyChildrenInTests)
                         ? const SizedBox
                             .shrink() // <-- avoid Firestore in tests
                         : const ClockInOutWidget(),
