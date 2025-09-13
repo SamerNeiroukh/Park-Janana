@@ -58,5 +58,38 @@ void main() {
       // Assert
       expect(hebrewName, 'שבת');
     });
+
+    test('formatDateWithDay handles invalid date gracefully', () {
+      // Arrange
+      final invalidDate = 'invalid-date';
+
+      // Act
+      final result = DateTimeUtils.formatDateWithDay(invalidDate);
+
+      // Assert
+      expect(result, invalidDate); // Should return the input as fallback
+    });
+
+    test('getHebrewWeekdayName returns empty string for invalid weekday', () {
+      // Arrange
+      final invalidWeekday = 8; // Out of range
+
+      // Act
+      final result = DateTimeUtils.getHebrewWeekdayName(invalidWeekday);
+
+      // Assert
+      expect(result, ''); // Should return an empty string
+    });
+
+    test('startOfWeek handles edge case for Sunday', () {
+      // Arrange
+      final sunday = DateTime(2025, 9, 7); // Sunday, September 7, 2025
+
+      // Act
+      final startOfWeek = DateTimeUtils.startOfWeek(sunday);
+
+      // Assert
+      expect(startOfWeek, sunday); // Should return the same date
+    });
   });
 }
