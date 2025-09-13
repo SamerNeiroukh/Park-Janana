@@ -19,8 +19,6 @@ import 'package:park_janana/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/widgets/custom_card.dart';
 import 'package:park_janana/services/weather_service.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-
 class HomeScreen extends StatefulWidget {
   final String role;
 
@@ -39,7 +37,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? _profilePictureUrl;
   Map<String, dynamic>? _roleData;
   Map<String, dynamic>? _userData;
   Map<String, double>? _workStats;
@@ -126,17 +123,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final User? currentUser =
-        (widget.firebaseAuth ?? FirebaseAuth.instance).currentUser;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-// In tests, avoid any animated/network/Firebase widgets entirely.
+    // In tests, avoid any animated/network/Firebase widgets entirely.
     if (widget.testMode) {
       return const Scaffold(
         body: Center(child: Text('Home (test)')),
       );
     }
+
+    final User? currentUser =
+        (widget.firebaseAuth ?? FirebaseAuth.instance).currentUser;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     if (currentUser == null) {
       return Scaffold(
