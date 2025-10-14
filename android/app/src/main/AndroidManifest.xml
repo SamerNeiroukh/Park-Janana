@@ -8,7 +8,9 @@
     <application
         android:label="temp_build_test"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <!-- ✅ Required by image_cropper to crop images using UCrop -->
         <activity
