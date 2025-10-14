@@ -1,0 +1,418 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🚀 Dev Start (Ultimate)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/development/dev-start.ps1",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-ExecutionPolicy", "Bypass", "-File"]
+        }
+      }
+    },
+    {
+      "label": "🚀 Dev Start (Web)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/development/dev-start.ps1",
+      "args": ["-Web"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-ExecutionPolicy", "Bypass", "-File"]
+        }
+      }
+    },
+    {
+      "label": "🚀 Dev Start (Clean Build)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/development/dev-start.ps1",
+      "args": ["-CleanBuild"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-ExecutionPolicy", "Bypass", "-File"]
+        }
+      }
+    },
+    {
+      "label": "🔥 Start Firebase Emulators",
+      "type": "shell",
+      "command": "firebase",
+      "args": ["emulators:start"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🔥 Start Firebase Emulators (with Import)",
+      "type": "shell",
+      "command": "firebase",
+      "args": [
+        "emulators:start",
+        "--import=./emulator-data",
+        "--export-on-exit=./emulator-data"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "📱 Flutter: Run on Android",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "run",
+        "-d",
+        "android",
+        "--dart-define=FIREBASE_EMULATOR_HOST=${env:FIREBASE_EMULATOR_HOST}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "dependsOn": "🔥 Start Firebase Emulators",
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Flutter: Run on Web",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "run",
+        "-d",
+        "chrome",
+        "--dart-define=FIREBASE_EMULATOR_HOST=${env:FIREBASE_EMULATOR_HOST}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "dependsOn": "🔥 Start Firebase Emulators",
+      "problemMatcher": []
+    },
+    {
+      "label": "📱 Flutter: Run on Android (Clean)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-Command",
+        "flutter clean; flutter pub get; flutter run -d android --dart-define=FIREBASE_EMULATOR_HOST=${env:FIREBASE_EMULATOR_HOST}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "dependsOn": "🔥 Start Firebase Emulators",
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Flutter: Run on Web (Clean)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-Command",
+        "flutter clean; flutter pub get; flutter run -d chrome --dart-define=FIREBASE_EMULATOR_HOST=${env:FIREBASE_EMULATOR_HOST}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "dependsOn": "🔥 Start Firebase Emulators",
+      "problemMatcher": []
+    },
+    {
+      "label": "📊 Export Emulator Data",
+      "type": "shell",
+      "command": "firebase",
+      "args": ["emulators:export", "./emulator-data"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧹 Clean Flutter Project",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-Command", "flutter clean; flutter pub get"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔧 Flutter: Pub Get",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["pub", "get"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Flutter: Run Tests",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Flutter: Test with Coverage",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test", "--coverage"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Flutter: Build APK",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "apk"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Flutter: Build Web",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "web"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Get Local IP",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-Command",
+        "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like '192.168.*' -or $_.IPAddress -like '10.0.*'} | Select-Object -First 1).IPAddress"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": [],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like '192.168.*' -or $_.IPAddress -like '10.0.*'} | Select-Object -First 1).IPAddress"
+        ]
+      },
+      "linux": {
+        "command": "hostname",
+        "args": ["-I"]
+      },
+      "osx": {
+        "command": "ifconfig",
+        "args": [
+          "|",
+          "grep",
+          "-E",
+          "inet (192\\.168\\.|10\\.0\\.)",
+          "|",
+          "grep",
+          "-v",
+          "127.0.0.1",
+          "|",
+          "awk",
+          "'{print $2}'",
+          "|",
+          "head",
+          "-1"
+        ]
+      }
+    },
+    {
+      "label": "🔍 Flutter: Doctor",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["doctor", "-v"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📱 Flutter: List Devices",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["devices"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔄 Firebase: Login",
+      "type": "shell",
+      "command": "firebase",
+      "args": ["login"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📋 Firebase: List Projects",
+      "type": "shell",
+      "command": "firebase",
+      "args": ["projects:list"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "⚙️ Show Environment Configuration",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-Command",
+        "if (Test-Path '.env') { Write-Host '🔥 .env Configuration:' -ForegroundColor Cyan; Get-Content '.env' | Where-Object { $_ -notmatch '^#' -and $_ -ne '' } | ForEach-Object { Write-Host \"  $_\" -ForegroundColor White } } else { Write-Host '❌ .env file not found' -ForegroundColor Red }"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    }
+  ]
+}
