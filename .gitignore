@@ -48,5 +48,22 @@ android/app/google-services.json
 android/app/google-services.json
 lib/firebase_options.dart
 firebase.json
+
+# 🔥 Firebase Emulator Development
+emulator-data/
+*-debug.log
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+database-debug.log
+storage-debug.log
+
+# 🛠️ Development Environment  
+.env.local
+.env.*.local
+
+# 🏗️ Auto-generated network security config
+# (Keep this commented out so the script can update it)
+# android/app/src/main/res/xml/network_security_config.xml
 node_modules
 
