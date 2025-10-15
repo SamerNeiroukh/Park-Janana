@@ -11,13 +11,13 @@ import 'package:park_janana/screens/welcome_screen.dart';
 import 'package:park_janana/screens/home/home_screen.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 
-import 'helpers/firebase_emulator_helper.dart';
+import '../helpers/firebase_emulator_helper.dart';
 
 /// 🧪 End-to-End Firebase Integration Tests
-/// 
+///
 /// These tests use Firebase emulators to test the complete app flow
 /// including authentication, Firestore operations, and UI interactions.
-/// 
+///
 /// Prerequisites:
 /// 1. Firebase emulators must be running: `firebase emulators:start`
 /// 2. Run tests with: `flutter test test/e2e_firebase_test.dart`
@@ -25,7 +25,8 @@ void main() {
   group('🔥 E2E Firebase Integration Tests', () {
     setUpAll(() async {
       // Check if emulators are running
-      final emulatorsRunning = await FirebaseEmulatorHelper.areEmulatorsRunning();
+      final emulatorsRunning =
+          await FirebaseEmulatorHelper.areEmulatorsRunning();
       if (!emulatorsRunning) {
         fail('''
 ❌ Firebase emulators are not running!
@@ -59,7 +60,9 @@ Once emulators are running, run the tests again.
       await FirebaseEmulatorHelper.clearTestData();
     });
 
-    testWidgets('🚀 Complete user journey: Registration → Login → Home → Profile', (tester) async {
+    testWidgets(
+        '🚀 Complete user journey: Registration → Login → Home → Profile',
+        (tester) async {
       print('\n🧪 Starting complete user journey test...');
 
       // Create test user in Firebase Auth emulator
@@ -140,7 +143,7 @@ Once emulators are running, run the tests again.
         email: 'testuser@parkjanana.com',
         password: 'testpassword123',
       );
-      
+
       // Wait for auth state change to propagate
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
@@ -153,7 +156,8 @@ Once emulators are running, run the tests again.
 
       // 6️⃣ Verify user data is displayed on home screen
       // Look for user's display name or role
-      expect(find.textContaining('Test User E2E'), findsNothing); // May or may not be visible depending on UI
+      expect(find.textContaining('Test User E2E'),
+          findsNothing); // May or may not be visible depending on UI
       print('✅ Home screen content verified');
 
       // 7️⃣ Navigate to profile screen
@@ -166,7 +170,8 @@ Once emulators are running, run the tests again.
 
         // Verify profile screen shows user data
         expect(find.byType(PersonalAreaScreen), findsOneWidget);
-        expect(find.textContaining('testuser@parkjanana.com'), findsNothing); // May not be visible
+        expect(find.textContaining('testuser@parkjanana.com'),
+            findsNothing); // May not be visible
         print('✅ Profile screen displays user data');
       }
 
@@ -177,9 +182,10 @@ Once emulators are running, run the tests again.
           .collection('tasks')
           .where('assignedTo', isEqualTo: testUser.uid)
           .get();
-      
+
       expect(tasksSnapshot.docs.length, equals(2));
-      expect(tasksSnapshot.docs.first.data()['title'], equals('Complete E2E Testing'));
+      expect(tasksSnapshot.docs.first.data()['title'],
+          equals('Complete E2E Testing'));
       print('✅ Firestore data retrieval verified');
 
       // 9️⃣ Test Firestore data update
@@ -194,7 +200,7 @@ Once emulators are running, run the tests again.
           .collection('tasks')
           .doc(tasksSnapshot.docs.first.id)
           .get();
-      
+
       expect(updatedTask.data()!['status'], equals('completed'));
       print('✅ Firestore data update verified');
 
@@ -210,7 +216,8 @@ Once emulators are running, run the tests again.
       print('🎉 Complete user journey test passed!');
     });
 
-    testWidgets('🔥 Firebase emulator host detection works correctly', (tester) async {
+    testWidgets('🔥 Firebase emulator host detection works correctly',
+        (tester) async {
       print('\n🧪 Testing Firebase emulator host detection...');
 
       // Test the emulator connection logic from main.dart
@@ -284,13 +291,16 @@ Once emulators are running, run the tests again.
       await FirebaseEmulatorHelper.createTestData(
         userId: testUser.uid,
         userData: {'role': 'worker'},
-        tasks: [{'title': 'User Task', 'status': 'assigned'}],
+        tasks: [
+          {'title': 'User Task', 'status': 'assigned'}
+        ],
       );
 
       final firestore = FirebaseEmulatorHelper.firestore;
-      
+
       // Should be able to read own user document
-      final userDoc = await firestore.collection('users').doc(testUser.uid).get();
+      final userDoc =
+          await firestore.collection('users').doc(testUser.uid).get();
       expect(userDoc.exists, isTrue);
       expect(userDoc.data()!['role'], equals('worker'));
       print('✅ User can read own data');
@@ -321,10 +331,10 @@ Once emulators are running, run the tests again.
       );
 
       final firestore = FirebaseEmulatorHelper.firestore;
-      
+
       // Set up a real-time listener
       final StreamController<int> taskCountController = StreamController<int>();
-      
+
       final subscription = firestore
           .collection('tasks')
           .where('assignedTo', isEqualTo: testUser.uid)
@@ -358,12 +368,13 @@ Once emulators are running, run the tests again.
   });
 
   group('🚨 Error Handling Tests', () {
-    testWidgets('📱 App handles Firebase initialization errors gracefully', (tester) async {
+    testWidgets('📱 App handles Firebase initialization errors gracefully',
+        (tester) async {
       print('\n🧪 Testing Firebase initialization error handling...');
 
       // Test that app doesn't crash when Firebase fails to initialize
       // This would happen if emulators are not running or misconfigured
-      
+
       await tester.pumpWidget(
         MyApp(
           overrideSplashDuration: const Duration(milliseconds: 50),
