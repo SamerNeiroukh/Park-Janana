@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../services/task_service.dart';
 import '../../models/task_model.dart';
 import '../../models/user_model.dart';
 import '../../widgets/user_header.dart';
+import '../../widgets/image_picker_widget.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
 
@@ -36,6 +38,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   List<UserModel> _allUsers = [];
   final List<UserModel> _selectedWorkers = [];
   bool _isSubmitting = false;
+  List<XFile> _selectedImages = [];
 
   @override
   void initState() {
@@ -195,7 +198,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       ],
                       onChanged: (val) => setState(() => _department = val ?? 'general'),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    
+                    // Image picker section
+                    ImagePickerWidget(
+                      onImagesChanged: (imagePaths) {
+                        _selectedImages = imagePaths.map((path) => XFile(path)).toList();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    
                     Row(
                       children: [
                         Expanded(
@@ -302,7 +314,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       workerProgress: workerProgress,
     );
 
-    await _taskService.createTask(newTask);
+    await _taskService.createTask(newTask, imageFiles: _selectedImages.isNotEmpty ? _selectedImages : null);
 
     if (mounted) {
       Navigator.pop(context);
