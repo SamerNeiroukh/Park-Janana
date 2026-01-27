@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
 
   const ApproveWorkerScreen({super.key, required this.userData});
-
-  ImageProvider _getProfileImage(String? url) {
-    return (url != null && url.startsWith('http'))
-        ? CachedNetworkImageProvider(url)
-        : const AssetImage('assets/images/default_profile.png');
-  }
 
   Future<void> _approveWorker(BuildContext context) async {
     final String uid = userData['uid'];
@@ -66,11 +60,18 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String fullName = userData['fullName'] ?? '';
-    final String email = userData['email'] ?? '';
-    final String phone = userData['phoneNumber'] ?? '';
-    final String id = userData['idNumber'] ?? '';
-    final String profilePicture = userData['profile_picture'] ?? '';
+    final data = userData.data() as Map<String, dynamic>;
+
+    final String fullName = data['fullName'] ?? '';
+    final String email = data['email'] ?? '';
+    final String phone = data['phoneNumber'] ?? '';
+    final String id = data['idNumber'] ?? '';
+    final String fallbackPicture = data['profile_picture'] ?? '';
+
+    // ✅ SAFE access (this is the fix)
+    final String? profilePicturePath = data.containsKey('profile_picture_path')
+        ? data['profile_picture_path']
+        : null;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFC),
@@ -81,11 +82,16 @@ class ApproveWorkerScreen extends StatelessWidget {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildProfileHeader(profilePicture, fullName),
+                    _buildProfileHeader(
+                      profilePicturePath,
+                      fallbackPicture,
+                      fullName,
+                    ),
                     const SizedBox(height: 24),
                     _buildInfoCard("🧾 פרטי העובד", [
                       _buildInfoRow("דוא\"ל", email),
@@ -105,7 +111,11 @@ class ApproveWorkerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(String pictureUrl, String name) {
+  Widget _buildProfileHeader(
+    String? storagePath,
+    String fallbackUrl,
+    String name,
+  ) {
     return Column(
       children: [
         Container(
@@ -119,16 +129,25 @@ class ApproveWorkerScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: CircleAvatar(
-            radius: 60,
-            backgroundColor: Colors.grey.shade300,
-            backgroundImage: _getProfileImage(pictureUrl),
+          child: FutureBuilder<ImageProvider>(
+            future: ProfileImageProvider.resolve(
+              storagePath: storagePath,
+              fallbackUrl: fallbackUrl,
+            ),
+            builder: (context, snapshot) {
+              return CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.grey.shade300,
+                backgroundImage: snapshot.data,
+              );
+            },
           ),
         ),
         const SizedBox(height: 16),
         Text(
           name,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+          style: const TextStyle(
+              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
         ),
         const SizedBox(height: 6),
         const Text(
@@ -157,7 +176,9 @@ class ApproveWorkerScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           const Divider(),
           ...children,
@@ -233,13 +254,15 @@ class ApproveWorkerScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Text(
             label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
           ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           elevation: 3,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         onPressed: onPressed,
       ),

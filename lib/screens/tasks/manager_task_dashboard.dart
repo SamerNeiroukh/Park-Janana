@@ -12,6 +12,7 @@ import '../../widgets/user_header.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
 
 class ManagerTaskDashboard extends StatefulWidget {
   const ManagerTaskDashboard({super.key});
@@ -59,50 +60,52 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (!snapshot.hasData) {
-  return const Center(child: CircularProgressIndicator());
-}
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-List<TaskModel> tasks = snapshot.data!;
+                      List<TaskModel> tasks = snapshot.data!;
 
-// Filter by date first
-tasks = tasks.where((t) {
-  final tDate = t.dueDate.toDate();
-  return tDate.year == selectedDate.year &&
-      tDate.month == selectedDate.month &&
-      tDate.day == selectedDate.day;
-}).toList();
+                      // Filter by date first
+                      tasks = tasks.where((t) {
+                        final tDate = t.dueDate.toDate();
+                        return tDate.year == selectedDate.year &&
+                            tDate.month == selectedDate.month &&
+                            tDate.day == selectedDate.day;
+                      }).toList();
 
-// Then filter by status
-if (selectedStatus != 'all') {
-  tasks = tasks.where((t) => t.status == selectedStatus).toList();
-}
+                      // Then filter by status
+                      if (selectedStatus != 'all') {
+                        tasks = tasks
+                            .where((t) => t.status == selectedStatus)
+                            .toList();
+                      }
 
-// 👉 Handle empty filtered list
-if (tasks.isEmpty) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      const SizedBox(height: 40),
-      
-      const SizedBox(height: 20),
-      const Text(
-        "אין משימות ליום זה",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 8),
-      const Text(
-        "השתמש בכפתור 'יצירת משימה' כדי להוסיף אחת חדשה",
-        style: TextStyle(fontSize: 14, color: Colors.grey),
-      ),
-    ],
-  );
-}
-
+                      if (tasks.isEmpty) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            SizedBox(height: 40),
+                            Text(
+                              "אין משימות ליום זה",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w600),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "השתמש בכפתור 'יצירת משימה' כדי להוסיף אחת חדשה",
+                              style:
+                                  TextStyle(fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
+                        );
+                      }
 
                       return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         itemCount: tasks.length,
-                        itemBuilder: (context, index) => _buildTaskCard(tasks[index]),
+                        itemBuilder: (context, index) =>
+                            _buildTaskCard(tasks[index]),
                       );
                     },
                   ),
@@ -155,12 +158,14 @@ if (tasks.isEmpty) {
               children: [
                 Text(
                   formattedDate,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _pickDate,
-                  child: const Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
+                  child: const Icon(Icons.calendar_today,
+                      size: 20, color: AppColors.primary),
                 ),
               ],
             ),
@@ -221,11 +226,14 @@ if (tasks.isEmpty) {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isSelected ? color : color.withOpacity(0.3),
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: isSelected ? 4 : 0,
                 ),
                 child: FittedBox(
-                  child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(label,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -244,7 +252,8 @@ if (tasks.isEmpty) {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskDetailsScreen(task: task)),
+          MaterialPageRoute(
+              builder: (context) => TaskDetailsScreen(task: task)),
         );
       },
       child: Container(
@@ -281,7 +290,8 @@ if (tasks.isEmpty) {
                     if (value == 'edit') {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => EditTaskScreen(task: task)),
+                        MaterialPageRoute(
+                            builder: (_) => EditTaskScreen(task: task)),
                       );
                     } else if (value == 'delete') {
                       _confirmDeleteTask(task);
@@ -289,7 +299,8 @@ if (tasks.isEmpty) {
                   },
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: 'edit', child: Text("✏️ ערוך")),
-                    const PopupMenuItem(value: 'delete', child: Text("🗑️ מחק")),
+                    const PopupMenuItem(
+                        value: 'delete', child: Text("🗑️ מחק")),
                   ],
                 )
               ],
@@ -297,7 +308,10 @@ if (tasks.isEmpty) {
             const SizedBox(height: 10),
             Text(
               task.title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
             ),
             const SizedBox(height: 4),
             Text(
@@ -313,16 +327,25 @@ if (tasks.isEmpty) {
                 FutureBuilder<List<UserModel>>(
                   future: _workerService.getUsersByIds(task.assignedTo),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
                     return Row(
                       children: snapshot.data!.take(3).map((user) {
                         return Container(
                           margin: const EdgeInsets.only(left: 6),
-                          child: CircleAvatar(
-                            radius: 16,
-                            backgroundImage: user.profilePicture.isNotEmpty
-                                ? NetworkImage(user.profilePicture)
-                                : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                          child: FutureBuilder<ImageProvider>(
+                            future: ProfileImageProvider.resolve(
+                              storagePath: user.profilePicturePath,
+                              fallbackUrl: user.profilePicture,
+                            ),
+                            builder: (context, imageSnapshot) {
+                              return CircleAvatar(
+                                radius: 16,
+                                backgroundImage: imageSnapshot.data,
+                              );
+                            },
                           ),
                         );
                       }).toList(),
@@ -331,7 +354,10 @@ if (tasks.isEmpty) {
                 ),
                 Text(
                   dateFormatted,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
                 ),
               ],
             )
@@ -359,7 +385,8 @@ if (tasks.isEmpty) {
     }
     return Chip(
       backgroundColor: color.withOpacity(0.15),
-      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      label: Text(label,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold)),
     );
   }
 

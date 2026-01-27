@@ -2,29 +2,37 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class UserCard extends StatelessWidget {
   final String userName;
+
+  /// Legacy URL (will be phased out later)
   final String profilePictureUrl;
+
+  /// NEW: Firebase Storage path (preferred)
+  final String? profilePicturePath;
+
   final String currentDate;
   final int daysWorked;
   final double hoursWorked;
   final String? weatherDescription;
   final String? temperature;
   final String? weatherIcon;
-  final VoidCallback? onProfileUpdated; // ✅ NEW
+  final VoidCallback? onProfileUpdated;
 
   const UserCard({
     super.key,
     required this.userName,
     required this.profilePictureUrl,
+    this.profilePicturePath,
     required this.currentDate,
     required this.daysWorked,
     required this.hoursWorked,
     this.weatherDescription,
     this.temperature,
     this.weatherIcon,
-    this.onProfileUpdated, // ✅ NEW
+    this.onProfileUpdated,
   });
 
   @override
@@ -65,7 +73,8 @@ class UserCard extends StatelessWidget {
                         top: 14,
                         right: 14,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
@@ -139,9 +148,7 @@ class UserCard extends StatelessWidget {
                             builder: (context) => PersonalAreaScreen(uid: uid),
                           ),
                         ).then((_) {
-                          if (onProfileUpdated != null) {
-                            onProfileUpdated!(); // ✅ Call to refresh
-                          }
+                          onProfileUpdated?.call();
                         });
                       }
                     },
@@ -156,9 +163,17 @@ class UserCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: CircleAvatar(
-                        radius: 42,
-                        backgroundImage: NetworkImage(profilePictureUrl),
+                      child: FutureBuilder<ImageProvider>(
+                        future: ProfileImageProvider.resolve(
+                          storagePath: profilePicturePath,
+                          fallbackUrl: profilePictureUrl,
+                        ),
+                        builder: (context, snapshot) {
+                          return CircleAvatar(
+                            radius: 42,
+                            backgroundImage: snapshot.data,
+                          );
+                        },
                       ),
                     ),
                   ),

@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/user_header.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -31,17 +32,14 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   static const String defaultProfilePictureUrl =
       "https://firebasestorage.googleapis.com/v0/b/park-janana-app.appspot.com/o/profile_pictures%2Fdefault_profile.png?alt=media";
 
-  // ✅ Static method to clear all user caches across the app
   static void clearUserCache(String uid) {
     _userCache.remove(uid);
-    // Clear SharedPreferences cache as well
     _clearAuthServiceCache();
   }
 
   static Future<void> _clearAuthServiceCache() async {
     try {
       final authService = AuthService();
-      // Clear cached profile in AuthService
       await authService.clearUserCache();
     } catch (e) {
       debugPrint('Error clearing auth cache: $e');
@@ -88,18 +86,23 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       try {
         final storageRef =
             _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
-        await storageRef.putFile(_imageFile!);
-        final downloadUrl = await storageRef.getDownloadURL();
-        await _authService.updateProfilePicture(widget.uid, downloadUrl);
 
-        // ✅ Clear all caches when profile picture is updated
+        await storageRef.putFile(_imageFile!);
+
+        // ✅ SAVE ONLY THE STORAGE PATH (no URL)
+        await _firestore.collection('users').doc(widget.uid).update({
+          'profilePicturePath': storageRef.fullPath,
+        });
+
         clearUserCache(widget.uid);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("תמונת הפרופיל עודכנה בהצלחה.",
-                  style: AppTheme.bodyText),
+              content: Text(
+                "תמונת הפרופיל עודכנה בהצלחה.",
+                style: AppTheme.bodyText,
+              ),
               backgroundColor: AppColors.success,
             ),
           );
@@ -130,8 +133,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.black),
-                title: const Text("צלם תמונה",
-                    style: TextStyle(color: Colors.black)),
+                title: const Text("צלם תמונה"),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -139,8 +141,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo, color: Colors.black),
-                title: const Text("העלה תמונה",
-                    style: TextStyle(color: Colors.black)),
+                title: const Text("העלה תמונה"),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -221,17 +222,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 }
 
                 final userData = snapshot.data!;
-                String profilePicture = userData['profile_picture'] ?? '';
-
-                if (profilePicture.isEmpty ||
-                    !profilePicture.startsWith('http')) {
-                  profilePicture = defaultProfilePictureUrl;
-                }
-
-                final fullName = userData['fullName'] ?? 'לא ידוע';
-                final email = userData['email'] ?? 'לא ידוע';
-                final idNumber = userData['idNumber'] ?? 'לא ידוע';
-                final phoneNumber = userData['phoneNumber'] ?? 'לא ידוע';
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
@@ -240,13 +230,21 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                       Stack(
                         alignment: Alignment.bottomRight,
                         children: [
-                          CircleAvatar(
-                            radius: 85,
-                            backgroundColor: AppColors.accent,
-                            child: CircleAvatar(
-                              radius: 80,
-                              backgroundImage: NetworkImage(profilePicture),
+                          FutureBuilder<ImageProvider>(
+                            future: ProfileImageProvider.resolve(
+                              storagePath: userData['profilePicturePath'],
+                              fallbackUrl: userData['profile_picture'],
                             ),
+                            builder: (context, imageSnapshot) {
+                              return CircleAvatar(
+                                radius: 85,
+                                backgroundColor: AppColors.accent,
+                                child: CircleAvatar(
+                                  radius: 80,
+                                  backgroundImage: imageSnapshot.data,
+                                ),
+                              );
+                            },
                           ),
                           Positioned(
                             right: 5,
@@ -265,10 +263,14 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                       ),
                       const SizedBox(height: 25),
                       _buildInfoCard([
-                        _buildInfoRow(Icons.person, "שם מלא", fullName),
-                        _buildInfoRow(Icons.email, "אימייל", email),
-                        _buildInfoRow(Icons.badge, "תעודת זהות", idNumber),
-                        _buildInfoRow(Icons.phone, "מספר טלפון", phoneNumber),
+                        _buildInfoRow(
+                            Icons.person, "שם מלא", userData['fullName'] ?? ''),
+                        _buildInfoRow(
+                            Icons.email, "אימייל", userData['email'] ?? ''),
+                        _buildInfoRow(Icons.badge, "תעודת זהות",
+                            userData['idNumber'] ?? ''),
+                        _buildInfoRow(Icons.phone, "מספר טלפון",
+                            userData['phoneNumber'] ?? ''),
                       ]),
                       const SizedBox(height: 20),
                       _buildLicensesSection(userData),
@@ -364,8 +366,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                   ),
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12.0, vertical: 4.0),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

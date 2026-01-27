@@ -6,19 +6,25 @@ import 'package:park_janana/services/task_service.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/attendance/month_selector.dart';
 import 'package:park_janana/services/pdf_export_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
 
 class TaskSummaryReport extends StatefulWidget {
   final String userId;
   final String userName;
+
+  /// Legacy URL (fallback)
   final String profileUrl;
+
+  /// NEW: Firebase Storage path (preferred)
+  final String? profilePicturePath;
 
   const TaskSummaryReport({
     super.key,
     required this.userId,
     required this.userName,
     required this.profileUrl,
+    this.profilePicturePath,
   });
 
   @override
@@ -59,17 +65,11 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
     await PdfExportService.exportTaskReportPdf(
       context: context,
       userName: widget.userName,
-      profileUrl: widget.profileUrl,
+      profileUrl: widget.profileUrl, // keep legacy for PDF if needed
       tasks: tasks,
       month: selectedMonth,
       userId: widget.userId,
     );
-  }
-
-  ImageProvider _getProfileImage(String url) {
-    return (url.isNotEmpty && url.startsWith('http'))
-        ? CachedNetworkImageProvider(url)
-        : const AssetImage('assets/images/default_profile.png');
   }
 
   String _formatTimestamp(dynamic ts) {
@@ -100,13 +100,22 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                 borderRadius: BorderRadius.circular(16.0),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0, vertical: 10.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage: _getProfileImage(widget.profileUrl),
+                    FutureBuilder<ImageProvider>(
+                      future: ProfileImageProvider.resolve(
+                        storagePath: widget.profilePicturePath,
+                        fallbackUrl: widget.profileUrl,
+                      ),
+                      builder: (context, snapshot) {
+                        return CircleAvatar(
+                          radius: 28,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage: snapshot.data,
+                        );
+                      },
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -158,25 +167,30 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             if (isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
             else if (tasks.isEmpty)
-              const Expanded(child: Center(child: Text('אין משימות זמינות לחודש זה')))
+              const Expanded(
+                  child: Center(child: Text('אין משימות זמינות לחודש זה')))
             else
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Column(
                     children: [
                       const SizedBox(height: 12),
                       Expanded(
                         child: ListView.separated(
                           itemCount: tasks.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 10),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 10),
                           itemBuilder: (context, index) {
                             final task = tasks[index];
                             final dueDate = task.dueDate is Timestamp
                                 ? (task.dueDate).toDate()
                                 : task.dueDate as DateTime;
-                            final formattedDate = DateFormat('dd/MM/yyyy').format(dueDate);
-                            final entry = task.workerProgress[widget.userId] ?? {};
+                            final formattedDate =
+                                DateFormat('dd/MM/yyyy').format(dueDate);
+                            final entry =
+                                task.workerProgress[widget.userId] ?? {};
 
                             return Card(
                               elevation: 2,
@@ -184,22 +198,28 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text('משימה: ${task.title}',
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.bold, fontSize: 16)),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16)),
                                     const SizedBox(height: 4),
                                     Text('תיאור: ${task.description}'),
                                     Text('תאריך יעד: $formattedDate'),
                                     Text('סטטוס כללי: ${task.status}'),
                                     const SizedBox(height: 6),
-                                    Text('סטטוס עובד: ${entry['status'] ?? 'unknown'}'),
-                                    Text('הוגשה ב: ${_formatTimestamp(entry['submittedAt'])}'),
-                                    Text('התחילה ב: ${_formatTimestamp(entry['startedAt'])}'),
-                                    Text('הסתיימה ב: ${_formatTimestamp(entry['endedAt'])}'),
+                                    Text(
+                                        'סטטוס עובד: ${entry['status'] ?? 'unknown'}'),
+                                    Text(
+                                        'הוגשה ב: ${_formatTimestamp(entry['submittedAt'])}'),
+                                    Text(
+                                        'התחילה ב: ${_formatTimestamp(entry['startedAt'])}'),
+                                    Text(
+                                        'הסתיימה ב: ${_formatTimestamp(entry['endedAt'])}'),
                                   ],
                                 ),
                               ),

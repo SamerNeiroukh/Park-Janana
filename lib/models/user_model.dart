@@ -4,9 +4,15 @@ class UserModel {
   final String fullName;
   final String idNumber;
   final String phoneNumber;
+
+  /// Legacy (download URL) – kept for backward compatibility
   final String profilePicture;
+
+  /// NEW: Firebase Storage path (preferred)
+  final String? profilePicturePath;
+
   final String role;
-  final List<String> licensedDepartments; // 🆕 New field
+  final List<String> licensedDepartments;
 
   UserModel({
     required this.uid,
@@ -15,8 +21,9 @@ class UserModel {
     required this.idNumber,
     required this.phoneNumber,
     required this.profilePicture,
+    this.profilePicturePath, // ✅ NEW
     required this.role,
-    this.licensedDepartments = const [], // Default: not licensed for any department
+    this.licensedDepartments = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -28,8 +35,9 @@ class UserModel {
       'idNumber': idNumber,
       'phoneNumber': phoneNumber,
       'profile_picture': profilePicture,
+      'profile_picture_path': profilePicturePath,
       'role': role,
-      'licensedDepartments': licensedDepartments, // 🆕 Save licenses to Firestore
+      'licensedDepartments': licensedDepartments,
     };
   }
 
@@ -42,8 +50,9 @@ class UserModel {
       idNumber: map['idNumber'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       profilePicture: map['profile_picture'] ?? '',
+      profilePicturePath: map['profile_picture_path'] as String?,
       role: map['role'] ?? 'worker',
-      licensedDepartments: List<String>.from(map['licensedDepartments'] ?? []), // 🆕 Read licenses
+      licensedDepartments: List<String>.from(map['licensedDepartments'] ?? []),
     );
   }
 }

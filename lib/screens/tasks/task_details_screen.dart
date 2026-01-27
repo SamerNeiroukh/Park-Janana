@@ -10,6 +10,7 @@ import 'package:park_janana/widgets/task/task_comments_section.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -40,7 +41,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   Future<void> _fetchTaskAndWorkers() async {
     final updatedTask = await _taskService.getTaskById(widget.task.id);
     if (updatedTask != null) {
-      final workers = await _workerService.getUsersByIds(updatedTask.assignedTo);
+      final workers =
+          await _workerService.getUsersByIds(updatedTask.assignedTo);
       setState(() {
         task = updatedTask;
         _assignedWorkers = workers;
@@ -50,7 +52,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 
   Future<void> _updateWorkerStatus(String newStatus) async {
-    await _taskService.updateWorkerStatus(task.id, _currentUser!.uid, newStatus);
+    await _taskService.updateWorkerStatus(
+        task.id, _currentUser!.uid, newStatus);
     await _fetchTaskAndWorkers();
   }
 
@@ -148,9 +151,11 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final String userId = _currentUser?.uid ?? '';
-    final currentWorkerStatus = task.workerProgress[userId]?['status'] ?? 'pending';
+    final currentWorkerStatus =
+        task.workerProgress[userId]?['status'] ?? 'pending';
     final String time = DateFormat('HH:mm').format(task.dueDate.toDate());
-    final String dateFormatted = DateFormat('dd/MM/yyyy').format(task.dueDate.toDate());
+    final String dateFormatted =
+        DateFormat('dd/MM/yyyy').format(task.dueDate.toDate());
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -185,18 +190,29 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         task: task,
                       ),
                       const SizedBox(height: 24),
-                      Text("עובדים שהוקצו למשימה", style: AppTheme.sectionTitle),
+                      Text("עובדים שהוקצו למשימה",
+                          style: AppTheme.sectionTitle),
                       const SizedBox(height: 8),
                       ..._assignedWorkers.map((user) {
-                        final workerStatus = task.workerProgress[user.uid]?['status'] ?? 'pending';
+                        final workerStatus = task.workerProgress[user.uid]
+                                ?['status'] ??
+                            'pending';
                         return Card(
                           color: Colors.grey.shade100,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(user.profilePicture),
+                            leading: FutureBuilder<ImageProvider>(
+                              future: ProfileImageProvider.resolve(
+                                storagePath: user.profilePicturePath,
+                                fallbackUrl: user.profilePicture,
+                              ),
+                              builder: (context, snapshot) {
+                                return CircleAvatar(
+                                  backgroundImage: snapshot.data,
+                                );
+                              },
                             ),
                             title: Text(user.fullName),
                             trailing: _buildWorkerStatusBadge(workerStatus),
@@ -211,7 +227,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       const SizedBox(height: 16),
                       TextField(
                         controller: _commentController,
-                        decoration: AppTheme.inputDecoration(hintText: "הוסף תגובה..."),
+                        decoration:
+                            AppTheme.inputDecoration(hintText: "הוסף תגובה..."),
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton(
@@ -232,13 +249,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       if (_isWorker && currentWorkerStatus == 'pending')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('in_progress'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange),
                           child: const Text("🚧 התחל משימה"),
                         ),
                       if (_isWorker && currentWorkerStatus == 'in_progress')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('done'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green),
                           child: const Text("✅ סיים משימה"),
                         ),
                     ],

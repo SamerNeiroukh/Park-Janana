@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/models/shift_model.dart';
 import 'package:park_janana/services/report_service.dart';
@@ -9,17 +8,24 @@ import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/attendance/month_selector.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/services/firebase_service.dart';
+import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
 
 class WorkerShiftReport extends StatefulWidget {
   final String uid;
   final String fullName;
+
+  /// Legacy URL (fallback)
   final String profilePicture;
+
+  /// NEW: Firebase Storage path (preferred)
+  final String? profilePicturePath;
 
   const WorkerShiftReport({
     super.key,
     required this.uid,
     required this.fullName,
     required this.profilePicture,
+    this.profilePicturePath,
   });
 
   @override
@@ -73,7 +79,6 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
   void _exportPdf() async {
     if (_shifts.isEmpty) return;
 
-    // ✅ Collect all UIDs from shifts
     final Set<String> allUids = {};
     for (final shift in _shifts) {
       for (final data in shift.assignedWorkerData) {
@@ -83,7 +88,6 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       }
     }
 
-    // ✅ Fetch names
     final Map<String, String> uidToName = {};
     for (final uid in allUids) {
       try {
@@ -95,22 +99,15 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       }
     }
 
-    // ✅ Pass the map to the PDF service
     await PdfExportService.exportShiftReportPdf(
       context: context,
       userName: widget.fullName,
-      profileUrl: widget.profilePicture,
+      profileUrl: widget.profilePicture, // legacy for PDF
       shifts: _shifts,
       month: _selectedMonth,
       userId: widget.uid,
       uidToNameMap: uidToName,
     );
-  }
-
-  ImageProvider _getProfileImage(String url) {
-    return (url.isNotEmpty && url.startsWith('http'))
-        ? CachedNetworkImageProvider(url)
-        : const AssetImage('assets/images/default_profile.png');
   }
 
   Future<String> _getFullName(String uid) async {
@@ -167,9 +164,6 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text('',
-                style:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
             Text(hebrewDecision,
                 style: TextStyle(
                     fontSize: 13,
@@ -224,10 +218,18 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                     horizontal: 12.0, vertical: 10.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage: _getProfileImage(widget.profilePicture),
+                    FutureBuilder<ImageProvider>(
+                      future: ProfileImageProvider.resolve(
+                        storagePath: widget.profilePicturePath,
+                        fallbackUrl: widget.profilePicture,
+                      ),
+                      builder: (context, snapshot) {
+                        return CircleAvatar(
+                          radius: 28,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage: snapshot.data,
+                        );
+                      },
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -274,7 +276,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                         final Timestamp bTime = b['decisionAt'] ??
                             b['requestedAt'] ??
                             Timestamp(0, 0);
-                        return bTime.compareTo(aTime); // latest first
+                        return bTime.compareTo(aTime);
                       });
 
                       final Map<String, dynamic> userData =

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../services/worker_service.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class WorkerRow extends StatelessWidget {
   final UserModel worker;
@@ -19,23 +20,30 @@ class WorkerRow extends StatelessWidget {
     required this.workerService,
     required this.isApproved,
     required this.onApproveToggle,
-    required this.showRemoveIcon, required Null Function() onTap,
+    required this.showRemoveIcon,
+    required Null Function() onTap, // kept as-is (not image-related)
   });
 
   @override
   Widget build(BuildContext context) {
-    bool isValidNetworkImage = worker.profilePicture.isNotEmpty && worker.profilePicture.startsWith('http');
-
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        radius: 25.0,
-        backgroundImage: isValidNetworkImage
-            ? NetworkImage(worker.profilePicture) // ✅ Uses Firestore URL
-            : const AssetImage('assets/images/default_profile.png') as ImageProvider, // ✅ Uses default if missing
-        onBackgroundImageError: (_, __) {}, // ✅ Prevents red error UI on broken image
+      leading: FutureBuilder<ImageProvider>(
+        future: ProfileImageProvider.resolve(
+          storagePath: worker.profilePicturePath,
+          fallbackUrl: worker.profilePicture,
+        ),
+        builder: (context, snapshot) {
+          return CircleAvatar(
+            radius: 25.0,
+            backgroundImage: snapshot.data,
+          );
+        },
       ),
-      title: Text(worker.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(
+        worker.fullName,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
