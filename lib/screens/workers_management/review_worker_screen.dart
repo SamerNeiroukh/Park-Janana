@@ -6,6 +6,7 @@ import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/screens/workers_management/management_buttons/shifts_button.dart';
 import 'package:park_janana/screens/tasks/create_task_screen.dart';
 import 'package:park_janana/models/user_model.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -14,13 +15,14 @@ class ReviewWorkerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String fullName = userData['fullName'] ?? '';
-    final String email = userData['email'] ?? '';
-    final String phone = userData['phoneNumber'] ?? '';
-    final String id = userData['idNumber'] ?? '';
-    final String profilePicture = userData['profile_picture'] ?? '';
-    final String uid = userData['uid'] ?? '';
-    final String role = userData['role'] ?? '';
+    final Map<String, dynamic> data = userData.data() as Map<String, dynamic>;
+
+    final String fullName = data['fullName'] ?? '';
+    final String email = data['email'] ?? '';
+    final String phone = data['phoneNumber'] ?? '';
+    final String id = data['idNumber'] ?? '';
+    final String uid = data['uid'] ?? '';
+    final String role = data['role'] ?? '';
 
     final worker = UserModel(
       uid: uid,
@@ -28,7 +30,8 @@ class ReviewWorkerScreen extends StatelessWidget {
       email: email,
       phoneNumber: phone,
       idNumber: id,
-      profilePicture: profilePicture,
+      profilePicture: data['profile_picture'] ?? '',
+      profilePicturePath: data['profile_picture_path'],
       role: role,
     );
 
@@ -41,10 +44,11 @@ class ReviewWorkerScreen extends StatelessWidget {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: Column(
                   children: [
-                    _buildSpiritualProfile(profilePicture, fullName),
+                    _buildSpiritualProfile(data),
                     const SizedBox(height: 30),
                     _buildSoftCard("🧾 פרטי העובד", [
                       _buildInfoRow(Icons.email_rounded, "אימייל", email),
@@ -62,9 +66,9 @@ class ReviewWorkerScreen extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => ShiftsButtonScreen(
-                                uid: userData['uid'],
-                                fullName: userData['fullName'] ?? '',
-                                profilePicture: userData['profile_picture'] ?? '',
+                                uid: uid,
+                                fullName: fullName,
+                                profilePicture: data['profile_picture'] ?? '',
                               ),
                             ),
                           );
@@ -131,31 +135,37 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpiritualProfile(String image, String name) {
+  Widget _buildSpiritualProfile(Map<String, dynamic> data) {
     return Column(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+        FutureBuilder<ImageProvider>(
+          future: ProfileImageProvider.resolve(
+            storagePath: data['profile_picture_path'],
+            fallbackUrl: data['profile_picture'],
+          ),
+          builder: (context, snapshot) {
+            return Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: CircleAvatar(
-            radius: 60,
-            backgroundColor: Colors.grey.shade300,
-            backgroundImage: image.isNotEmpty
-                ? NetworkImage(image)
-                : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-          ),
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.grey.shade300,
+                backgroundImage: snapshot.data,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 16),
         Text(
-          name,
+          data['fullName'] ?? '',
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -211,7 +221,8 @@ class ReviewWorkerScreen extends StatelessWidget {
           Icon(icon, color: AppColors.accent),
           const SizedBox(width: 12),
           Text("$label:",
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(value,
@@ -276,7 +287,8 @@ class ReviewWorkerScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           elevation: 3,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         onPressed: onPressed,
       ),
@@ -288,13 +300,15 @@ class ReviewWorkerScreen extends StatelessWidget {
   }
 
   Future<void> _deleteWorker(BuildContext context, String uid) async {
-    bool confirm = await showDialog(
+    final bool confirm = await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("מחיקת עובד"),
         content: const Text("האם אתה בטוח שברצונך למחוק את העובד הזה?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("ביטול")),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text("ביטול")),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text("מחק", style: TextStyle(color: Colors.red))),

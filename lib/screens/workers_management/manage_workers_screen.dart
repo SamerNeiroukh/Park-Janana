@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/screens/workers_management/review_worker_screen.dart';
 import 'package:park_janana/screens/workers_management/approve_worker_screen.dart';
 import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class ManageWorkersScreen extends StatefulWidget {
   const ManageWorkersScreen({super.key});
@@ -28,12 +28,6 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  ImageProvider _getProfileImage(dynamic url) {
-    return (url != null && url.toString().startsWith('http'))
-        ? CachedNetworkImageProvider(url)
-        : const AssetImage('assets/images/default_profile.png');
   }
 
   @override
@@ -68,6 +62,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     );
   }
 
+  /// =========================
+  /// New Workers Tab
+  /// =========================
   Widget _buildNewWorkersTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -80,7 +77,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError ||
+            !snapshot.hasData ||
+            snapshot.data!.docs.isEmpty) {
           return const Center(child: Text("אין עובדים שממתינים לאישור"));
         }
 
@@ -91,9 +90,10 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           itemCount: newWorkers.length,
           itemBuilder: (context, index) {
             final user = newWorkers[index];
-            final fullName = user['fullName'] ?? '---';
-            final phone = user['phoneNumber'] ?? '---';
-            final profilePicture = user['profile_picture'];
+            final data = user.data() as Map<String, dynamic>;
+
+            final fullName = data['fullName'] ?? '---';
+            final phone = data['phoneNumber'] ?? '---';
 
             return Directionality(
               textDirection: TextDirection.rtl,
@@ -114,13 +114,22 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 10.0),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.grey.shade300,
-                          backgroundImage: _getProfileImage(profilePicture),
+                        FutureBuilder<ImageProvider>(
+                          future: ProfileImageProvider.resolve(
+                            storagePath: data['profile_picture_path'],
+                            fallbackUrl: data['profile_picture'],
+                          ),
+                          builder: (context, snapshot) {
+                            return CircleAvatar(
+                              radius: 28,
+                              backgroundColor: Colors.grey.shade300,
+                              backgroundImage: snapshot.data,
+                            );
+                          },
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -156,6 +165,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     );
   }
 
+  /// =========================
+  /// Approved Workers Tab
+  /// =========================
   Widget _buildApprovedWorkersTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -168,7 +180,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError ||
+            !snapshot.hasData ||
+            snapshot.data!.docs.isEmpty) {
           return const Center(child: Text("אין עובדים פעילים במערכת"));
         }
 
@@ -179,9 +193,10 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           itemCount: workers.length,
           itemBuilder: (context, index) {
             final user = workers[index];
-            final fullName = user['fullName'] ?? '---';
-            final phone = user['phoneNumber'] ?? '---';
-            final profilePicture = user['profile_picture'];
+            final data = user.data() as Map<String, dynamic>;
+
+            final fullName = data['fullName'] ?? '---';
+            final phone = data['phoneNumber'] ?? '---';
 
             return Directionality(
               textDirection: TextDirection.rtl,
@@ -202,13 +217,22 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 10.0),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.grey.shade300,
-                          backgroundImage: _getProfileImage(profilePicture),
+                        FutureBuilder<ImageProvider>(
+                          future: ProfileImageProvider.resolve(
+                            storagePath: data['profile_picture_path'],
+                            fallbackUrl: data['profile_picture'],
+                          ),
+                          builder: (context, snapshot) {
+                            return CircleAvatar(
+                              radius: 28,
+                              backgroundColor: Colors.grey.shade300,
+                              backgroundImage: snapshot.data,
+                            );
+                          },
                         ),
                         const SizedBox(width: 12),
                         Column(

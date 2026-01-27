@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/constants/app_theme.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class UserSummaryCard extends StatelessWidget {
   final String userName;
+
+  /// Legacy URL (fallback)
   final String profileUrl;
+
+  /// NEW: Firebase Storage path (preferred)
+  final String? profilePicturePath;
+
   final int daysWorked;
   final double totalHours;
   final String month;
-  final VoidCallback? onTap; // Optional tap handler
+  final VoidCallback? onTap;
 
   const UserSummaryCard({
     super.key,
     required this.userName,
     required this.profileUrl,
+    this.profilePicturePath,
     required this.daysWorked,
     required this.totalHours,
     required this.month,
     this.onTap,
   });
-
-  ImageProvider _getProfileImage(String url) {
-    return (url.isNotEmpty && url.startsWith('http'))
-        ? CachedNetworkImageProvider(url)
-        : const AssetImage('assets/images/default_profile.png');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +36,28 @@ class UserSummaryCard extends StatelessWidget {
         key: ValueKey('$userName-$month-$daysWorked-$totalHours'),
         elevation: 3,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.grey.shade300,
-                  backgroundImage: _getProfileImage(profileUrl),
+                FutureBuilder<ImageProvider>(
+                  future: ProfileImageProvider.resolve(
+                    storagePath: profilePicturePath,
+                    fallbackUrl: profileUrl,
+                  ),
+                  builder: (context, snapshot) {
+                    return CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage: snapshot.data,
+                    );
+                  },
                 ),
                 const SizedBox(width: 12),
                 Expanded(

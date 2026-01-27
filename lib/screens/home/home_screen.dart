@@ -29,7 +29,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? _profilePictureUrl;
   Map<String, dynamic>? _roleData;
   Map<String, dynamic>? _userData;
   Map<String, double>? _workStats;
@@ -95,8 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final User? currentUser = FirebaseAuth.instance.currentUser;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     if (currentUser == null) {
       return Scaffold(
@@ -113,47 +110,38 @@ class _HomeScreenState extends State<HomeScreen> {
           : SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.00,
-                      vertical: screenHeight * 0.01,
-                    ),
-                    child: UserCard(
-                      userName: _userData!['fullName'] ?? 'משתמש',
-                      profilePictureUrl: _userData!['profile_picture'] ?? '',
-                      currentDate:
-                          DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                      daysWorked: _workStats!['daysWorked']!.toInt(),
-                      hoursWorked: _workStats!['hoursWorked']!,
-                      weatherDescription: _weatherData?['description'],
-                      temperature: _weatherData?['temperature']?.toString(),
-                      weatherIcon: _weatherData?['icon'],
-                      onProfileUpdated: () {
-                        // Clear cache and reload data when profile is updated
-                        final uid = FirebaseAuth.instance.currentUser?.uid;
-                        if (uid != null) {
-                          _userCache.remove(uid);
-                          _loadData();
-                        }
-                      },
-                    ),
+                  UserCard(
+                    userName: _userData!['fullName'] ?? 'משתמש',
+                    profilePictureUrl: _userData!['profile_picture'] ?? '',
+                    profilePicturePath: _userData!['profilePicturePath'],
+                    currentDate:
+                        DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                    daysWorked: _workStats!['daysWorked']!.toInt(),
+                    hoursWorked: _workStats!['hoursWorked']!,
+                    weatherDescription: _weatherData?['description'],
+                    temperature: _weatherData?['temperature']?.toString(),
+                    weatherIcon: _weatherData?['icon'],
+                    onProfileUpdated: () {
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+                      if (uid != null) {
+                        _userCache.remove(uid);
+                        _loadData();
+                      }
+                    },
                   ),
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: ActionButtonGridPager(
                       buttons: _buildActionButtons(
-                          _userData!['role'] ?? 'worker', currentUser.uid),
+                        _userData!['role'] ?? 'worker',
+                        currentUser.uid,
+                      ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.04,
-                      vertical: screenHeight * 0.005,
-                    ),
-                    child: const ClockInOutWidget(),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: ClockInOutWidget(),
                   ),
                 ],
               ),
@@ -170,12 +158,13 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => PersonalAreaScreen(uid: uid)),
+              builder: (context) => PersonalAreaScreen(uid: uid),
+            ),
           );
         },
       ),
       ActionButton(
-        title: 'הדו\"חות שלי',
+        title: 'הדו"חות שלי',
         icon: Icons.stacked_bar_chart_rounded,
         onTap: () {
           Navigator.push(
@@ -198,9 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return ActionButton(
             title: operation['title'],
             icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
-            onTap: () {
-              debugPrint('${operation['title']} tapped');
-            },
+            onTap: () {},
           );
         }).toList(),
       );
@@ -212,16 +199,24 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'המשימות שלי',
           icon: Icons.check_circle_outline_rounded,
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const WorkerTaskScreen()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const WorkerTaskScreen(),
+              ),
+            );
           },
         ),
         ActionButton(
           title: 'המשמרות שלי',
           icon: Icons.schedule_outlined,
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const ShiftsScreen()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ShiftsScreen(),
+              ),
+            );
           },
         ),
       ]);
@@ -233,8 +228,12 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'ניהול משמרות',
           icon: Icons.manage_history_rounded,
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ManagerShiftsScreen(),
+              ),
+            );
           },
         ),
         ActionButton(
@@ -242,17 +241,23 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.assignment_turned_in_rounded,
           onTap: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const ManagerTaskDashboard()));
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ManagerTaskDashboard(),
+              ),
+            );
           },
         ),
         ActionButton(
           title: 'ניהול עובדים',
           icon: Icons.group,
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const ManageWorkersScreen()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ManageWorkersScreen(),
+              ),
+            );
           },
         ),
       ]);
@@ -261,9 +266,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (role == 'owner') {
       buttons.add(
         ActionButton(
-          title: 'דו\"חות עסקיים',
+          title: 'דו"חות עסקיים',
           icon: Icons.bar_chart_rounded,
-          onTap: () => debugPrint('דוחות עסקיים tapped'),
+          onTap: () {},
         ),
       );
     }

@@ -4,11 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/widgets/user_header.dart';
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class ShiftsButtonScreen extends StatefulWidget {
   final String uid;
   final String fullName;
-  final String profilePicture;
+  final String profilePicture; // legacy URL support
 
   const ShiftsButtonScreen({
     super.key,
@@ -21,7 +22,8 @@ class ShiftsButtonScreen extends StatefulWidget {
   State<ShiftsButtonScreen> createState() => _ShiftsButtonScreenState();
 }
 
-class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTickerProviderStateMixin {
+class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
+    with SingleTickerProviderStateMixin {
   String filter = 'all';
   late AnimationController _animationController;
 
@@ -31,8 +33,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
-    );
-    _animationController.forward();
+    )..forward();
   }
 
   @override
@@ -77,27 +78,51 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: Colors.black12.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 4)),
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundImage: widget.profilePicture.isNotEmpty
-                  ? NetworkImage(widget.profilePicture)
-                  : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+            FutureBuilder<ImageProvider>(
+              future: ProfileImageProvider.resolve(
+                storagePath: 'profile_pictures/${widget.uid}/profile.jpg',
+                fallbackUrl: widget.profilePicture,
+              ),
+              builder: (context, snapshot) {
+                return CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.grey.shade300,
+                  backgroundImage: snapshot.data,
+                );
+              },
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(widget.fullName,
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  Text(
+                    widget.fullName,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text("רשימת המשמרות של העובד", textAlign: TextAlign.right, style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                  Text(
+                    "רשימת המשמרות של העובד",
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -130,12 +155,17 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
       child: ElevatedButton(
         onPressed: () => setState(() => filter = value),
         style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? AppColors.primary : Colors.grey.shade300,
+          backgroundColor:
+              isSelected ? AppColors.primary : Colors.grey.shade300,
           foregroundColor: isSelected ? Colors.white : Colors.black87,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
-        child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -153,11 +183,8 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
         }
 
         if (!snapshot.hasData) {
-          return const Center(child: Text("לא ניתן לטעון נתונים. בדוק חיבור או אינדקס."));
-        }
-
-        if (snapshot.hasError || (snapshot.data!.docs.isEmpty && snapshot.error != null)) {
-          return const Center(child: Text("ייתכן והאינדקס עדיין בבנייה. נסה שוב בעוד רגע."));
+          return const Center(
+              child: Text("לא ניתן לטעון נתונים. בדוק חיבור או אינדקס."));
         }
 
         if (snapshot.data!.docs.isEmpty) {
@@ -180,9 +207,9 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
             } catch (_) {
               return false;
             }
-          } else {
-            return false;
           }
+
+          if (date == null) return false;
 
           switch (filter) {
             case 'upcoming':
@@ -190,11 +217,15 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
             case 'past':
               return date.isBefore(now);
             case 'today':
-              return date.day == now.day && date.month == now.month && date.year == now.year;
+              return date.day == now.day &&
+                  date.month == now.month &&
+                  date.year == now.year;
             case 'thisWeek':
               final weekStart = now.subtract(Duration(days: now.weekday - 1));
               final weekEnd = weekStart.add(const Duration(days: 6));
-              return date.isAfter(weekStart.subtract(const Duration(days: 1))) && date.isBefore(weekEnd.add(const Duration(days: 1)));
+              return date
+                      .isAfter(weekStart.subtract(const Duration(days: 1))) &&
+                  date.isBefore(weekEnd.add(const Duration(days: 1)));
             default:
               return true;
           }
@@ -212,9 +243,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
             } else if (rawDate is String) {
               try {
                 date = DateFormat('dd/MM/yyyy').parseStrict(rawDate);
-              } catch (_) {
-                date = null;
-              }
+              } catch (_) {}
             }
 
             final startTime = shift['startTime'] ?? "--";
@@ -226,10 +255,12 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
               position: Tween<Offset>(
                 begin: const Offset(1, 0),
                 end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: _animationController,
-                curve: Interval(index * 0.1, 1.0, curve: Curves.easeOut),
-              )),
+              ).animate(
+                CurvedAnimation(
+                  parent: _animationController,
+                  curve: Interval(index * 0.1, 1.0, curve: Curves.easeOut),
+                ),
+              ),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(14),
@@ -238,7 +269,11 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppColors.primary.withOpacity(0.1)),
                   boxShadow: [
-                    BoxShadow(color: Colors.black12.withOpacity(0.08), blurRadius: 6, offset: const Offset(0, 4)),
+                    BoxShadow(
+                      color: Colors.black12.withOpacity(0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Column(
@@ -247,18 +282,29 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen> with SingleTick
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(date != null ? DateFormat('dd/MM/yyyy').format(date) : "--",
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(
+                          date != null
+                              ? DateFormat('dd/MM/yyyy').format(date)
+                              : "--",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.calendar_today, size: 18, color: AppColors.primary),
+                        const Icon(Icons.calendar_today,
+                            size: 18, color: AppColors.primary),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text("שעות: $startTime - $endTime", textAlign: TextAlign.right, style: AppTheme.bodyText),
-                    Text("מחלקה: $department", textAlign: TextAlign.right, style: AppTheme.bodyText),
+                    Text("שעות: $startTime - $endTime",
+                        style: AppTheme.bodyText),
+                    Text("מחלקה: $department", style: AppTheme.bodyText),
                     if (note.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text("הערה: $note", textAlign: TextAlign.right, style: AppTheme.bodyText.copyWith(fontStyle: FontStyle.italic)),
+                      Text(
+                        "הערה: $note",
+                        style: AppTheme.bodyText
+                            .copyWith(fontStyle: FontStyle.italic),
+                      ),
                     ]
                   ],
                 ),

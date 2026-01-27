@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/user_model.dart';
 import '../services/worker_service.dart';
 import '../widgets/user_header.dart';
+import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
 
 class UsersScreen extends StatefulWidget {
   final String shiftId;
   final List<String> assignedWorkerIds;
 
-  const UsersScreen({super.key, required this.shiftId, required this.assignedWorkerIds});
+  const UsersScreen({
+    super.key,
+    required this.shiftId,
+    required this.assignedWorkerIds,
+  });
 
   @override
   _UsersScreenState createState() => _UsersScreenState();
@@ -52,7 +56,7 @@ class _UsersScreenState extends State<UsersScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
-      print("⚠️ Error loading users: $e");
+      debugPrint("⚠️ Error loading users: $e");
     }
   }
 
@@ -121,7 +125,8 @@ class _UsersScreenState extends State<UsersScreen> {
                 labelText: " חיפוש לפי שם או תפקיד",
                 filled: true,
                 fillColor: Colors.grey[200],
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0)),
                 prefixIcon: const Icon(Icons.search),
               ),
               onChanged: filterUsers,
@@ -139,45 +144,63 @@ class _UsersScreenState extends State<UsersScreen> {
                           itemCount: filteredUsers.length,
                           itemBuilder: (context, index) {
                             final worker = filteredUsers[index];
-                            final isAssigned = widget.assignedWorkerIds.contains(worker.uid);
-                            final isProcessing = _inProgressWorkerIds.contains(worker.uid);
+                            final isAssigned =
+                                widget.assignedWorkerIds.contains(worker.uid);
+                            final isProcessing =
+                                _inProgressWorkerIds.contains(worker.uid);
 
                             return Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0)),
                               elevation: 3,
-                              margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 10.0, vertical: 6.0),
                               child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                                trailing: CircleAvatar(
-                                  radius: 30.0,
-                                  backgroundImage: worker.profilePicture.isNotEmpty &&
-                                          worker.profilePicture.startsWith('http')
-                                      ? CachedNetworkImageProvider(worker.profilePicture)
-                                      : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 8.0),
+                                trailing: FutureBuilder<ImageProvider>(
+                                  future: ProfileImageProvider.resolve(
+                                    storagePath: worker.profilePicturePath,
+                                    fallbackUrl: worker.profilePicture,
+                                  ),
+                                  builder: (context, snapshot) {
+                                    return CircleAvatar(
+                                      radius: 30.0,
+                                      backgroundImage: snapshot.data,
+                                    );
+                                  },
                                 ),
                                 title: Text(
                                   worker.fullName,
                                   textAlign: TextAlign.right,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: Text(worker.role, textAlign: TextAlign.right),
+                                subtitle: Text(worker.role,
+                                    textAlign: TextAlign.right),
                                 leading: IconButton(
                                   icon: isProcessing
                                       ? const SizedBox(
                                           width: 24,
                                           height: 24,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
                                         )
                                       : Icon(
-                                          isAssigned ? Icons.person_remove : Icons.person_add,
-                                          color: isAssigned ? Colors.red : Colors.green,
+                                          isAssigned
+                                              ? Icons.person_remove
+                                              : Icons.person_add,
+                                          color: isAssigned
+                                              ? Colors.red
+                                              : Colors.green,
                                           size: 24,
                                         ),
                                   onPressed: isProcessing
                                       ? null
                                       : () {
                                           isAssigned
-                                              ? removeWorkerFromShift(worker.uid)
+                                              ? removeWorkerFromShift(
+                                                  worker.uid)
                                               : assignWorkerToShift(worker.uid);
                                         },
                                 ),
