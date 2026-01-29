@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/models/task_model.dart';
@@ -8,7 +9,7 @@ import 'package:park_janana/services/worker_service.dart';
 import 'package:park_janana/widgets/task/task_description_section.dart';
 import 'package:park_janana/widgets/task/task_comments_section.dart';
 import 'package:park_janana/widgets/user_header.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:park_janana/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/utils/profile_image_provider.dart';
 
@@ -25,11 +26,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   final TaskService _taskService = TaskService();
   final WorkerService _workerService = WorkerService();
   final TextEditingController _commentController = TextEditingController();
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
   List<UserModel> _assignedWorkers = [];
   bool _isWorker = false;
   late TaskModel task;
   bool _isSubmitting = false;
+
+  String? get _currentUid => context.read<AppAuthProvider>().uid;
 
   @override
   void initState() {
@@ -46,24 +48,25 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       setState(() {
         task = updatedTask;
         _assignedWorkers = workers;
-        _isWorker = task.assignedTo.contains(_currentUser?.uid ?? "");
+        _isWorker = task.assignedTo.contains(_currentUid ?? "");
       });
     }
   }
 
   Future<void> _updateWorkerStatus(String newStatus) async {
+    if (_currentUid == null) return;
     await _taskService.updateWorkerStatus(
-        task.id, _currentUser!.uid, newStatus);
+        task.id, _currentUid!, newStatus);
     await _fetchTaskAndWorkers();
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.isEmpty || _isSubmitting) return;
+    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null) return;
     setState(() => _isSubmitting = true);
 
     try {
       await _taskService.addComment(task.id, {
-        'by': _currentUser!.uid,
+        'by': _currentUid!,
         'message': _commentController.text,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
@@ -150,7 +153,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final String userId = _currentUser?.uid ?? '';
+    final String userId = _currentUid ?? '';
     final currentWorkerStatus =
         task.workerProgress[userId]?['status'] ?? 'pending';
     final String time = DateFormat('HH:mm').format(task.dueDate.toDate());

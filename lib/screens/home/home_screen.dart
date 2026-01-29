@@ -18,9 +18,7 @@ import 'package:park_janana/providers/app_state_provider.dart';
 import 'package:park_janana/providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String role;
-
-  const HomeScreen({super.key, required this.role});
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();

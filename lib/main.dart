@@ -118,13 +118,13 @@ class _MyAppState extends State<MyApp> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasData) {
-                  return const HomeScreen(role: '');
+                  return const HomeScreen();
                 }
                 return const WelcomeScreen();
               },
             ),
       routes: {
-        '/home': (context) => const HomeScreen(role: ''),
+        '/home': (context) => const HomeScreen(),
         '/login': (context) => const WelcomeScreen(),
         '/profile': (context) {
           final user = FirebaseAuth.instance.currentUser;

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:park_janana/constants/app_strings.dart';
+import 'package:park_janana/services/auth_service.dart';
+import 'package:park_janana/utils/custom_exception.dart';
 import '../home/home_screen.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/auth/forgot_password_screen.dart';
+import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,16 +19,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _obscurePassword = true;
 
   String? _emailError;
   String? _passwordError;
-
-  static final Map<String, String> _userRoleCache = {};
 
   Future<void> _login() async {
     // Clear previous errors
@@ -48,63 +47,31 @@ class _LoginScreenState extends State<LoginScreen> {
       String email = _emailController.text.trim();
       String password = _passwordController.text.trim();
 
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // Use AuthService to sign in - it handles approval check automatically
+      await _authService.signIn(email, password);
 
-      String uid = userCredential.user!.uid;
-
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(uid).get();
-
-      if (!userDoc.exists) {
-        throw Exception("מסמך המשתמש לא קיים.");
-      }
-
-      final data = userDoc.data() as Map<String, dynamic>;
-
-      // 🔒 Check if account is approved
-      bool isApproved = data['approved'] ?? false;
-
-      if (!isApproved) {
-        await _auth.signOut(); // Important: Sign out the user immediately
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('החשבון שלך עדיין לא אושר על ידי ההנהלה.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-
-      String role = data['role'] ?? 'worker';
-      _userRoleCache[uid] = role;
-
+      // AppAuthProvider's listener will automatically update auth state
       if (!mounted) return;
-      _navigateToHomeScreen(role);
-    } on FirebaseAuthException catch (e) {
+      _navigateToHomeScreen();
+    } on CustomException catch (e) {
       if (!mounted) return;
+
+      // Parse the error message to set appropriate field errors
+      String errorMsg = e.message;
       setState(() {
-        if (e.code == 'user-not-found') {
-          _emailError = 'האימייל לא נמצא במערכת';
-        } else if (e.code == 'wrong-password') {
-          _passwordError = 'הסיסמה שגויה';
-        } else if (e.code == 'invalid-email') {
-          _emailError = 'כתובת האימייל לא תקינה';
-        } else if (e.code == 'too-many-requests') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+        if (errorMsg.contains('האימייל לא נמצא במערכת') ||
+            errorMsg.contains('כתובת האימייל לא תקינה')) {
+          _emailError = errorMsg;
+        } else if (errorMsg.contains('הסיסמה שגויה')) {
+          _passwordError = errorMsg;
         } else {
+          // Show general errors in SnackBar
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('מייל או סיסמה לא נכונים.'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: Text(errorMsg),
+              backgroundColor: errorMsg.contains('לא אושר')
+                ? Colors.orange
+                : Colors.red,
             ),
           );
         }
@@ -123,12 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _navigateToHomeScreen(String role) {
+  void _navigateToHomeScreen() {
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => HomeScreen(role: role),
+          builder: (context) => const HomeScreen(),
         ),
         (route) => false,
       );
