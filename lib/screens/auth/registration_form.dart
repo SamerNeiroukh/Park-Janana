@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
-import '../../models/user_model.dart';
+import 'package:park_janana/services/auth_service.dart';
+import 'package:park_janana/utils/custom_exception.dart';
 import '../welcome_screen.dart';
 import 'package:flutter/services.dart';
 
@@ -15,8 +14,7 @@ class RegistrationForm extends StatefulWidget {
 }
 
 class _RegistrationFormState extends State<RegistrationForm> {
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
 
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
@@ -84,40 +82,44 @@ class _RegistrationFormState extends State<RegistrationForm> {
     });
 
     try {
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      // Use AuthService to create user - handles everything including default profile picture
+      await _authService.createUser(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+        _fullNameController.text.trim(),
+        _idNumberController.text.trim(),
+        _phoneNumberController.text.trim(),
       );
-
-      String uid = userCredential.user!.uid;
-
-      UserModel userModel = UserModel(
-        fullName: _fullNameController.text.trim(),
-        email: _emailController.text.trim(),
-        idNumber: _idNumberController.text.trim(),
-        phoneNumber: _phoneNumberController.text.trim(),
-        uid: uid,
-        profilePicture:
-            'https://firebasestorage.googleapis.com/v0/b/park-janana-app.firebasestorage.app/o/profile_pictures%2Fdefault_profile.png?alt=media&token=918661c9-90a5-4197-8649-d2498d8ef4cd',
-        role: 'worker',
-      );
-
-      // ✅ Add "approved": false here explicitly
-      await _firestore.collection('users').doc(uid).set({
-        ...userModel.toMap(),
-        'approved': false,
-      });
 
       if (!mounted) return;
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ההרשמה הושלמה בהצלחה! אנא המתן לאישור ההנהלה.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
       );
+    } on CustomException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          backgroundColor: Colors.red,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text('שגיאה בהרשמה: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (!mounted) return;
