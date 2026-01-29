@@ -21,12 +21,11 @@ void main() async {
 
   try {
     // Initialize Firebase
-    print("firebase logs: await Firebase.initializeApp(");
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    print('Error initializing Firebase or App Check: $e');
+    debugPrint('Error initializing Firebase: $e');
   }
 
   runApp(const MyApp());
