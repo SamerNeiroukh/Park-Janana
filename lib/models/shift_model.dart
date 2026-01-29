@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/utils/datetime_utils.dart';
 
@@ -100,7 +101,7 @@ class ShiftModel {
       String dayName = DateTimeUtils.getHebrewWeekdayName(dateTime.weekday);
       return "$dayName, ${DateTimeUtils.formatDate(dateTime)}";
     } catch (e) {
-      print("Error parsing date in ShiftModel: $e");
+      debugPrint("Error parsing date in ShiftModel: $e");
       return date;
     }
   }
@@ -109,7 +110,7 @@ class ShiftModel {
     try {
       return DateFormat('dd/MM/yyyy').parse(date);
     } catch (e) {
-      print("Error parsing date in ShiftModel: $e");
+      debugPrint("Error parsing date in ShiftModel: $e");
       return DateTime.now();
     }
   }

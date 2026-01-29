@@ -27,7 +27,6 @@ class UserModel {
   });
 
   Map<String, dynamic> toMap() {
-    print("firebase logs: Converting UserModel to Map");
     return {
       'uid': uid,
       'email': email,
@@ -42,7 +41,6 @@ class UserModel {
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
-    print("firebase logs: Converting Map to UserModel");
     return UserModel(
       uid: map['uid'] ?? '',
       email: map['email'] ?? '',
