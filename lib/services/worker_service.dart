@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:park_janana/models/user_model.dart';
 import '../utils/custom_exception.dart';
 import '../constants/app_constants.dart';
@@ -159,7 +160,7 @@ class WorkerService {
       'lastUpdatedAt': now,
     });
   } catch (e) {
-    print("❌ Error assigning worker to shift: $e");
+    debugPrint("Error assigning worker to shift: $e");
     throw CustomException("שגיאה בהוספת העובד למשמרת.");
   }
 }
@@ -197,7 +198,7 @@ class WorkerService {
       'lastUpdatedAt': Timestamp.now(),
     });
   } catch (e) {
-    print("❌ Error removing worker from shift: $e");
+    debugPrint("Error removing worker from shift: $e");
     throw CustomException("שגיאה בהסרת העובד מהמשמרת.");
   }
 }
@@ -234,7 +235,7 @@ class WorkerService {
         'assignedWorkerData': updatedAssignedData,
       });
     } catch (e) {
-      print("❌ Error moving worker back to requested: $e");
+      debugPrint("Error moving worker back to requested: $e");
       throw CustomException('שגיאה בהעברת העובד חזרה לרשימת המבקשים.');
     }
   }
@@ -252,7 +253,7 @@ class WorkerService {
         _workerCache[userId] = user;
         return user;
       } else {
-        print("⚠️ User not found: $userId");
+        debugPrint("User not found: $userId");
         return null;
       }
     } catch (e) {
