@@ -1,6 +1,6 @@
 // unchanged import statements
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../../models/task_model.dart';
 import '../../models/user_model.dart';
 import 'task_details_screen.dart';
@@ -11,8 +11,9 @@ import '../../services/worker_service.dart';
 import '../../widgets/user_header.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/auth_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class ManagerTaskDashboard extends StatefulWidget {
   const ManagerTaskDashboard({super.key});
@@ -24,7 +25,6 @@ class ManagerTaskDashboard extends StatefulWidget {
 class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   final TaskService _taskService = TaskService();
   final WorkerService _workerService = WorkerService();
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   String selectedStatus = 'all';
   DateTime selectedDate = DateTime.now();
@@ -33,6 +33,9 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AppAuthProvider>();
+    final currentUid = authProvider.uid;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
@@ -51,10 +54,10 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
           _buildDateNavigation(),
           _buildFilterButtons(),
           Expanded(
-            child: _currentUser == null
+            child: currentUid == null
                 ? const Center(child: Text("שגיאה בזיהוי המשתמש."))
                 : StreamBuilder<List<TaskModel>>(
-                    stream: _taskService.getTasksCreatedBy(_currentUser.uid),
+                    stream: _taskService.getTasksCreatedBy(currentUid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
