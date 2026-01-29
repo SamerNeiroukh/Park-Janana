@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'auth/login_screen.dart';
 import 'auth/new_worker_screen.dart';
-import '../../constants/app_constants.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_strings.dart';
-import '../../constants/app_theme.dart';
+import '../constants/app_constants.dart';
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
+import '../constants/app_theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
