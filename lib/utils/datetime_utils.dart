@@ -24,7 +24,7 @@ class DateTimeUtils {
       String day = getHebrewWeekdayName(dateTime.weekday);
       return "$day, ${formatDate(dateTime)}";
     } catch (e) {
-      print("Error parsing date: $e");
+      debugPrint("Error parsing date: $e");
       return date; // Fallback if parsing fails
     }
   }

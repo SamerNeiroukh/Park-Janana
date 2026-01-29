@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/task_model.dart';
 import '../utils/custom_exception.dart';
 
@@ -83,7 +84,7 @@ class TaskService {
   final snapshot = await taskRef.get();
 
   if (!snapshot.exists) {
-    print('❌ Task not found: $taskId');
+    debugPrint('Task not found: $taskId');
     return;
   }
 
@@ -113,7 +114,6 @@ class TaskService {
 
   // Update Firestore with the user's updated progress
   await taskRef.update({'workerProgress.$userId': progressEntry});
-  print('✅ Firestore: updated workerProgress.$userId successfully');
 
   // Now determine global task status
   workerProgress[userId] = progressEntry;
@@ -130,8 +130,6 @@ class TaskService {
   } else {
     overallStatus = 'pending';
   }
-
-  print('📊 New task status → $overallStatus');
 
   // Update task global status
   await taskRef.update({'status': overallStatus});
@@ -153,9 +151,6 @@ class TaskService {
       final firstDay = DateTime(month.year, month.month, 1);
       final lastDay = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
 
-      print('📅 Fetching tasks for user: $userId');
-      print('🔍 Filtering between: $firstDay → $lastDay');
-
       final query = await FirebaseFirestore.instance
           .collection('tasks')
           .where('assignedTo', arrayContains: userId)
@@ -163,17 +158,14 @@ class TaskService {
           .where('dueDate', isLessThanOrEqualTo: lastDay)
           .get();
 
-      print('✅ Found ${query.docs.length} tasks');
-
       final tasks = query.docs.map((doc) {
         final data = doc.data();
-        print('📦 Task: ${data['title']} | dueDate: ${data['dueDate']}');
         return TaskModel.fromMap(doc.id, data);
       }).toList();
 
       return tasks;
     } catch (e) {
-      print('❌ Error fetching tasks for month: $e');
+      debugPrint('Error fetching tasks for month: $e');
       return [];
     }
   }

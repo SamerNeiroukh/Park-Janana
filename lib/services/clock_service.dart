@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../models/attendance_model.dart';
 
 class ClockService {
@@ -71,7 +72,7 @@ class ClockService {
         'sessions': updatedSessions.map((r) => r.toMap()).toList()
       });
     } catch (e) {
-      print('Error clocking out: $e');
+      debugPrint('Error clocking out: $e');
     }
   }
 
@@ -96,7 +97,7 @@ class ClockService {
       final last = sessions.last;
       return last.clockIn == last.clockOut ? last : null;
     } catch (e) {
-      print('Error parsing attendance model: $e');
+      debugPrint('Error parsing attendance model: $e');
       return null;
     }
   }
