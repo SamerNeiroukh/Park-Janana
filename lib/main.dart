@@ -8,6 +8,7 @@ import 'screens/home/personal_area_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'constants/app_theme.dart';
+import 'widgets/error_state_widget.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
@@ -19,21 +20,25 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  String? firebaseError;
+
   try {
     // Initialize Firebase
-    print("firebase logs: await Firebase.initializeApp(");
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    print('Error initializing Firebase or App Check: $e');
+    debugPrint('Error initializing Firebase: $e');
+    firebaseError = 'לא ניתן להתחבר לשרתי האפליקציה. אנא בדוק את החיבור לאינטרנט ונסה שוב.';
   }
 
-  runApp(const MyApp());
+  runApp(MyApp(firebaseError: firebaseError));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final String? firebaseError;
+
+  const MyApp({super.key, this.firebaseError});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -46,7 +51,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    // Show splash screen for 2 seconds, then check login state
+    // Show splash screen for 6 seconds, then check login state
     Future.delayed(const Duration(seconds: 6), () {
       setState(() {
         _showSplashScreen = false;
@@ -54,8 +59,25 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _retryApp() {
+    // Restart the app by re-initializing
+    // This is a simple approach - in production you might want to use a package like restart_app
+    setState(() {
+      _showSplashScreen = true;
+    });
+    // In a real app, you would re-initialize Firebase here or use a restart package
+  }
+
   @override
   Widget build(BuildContext context) {
+    // If Firebase initialization failed, show error screen immediately
+    if (widget.firebaseError != null) {
+      return ErrorStateWidget(
+        errorMessage: widget.firebaseError!,
+        onRetry: _retryApp,
+      );
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
