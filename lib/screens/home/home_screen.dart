@@ -34,13 +34,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, double>? _workStats;
   Map<String, dynamic>? _weatherData;
 
-  static final Map<String, Map<String, dynamic>> _userCache = {};
+  // Instance-level cache instead of static to prevent memory leaks
+  final Map<String, Map<String, dynamic>> _userCache = {};
 
   @override
   void initState() {
     super.initState();
     _loadRolesData();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    // Clear cache on dispose to free memory
+    _userCache.clear();
+    super.dispose();
   }
 
   Future<void> _loadRolesData() async {
