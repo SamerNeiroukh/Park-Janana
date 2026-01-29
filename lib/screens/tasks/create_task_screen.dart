@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/task_service.dart';
@@ -8,6 +8,7 @@ import '../../models/user_model.dart';
 import '../../widgets/user_header.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/auth_provider.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   final List<UserModel>? initialSelectedUsers;
@@ -30,7 +31,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   String _department = 'general';
 
   final TaskService _taskService = TaskService();
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<UserModel> _allUsers = [];
@@ -253,10 +253,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   Future<void> _submitTask() async {
     if (_isSubmitting) return;
 
+    final currentUid = context.read<AppAuthProvider>().uid;
+
     if (!_formKey.currentState!.validate() ||
         _dueDate == null ||
         _dueTime == null ||
-        _currentUser == null ||
+        currentUid == null ||
         _selectedWorkers.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("יש למלא את כל השדות ולבחור עובדים")),
@@ -291,7 +293,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       department: _department,
-      createdBy: _currentUser.uid,
+      createdBy: currentUid,
       assignedTo: _selectedWorkers.map((u) => u.uid).toList(),
       dueDate: Timestamp.fromDate(dueDateTime),
       priority: _priority,
