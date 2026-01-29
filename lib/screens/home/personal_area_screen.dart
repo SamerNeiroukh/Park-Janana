@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:provider/provider.dart';
 import 'package:park_janana/config/departments.dart';
-import 'package:park_janana/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/user_header.dart';
+import '../../providers/user_provider.dart';
+import '../../models/user_model.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
-import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -22,28 +24,17 @@ class PersonalAreaScreen extends StatefulWidget {
 
 class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   File? _imageFile;
-  final AuthService _authService = AuthService();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isUploading = false;
 
-  static final Map<String, Map<String, dynamic>> _userCache = {};
-
-  static const String defaultProfilePictureUrl =
-      "https://firebasestorage.googleapis.com/v0/b/park-janana-app.appspot.com/o/profile_pictures%2Fdefault_profile.png?alt=media";
-
-  static void clearUserCache(String uid) {
-    _userCache.remove(uid);
-    _clearAuthServiceCache();
-  }
-
-  static Future<void> _clearAuthServiceCache() async {
-    try {
-      final authService = AuthService();
-      await authService.clearUserCache();
-    } catch (e) {
-      debugPrint('Error clearing auth cache: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Load user data when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProvider>().getUserById(widget.uid);
+    });
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -89,12 +80,15 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
         await storageRef.putFile(_imageFile!);
 
-        // ✅ SAVE ONLY THE STORAGE PATH (no URL)
+        // Update Firestore with storage path
         await _firestore.collection('users').doc(widget.uid).update({
           'profilePicturePath': storageRef.fullPath,
         });
 
-        clearUserCache(widget.uid);
+        // Refresh user data in provider to reflect the new profile picture
+        if (mounted) {
+          await context.read<UserProvider>().getUserById(widget.uid);
+        }
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -182,104 +176,108 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     );
   }
 
-  Future<Map<String, dynamic>> _fetchUserData() async {
-    if (_userCache.containsKey(widget.uid)) {
-      return Future.value(_userCache[widget.uid]!);
-    }
-
-    try {
-      final DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(widget.uid).get();
-
-      if (userDoc.exists && userDoc.data() != null) {
-        final userData = userDoc.data() as Map<String, dynamic>;
-        _userCache[widget.uid] = userData;
-        return userData;
-      }
-    } catch (e) {
-      debugPrint('Error fetching user data: $e');
-    }
-
-    return {};
-  }
-
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
+
     return Scaffold(
       body: Column(
         children: [
           const UserHeader(),
           Expanded(
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: _fetchUserData(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Text("שגיאה בטעינת הפרופיל.");
+            child: Builder(
+              builder: (context) {
+                // Check if we're currently loading this specific user
+                if (userProvider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
                 }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text("לא נמצאו נתונים להצגה.");
+                // Try to get user from cache
+                UserModel? userData;
+                if (userProvider.currentUser?.uid == widget.uid) {
+                  userData = userProvider.currentUser;
+                } else {
+                  // For other users, we'd need to fetch from cache
+                  // For now, show loading if not available
+                  return FutureBuilder<UserModel?>(
+                    future: context.read<UserProvider>().getUserById(widget.uid),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return const Center(child: Text("שגיאה בטעינת הפרופיל."));
+                      }
+                      if (!snapshot.hasData || snapshot.data == null) {
+                        return const Center(child: Text("לא נמצאו נתונים להצגה."));
+                      }
+                      userData = snapshot.data;
+                      return _buildProfileContent(userData!);
+                    },
+                  );
                 }
 
-                final userData = snapshot.data!;
+                if (userData == null) {
+                  return const Center(child: Text("לא נמצאו נתונים להצגה."));
+                }
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          FutureBuilder<ImageProvider>(
-                            future: ProfileImageProvider.resolve(
-                              storagePath: userData['profilePicturePath'],
-                              fallbackUrl: userData['profile_picture'],
-                            ),
-                            builder: (context, imageSnapshot) {
-                              return CircleAvatar(
-                                radius: 85,
-                                backgroundColor: AppColors.accent,
-                                child: CircleAvatar(
-                                  radius: 80,
-                                  backgroundImage: imageSnapshot.data,
-                                ),
-                              );
-                            },
-                          ),
-                          Positioned(
-                            right: 5,
-                            bottom: 5,
-                            child: GestureDetector(
-                              onTap: _showOptions,
-                              child: const CircleAvatar(
-                                backgroundColor: AppColors.background,
-                                radius: 22,
-                                child: Icon(Icons.camera_alt,
-                                    color: Colors.blue, size: 22),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 25),
-                      _buildInfoCard([
-                        _buildInfoRow(
-                            Icons.person, "שם מלא", userData['fullName'] ?? ''),
-                        _buildInfoRow(
-                            Icons.email, "אימייל", userData['email'] ?? ''),
-                        _buildInfoRow(Icons.badge, "תעודת זהות",
-                            userData['idNumber'] ?? ''),
-                        _buildInfoRow(Icons.phone, "מספר טלפון",
-                            userData['phoneNumber'] ?? ''),
-                      ]),
-                      const SizedBox(height: 20),
-                      _buildLicensesSection(userData),
-                    ],
-                  ),
-                );
+                return _buildProfileContent(userData);
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileContent(UserModel userData) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              FutureBuilder<ImageProvider>(
+                future: ProfileImageProvider.resolve(
+                  storagePath: userData.profilePicturePath,
+                  fallbackUrl: userData.profilePicture,
+                ),
+                builder: (context, imageSnapshot) {
+                  return CircleAvatar(
+                    radius: 85,
+                    backgroundColor: AppColors.accent,
+                    child: CircleAvatar(
+                      radius: 80,
+                      backgroundImage: imageSnapshot.data,
+                    ),
+                  );
+                },
+              ),
+              Positioned(
+                right: 5,
+                bottom: 5,
+                child: GestureDetector(
+                  onTap: _showOptions,
+                  child: const CircleAvatar(
+                    backgroundColor: AppColors.background,
+                    radius: 22,
+                    child: Icon(Icons.camera_alt,
+                        color: Colors.blue, size: 22),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 25),
+          _buildInfoCard([
+            _buildInfoRow(Icons.person, "שם מלא", userData.fullName),
+            _buildInfoRow(Icons.email, "אימייל", userData.email),
+            _buildInfoRow(Icons.badge, "תעודת זהות", userData.idNumber),
+            _buildInfoRow(Icons.phone, "מספר טלפון", userData.phoneNumber),
+          ]),
+          const SizedBox(height: 20),
+          _buildLicensesSection(userData),
         ],
       ),
     );
@@ -322,9 +320,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     );
   }
 
-  Widget _buildLicensesSection(Map<String, dynamic> userData) {
-    final List<String> licensed =
-        List<String>.from(userData['licensedDepartments'] ?? []);
+  Widget _buildLicensesSection(UserModel userData) {
+    final List<String> licensed = userData.licensedDepartments;
     final List<String> departments = allDepartments;
 
     final Map<String, IconData> departmentIcons = {

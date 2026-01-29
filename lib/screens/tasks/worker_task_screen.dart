@@ -1,7 +1,7 @@
 // 💡 Modernized UI Enhancements for WorkerTaskScreen
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/screens/tasks/worker_task_details.dart';
 import '../../models/task_model.dart';
@@ -9,6 +9,7 @@ import '../../services/task_service.dart';
 import '../../widgets/user_header.dart';
 import '../../constants/app_theme.dart';
 import '../../constants/app_colors.dart';
+import '../../providers/auth_provider.dart';
 
 class WorkerTaskScreen extends StatefulWidget {
   const WorkerTaskScreen({super.key});
@@ -19,18 +20,19 @@ class WorkerTaskScreen extends StatefulWidget {
 
 class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
   final TaskService _taskService = TaskService();
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   String _selectedStatus = 'all';
   DateTime _selectedDate = DateTime.now();
 
-  Future<void> _refreshTasks() async {
-    if (_currentUser == null) return;
-    final snapshot = await _taskService.getTasksForUser(_currentUser.uid).first;
+  Future<void> _refreshTasks(String uid) async {
+    final snapshot = await _taskService.getTasksForUser(uid).first;
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AppAuthProvider>();
+    final currentUid = authProvider.uid;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
@@ -43,10 +45,10 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
           _buildDateNavigation(),
           _buildStatusFilterButtons(),
           Expanded(
-            child: _currentUser == null
+            child: currentUid == null
                 ? const Center(child: Text("שגיאה בזיהוי המשתמש."))
                 : StreamBuilder<List<TaskModel>>(
-                    stream: _taskService.getTasksForUser(_currentUser.uid),
+                    stream: _taskService.getTasksForUser(currentUid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -64,16 +66,16 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                       if (_selectedStatus != 'all') {
                         tasks = tasks.where((t) {
                           final workerStatus =
-                              t.workerProgress[_currentUser.uid]?['status'] ?? 'pending';
+                              t.workerProgress[currentUid]?['status'] ?? 'pending';
                           return workerStatus == _selectedStatus;
                         }).toList();
                       }
                       return RefreshIndicator(
-                        onRefresh: _refreshTasks,
+                        onRefresh: () => _refreshTasks(currentUid),
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           itemCount: tasks.length,
-                          itemBuilder: (context, index) => _buildTaskCard(tasks[index]),
+                          itemBuilder: (context, index) => _buildTaskCard(tasks[index], currentUid),
                         ),
                       );
                     },
@@ -176,8 +178,8 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
-  Widget _buildTaskCard(TaskModel task) {
-    final String workerStatus = task.workerProgress[_currentUser?.uid ?? '']?['status'] ?? 'pending';
+  Widget _buildTaskCard(TaskModel task, String uid) {
+    final String workerStatus = task.workerProgress[uid]?['status'] ?? 'pending';
     final DateTime date = task.dueDate.toDate();
     final String time = DateFormat('HH:mm').format(date);
     Color bgColor = workerStatus == 'done'
@@ -247,7 +249,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (workerStatus != 'done') LiveCountdownTimer(dueDate: task.dueDate.toDate()),
-                if (workerStatus != 'done') _buildActionButtons(task, workerStatus),
+                if (workerStatus != 'done') _buildActionButtons(task, workerStatus, uid),
               ],
             )
           ],
@@ -279,12 +281,12 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
-  Widget _buildActionButtons(TaskModel task, String currentStatus) {
+  Widget _buildActionButtons(TaskModel task, String currentStatus, String uid) {
     return Row(
       children: [
         if (currentStatus == 'pending')
           ElevatedButton(
-            onPressed: () => _updateStatus(task, 'in_progress'),
+            onPressed: () => _updateStatus(task, 'in_progress', uid),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
@@ -294,7 +296,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
           ),
         if (currentStatus == 'in_progress')
           ElevatedButton(
-            onPressed: () => _updateStatus(task, 'done'),
+            onPressed: () => _updateStatus(task, 'done', uid),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
               foregroundColor: Colors.white,
@@ -306,10 +308,9 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
-  Future<void> _updateStatus(TaskModel task, String status) async {
-    if (_currentUser == null) return;
-    await _taskService.updateWorkerStatus(task.id, _currentUser.uid, status);
-    await _refreshTasks();
+  Future<void> _updateStatus(TaskModel task, String status, String uid) async {
+    await _taskService.updateWorkerStatus(task.id, uid, status);
+    await _refreshTasks(uid);
   }
 }
 
