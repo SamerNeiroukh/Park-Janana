@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 import '../utils/custom_exception.dart';
 import 'firebase_service.dart';
 
@@ -47,10 +47,14 @@ Future<void> createUser(String email, String password, String fullName, String i
   // 🟢 Upload default profile picture to Firebase Storage
   Future<String> _uploadDefaultProfilePicture(String uid) async {
     try {
-      File defaultImageFile = File('assets/images/default_profile.png'); // 🔹 Load the asset
+      // Load the default profile image from assets as bytes
+      final ByteData byteData = await rootBundle.load('assets/images/default_profile.png');
+      final Uint8List imageData = byteData.buffer.asUint8List();
+
       Reference storageRef = _storage.ref().child('profile_pictures/$uid/profile.jpg');
 
-      await storageRef.putFile(defaultImageFile);
+      // Upload bytes directly to Firebase Storage
+      await storageRef.putData(imageData);
       return await storageRef.getDownloadURL();
     } catch (e) {
       throw CustomException('שגיאה בהעלאת תמונת פרופיל ברירת מחדל.');
