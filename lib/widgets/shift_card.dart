@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/users_screen.dart';
 import '../models/shift_model.dart';
@@ -80,10 +81,10 @@ class ShiftCardState extends State<ShiftCard> {
               ),
               const SizedBox(height: 20),
               Row(
-                children: const [
-                  Icon(Icons.chat_rounded, color: Color(0xFF1976D2), size: 28),
-                  SizedBox(width: 10),
-                  Text(
+                children: [
+                  Icon(Icons.chat_rounded, color: AppColors.deepBlue, size: AppDimensions.iconXL),
+                  const SizedBox(width: 10),
+                  const Text(
                     "הודעה למשמרת",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -102,20 +103,20 @@ class ShiftCardState extends State<ShiftCard> {
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                    borderRadius: AppDimensions.borderRadiusXL,
+                    borderSide: BorderSide(color: AppColors.deepBlue),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: AppDimensions.borderRadiusXL,
                     borderSide:
-                        const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        BorderSide(color: AppColors.deepBlue, width: 2),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1976D2),
+                  backgroundColor: AppColors.deepBlue,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
@@ -149,8 +150,8 @@ class ShiftCardState extends State<ShiftCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      elevation: AppDimensions.elevationXL,
+      shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXL),
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
       shadowColor: AppColors.cardShadow,
       child: ExpansionTile(
@@ -403,17 +404,17 @@ class ShiftCardState extends State<ShiftCard> {
           shadowColor: Colors.transparent,
           padding: EdgeInsets.zero,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXL),
         ),
         onPressed: () => _showCommentBottomSheet(context),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF42A5F5), Color(0xFF1976D2)],
+            gradient: LinearGradient(
+              colors: [AppColors.lightBlue, AppColors.deepBlue],
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: AppDimensions.borderRadiusXL,
           ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
