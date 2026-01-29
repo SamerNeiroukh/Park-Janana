@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../models/shift_model.dart';
 import '../../services/shift_service.dart';
@@ -7,6 +8,7 @@ import '../../widgets/user_header.dart';
 import '../../widgets/worker_shift_card.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
+import '../../providers/auth_provider.dart';
 
 class ShiftsScreen extends StatefulWidget {
   const ShiftsScreen({super.key});
@@ -17,7 +19,6 @@ class ShiftsScreen extends StatefulWidget {
 
 class _ShiftsScreenState extends State<ShiftsScreen> {
   final ShiftService _shiftService = ShiftService();
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   // ✅ Ensure the week starts from Sunday
   DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday % 7));
@@ -25,6 +26,9 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AppAuthProvider>();
+    final currentUser = authProvider.user;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const UserHeader(),
@@ -32,7 +36,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         children: [
           _buildWeekNavigation(),
           _buildDayTabs(),
-          Expanded(child: _buildShiftList()),
+          Expanded(child: _buildShiftList(currentUser)),
         ],
       ),
     );
@@ -118,7 +122,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
   }
 
   // 🟢 Build Shift List
-  Widget _buildShiftList() {
+  Widget _buildShiftList(User? currentUser) {
     return StreamBuilder<List<ShiftModel>>(
       stream: _shiftService.getShiftsStream(),
       builder: (context, snapshot) {
@@ -139,6 +143,10 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
           return Center(child: Text('אין משמרות ליום זה', style: AppTheme.bodyText));
         }
 
+        if (currentUser == null) {
+          return Center(child: Text('שגיאה בזיהוי משתמש', style: AppTheme.bodyText));
+        }
+
         return ListView.builder(
           padding: const EdgeInsets.all(12.0),
           itemCount: filteredShifts.length,
@@ -146,7 +154,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
             return WorkerShiftCard(
               shift: filteredShifts[index],
               shiftService: _shiftService,
-              currentUser: _currentUser!,
+              currentUser: currentUser,
             );
           },
         );
