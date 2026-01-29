@@ -61,6 +61,54 @@ Future<void> createUser(String email, String password, String fullName, String i
     }
   }
 
+  // 🟢 Sign in with email and password
+  Future<void> signIn(String email, String password) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String uid = userCredential.user!.uid;
+      final userDoc = await _firebaseService.getUser(uid);
+
+      if (!userDoc.exists) {
+        throw CustomException('מסמך המשתמש לא קיים.');
+      }
+
+      final data = userDoc.data() as Map<String, dynamic>;
+
+      // Check if account is approved
+      bool isApproved = data['approved'] ?? false;
+
+      if (!isApproved) {
+        await _auth.signOut(); // Sign out immediately
+        throw CustomException('החשבון שלך עדיין לא אושר על ידי ההנהלה.');
+      }
+
+      // Cache user role
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userRole', data['role'] ?? 'worker');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        throw CustomException('האימייל לא נמצא במערכת');
+      } else if (e.code == 'wrong-password') {
+        throw CustomException('הסיסמה שגויה');
+      } else if (e.code == 'invalid-email') {
+        throw CustomException('כתובת האימייל לא תקינה');
+      } else if (e.code == 'too-many-requests') {
+        throw CustomException('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.');
+      } else {
+        throw CustomException('מייל או סיסמה לא נכונים.');
+      }
+    } catch (e) {
+      if (e is CustomException) {
+        rethrow;
+      }
+      throw CustomException('שגיאה בהתחברות: ${e.toString()}');
+    }
+  }
+
   // 🟢 Fetch user role (Checks Cache First)
   Future<String?> fetchUserRole(String uid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
