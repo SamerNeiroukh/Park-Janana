@@ -128,4 +128,108 @@ class ShiftModel {
   bool get isFull => assignedWorkers.length >= maxWorkers;
 
   bool isUserAssigned(String userId) => assignedWorkers.contains(userId);
+
+  // Create a copy of ShiftModel with some fields updated
+  ShiftModel copyWith({
+    String? id,
+    String? date,
+    String? department,
+    String? startTime,
+    String? endTime,
+    int? maxWorkers,
+    List<String>? requestedWorkers,
+    List<String>? assignedWorkers,
+    List<Map<String, dynamic>>? messages,
+    String? createdBy,
+    Timestamp? createdAt,
+    String? lastUpdatedBy,
+    Timestamp? lastUpdatedAt,
+    String? status,
+    String? cancelReason,
+    String? shiftManager,
+    List<Map<String, dynamic>>? assignedWorkerData,
+    List<Map<String, dynamic>>? rejectedWorkerData,
+  }) {
+    return ShiftModel(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      department: department ?? this.department,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      maxWorkers: maxWorkers ?? this.maxWorkers,
+      requestedWorkers: requestedWorkers ?? this.requestedWorkers,
+      assignedWorkers: assignedWorkers ?? this.assignedWorkers,
+      messages: messages ?? this.messages,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
+      lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      status: status ?? this.status,
+      cancelReason: cancelReason ?? this.cancelReason,
+      shiftManager: shiftManager ?? this.shiftManager,
+      assignedWorkerData: assignedWorkerData ?? this.assignedWorkerData,
+      rejectedWorkerData: rejectedWorkerData ?? this.rejectedWorkerData,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ShiftModel(id: $id, date: $date, department: $department, startTime: $startTime, endTime: $endTime, maxWorkers: $maxWorkers, requestedWorkers: ${requestedWorkers.length} workers, assignedWorkers: ${assignedWorkers.length} workers, messages: ${messages.length} items, createdBy: $createdBy, createdAt: $createdAt, lastUpdatedBy: $lastUpdatedBy, lastUpdatedAt: $lastUpdatedAt, status: $status, cancelReason: $cancelReason, shiftManager: $shiftManager, assignedWorkerData: ${assignedWorkerData.length} items, rejectedWorkerData: ${rejectedWorkerData.length} items)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is ShiftModel &&
+        other.id == id &&
+        other.date == date &&
+        other.department == department &&
+        other.startTime == startTime &&
+        other.endTime == endTime &&
+        other.maxWorkers == maxWorkers &&
+        listEquals(other.requestedWorkers, requestedWorkers) &&
+        listEquals(other.assignedWorkers, assignedWorkers) &&
+        _listOfMapsEquals(other.messages, messages) &&
+        other.createdBy == createdBy &&
+        other.createdAt == createdAt &&
+        other.lastUpdatedBy == lastUpdatedBy &&
+        other.lastUpdatedAt == lastUpdatedAt &&
+        other.status == status &&
+        other.cancelReason == cancelReason &&
+        other.shiftManager == shiftManager &&
+        _listOfMapsEquals(other.assignedWorkerData, assignedWorkerData) &&
+        _listOfMapsEquals(other.rejectedWorkerData, rejectedWorkerData);
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        date.hashCode ^
+        department.hashCode ^
+        startTime.hashCode ^
+        endTime.hashCode ^
+        maxWorkers.hashCode ^
+        requestedWorkers.hashCode ^
+        assignedWorkers.hashCode ^
+        messages.hashCode ^
+        createdBy.hashCode ^
+        createdAt.hashCode ^
+        lastUpdatedBy.hashCode ^
+        lastUpdatedAt.hashCode ^
+        status.hashCode ^
+        cancelReason.hashCode ^
+        shiftManager.hashCode ^
+        assignedWorkerData.hashCode ^
+        rejectedWorkerData.hashCode;
+  }
+
+  // Helper method to compare List<Map<String, dynamic>>
+  static bool _listOfMapsEquals(List<Map<String, dynamic>> a, List<Map<String, dynamic>> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (!mapEquals(a[i], b[i])) return false;
+    }
+    return true;
+  }
 }
