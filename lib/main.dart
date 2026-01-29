@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // ✅ For locking orientation
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/home/personal_area_screen.dart';
 import 'screens/welcome_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'constants/app_theme.dart';
 import 'widgets/error_state_widget.dart';
+import 'providers/user_provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/app_state_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
@@ -32,7 +36,16 @@ void main() async {
     firebaseError = 'לא ניתן להתחבר לשרתי האפליקציה. אנא בדוק את החיבור לאינטרנט ונסה שוב.';
   }
 
-  runApp(MyApp(firebaseError: firebaseError));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => AppAuthProvider()),
+        ChangeNotifierProvider(create: (_) => AppStateProvider()),
+      ],
+      child: MyApp(firebaseError: firebaseError),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
