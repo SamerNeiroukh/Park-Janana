@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/reports/worker_reports_screen.dart';
-import 'package:park_janana/services/clock_service.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/user_card.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
@@ -12,12 +10,12 @@ import 'package:park_janana/screens/shifts/shifts_screen.dart';
 import 'package:park_janana/screens/shifts/manager_shifts_screen.dart';
 import 'package:park_janana/screens/tasks/worker_task_screen.dart';
 import 'package:park_janana/screens/tasks/manager_task_dashboard.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:park_janana/screens/workers_management/manage_workers_screen.dart';
 import 'package:park_janana/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/widgets/custom_card.dart';
-import 'package:park_janana/services/weather_service.dart';
+import 'package:park_janana/providers/user_provider.dart';
+import 'package:park_janana/providers/app_state_provider.dart';
+import 'package:park_janana/providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   final String role;
@@ -29,79 +27,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Map<String, dynamic>? _roleData;
-  Map<String, dynamic>? _userData;
-  Map<String, double>? _workStats;
-  Map<String, dynamic>? _weatherData;
-
-  // Instance-level cache instead of static to prevent memory leaks
-  final Map<String, Map<String, dynamic>> _userCache = {};
-
   @override
   void initState() {
     super.initState();
-    _loadRolesData();
-    _loadData();
-  }
+    // Load data from providers on initialization
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = context.read<UserProvider>();
+      final appStateProvider = context.read<AppStateProvider>();
 
-  @override
-  void dispose() {
-    // Clear cache on dispose to free memory
-    _userCache.clear();
-    super.dispose();
-  }
+      // Load user data and work stats
+      userProvider.loadCurrentUser();
+      userProvider.loadWorkStats();
 
-  Future<void> _loadRolesData() async {
-    final String rolesJson =
-        await rootBundle.loadString('lib/config/roles.json');
-    if (!mounted) return;
-    setState(() {
-      _roleData = json.decode(rolesJson);
+      // Load app-wide data
+      appStateProvider.loadWeather();
+      appStateProvider.loadRolesData();
     });
-  }
-
-  Future<void> _loadData() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-
-    final userData = await _fetchUserData(uid);
-    final stats = await ClockService().getMonthlyWorkStats(uid);
-    final weather = await WeatherService().fetchWeather();
-
-    if (mounted) {
-      setState(() {
-        _userData = userData;
-        _weatherData = weather;
-        _workStats = {
-          'hoursWorked': stats['hoursWorked']?.toDouble() ?? 0.0,
-          'daysWorked': stats['daysWorked']?.toDouble() ?? 0.0,
-        };
-      });
-    }
-  }
-
-  Future<Map<String, dynamic>> _fetchUserData(String uid) async {
-    if (_userCache.containsKey(uid)) {
-      return _userCache[uid]!;
-    }
-
-    try {
-      final DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      if (userDoc.exists && userDoc.data() != null) {
-        final userData = userDoc.data() as Map<String, dynamic>;
-        _userCache[uid] = userData;
-        return userData;
-      }
-    } catch (e) {
-      debugPrint('Error fetching user data: $e');
-    }
-    return {};
   }
 
   @override
   Widget build(BuildContext context) {
-    final User? currentUser = FirebaseAuth.instance.currentUser;
+    // Watch providers for automatic updates
+    final userProvider = context.watch<UserProvider>();
+    final appStateProvider = context.watch<AppStateProvider>();
+    final authProvider = context.watch<AppAuthProvider>();
+
+    final currentUser = authProvider.user;
 
     if (currentUser == null) {
       return Scaffold(
@@ -111,53 +62,70 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    // Show loading while data is being fetched
+    if (userProvider.isLoading || userProvider.currentUser == null) {
+      return Scaffold(
+        appBar: const UserHeader(showLogoutButton: true),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final userData = userProvider.currentUser!;
+    final workStats = userProvider.workStats ?? {'hoursWorked': 0.0, 'daysWorked': 0.0};
+    final weatherData = appStateProvider.weatherData;
+
     return Scaffold(
       appBar: const UserHeader(showLogoutButton: true),
-      body: _userData == null || _workStats == null
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Column(
-                children: [
-                  UserCard(
-                    userName: _userData!['fullName'] ?? 'משתמש',
-                    profilePictureUrl: _userData!['profile_picture'] ?? '',
-                    profilePicturePath: _userData!['profilePicturePath'],
-                    currentDate:
-                        DateFormat('dd/MM/yyyy').format(DateTime.now()),
-                    daysWorked: _workStats!['daysWorked']!.toInt(),
-                    hoursWorked: _workStats!['hoursWorked']!,
-                    weatherDescription: _weatherData?['description'],
-                    temperature: _weatherData?['temperature']?.toString(),
-                    weatherIcon: _weatherData?['icon'],
-                    onProfileUpdated: () {
-                      final uid = FirebaseAuth.instance.currentUser?.uid;
-                      if (uid != null) {
-                        _userCache.remove(uid);
-                        _loadData();
-                      }
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: ActionButtonGridPager(
-                      buttons: _buildActionButtons(
-                        _userData!['role'] ?? 'worker',
-                        currentUser.uid,
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: ClockInOutWidget(),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          children: [
+            UserCard(
+              userName: userData.fullName,
+              profilePictureUrl: userData.profilePicture,
+              profilePicturePath: userData.profilePicturePath,
+              currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+              daysWorked: (workStats['daysWorked'] as double).toInt(),
+              hoursWorked: workStats['hoursWorked'] as double,
+              weatherDescription: weatherData?['description'],
+              temperature: weatherData?['temperature']?.toString(),
+              weatherIcon: weatherData?['icon'],
+              onProfileUpdated: () {
+                // Refresh user data after profile update
+                context.read<UserProvider>().refresh();
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: ActionButtonGridPager(
+                buttons: _buildActionButtons(
+                  userData.role,
+                  currentUser.uid,
+                  userData.fullName,
+                  userData.profilePicture,
+                ),
               ),
             ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: ClockInOutWidget(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  List<ActionButton> _buildActionButtons(String role, String uid) {
+  List<ActionButton> _buildActionButtons(
+    String role,
+    String uid,
+    String userName,
+    String profileUrl,
+  ) {
+    // Get role operations from provider
+    final appStateProvider = context.read<AppStateProvider>();
+    final roleOperations = appStateProvider.getOperationsForRole(role);
+
     List<ActionButton> buttons = [
       ActionButton(
         title: 'פרופיל',
@@ -180,8 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(
               builder: (context) => WorkerReportsScreen(
                 userId: uid,
-                userName: _userData!['fullName'] ?? 'משתמש',
-                profileUrl: _userData!['profile_picture'] ?? '',
+                userName: userName,
+                profileUrl: profileUrl,
               ),
             ),
           );
@@ -189,9 +157,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ];
 
-    if (_roleData != null && _roleData!.containsKey(role)) {
+    // Add role-specific operations
+    if (roleOperations.isNotEmpty) {
       buttons.addAll(
-        (_roleData![role] as List<dynamic>).map<ActionButton>((operation) {
+        roleOperations.map<ActionButton>((operation) {
           return ActionButton(
             title: operation['title'],
             icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
