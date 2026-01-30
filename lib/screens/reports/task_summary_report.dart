@@ -184,9 +184,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                               const SizedBox(height: 10),
                           itemBuilder: (context, index) {
                             final task = tasks[index];
-                            final dueDate = task.dueDate is Timestamp
-                                ? (task.dueDate).toDate()
-                                : task.dueDate as DateTime;
+                            final dueDate = task.dueDate.toDate();
                             final formattedDate =
                                 DateFormat('dd/MM/yyyy').format(dueDate);
                             final entry =

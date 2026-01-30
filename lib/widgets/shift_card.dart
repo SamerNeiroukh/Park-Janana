@@ -122,13 +122,16 @@ class ShiftCardState extends State<ShiftCard> {
                       borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: () async {
-                  if (controller.text.isNotEmpty && _currentUser != null) {
+                  final user = _currentUser;
+                  if (controller.text.isNotEmpty && user != null) {
                     await widget.shiftService.addMessageToShift(
                       widget.shift.id,
                       controller.text,
-                      _currentUser!.uid,
+                      user.uid,
                     );
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   }
                 },
                 icon: const Icon(Icons.send_rounded, color: Colors.white),

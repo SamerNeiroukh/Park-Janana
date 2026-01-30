@@ -101,6 +101,8 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       }
     }
 
+    if (!mounted) return;
+
     await PdfExportService.exportShiftReportPdf(
       context: context,
       userName: widget.fullName,
