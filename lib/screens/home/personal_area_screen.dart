@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/user_header.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user_model.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/utils/profile_image_provider.dart';
@@ -285,8 +286,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Widget _buildInfoCard(List<Widget> children) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXL),
+      elevation: AppDimensions.elevationL,
       color: AppColors.background,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
@@ -334,8 +335,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     };
 
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXL),
+      elevation: AppDimensions.elevationL,
       color: AppColors.background,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
@@ -355,7 +356,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                   color: isLicensed
                       ? AppColors.lightGreen.withOpacity(0.15)
                       : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: AppDimensions.borderRadiusL,
                   border: Border.all(
                     color:
                         isLicensed ? AppColors.success : Colors.grey.shade300,
