@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final appStateProvider = context.read<AppStateProvider>();
     final roleOperations = appStateProvider.getOperationsForRole(role);
 
-    List<ActionButton> buttons = [
+    final List<ActionButton> buttons = [
       ActionButton(
         title: 'פרופיל',
         icon: Icons.person_rounded,

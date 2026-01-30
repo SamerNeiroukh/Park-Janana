@@ -78,10 +78,12 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ),
                   );
-                  if (shouldLogout == true) {
+                  if (shouldLogout ?? false) {
                     await AuthService().signOut();
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/login', (route) => false);
+                    if (context.mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/login', (route) => false);
+                    }
                   }
                 },
               ),

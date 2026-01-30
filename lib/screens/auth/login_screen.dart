@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:park_janana/constants/app_strings.dart';
 import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/services/auth_service.dart';
@@ -8,7 +7,6 @@ import '../home/home_screen.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/screens/auth/forgot_password_screen.dart';
-import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      String email = _emailController.text.trim();
-      String password = _passwordController.text.trim();
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
 
       // Use AuthService to sign in - it handles approval check automatically
       await _authService.signIn(email, password);
@@ -58,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       // Parse the error message to set appropriate field errors
-      String errorMsg = e.message;
+      final errorMsg = e.message;
       setState(() {
         if (errorMsg.contains('האימייל לא נמצא במערכת') ||
             errorMsg.contains('כתובת האימייל לא תקינה')) {

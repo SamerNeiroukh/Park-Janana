@@ -97,8 +97,8 @@ class ShiftModel {
 
   String get formattedDateWithDay {
     try {
-      DateTime dateTime = DateFormat('dd/MM/yyyy').parse(date);
-      String dayName = DateTimeUtils.getHebrewWeekdayName(dateTime.weekday);
+      final dateTime = DateFormat('dd/MM/yyyy').parse(date);
+      final dayName = DateTimeUtils.getHebrewWeekdayName(dateTime.weekday);
       return "$dayName, ${DateTimeUtils.formatDate(dateTime)}";
     } catch (e) {
       debugPrint("Error parsing date in ShiftModel: $e");
@@ -116,8 +116,8 @@ class ShiftModel {
   }
 
   int get weekNumber {
-    DateTime dt = parsedDate;
-    int dayOfYear = int.parse(DateFormat("D").format(dt));
+    final dt = parsedDate;
+    final dayOfYear = int.parse(DateFormat("D").format(dt));
     return ((dayOfYear - dt.weekday + 10) / 7).floor();
   }
 
