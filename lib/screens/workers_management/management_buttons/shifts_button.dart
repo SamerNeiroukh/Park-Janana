@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
+import 'package:park_janana/constants/app_durations.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/utils/profile_image_provider.dart';
@@ -31,7 +33,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: AppDurations.slow,
       vsync: this,
     )..forward();
   }
@@ -45,20 +47,20 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FF),
+      backgroundColor: AppColors.backgroundBlueLight,
       body: Column(
         children: [
           const UserHeader(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingM),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   _buildWorkerSummary(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppDimensions.spacingXL),
                   _buildFilterButtons(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppDimensions.spacingXL),
                   Expanded(child: _buildShiftList()),
                 ],
               ),
@@ -73,15 +75,15 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
     return FadeTransition(
       opacity: _animationController,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: AppDimensions.paddingAllL,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.surface,
+          borderRadius: AppDimensions.borderRadiusXL,
           boxShadow: [
             BoxShadow(
               color: Colors.black12.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 4),
+              blurRadius: AppDimensions.elevationXL,
+              offset: AppDimensions.shadowOffsetS,
             ),
           ],
         ),
@@ -94,13 +96,13 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
               ),
               builder: (context, snapshot) {
                 return CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.grey.shade300,
+                  radius: AppDimensions.avatarS * 0.75,
+                  backgroundColor: AppColors.greyLight,
                   backgroundImage: snapshot.data,
                 );
               },
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppDimensions.spacingXL),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -109,18 +111,18 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                     widget.fullName,
                     textAlign: TextAlign.right,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: AppDimensions.fontXXL,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppDimensions.spacingS),
                   Text(
                     "רשימת המשמרות של העובד",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+                      fontSize: AppDimensions.fontM,
+                      color: AppColors.greyDark,
                     ),
                   ),
                 ],
@@ -151,20 +153,20 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
   Widget _filterButton(String value, String label) {
     final isSelected = filter == value;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXS),
       child: ElevatedButton(
         onPressed: () => setState(() => filter = value),
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              isSelected ? AppColors.primary : Colors.grey.shade300,
-          foregroundColor: isSelected ? Colors.white : Colors.black87,
+              isSelected ? AppColors.primary : AppColors.greyLight,
+          foregroundColor: isSelected ? AppColors.textWhite : AppColors.textPrimary,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXXL),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL, vertical: AppDimensions.paddingS),
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: AppDimensions.fontS, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -262,17 +264,17 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                 ),
               ),
               child: Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: AppDimensions.spacingL),
+                padding: const EdgeInsets.all(AppDimensions.paddingML),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.surface,
+                  borderRadius: AppDimensions.borderRadiusML,
                   border: Border.all(color: AppColors.primary.withOpacity(0.1)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12.withOpacity(0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 4),
+                      blurRadius: AppDimensions.elevationXL,
+                      offset: AppDimensions.shadowOffsetS,
                     ),
                   ],
                 ),
@@ -287,19 +289,19 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                               ? DateFormat('dd/MM/yyyy').format(date)
                               : "--",
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold, fontSize: AppDimensions.fontL),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppDimensions.spacingM),
                         const Icon(Icons.calendar_today,
-                            size: 18, color: AppColors.primary),
+                            size: AppDimensions.iconS, color: AppColors.primary),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppDimensions.spacingS),
                     Text("שעות: $startTime - $endTime",
                         style: AppTheme.bodyText),
                     Text("מחלקה: $department", style: AppTheme.bodyText),
                     if (note.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppDimensions.spacingXS),
                       Text(
                         "הערה: $note",
                         style: AppTheme.bodyText

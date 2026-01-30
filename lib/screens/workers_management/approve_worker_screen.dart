@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/utils/profile_image_provider.dart';
 
@@ -74,7 +76,7 @@ class ApproveWorkerScreen extends StatelessWidget {
         : null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: AppColors.backgroundCard,
       body: Column(
         children: [
           const UserHeader(),
@@ -82,8 +84,9 @@ class ApproveWorkerScreen extends StatelessWidget {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.paddingXL,
+                    vertical: AppDimensions.paddingXXL),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -92,15 +95,15 @@ class ApproveWorkerScreen extends StatelessWidget {
                       fallbackPicture,
                       fullName,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildInfoCard("🧾 פרטי העובד", [
                       _buildInfoRow("דוא\"ל", email),
                       _buildInfoRow("טלפון", phone),
                       _buildInfoRow("ת.ז", id),
                     ]),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildActionButtons(context),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: AppDimensions.spacingXXXXL),
                   ],
                 ),
               ),
@@ -119,13 +122,13 @@ class ApproveWorkerScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
                 color: Colors.black12,
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: AppDimensions.shadowBlurS,
+                offset: AppDimensions.shadowOffsetS,
               ),
             ],
           ),
@@ -136,23 +139,25 @@ class ApproveWorkerScreen extends StatelessWidget {
             ),
             builder: (context, snapshot) {
               return CircleAvatar(
-                radius: 60,
+                radius: AppDimensions.avatarM,
                 backgroundColor: Colors.grey.shade300,
                 backgroundImage: snapshot.data,
               );
             },
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppDimensions.spacingXL),
         Text(
           name,
           style: const TextStyle(
-              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+              fontSize: AppDimensions.fontTitle,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppDimensions.spacingS),
         const Text(
           "עובד חדש ממתין לאישור",
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+          style: TextStyle(fontSize: AppDimensions.fontM, color: Colors.grey),
         ),
       ],
     );
@@ -161,15 +166,15 @@ class ApproveWorkerScreen extends StatelessWidget {
   Widget _buildInfoCard(String title, List<Widget> children) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      padding: AppDimensions.paddingSymmetricCard,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: AppColors.surface,
+        borderRadius: AppDimensions.borderRadiusXXL,
         boxShadow: [
           BoxShadow(
             color: Colors.black12.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 8),
+            blurRadius: AppDimensions.shadowBlurM,
+            offset: AppDimensions.shadowOffsetM,
           ),
         ],
       ),
@@ -177,9 +182,9 @@ class ApproveWorkerScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style:
-                  const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 12),
+              style: const TextStyle(
+                  fontSize: AppDimensions.fontXL, fontWeight: FontWeight.w600)),
+          const SizedBox(height: AppDimensions.spacingL),
           const Divider(),
           ...children,
         ],
@@ -189,18 +194,19 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
       child: Row(
         children: [
           Text(
             "$label:",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: AppDimensions.fontML),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppDimensions.spacingM),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 15),
+              style: const TextStyle(fontSize: AppDimensions.fontML),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -216,7 +222,7 @@ class ApproveWorkerScreen extends StatelessWidget {
           context,
           label: "אשר עובד",
           icon: Icons.check_circle_outline,
-          color: Colors.green,
+          color: AppColors.success,
           onPressed: () => _showConfirmationDialog(
             context: context,
             title: "אישור עובד",
@@ -224,12 +230,12 @@ class ApproveWorkerScreen extends StatelessWidget {
             onConfirm: () => _approveWorker(context),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppDimensions.spacingL),
         _buildFullWidthButton(
           context,
           label: "דחה ומחק",
           icon: Icons.cancel_outlined,
-          color: Colors.red,
+          color: AppColors.error,
           onPressed: () => _showConfirmationDialog(
             context: context,
             title: "דחיית עובד",
@@ -249,20 +255,22 @@ class ApproveWorkerScreen extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.white),
+        icon: Icon(icon, color: AppColors.textWhite),
         label: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          padding: AppDimensions.paddingSymmetricButton,
           child: Text(
             label,
             style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                fontWeight: FontWeight.bold,
+                fontSize: AppDimensions.fontL,
+                color: AppColors.textWhite),
           ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          elevation: 3,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: AppDimensions.elevationM,
+          shape: RoundedRectangleBorder(
+              borderRadius: AppDimensions.borderRadiusML),
         ),
         onPressed: onPressed,
       ),
