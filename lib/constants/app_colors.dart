@@ -17,11 +17,14 @@ class AppColors {
   static const Color salmon = Color(0xFFEE7752);
   static const Color darkRed = Color(0xFFD8363A);
   static const Color errorRed = Colors.red;
+  static const Color redLight = Color(0xFFE53935);
+  static const Color redDark = Color(0xFFB71C1C);
   static const Color deepOrange = Color(0xFFE65100);
   static const Color warningOrange = Color(0xFFFF8C00);
 
   // Green Shades
   static const Color success = Color(0xFF4CAF50);
+  static const Color greenMedium = Color(0xFF43A047);
   static const Color lightGreen = Color.fromARGB(255, 117, 192, 119);
   static const Color darkGreen = Color(0xFF1B5E20);
 

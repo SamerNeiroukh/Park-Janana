@@ -95,5 +95,6 @@ class AppDimensions {
   static BorderRadius get borderRadiusM => BorderRadius.circular(radiusM);
   static BorderRadius get borderRadiusL => BorderRadius.circular(radiusL);
   static BorderRadius get borderRadiusXL => BorderRadius.circular(radiusXL);
+  static BorderRadius get borderRadiusXXL => BorderRadius.circular(radiusXXL);
   static BorderRadius get borderRadiusRound => BorderRadius.circular(radiusRound);
 }

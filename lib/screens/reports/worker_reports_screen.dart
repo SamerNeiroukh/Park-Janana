@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
+import 'package:park_janana/constants/app_durations.dart';
 import 'package:park_janana/screens/reports/attendance_summary_report.dart';
 import 'package:park_janana/screens/reports/task_summary_report.dart';
 import 'package:park_janana/screens/reports/worker_shift_report.dart';
@@ -59,8 +62,8 @@ class WorkerReportsScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF42A5F5), Color(0xFF1976D2)],
+                    gradient: LinearGradient(
+                      colors: [AppColors.lightBlue, AppColors.deepBlue],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                     ),
@@ -80,8 +83,8 @@ class WorkerReportsScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
+                    gradient: LinearGradient(
+                      colors: [AppColors.redLight, AppColors.redDark],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                     ),
@@ -101,8 +104,8 @@ class WorkerReportsScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF43A047), Color(0xFF1B5E20)],
+                    gradient: LinearGradient(
+                      colors: [AppColors.greenMedium, AppColors.darkGreen],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                     ),
@@ -142,7 +145,7 @@ class _ReportCardState extends State<_ReportCard> with SingleTickerProviderState
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: AppDurations.instant,
       vsync: this,
       lowerBound: 0.95,
       upperBound: 1.0,
@@ -171,7 +174,7 @@ class _ReportCardState extends State<_ReportCard> with SingleTickerProviderState
         child: Container(
           decoration: BoxDecoration(
             gradient: widget.gradient,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: AppDimensions.borderRadiusXXL,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -180,12 +183,12 @@ class _ReportCardState extends State<_ReportCard> with SingleTickerProviderState
               ),
             ],
           ),
-          padding: const EdgeInsets.all(20),
+          padding: AppDimensions.paddingAllXL,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(widget.icon, size: 42, color: Colors.white),
-              const SizedBox(height: 12),
+              Icon(widget.icon, size: AppDimensions.iconLarge, color: Colors.white),
+              const SizedBox(height: AppDimensions.spacingM),
               Text(
                 widget.label,
                 style: const TextStyle(
