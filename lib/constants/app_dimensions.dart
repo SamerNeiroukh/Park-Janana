@@ -5,6 +5,7 @@ class AppDimensions {
   static const double paddingXS = 4.0;
   static const double paddingS = 8.0;
   static const double paddingM = 12.0;
+  static const double paddingML = 14.0;
   static const double paddingL = 16.0;
   static const double paddingXL = 20.0;
   static const double paddingXXL = 24.0;
@@ -12,31 +13,58 @@ class AppDimensions {
 
   // Spacing (SizedBox heights/widths)
   static const double spacingXS = 4.0;
-  static const double spacingS = 8.0;
-  static const double spacingM = 12.0;
-  static const double spacingL = 16.0;
-  static const double spacingXL = 20.0;
-  static const double spacingXXL = 24.0;
-  static const double spacingXXXL = 32.0;
+  static const double spacingS = 6.0;
+  static const double spacingM = 8.0;
+  static const double spacingML = 10.0;
+  static const double spacingL = 12.0;
+  static const double spacingXL = 16.0;
+  static const double spacingXXL = 20.0;
+  static const double spacingXXXL = 24.0;
+  static const double spacingXXXXL = 30.0;
+  static const double spacingHuge = 40.0;
 
   // Border Radius
   static const double radiusS = 4.0;
   static const double radiusM = 8.0;
   static const double radiusL = 12.0;
+  static const double radiusML = 14.0;
   static const double radiusXL = 16.0;
   static const double radiusXXL = 20.0;
+  static const double radiusXXXL = 24.0;
   static const double radiusRound = 28.0;
+  static const double radiusCircle = 40.0;
 
   // Icon Sizes
   static const double iconXS = 16.0;
   static const double iconS = 18.0;
   static const double iconM = 20.0;
   static const double iconL = 24.0;
+  static const double iconML = 26.0;
   static const double iconXL = 28.0;
   static const double iconXXL = 30.0;
-  static const double iconLarge = 42.0;
+  static const double iconLarge = 40.0;
+  static const double iconXLarge = 42.0;
   static const double iconHuge = 64.0;
   static const double iconError = 80.0;
+
+  // Shadow/Blur Radius
+  static const double shadowBlurS = 10.0;
+  static const double shadowBlurM = 12.0;
+  static const double shadowBlurL = 20.0;
+
+  // Border Width
+  static const double borderWidthS = 1.0;
+  static const double borderWidthM = 2.0;
+  static const double borderWidthL = 5.0;
+
+  // Loader/Indicator Sizes
+  static const double loaderS = 24.0;
+  static const double loaderM = 36.0;
+
+  // Container Sizes
+  static const double containerS = 80.0;
+  static const double containerM = 100.0;
+  static const double maxWidthForm = 400.0;
 
   // Elevation
   static const double elevationNone = 0.0;
@@ -71,10 +99,12 @@ class AppDimensions {
   static const double fontXS = 12.0;
   static const double fontS = 13.0;
   static const double fontM = 14.0;
+  static const double fontML = 15.0;
   static const double fontL = 16.0;
-  static const double fontXL = 18.0;
-  static const double fontXXL = 20.0;
+  static const double fontXL = 17.0;
+  static const double fontXXL = 18.0;
   static const double fontTitle = 24.0;
+  static const double fontTitleL = 28.0;
   static const double fontDisplay = 32.0;
 
   // Common EdgeInsets
@@ -94,7 +124,21 @@ class AppDimensions {
   static BorderRadius get borderRadiusS => BorderRadius.circular(radiusS);
   static BorderRadius get borderRadiusM => BorderRadius.circular(radiusM);
   static BorderRadius get borderRadiusL => BorderRadius.circular(radiusL);
+  static BorderRadius get borderRadiusML => BorderRadius.circular(radiusML);
   static BorderRadius get borderRadiusXL => BorderRadius.circular(radiusXL);
   static BorderRadius get borderRadiusXXL => BorderRadius.circular(radiusXXL);
+  static BorderRadius get borderRadiusXXXL => BorderRadius.circular(radiusXXXL);
   static BorderRadius get borderRadiusRound => BorderRadius.circular(radiusRound);
+  static BorderRadius get borderRadiusCircle => BorderRadius.circular(radiusCircle);
+
+  // Additional EdgeInsets
+  static const EdgeInsets paddingHorizontalXXL = EdgeInsets.symmetric(horizontal: paddingXXL);
+  static const EdgeInsets paddingSymmetricCard = EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0);
+  static const EdgeInsets paddingSymmetricButton = EdgeInsets.symmetric(vertical: 10.0);
+  static const EdgeInsets paddingContentInput = EdgeInsets.symmetric(vertical: paddingL, horizontal: paddingL);
+
+  // Shadow Offsets
+  static const Offset shadowOffsetS = Offset(0, 4);
+  static const Offset shadowOffsetM = Offset(0, 8);
+  static const Offset shadowOffsetL = Offset(0, 10);
 }

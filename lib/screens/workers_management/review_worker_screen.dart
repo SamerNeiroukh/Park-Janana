@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/screens/workers_management/edit_worker_licenses_screen.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/screens/workers_management/management_buttons/shifts_button.dart';
@@ -36,7 +37,7 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: AppColors.backgroundCard,
       body: Column(
         children: [
           const UserHeader(),
@@ -45,17 +46,17 @@ class ReviewWorkerScreen extends StatelessWidget {
               textDirection: TextDirection.rtl,
               child: SingleChildScrollView(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingXXL),
                 child: Column(
                   children: [
                     _buildSpiritualProfile(data),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildSoftCard("🧾 פרטי העובד", [
                       _buildInfoRow(Icons.email_rounded, "אימייל", email),
                       _buildInfoRow(Icons.phone, "טלפון", phone),
                       _buildInfoRow(Icons.credit_card, "תעודת זהות", id),
                     ]),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🧭 פעולות מנהל", [
                       _buildActionCard(
                         icon: Icons.calendar_today_outlined,
@@ -92,11 +93,11 @@ class ReviewWorkerScreen extends StatelessWidget {
                       _buildActionCard(
                         icon: Icons.show_chart,
                         label: "הצג ביצועים",
-                        color: Colors.deepOrange,
+                        color: AppColors.deepOrange,
                         onTap: () => _snack(context, "הצגת ביצועים - בפיתוח"),
                       ),
                     ]),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🛠 ניהול משא", [
                       _buildFullWidthButton(
                         context,
@@ -115,16 +116,16 @@ class ReviewWorkerScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppDimensions.spacingL),
                       _buildFullWidthButton(
                         context,
                         label: "מחק עובד",
                         icon: Icons.delete_forever,
-                        color: Colors.red.shade600,
+                        color: AppColors.redLight,
                         onPressed: () => _deleteWorker(context, uid),
                       ),
                     ]),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: AppDimensions.spacingHuge),
                   ],
                 ),
               ),
@@ -145,37 +146,37 @@ class ReviewWorkerScreen extends StatelessWidget {
           ),
           builder: (context, snapshot) {
             return Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    blurRadius: AppDimensions.shadowBlurS,
+                    offset: AppDimensions.shadowOffsetS,
                   ),
                 ],
               ),
               child: CircleAvatar(
-                radius: 60,
+                radius: AppDimensions.avatarM,
                 backgroundColor: Colors.grey.shade300,
                 backgroundImage: snapshot.data,
               ),
             );
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppDimensions.spacingXL),
         Text(
           data['fullName'] ?? '',
           style: const TextStyle(
-            fontSize: 24,
+            fontSize: AppDimensions.fontTitle,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppDimensions.spacingS),
         const Text(
           "עובד בפארק ג׳ננה",
-          style: TextStyle(color: Colors.grey, fontSize: 14),
+          style: TextStyle(color: Colors.grey, fontSize: AppDimensions.fontM),
         ),
       ],
     );
@@ -184,29 +185,29 @@ class ReviewWorkerScreen extends StatelessWidget {
   Widget _buildSoftCard(String title, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: AppColors.surface,
+        borderRadius: AppDimensions.borderRadiusXXL,
         boxShadow: [
           BoxShadow(
             color: Colors.black12.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 8),
+            blurRadius: AppDimensions.shadowBlurM,
+            offset: AppDimensions.shadowOffsetM,
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+      padding: AppDimensions.paddingSymmetricCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                fontSize: 17,
-                color: Colors.black87,
+                fontSize: AppDimensions.fontXL,
+                color: AppColors.textPrimary,
               )),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppDimensions.spacingML),
           const Divider(),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppDimensions.spacingS),
           ...children,
         ],
       ),
@@ -215,18 +216,18 @@ class ReviewWorkerScreen extends StatelessWidget {
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
       child: Row(
         children: [
           Icon(icon, color: AppColors.accent),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppDimensions.spacingL),
           Text("$label:",
               style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-          const SizedBox(width: 8),
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: AppDimensions.fontML)),
+          const SizedBox(width: AppDimensions.spacingM),
           Expanded(
             child: Text(value,
-                style: const TextStyle(fontSize: 15),
+                style: const TextStyle(fontSize: AppDimensions.fontML),
                 overflow: TextOverflow.ellipsis),
           ),
         ],
@@ -243,22 +244,22 @@ class ReviewWorkerScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(top: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        margin: const EdgeInsets.only(top: AppDimensions.spacingL),
+        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL, vertical: AppDimensions.paddingML),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppDimensions.borderRadiusXL,
         ),
         child: Row(
           children: [
-            Icon(icon, color: color, size: 26),
-            const SizedBox(width: 12),
+            Icon(icon, color: color, size: AppDimensions.iconML),
+            const SizedBox(width: AppDimensions.spacingL),
             Text(
               label,
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.w600,
-                fontSize: 16,
+                fontSize: AppDimensions.fontL,
               ),
             ),
           ],
@@ -275,20 +276,20 @@ class ReviewWorkerScreen extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.white),
+        icon: Icon(icon, color: AppColors.textWhite),
         label: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          padding: AppDimensions.paddingSymmetricButton,
           child: Text(
             label,
             style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                fontWeight: FontWeight.bold, fontSize: AppDimensions.fontL, color: AppColors.textWhite),
           ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          elevation: 3,
+          elevation: AppDimensions.elevationM,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusML),
         ),
         onPressed: onPressed,
       ),

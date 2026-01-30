@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/models/task_model.dart';
 import 'package:park_janana/models/user_model.dart';
@@ -107,24 +108,24 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     String label;
     switch (status) {
       case 'in_progress':
-        bgColor = Colors.orange;
+        bgColor = AppColors.warningOrange;
         label = 'בתהליך';
         break;
       case 'done':
-        bgColor = Colors.green;
+        bgColor = AppColors.success;
         label = 'הושלם';
         break;
       case 'pending':
       default:
-        bgColor = Colors.grey;
+        bgColor = AppColors.greyMedium;
         label = 'טרם התחיל';
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingML, vertical: AppDimensions.paddingXS),
       decoration: BoxDecoration(
         color: bgColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppDimensions.borderRadiusXXL,
         border: Border.all(color: bgColor),
       ),
       child: Text(
@@ -132,7 +133,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         style: TextStyle(
           color: bgColor,
           fontWeight: FontWeight.bold,
-          fontSize: 13,
+          fontSize: AppDimensions.fontS,
         ),
       ),
     );
@@ -171,7 +172,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                 onRefresh: _fetchTaskAndWorkers,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
+                  padding: AppDimensions.paddingAllL,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -179,12 +180,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildStatusChip(task.status),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppDimensions.spacingM),
                         ],
                       ),
                       Text(task.title,
-                          style: AppTheme.screenTitle.copyWith(fontSize: 24)),
-                      const SizedBox(height: 16),
+                          style: AppTheme.screenTitle.copyWith(fontSize: AppDimensions.fontTitle)),
+                      const SizedBox(height: AppDimensions.spacingXL),
                       TaskDescriptionSection(
                         description: task.description,
                         time: time,
@@ -192,18 +193,18 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         isManager: false,
                         task: task,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppDimensions.spacingXXXL),
                       Text("עובדים שהוקצו למשימה",
                           style: AppTheme.sectionTitle),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppDimensions.spacingM),
                       ..._assignedWorkers.map((user) {
                         final workerStatus = task.workerProgress[user.uid]
                                 ?['status'] ??
                             'pending';
                         return Card(
-                          color: Colors.grey.shade100,
+                          color: AppColors.greyLight,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: AppDimensions.borderRadiusL,
                           ),
                           child: ListTile(
                             leading: FutureBuilder<ImageProvider>(
@@ -222,45 +223,45 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                           ),
                         );
                       }),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppDimensions.spacingXXXL),
                       TaskCommentsSection(
                         taskId: task.id,
                         comments: task.comments,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppDimensions.spacingXL),
                       TextField(
                         controller: _commentController,
                         decoration:
                             AppTheme.inputDecoration(hintText: "הוסף תגובה..."),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppDimensions.spacingM),
                       ElevatedButton(
                         onPressed: _isSubmitting ? null : _addComment,
                         style: AppTheme.primaryButtonStyle,
                         child: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
+                            ? SizedBox(
+                                width: AppDimensions.iconM,
+                                height: AppDimensions.iconM,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+                                  strokeWidth: AppDimensions.borderWidthM,
+                                  color: AppColors.textWhite,
                                 ),
                               )
                             : const Text("💬 שלח תגובה"),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: AppDimensions.spacingXXXL),
                       if (_isWorker && currentWorkerStatus == 'pending')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('in_progress'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange),
+                              backgroundColor: AppColors.warningOrange),
                           child: const Text("🚧 התחל משימה"),
                         ),
                       if (_isWorker && currentWorkerStatus == 'in_progress')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('done'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green),
+                              backgroundColor: AppColors.success),
                           child: const Text("✅ סיים משימה"),
                         ),
                     ],

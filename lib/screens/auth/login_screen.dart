@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/constants/app_strings.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/services/auth_service.dart';
 import 'package:park_janana/utils/custom_exception.dart';
 import '../home/home_screen.dart';
@@ -109,21 +110,21 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: AppDimensions.paddingHorizontalXXL,
             child: Form(
               key: _formKey,
               child: AutofillGroup(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  padding: const EdgeInsets.all(32.0),
+                  constraints: const BoxConstraints(maxWidth: AppDimensions.maxWidthForm),
+                  padding: const EdgeInsets.all(AppDimensions.paddingXXXL),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24.0),
+                    color: AppColors.surface,
+                    borderRadius: AppDimensions.borderRadiusXXXL,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        blurRadius: AppDimensions.shadowBlurL,
+                        offset: AppDimensions.shadowOffsetL,
                       ),
                     ],
                   ),
@@ -132,63 +133,63 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       // App Logo or Icon
                       Container(
-                        width: 80,
-                        height: 80,
+                        width: AppDimensions.containerS,
+                        height: AppDimensions.containerS,
                         decoration: BoxDecoration(
                           color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(40),
+                          borderRadius: AppDimensions.borderRadiusCircle,
                         ),
                         child: Icon(
                           Icons.person,
-                          size: 40,
+                          size: AppDimensions.iconLarge,
                           color: AppColors.primary,
                         ),
                       ),
-                      const SizedBox(height: 24.0),
-                      
+                      const SizedBox(height: AppDimensions.spacingXXXL),
+
                       // Welcome Text
                       Text(
                         'שלום עובדים יקרים',
                         style: AppTheme.titleStyle.copyWith(
                           color: AppColors.primary,
-                          fontSize: 28,
+                          fontSize: AppDimensions.fontTitleL,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
-                      const SizedBox(height: 8.0),
+
+                      const SizedBox(height: AppDimensions.spacingM),
                       Text(
                         'אנא הכנס את פרטי הכניסה שלך',
                         style: TextStyle(
-                          fontSize: 16.0,
+                          fontSize: AppDimensions.fontL,
                           color: AppColors.textSecondary,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
-                      const SizedBox(height: 40.0),
+
+                      const SizedBox(height: AppDimensions.spacingHuge),
                       
                       // Email Field
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+                            padding: const EdgeInsets.only(bottom: AppDimensions.paddingS, right: AppDimensions.paddingXS),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
                                   'אימייל',
                                   style: TextStyle(
-                                    fontSize: 16.0,
+                                    fontSize: AppDimensions.fontL,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(width: 8.0),
+                                const SizedBox(width: AppDimensions.spacingM),
                                 Icon(
                                   Icons.email_outlined,
-                                  size: 20,
+                                  size: AppDimensions.iconM,
                                   color: AppColors.primary,
                                 ),
                               ],
@@ -200,38 +201,35 @@ class _LoginScreenState extends State<LoginScreen> {
                               filled: true,
                               fillColor: AppColors.background,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                                 borderSide: BorderSide(color: AppColors.border),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                                 borderSide: BorderSide(color: AppColors.border),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.primary,
-                                  width: 2.0,
+                                  width: AppDimensions.borderWidthM,
                                 ),
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.error,
-                                  width: 1.0,
+                                  width: AppDimensions.borderWidthS,
                                 ),
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.error,
-                                  width: 2.0,
+                                  width: AppDimensions.borderWidthM,
                                 ),
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 16.0,
-                                horizontal: 16.0,
-                              ),
+                              contentPadding: AppDimensions.paddingContentInput,
                               hintText: 'הכנס את כתובת האימייל שלך',
                               hintStyle: AppTheme.hintTextStyle,
                               errorText: _emailError,
@@ -251,30 +249,30 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      
-                      const SizedBox(height: 24.0),
-                      
+
+                      const SizedBox(height: AppDimensions.spacingXXXL),
+
                       // Password Field
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+                            padding: const EdgeInsets.only(bottom: AppDimensions.paddingS, right: AppDimensions.paddingXS),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
                                   'סיסמה',
                                   style: TextStyle(
-                                    fontSize: 16.0,
+                                    fontSize: AppDimensions.fontL,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(width: 8.0),
+                                const SizedBox(width: AppDimensions.spacingM),
                                 Icon(
                                   Icons.lock_outlined,
-                                  size: 20,
+                                  size: AppDimensions.iconM,
                                   color: AppColors.primary,
                                 ),
                               ],
@@ -287,38 +285,35 @@ class _LoginScreenState extends State<LoginScreen> {
                               filled: true,
                               fillColor: AppColors.background,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                                 borderSide: BorderSide(color: AppColors.border),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                                 borderSide: BorderSide(color: AppColors.border),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.primary,
-                                  width: 2.0,
+                                  width: AppDimensions.borderWidthM,
                                 ),
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.error,
-                                  width: 1.0,
+                                  width: AppDimensions.borderWidthS,
                                 ),
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: AppColors.error,
-                                  width: 2.0,
+                                  width: AppDimensions.borderWidthM,
                                 ),
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: AppDimensions.borderRadiusL,
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 16.0,
-                                horizontal: 16.0,
-                              ),
+                              contentPadding: AppDimensions.paddingContentInput,
                               hintText: 'הכנס את הסיסמה שלך',
                               hintStyle: AppTheme.hintTextStyle,
                               errorText: _passwordError,
@@ -350,9 +345,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      
-                      const SizedBox(height: 16.0),
-                      
+
+                      const SizedBox(height: AppDimensions.spacingXL),
+
                       // Forgot Password Link
                       Align(
                         alignment: Alignment.centerRight,
@@ -369,52 +364,52 @@ class _LoginScreenState extends State<LoginScreen> {
                             AppStrings.forgotPassword,
                             style: AppTheme.linkTextStyle.copyWith(
                               color: AppColors.primary,
-                              fontSize: 14,
+                              fontSize: AppDimensions.fontM,
                             ),
                           ),
                         ),
                       ),
-                      
-                      const SizedBox(height: 32.0),
-                      
+
+                      const SizedBox(height: AppDimensions.spacingXXXL),
+
                       // Login Button
                       SizedBox(
                         width: double.infinity,
-                        height: 56,
+                        height: AppDimensions.buttonHeightL,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            elevation: 2,
+                            elevation: AppDimensions.elevationS,
                             shadowColor: AppColors.primary.withOpacity(0.3),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16.0),
+                              borderRadius: AppDimensions.borderRadiusXL,
                             ),
                           ),
                           onPressed: _isLoading ? null : _login,
                           child: _isLoading
                               ? SizedBox(
-                                  width: 24,
-                                  height: 24,
+                                  width: AppDimensions.loaderS,
+                                  height: AppDimensions.loaderS,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                                    strokeWidth: AppDimensions.borderWidthM,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                                      AppColors.textWhite,
                                     ),
                                   ),
                                 )
                               : Text(
                                   'כניסה',
                                   style: TextStyle(
-                                    fontSize: 18.0,
+                                    fontSize: AppDimensions.fontXXL,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: AppColors.textWhite,
                                   ),
                                 ),
                         ),
                       ),
-                      
-                      const SizedBox(height: 24.0),
-                      
+
+                      const SizedBox(height: AppDimensions.spacingXXXL),
+
                       // Back Button
                       TextButton(
                         onPressed: () {
@@ -422,14 +417,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
-                            vertical: 12.0,
-                            horizontal: 24.0,
+                            vertical: AppDimensions.paddingM,
+                            horizontal: AppDimensions.paddingXXL,
                           ),
                         ),
                         child: Text(
                           'חזור',
                           style: AppTheme.secondaryButtonTextStyle.copyWith(
-                            fontSize: 16,
+                            fontSize: AppDimensions.fontL,
                           ),
                         ),
                       ),

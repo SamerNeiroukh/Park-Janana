@@ -6,9 +6,11 @@ import 'package:park_janana/services/report_service.dart';
 import 'package:park_janana/services/pdf_export_service.dart';
 import 'package:park_janana/widgets/user_header.dart';
 import 'package:park_janana/widgets/attendance/month_selector.dart';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/services/firebase_service.dart';
-import 'package:park_janana/utils/profile_image_provider.dart'; // ✅ NEW
+import 'package:park_janana/utils/profile_image_provider.dart';
 
 class WorkerShiftReport extends StatefulWidget {
   final String uid;
@@ -141,10 +143,10 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
 
     final decision = data['decision'] ?? '';
     final Color decisionColor = {
-          'accepted': Colors.green,
-          'rejected': Colors.red,
+          'accepted': AppColors.success,
+          'rejected': AppColors.error,
         }[decision] ??
-        Colors.grey;
+        AppColors.greyMedium;
 
     final String hebrewDecision = {
           'accepted': 'מאושר',
@@ -166,7 +168,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
           children: [
             Text(hebrewDecision,
                 style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppDimensions.fontS,
                     fontWeight: FontWeight.bold,
                     color: decisionColor)),
           ],
@@ -189,9 +191,9 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
   Widget _infoLine(String label, String? value) {
     if (value == null || value.isEmpty) return const SizedBox();
     return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.only(bottom: AppDimensions.borderWidthM),
       child: Text('$label: $value',
-          style: const TextStyle(fontSize: 13, color: Colors.black87)),
+          style: const TextStyle(fontSize: AppDimensions.fontS, color: AppColors.textPrimary)),
     );
   }
 
@@ -209,13 +211,13 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
               onMonthChanged: _onMonthChanged,
             ),
             Card(
-              elevation: 3,
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              elevation: AppDimensions.elevationM,
+              margin: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL, vertical: AppDimensions.paddingS),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0)),
+                  borderRadius: AppDimensions.borderRadiusXL),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12.0, vertical: 10.0),
+                    horizontal: AppDimensions.paddingM, vertical: AppDimensions.paddingML),
                 child: Row(
                   children: [
                     FutureBuilder<ImageProvider>(
@@ -225,28 +227,28 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                       ),
                       builder: (context, snapshot) {
                         return CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.grey.shade300,
+                          radius: AppDimensions.iconXL,
+                          backgroundColor: AppColors.greyLight,
                           backgroundImage: snapshot.data,
                         );
                       },
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppDimensions.spacingL),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(widget.fullName,
                               style: AppTheme.bodyText.copyWith(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                                  fontWeight: FontWeight.bold, fontSize: AppDimensions.fontL)),
                           Text(formattedMonth,
                               style: AppTheme.bodyText.copyWith(
-                                  fontSize: 14, color: Colors.grey.shade700)),
+                                  fontSize: AppDimensions.fontM, color: AppColors.greyDark)),
                         ],
                       ),
                     ),
                     Text('סה״כ: ${_shifts.length}',
-                        style: AppTheme.bodyText.copyWith(fontSize: 14)),
+                        style: AppTheme.bodyText.copyWith(fontSize: AppDimensions.fontM)),
                   ],
                 ),
               ),
@@ -259,10 +261,10 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             else
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL),
                   child: ListView.separated(
                     itemCount: _shifts.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, __) => const SizedBox(height: AppDimensions.spacingML),
                     itemBuilder: (context, index) {
                       final shift = _shifts[index];
                       final userDataList = shift.assignedWorkerData
@@ -290,11 +292,11 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                         future: _buildWorkerMetadata(userData),
                         builder: (context, snapshot) {
                           return Card(
-                            elevation: 3,
+                            elevation: AppDimensions.elevationM,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
+                                borderRadius: AppDimensions.borderRadiusML),
                             child: Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(AppDimensions.paddingM),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
@@ -322,7 +324,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppDimensions.paddingM),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -330,13 +332,13 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                   icon: const Icon(Icons.picture_as_pdf),
                   label: const Text('צור קובץ'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.textWhite,
+                    padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingL),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                        borderRadius: AppDimensions.borderRadiusML),
                     textStyle: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                        fontSize: AppDimensions.fontXXL, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

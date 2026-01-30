@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/config/departments.dart';
 import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/widgets/user_header.dart';
 
@@ -76,7 +77,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: AppColors.backgroundInput,
       body: Column(
         children: [
           const UserHeader(),
@@ -86,39 +87,39 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 : Directionality(
                     textDirection: TextDirection.rtl,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXXL, vertical: AppDimensions.paddingXXL),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
                             "ניהול הרשאות לעובד",
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: AppDimensions.fontXXL,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: AppDimensions.spacingS),
                           Text(
                             widget.fullName,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: AppDimensions.fontTitle,
                               fontWeight: FontWeight.w700,
                               color: AppColors.primary,
                               height: 1.4,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppDimensions.spacingXXXL),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingXL),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
+                              color: AppColors.surface,
+                              borderRadius: AppDimensions.borderRadiusXL,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black12.withOpacity(0.04),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 4),
+                                  blurRadius: AppDimensions.elevationXL,
+                                  offset: AppDimensions.shadowOffsetS,
                                 ),
                               ],
                             ),
@@ -127,9 +128,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                               children: [
                                 Text(
                                   "בחר מחלקות מורשות",
-                                  style: AppTheme.sectionTitle.copyWith(fontSize: 18),
+                                  style: AppTheme.sectionTitle.copyWith(fontSize: AppDimensions.fontXXL),
                                 ),
-                                const Divider(height: 24),
+                                const Divider(height: AppDimensions.spacingXXXL),
                                 ...allDepartments.map((dept) {
                                   final bool selected = _selectedDepartments.contains(dept);
                                   return CheckboxListTile(
@@ -137,11 +138,11 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                                     onChanged: (_) => _toggleDepartment(dept),
                                     title: Text(
                                       dept,
-                                      style: const TextStyle(fontSize: 15),
+                                      style: const TextStyle(fontSize: AppDimensions.fontML),
                                     ),
                                     activeColor: AppColors.primary,
                                     checkboxShape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: AppDimensions.borderRadiusS,
                                     ),
                                     contentPadding: EdgeInsets.zero,
                                   );
@@ -149,30 +150,30 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: AppDimensions.spacingXXXXL),
                           Center(
                             child: SizedBox(
                               width: 260,
                               child: ElevatedButton.icon(
                                 onPressed: _saveChanges,
                                 icon: const Icon(Icons.save),
-                                label: const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                                label: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingM),
                                   child: Text(
                                     "שמור שינויים",
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: AppDimensions.fontL,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: AppColors.textWhite,
                                     ),
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: AppDimensions.borderRadiusL,
                                   ),
-                                  elevation: 2,
+                                  elevation: AppDimensions.elevationS,
                                 ),
                               ),
                             ),
