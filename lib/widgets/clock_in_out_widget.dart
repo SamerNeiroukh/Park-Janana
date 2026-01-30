@@ -230,7 +230,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Cancel button ("לא")
+                        // Cancel button (displays "No" in Hebrew)
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.grey[300],
@@ -253,7 +253,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                           ),
                         ),
 
-                        // Confirm button ("כן")
+                        // Confirm button (displays "Yes" in Hebrew)
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
