@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final currentUser = authProvider.user;
 
     if (currentUser == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: Text('לא נמצא משתמש מחובר', style: AppTheme.bodyText),
         ),
@@ -62,14 +62,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Show loading while data is being fetched
     if (userProvider.isLoading || userProvider.currentUser == null) {
-      return Scaffold(
-        appBar: const UserHeader(showLogoutButton: true),
-        body: const Center(child: CircularProgressIndicator()),
+      return const Scaffold(
+        appBar: UserHeader(showLogoutButton: true),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     final userData = userProvider.currentUser!;
-    final workStats = userProvider.workStats ?? {'hoursWorked': 0.0, 'daysWorked': 0.0};
+    final workStats =
+        userProvider.workStats ?? {'hoursWorked': 0.0, 'daysWorked': 0.0};
     final weatherData = appStateProvider.weatherData;
 
     return Scaffold(
