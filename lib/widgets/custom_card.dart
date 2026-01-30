@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../constants/app_colors.dart';
+import '../constants/app_dimensions.dart';
+import '../constants/app_durations.dart';
 
 class ActionButton {
   final String title;
@@ -36,8 +39,8 @@ class _ActionButtonGridPagerState extends State<ActionButtonGridPager> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox( // ✅ replaces Expanded to avoid crash
-          height: 180, // fixed height for button pager
+        SizedBox(
+          height: AppDimensions.cardHeightXL,
           child: PageView.builder(
             reverse: true,
             controller: _controller,
@@ -70,13 +73,13 @@ class _ActionButtonGridPagerState extends State<ActionButtonGridPager> {
           children: List.generate(pages.length, (index) => index)
               .reversed
               .map((index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                    duration: AppDurations.normal,
                     margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     width: _currentPage == index ? 12 : 6,
                     height: _currentPage == index ? 12 : 6,
                     decoration: BoxDecoration(
                       color: _currentPage == index
-                          ? const Color(0xFFE65100)
+                          ? AppColors.deepOrange
                           : Colors.grey.shade400,
                       shape: BoxShape.circle,
                     ),
@@ -89,15 +92,15 @@ class _ActionButtonGridPagerState extends State<ActionButtonGridPager> {
 
   Widget _buildTile(ActionButton button) {
     return SizedBox(
-      width: 140,
-      height: 75,
+      width: AppDimensions.cardHeightM,
+      height: AppDimensions.cardHeightS,
       child: ElevatedButton(
         onPressed: button.onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4FC3F7), // Sky blue color
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          elevation: 5,
-          padding: const EdgeInsets.all(8),
+          backgroundColor: AppColors.skyBlue,
+          shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXXL),
+          elevation: AppDimensions.elevationL,
+          padding: AppDimensions.paddingAllS,
         ),
         child: Animate(
           effects: [FadeEffect(duration: 300.ms), ScaleEffect(duration: 300.ms)],

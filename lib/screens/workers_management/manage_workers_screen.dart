@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/screens/workers_management/review_worker_screen.dart';
@@ -36,7 +37,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
       body: Column(
         children: [
           const UserHeader(),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppDimensions.spacingS),
           TabBar(
             controller: _tabController,
             labelColor: AppColors.primary,
@@ -47,7 +48,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
               Tab(text: "עובדים פעילים"),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppDimensions.spacingS),
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -86,7 +87,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
         final newWorkers = snapshot.data!.docs;
 
         return ListView.builder(
-          padding: const EdgeInsets.all(12.0),
+          padding: AppDimensions.paddingAllM,
           itemCount: newWorkers.length,
           itemBuilder: (context, index) {
             final user = newWorkers[index];
@@ -98,13 +99,13 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
             return Directionality(
               textDirection: TextDirection.rtl,
               child: Card(
-                elevation: 3,
+                elevation: AppDimensions.elevationM,
                 margin: const EdgeInsets.symmetric(vertical: 6),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: AppDimensions.borderRadiusXL,
                 ),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: AppDimensions.borderRadiusXL,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -189,7 +190,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
         final workers = snapshot.data!.docs;
 
         return ListView.builder(
-          padding: const EdgeInsets.all(12.0),
+          padding: AppDimensions.paddingAllM,
           itemCount: workers.length,
           itemBuilder: (context, index) {
             final user = workers[index];
@@ -201,13 +202,13 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
             return Directionality(
               textDirection: TextDirection.rtl,
               child: Card(
-                elevation: 3,
+                elevation: AppDimensions.elevationM,
                 margin: const EdgeInsets.symmetric(vertical: 6),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: AppDimensions.borderRadiusXL,
                 ),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: AppDimensions.borderRadiusXL,
                   onTap: () {
                     Navigator.push(
                       context,
