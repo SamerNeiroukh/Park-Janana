@@ -104,9 +104,11 @@ Requirements were gathered from real park operations:
 ### ⏰ Shift Management
 
 - Workers request to join shifts
-- Managers approve or reject requests
+- Managers approve or reject requests  
 - Role-based worker assignment
 - Real-time updates with Firebase
+- **📅 Weekly Calendar View**: RTL calendar grid showing all shifts for the week with color-coded status (assigned, requested, available)
+- **Day Details**: Tap any day to view detailed shift information in an intuitive bottom sheet
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c0c52538-f432-4c7d-bc35-3986e05d2884" width="250" />
