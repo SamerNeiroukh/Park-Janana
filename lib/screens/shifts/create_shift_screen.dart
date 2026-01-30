@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/constants/app_theme.dart';
 import 'package:park_janana/constants/app_colors.dart';
 import 'package:park_janana/widgets/user_header.dart';
@@ -81,14 +82,14 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppDimensions.paddingAllL,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const UserHeader(),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppDimensions.spacingXL),
             Text("יצירת משמרת חדשה", style: AppTheme.screenTitle),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppDimensions.spacingXL),
 
             Align(
               alignment: Alignment.centerRight,
@@ -100,7 +101,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 _selectedDate = date;
               }),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppDimensions.spacingXL),
 
             Align(
               alignment: Alignment.centerRight,
@@ -122,7 +123,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppDimensions.spacingXL),
 
             Align(
               alignment: Alignment.centerRight,
@@ -141,7 +142,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppDimensions.spacingXL),
 
             Align(
               alignment: Alignment.centerRight,
@@ -153,7 +154,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 _startTime = time;
               }),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppDimensions.spacingXL),
 
             Align(
               alignment: Alignment.centerRight,
@@ -165,7 +166,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 _endTime = time;
               }),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: AppDimensions.spacingXXXL),
 
             ElevatedButton(
               style: AppTheme.primaryButtonStyle,
@@ -174,7 +175,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text("צור משמרת", style: AppTheme.buttonTextStyle),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: AppDimensions.spacingL),
 
             TextButton(
               onPressed: () {

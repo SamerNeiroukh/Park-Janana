@@ -5,9 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../constants/app_colors.dart';
+import '../constants/app_dimensions.dart';
+import '../constants/app_durations.dart';
 import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
-import '../utils/location_utils.dart'; // ✅ NEW
+import '../utils/location_utils.dart';
 
 class ClockInOutWidget extends StatefulWidget {
   const ClockInOutWidget({super.key});
@@ -55,7 +58,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
 
     _cardPulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: AppDurations.cardExpand,
       lowerBound: 0.0,
       upperBound: 0.04,
     );
@@ -149,7 +152,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         barrierDismissible: false,
         barrierLabel: 'Location Warning',
         barrierColor: Colors.black54.withOpacity(0.6), // dimmed background
-        transitionDuration: const Duration(milliseconds: 350),
+        transitionDuration: AppDurations.shimmer,
         pageBuilder: (context, animation, secondaryAnimation) {
           return Center(
             child: Material(
@@ -176,8 +179,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFEE7752), Color(0xFFD8363A)],
+                        gradient: LinearGradient(
+                          colors: [AppColors.salmon, AppColors.darkRed],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -265,8 +268,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                           onPressed: () => Navigator.of(context).pop(true),
                           child: Ink(
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFD8363A), Color(0xFFEE7752)],
+                              gradient: LinearGradient(
+                                colors: [AppColors.darkRed, AppColors.salmon],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -352,7 +355,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         child: ClipRRect(
           borderRadius: BorderRadius.circular(32),
           child: Container(
-            height: 170,
+            height: AppDimensions.cardHeightL,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -404,7 +407,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                 _buildMotivationalQuote(),
               const SizedBox(height: 6),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
+                duration: AppDurations.cardExpand,
                 child: Text(
                   subLabel,
                   key: ValueKey(subLabel),
@@ -436,8 +439,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
             },
             child: SlideAction(
               key: _key,
-              height: 56,
-              borderRadius: 16,
+              height: AppDimensions.buttonHeightL,
+              borderRadius: AppDimensions.radiusXL,
               elevation: 0,
               outerColor: Colors.transparent,
               innerColor: Colors.white,
@@ -486,7 +489,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
 
   Widget _buildMotivationalQuote() {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 600),
+      duration: AppDurations.slow,
       child: Text(
         _quotes[_quoteIndex],
         key: ValueKey(_quoteIndex),
