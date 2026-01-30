@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:park_janana/constants/app_colors.dart';
+import 'package:park_janana/constants/app_dimensions.dart';
 import 'package:park_janana/screens/home/personal_area_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/utils/profile_image_provider.dart';
@@ -52,9 +54,9 @@ class UserCard extends StatelessWidget {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFFFF8C00),
-                      Color.fromARGB(255, 63, 163, 251),
-                      Color(0xFFFF0000),
+                      AppColors.warningOrange,
+                      AppColors.lightBlue,
+                      AppColors.errorRed,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -128,12 +130,12 @@ class UserCard extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: AppDimensions.avatarXL,
+                    height: AppDimensions.avatarXL,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color.fromARGB(255, 255, 195, 64),
+                        color: AppColors.secondaryYellow,
                         width: 5,
                       ),
                     ),
