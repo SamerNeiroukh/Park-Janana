@@ -14,14 +14,18 @@ class ShiftService {
   final Map<String, UserModel> _workerCache = {};
 
   Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
-    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+    final DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     return _firestore
         .collection('shifts')
-        .where('date', isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(startOfWeek))
-        .where('date', isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(endOfWeek))
+        .where('date',
+            isGreaterThanOrEqualTo:
+                DateFormat('dd/MM/yyyy').format(startOfWeek))
+        .where('date',
+            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(endOfWeek))
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList());
   }
 
   Stream<List<ShiftModel>> getShiftsStream() {
@@ -39,7 +43,9 @@ class ShiftService {
           .where('date', isEqualTo: DateFormat('dd/MM/yyyy').format(date))
           .get();
 
-      return querySnapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList();
+      return querySnapshot.docs
+          .map((doc) => ShiftModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
       throw CustomException('שגיאה בשליפת המשמרות לתאריך זה.');
     }
@@ -47,7 +53,9 @@ class ShiftService {
 
   List<ShiftModel> sortShifts(List<ShiftModel> shifts, String sortOption) {
     if (sortOption == 'תאריך') {
-      shifts.sort((a, b) => DateFormat('dd/MM/yyyy').parse(a.date).compareTo(DateFormat('dd/MM/yyyy').parse(b.date)));
+      shifts.sort((a, b) => DateFormat('dd/MM/yyyy')
+          .parse(a.date)
+          .compareTo(DateFormat('dd/MM/yyyy').parse(b.date)));
     } else if (sortOption == 'מחלקה') {
       shifts.sort((a, b) => a.department.compareTo(b.department));
     }
@@ -63,8 +71,10 @@ class ShiftService {
     required int maxWorkers,
   }) async {
     try {
-      final String shiftId = _firebaseService.generateDocumentId(AppConstants.shiftsCollection);
-      final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+      final String shiftId =
+          _firebaseService.generateDocumentId(AppConstants.shiftsCollection);
+      final String currentUserId =
+          FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
 
       await _firebaseService.createShift({
         'shift_id': shiftId,
@@ -91,10 +101,12 @@ class ShiftService {
     }
   }
 
-  Future<void> addMessageToShift(String shiftId, String message, String managerId) async {
+  Future<void> addMessageToShift(
+      String shiftId, String message, String managerId) async {
     try {
-      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
-      DocumentSnapshot shiftDoc = await shiftRef.get();
+      final DocumentReference shiftRef =
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final DocumentSnapshot shiftDoc = await shiftRef.get();
 
       if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
 
@@ -146,112 +158,122 @@ class ShiftService {
     }
   }
 
-Future<void> approveWorker(String shiftId, String workerId) async {
-  final manager = FirebaseAuth.instance.currentUser;
-  if (manager == null) throw CustomException("Manager not logged in");
+  Future<void> approveWorker(String shiftId, String workerId) async {
+    final manager = FirebaseAuth.instance.currentUser;
+    if (manager == null) throw CustomException("Manager not logged in");
 
-  try {
-    // 1. Fetch worker info
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(workerId).get();
-    if (!userDoc.exists) throw CustomException("Worker not found");
+    try {
+      // 1. Fetch worker info
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(workerId)
+          .get();
+      if (!userDoc.exists) throw CustomException("Worker not found");
 
-    final userData = userDoc.data()!;
-    final fullName = userData['fullName'] ?? '';
-    final profilePicture = userData['profile_picture'] ?? '';
-    final role = userData['role'] ?? 'worker';
+      final userData = userDoc.data()!;
+      final fullName = userData['fullName'] ?? '';
+      final profilePicture = userData['profile_picture'] ?? '';
+      final role = userData['role'] ?? 'worker';
 
-    final decisionData = {
-      'userId': workerId,
-      'fullName': fullName,
-      'profilePicture': profilePicture,
-      'decision': 'accepted',
-      'decisionBy': manager.uid,
-      'decisionAt': Timestamp.now(),
-      'roleAtAssignment': role,
-      'requestedAt': Timestamp.now(), // ✅ Optional: Replace with actual request time if tracked
-    };
+      final decisionData = {
+        'userId': workerId,
+        'fullName': fullName,
+        'profilePicture': profilePicture,
+        'decision': 'accepted',
+        'decisionBy': manager.uid,
+        'decisionAt': Timestamp.now(),
+        'roleAtAssignment': role,
+        'requestedAt': Timestamp
+            .now(), // ✅ Optional: Replace with actual request time if tracked
+      };
 
-    await _firebaseService.updateShift(shiftId, {
-      'requestedWorkers': FieldValue.arrayRemove([workerId]),
-      'assignedWorkers': FieldValue.arrayUnion([workerId]),
-      'assignedWorkerData': FieldValue.arrayUnion([decisionData]),
-    });
-  } catch (e) {
-    throw CustomException("שגיאה באישור העובד: $e");
+      await _firebaseService.updateShift(shiftId, {
+        'requestedWorkers': FieldValue.arrayRemove([workerId]),
+        'assignedWorkers': FieldValue.arrayUnion([workerId]),
+        'assignedWorkerData': FieldValue.arrayUnion([decisionData]),
+      });
+    } catch (e) {
+      throw CustomException("שגיאה באישור העובד: $e");
+    }
   }
-}
 
-Future<void> rejectWorker(String shiftId, String workerId) async {
-  final manager = FirebaseAuth.instance.currentUser;
-  if (manager == null) throw CustomException("Manager not logged in");
+  Future<void> rejectWorker(String shiftId, String workerId) async {
+    final manager = FirebaseAuth.instance.currentUser;
+    if (manager == null) throw CustomException("Manager not logged in");
 
-  try {
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(workerId).get();
-    if (!userDoc.exists) throw CustomException("Worker not found");
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(workerId)
+          .get();
+      if (!userDoc.exists) throw CustomException("Worker not found");
 
-    final userData = userDoc.data()!;
-    final fullName = userData['fullName'] ?? '';
-    final profilePicture = userData['profile_picture'] ?? '';
-    final role = userData['role'] ?? 'worker';
+      final userData = userDoc.data()!;
+      final fullName = userData['fullName'] ?? '';
+      final profilePicture = userData['profile_picture'] ?? '';
+      final role = userData['role'] ?? 'worker';
 
-    final decisionData = {
-      'userId': workerId,
-      'fullName': fullName,
-      'profilePicture': profilePicture,
-      'decision': 'rejected',
-      'decisionBy': manager.uid,
-      'decisionAt': Timestamp.now(),
-      'roleAtAssignment': role,
-      'requestedAt': Timestamp.now(),
-    };
+      final decisionData = {
+        'userId': workerId,
+        'fullName': fullName,
+        'profilePicture': profilePicture,
+        'decision': 'rejected',
+        'decisionBy': manager.uid,
+        'decisionAt': Timestamp.now(),
+        'roleAtAssignment': role,
+        'requestedAt': Timestamp.now(),
+      };
 
-    await _firebaseService.updateShift(shiftId, {
-      'requestedWorkers': FieldValue.arrayRemove([workerId]),
-      'rejectedWorkerData': FieldValue.arrayUnion([decisionData]),
-    });
-  } catch (e) {
-    throw CustomException("שגיאה בדחיית העובד: $e");
+      await _firebaseService.updateShift(shiftId, {
+        'requestedWorkers': FieldValue.arrayRemove([workerId]),
+        'rejectedWorkerData': FieldValue.arrayUnion([decisionData]),
+      });
+    } catch (e) {
+      throw CustomException("שגיאה בדחיית העובד: $e");
+    }
   }
-}
 
   Future<void> removeWorker(String shiftId, String workerId) async {
-  final manager = FirebaseAuth.instance.currentUser;
-  if (manager == null) throw CustomException("Manager not logged in");
+    final manager = FirebaseAuth.instance.currentUser;
+    if (manager == null) throw CustomException("Manager not logged in");
 
-  try {
-    DocumentReference shiftRef = _firestore.collection('shifts').doc(shiftId);
-    DocumentSnapshot doc = await shiftRef.get();
+    try {
+      final DocumentReference shiftRef =
+          _firestore.collection('shifts').doc(shiftId);
+      final DocumentSnapshot doc = await shiftRef.get();
 
-    if (!doc.exists) throw CustomException("Shift not found");
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      if (!doc.exists) throw CustomException("Shift not found");
+      final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    List<dynamic> currentAssignedData = data['assignedWorkerData'] ?? [];
+      final List<dynamic> currentAssignedData =
+          data['assignedWorkerData'] ?? [];
 
-    // Update the specific worker entry
-    List<dynamic> updatedAssignedData = currentAssignedData.map((entry) {
-      if (entry['userId'] == workerId) {
-        return {
-          ...entry,
-          'decision': 'removed',
-          'removedAt': Timestamp.now(),
-          'removedBy': manager.uid,
-        };
-      }
-      return entry;
-    }).toList();
+      // Update the specific worker entry
+      final List<dynamic> updatedAssignedData =
+          currentAssignedData.map((entry) {
+        if (entry['userId'] == workerId) {
+          return {
+            ...entry,
+            'decision': 'removed',
+            'removedAt': Timestamp.now(),
+            'removedBy': manager.uid,
+          };
+        }
+        return entry;
+      }).toList();
 
-    await shiftRef.update({
-      'assignedWorkers': FieldValue.arrayRemove([workerId]),
-      'assignedWorkerData': updatedAssignedData,
-    });
-  } catch (e) {
-    throw CustomException("שגיאה בהסרת העובד: $e");
+      await shiftRef.update({
+        'assignedWorkers': FieldValue.arrayRemove([workerId]),
+        'assignedWorkerData': updatedAssignedData,
+      });
+    } catch (e) {
+      throw CustomException("שגיאה בהסרת העובד: $e");
+    }
   }
-}
 
   Future<List<UserModel>> fetchWorkerDetails(List<String> workerIds) async {
-    List<UserModel> workers = [];
-    List<String> missingWorkerIds = [];
+    final List<UserModel> workers = [];
+    final List<String> missingWorkerIds = [];
 
     for (String workerId in workerIds) {
       if (_workerCache.containsKey(workerId)) {
@@ -266,7 +288,8 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
         for (String workerId in missingWorkerIds) {
           final userDoc = await _firebaseService.getUser(workerId);
           if (userDoc.exists && userDoc.data() != null) {
-            UserModel worker = UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+            final UserModel worker =
+                UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
             _workerCache[workerId] = worker;
             workers.add(worker);
           }
@@ -279,15 +302,18 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
     return workers;
   }
 
-  Future<void> updateMessage(String shiftId, int timestamp, String newMessage) async {
+  Future<void> updateMessage(
+      String shiftId, int timestamp, String newMessage) async {
     try {
-      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
-      DocumentSnapshot shiftDoc = await shiftRef.get();
+      final DocumentReference shiftRef =
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final DocumentSnapshot shiftDoc = await shiftRef.get();
 
       if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
 
-      List messages = List.from(shiftDoc['messages'] ?? []);
-      int index = messages.indexWhere((msg) => msg['timestamp'] == timestamp);
+      final List messages = List.from(shiftDoc['messages'] ?? []);
+      final int index =
+          messages.indexWhere((msg) => msg['timestamp'] == timestamp);
       if (index != -1) {
         messages[index]['message'] = newMessage;
         await shiftRef.update({'messages': messages});
@@ -299,12 +325,13 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
 
   Future<void> deleteMessage(String shiftId, int timestamp) async {
     try {
-      DocumentReference shiftRef = _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
-      DocumentSnapshot shiftDoc = await shiftRef.get();
+      final DocumentReference shiftRef =
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final DocumentSnapshot shiftDoc = await shiftRef.get();
 
       if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
 
-      List messages = List.from(shiftDoc['messages'] ?? []);
+      final List messages = List.from(shiftDoc['messages'] ?? []);
       messages.removeWhere((msg) => msg['timestamp'] == timestamp);
       await shiftRef.update({'messages': messages});
     } catch (e) {
@@ -313,13 +340,17 @@ Future<void> rejectWorker(String shiftId, String workerId) async {
   }
 
   Future<List<ShiftModel>> getShiftsByWeek(DateTime weekStart) async {
-    final weekEnd = weekStart.add(Duration(days: 6));
+    final weekEnd = weekStart.add(const Duration(days: 6));
     final querySnapshot = await FirebaseFirestore.instance
         .collection('shifts')
-        .where('date', isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekStart))
-        .where('date', isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekEnd))
+        .where('date',
+            isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekStart))
+        .where('date',
+            isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekEnd))
         .get();
 
-    return querySnapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList();
+    return querySnapshot.docs
+        .map((doc) => ShiftModel.fromFirestore(doc))
+        .toList();
   }
 }

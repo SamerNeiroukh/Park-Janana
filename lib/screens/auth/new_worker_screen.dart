@@ -13,18 +13,21 @@ class NewWorkerScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Directionality(
-            textDirection: TextDirection.rtl, // Set text direction to Right-to-Left
+            textDirection:
+                TextDirection.rtl, // Set text direction to Right-to-Left
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center, // Center align content
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Center align content
               children: [
                 Text(
                   'עובד חדש? ברוך הבא!',
-                  style: AppTheme.titleStyle.copyWith(color: AppColors.secondary), // ✅ Use Yellow
+                  style: AppTheme.titleStyle
+                      .copyWith(color: AppColors.secondary), // ✅ Use Yellow
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16.0),
-                Text(
+                const Text(
                   'ליצירת חשבון עובד חדש בפארק גננה, צור קשר עם ההנהלה או שלח פניה.',
                   style: AppTheme.bodyText,
                   textAlign: TextAlign.center,
@@ -40,7 +43,8 @@ class NewWorkerScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    _showRegistrationForm(context); // Show the registration form
+                    _showRegistrationForm(
+                        context); // Show the registration form
                   },
                   child: const Text(
                     'שלח פניה',

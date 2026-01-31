@@ -53,7 +53,9 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
           const UserHeader(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingM),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingXL,
+                  vertical: AppDimensions.paddingM),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -117,7 +119,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                     ),
                   ),
                   const SizedBox(height: AppDimensions.spacingS),
-                  Text(
+                  const Text(
                     "רשימת המשמרות של העובד",
                     textAlign: TextAlign.right,
                     style: TextStyle(
@@ -157,16 +159,19 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
       child: ElevatedButton(
         onPressed: () => setState(() => filter = value),
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isSelected ? AppColors.primary : AppColors.greyLight,
-          foregroundColor: isSelected ? AppColors.textWhite : AppColors.textPrimary,
-          shape:
-              RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXXL),
-          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL, vertical: AppDimensions.paddingS),
+          backgroundColor: isSelected ? AppColors.primary : AppColors.greyLight,
+          foregroundColor:
+              isSelected ? AppColors.textWhite : AppColors.textPrimary,
+          shape: RoundedRectangleBorder(
+              borderRadius: AppDimensions.borderRadiusXXL),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingL,
+              vertical: AppDimensions.paddingS),
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: AppDimensions.fontS, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              fontSize: AppDimensions.fontS, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -289,11 +294,13 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                               ? DateFormat('dd/MM/yyyy').format(date)
                               : "--",
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: AppDimensions.fontL),
+                              fontWeight: FontWeight.bold,
+                              fontSize: AppDimensions.fontL),
                         ),
                         const SizedBox(width: AppDimensions.spacingM),
                         const Icon(Icons.calendar_today,
-                            size: AppDimensions.iconS, color: AppColors.primary),
+                            size: AppDimensions.iconS,
+                            color: AppColors.primary),
                       ],
                     ),
                     const SizedBox(height: AppDimensions.spacingS),

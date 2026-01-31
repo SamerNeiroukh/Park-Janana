@@ -17,7 +17,8 @@ class WorkerTaskDetailsScreen extends StatefulWidget {
   const WorkerTaskDetailsScreen({super.key, required this.task});
 
   @override
-  State<WorkerTaskDetailsScreen> createState() => _WorkerTaskDetailsScreenState();
+  State<WorkerTaskDetailsScreen> createState() =>
+      _WorkerTaskDetailsScreenState();
 }
 
 class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
@@ -41,7 +42,8 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   Future<void> _fetchTaskAndWorkers() async {
     final updatedTask = await _taskService.getTaskById(widget.task.id);
     if (updatedTask != null) {
-      final workers = await _workerService.getUsersByIds(updatedTask.assignedTo);
+      final workers =
+          await _workerService.getUsersByIds(updatedTask.assignedTo);
       setState(() {
         task = updatedTask;
         _isWorker = task.assignedTo.contains(_currentUid ?? "");
@@ -56,13 +58,14 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null) return;
+    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null)
+      return;
 
     setState(() => _isSubmitting = true);
 
     try {
       await _taskService.addComment(task.id, {
-        'by': _currentUid!,
+        'by': _currentUid,
         'message': _commentController.text,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
@@ -81,7 +84,8 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final String userId = _currentUid ?? '';
-    final currentWorkerStatus = task.workerProgress[userId]?['status'] ?? 'pending';
+    final currentWorkerStatus =
+        task.workerProgress[userId]?['status'] ?? 'pending';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -104,8 +108,8 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                       TaskDescriptionSection(
                         description: task.description,
                         time: DateFormat('HH:mm').format(task.dueDate.toDate()),
-                        dateFormatted:
-                            DateFormat('dd/MM/yyyy').format(task.dueDate.toDate()),
+                        dateFormatted: DateFormat('dd/MM/yyyy')
+                            .format(task.dueDate.toDate()),
                         isManager: false,
                         task: task,
                       ),
@@ -139,13 +143,15 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                       if (_isWorker && currentWorkerStatus == 'pending')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('in_progress'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange),
                           child: const Text("🚧 התחל משימה"),
                         ),
                       if (_isWorker && currentWorkerStatus == 'in_progress')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('done'),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green),
                           child: const Text("✅ סיים משימה"),
                         ),
                     ],

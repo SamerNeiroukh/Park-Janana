@@ -13,45 +13,50 @@ class AuthService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // 🟢 Create a new user with a default profile picture uploaded to Firebase
-Future<void> createUser(String email, String password, String fullName, String idNumber, String phoneNumber) async {
-  try {
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    String uid = userCredential.user!.uid;
+  Future<void> createUser(String email, String password, String fullName,
+      String idNumber, String phoneNumber) async {
+    try {
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final String uid = userCredential.user!.uid;
 
-    // ✅ Upload default profile picture to Firebase Storage
-    String defaultProfilePictureUrl = await _uploadDefaultProfilePicture(uid);
+      // ✅ Upload default profile picture to Firebase Storage
+      final String defaultProfilePictureUrl =
+          await _uploadDefaultProfilePicture(uid);
 
-    // ✅ Add user to Firestore with approved: false
-    await _firebaseService.addUser({
-      'uid': uid,
-      'email': email,
-      'fullName': fullName,
-      'idNumber': idNumber,
-      'phoneNumber': phoneNumber,
-      'profile_picture': defaultProfilePictureUrl,
-      'role': 'worker',
-      'approved': false, // 🔥 This line is required
-    });
+      // ✅ Add user to Firestore with approved: false
+      await _firebaseService.addUser({
+        'uid': uid,
+        'email': email,
+        'fullName': fullName,
+        'idNumber': idNumber,
+        'phoneNumber': phoneNumber,
+        'profile_picture': defaultProfilePictureUrl,
+        'role': 'worker',
+        'approved': false, // 🔥 This line is required
+      });
 
-    // ✅ Cache user role
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userRole', 'worker');
-  } catch (e) {
-    throw CustomException('שגיאה ביצירת משתמש.');
+      // ✅ Cache user role
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userRole', 'worker');
+    } catch (e) {
+      throw CustomException('שגיאה ביצירת משתמש.');
+    }
   }
-}
 
   // 🟢 Upload default profile picture to Firebase Storage
   Future<String> _uploadDefaultProfilePicture(String uid) async {
     try {
       // Load the default profile image from assets as bytes
-      final ByteData byteData = await rootBundle.load('assets/images/default_profile.png');
+      final ByteData byteData =
+          await rootBundle.load('assets/images/default_profile.png');
       final Uint8List imageData = byteData.buffer.asUint8List();
 
-      Reference storageRef = _storage.ref().child('profile_pictures/$uid/profile.jpg');
+      final Reference storageRef =
+          _storage.ref().child('profile_pictures/$uid/profile.jpg');
 
       // Upload bytes directly to Firebase Storage
       await storageRef.putData(imageData);
@@ -64,12 +69,13 @@ Future<void> createUser(String email, String password, String fullName, String i
   // 🟢 Sign in with email and password
   Future<void> signIn(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      String uid = userCredential.user!.uid;
+      final String uid = userCredential.user!.uid;
       final userDoc = await _firebaseService.getUser(uid);
 
       if (!userDoc.exists) {
@@ -79,7 +85,7 @@ Future<void> createUser(String email, String password, String fullName, String i
       final data = userDoc.data() as Map<String, dynamic>;
 
       // Check if account is approved
-      bool isApproved = data['approved'] ?? false;
+      final bool isApproved = data['approved'] ?? false;
 
       if (!isApproved) {
         await _auth.signOut(); // Sign out immediately
@@ -97,7 +103,8 @@ Future<void> createUser(String email, String password, String fullName, String i
       } else if (e.code == 'invalid-email') {
         throw CustomException('כתובת האימייל לא תקינה');
       } else if (e.code == 'too-many-requests') {
-        throw CustomException('יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.');
+        throw CustomException(
+            'יותר מדי ניסיונות התחברות. אנא נסה שוב מאוחר יותר.');
       } else {
         throw CustomException('מייל או סיסמה לא נכונים.');
       }
@@ -112,7 +119,7 @@ Future<void> createUser(String email, String password, String fullName, String i
   // 🟢 Fetch user role (Checks Cache First)
   Future<String?> fetchUserRole(String uid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cachedRole = prefs.getString('userRole');
+    final String? cachedRole = prefs.getString('userRole');
 
     if (cachedRole != null && cachedRole.isNotEmpty) {
       return cachedRole; // ✅ Return cached role if available
@@ -138,10 +145,11 @@ Future<void> createUser(String email, String password, String fullName, String i
   // 🟢 Fetch user profile with default profile picture fallback (Checks Cache First)
   Future<Map<String, dynamic>?> fetchUserProfile(String uid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cachedProfile = prefs.getString('userProfile');
+    final String? cachedProfile = prefs.getString('userProfile');
 
     if (cachedProfile != null && cachedProfile.isNotEmpty) {
-      return Map<String, dynamic>.from(jsonDecode(cachedProfile)); // ✅ Return cached profile if available
+      return Map<String, dynamic>.from(
+          jsonDecode(cachedProfile)); // ✅ Return cached profile if available
     }
 
     try {
@@ -151,9 +159,11 @@ Future<void> createUser(String email, String password, String fullName, String i
         final data = userDoc.data() as Map<String, dynamic>;
 
         // Ensure profile picture URL is present
-        String profilePicture = (data['profile_picture'] != null && data['profile_picture'].isNotEmpty)
+        final String profilePicture = (data['profile_picture'] != null &&
+                data['profile_picture'].isNotEmpty)
             ? data['profile_picture']
-            : await _uploadDefaultProfilePicture(uid); // ✅ Upload default if missing
+            : await _uploadDefaultProfilePicture(
+                uid); // ✅ Upload default if missing
 
         final profileData = {
           'uid': data['uid'] ?? '',
@@ -165,7 +175,8 @@ Future<void> createUser(String email, String password, String fullName, String i
           'role': data['role'] ?? '',
         };
 
-        await prefs.setString('userProfile', jsonEncode(profileData)); // ✅ Cache profile
+        await prefs.setString(
+            'userProfile', jsonEncode(profileData)); // ✅ Cache profile
 
         return profileData;
       } else {
@@ -191,15 +202,16 @@ Future<void> createUser(String email, String password, String fullName, String i
   }
 
   // 🟢 Update Profile Picture
-  Future<void> updateProfilePicture(String uid, String profilePictureUrl) async {
+  Future<void> updateProfilePicture(
+      String uid, String profilePictureUrl) async {
     await _firebaseService.updateProfilePicture(uid, profilePictureUrl);
 
     // ✅ Update Cached Profile Picture
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cachedProfile = prefs.getString('userProfile');
+    final String? cachedProfile = prefs.getString('userProfile');
 
     if (cachedProfile != null) {
-      Map<String, dynamic> profileData = jsonDecode(cachedProfile);
+      final Map<String, dynamic> profileData = jsonDecode(cachedProfile);
       profileData['profile_picture'] = profilePictureUrl;
       await prefs.setString('userProfile', jsonEncode(profileData));
     }

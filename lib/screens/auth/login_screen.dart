@@ -68,9 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMsg),
-              backgroundColor: errorMsg.contains('לא אושר')
-                ? Colors.orange
-                : Colors.red,
+              backgroundColor:
+                  errorMsg.contains('לא אושר') ? Colors.orange : Colors.red,
             ),
           );
         }
@@ -113,7 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: AutofillGroup(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: AppDimensions.maxWidthForm),
+                  constraints: const BoxConstraints(
+                      maxWidth: AppDimensions.maxWidthForm),
                   padding: const EdgeInsets.all(AppDimensions.paddingXXXL),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.primary.withOpacity(0.1),
                           borderRadius: AppDimensions.borderRadiusCircle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.person,
                           size: AppDimensions.iconLarge,
                           color: AppColors.primary,
@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       const SizedBox(height: AppDimensions.spacingM),
-                      Text(
+                      const Text(
                         'אנא הכנס את פרטי הכניסה שלך',
                         style: TextStyle(
                           fontSize: AppDimensions.fontL,
@@ -166,13 +166,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       const SizedBox(height: AppDimensions.spacingHuge),
-                      
+
                       // Email Field
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: AppDimensions.paddingS, right: AppDimensions.paddingXS),
+                          const Padding(
+                            padding: EdgeInsets.only(
+                                bottom: AppDimensions.paddingS,
+                                right: AppDimensions.paddingXS),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -184,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(width: AppDimensions.spacingM),
+                                SizedBox(width: AppDimensions.spacingM),
                                 Icon(
                                   Icons.email_outlined,
                                   size: AppDimensions.iconM,
@@ -200,28 +202,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               fillColor: AppColors.background,
                               border: OutlineInputBorder(
                                 borderRadius: AppDimensions.borderRadiusL,
-                                borderSide: BorderSide(color: AppColors.border),
+                                borderSide:
+                                    const BorderSide(color: AppColors.border),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: AppDimensions.borderRadiusL,
-                                borderSide: BorderSide(color: AppColors.border),
+                                borderSide:
+                                    const BorderSide(color: AppColors.border),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: AppColors.primary,
                                   width: AppDimensions.borderWidthM,
                                 ),
                                 borderRadius: AppDimensions.borderRadiusL,
                               ),
                               errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: AppColors.error,
                                   width: AppDimensions.borderWidthS,
                                 ),
                                 borderRadius: AppDimensions.borderRadiusL,
                               ),
                               focusedErrorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: AppColors.error,
                                   width: AppDimensions.borderWidthM,
                                 ),
@@ -254,8 +258,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: AppDimensions.paddingS, right: AppDimensions.paddingXS),
+                          const Padding(
+                            padding: EdgeInsets.only(
+                                bottom: AppDimensions.paddingS,
+                                right: AppDimensions.paddingXS),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -267,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(width: AppDimensions.spacingM),
+                                SizedBox(width: AppDimensions.spacingM),
                                 Icon(
                                   Icons.lock_outlined,
                                   size: AppDimensions.iconM,
@@ -284,28 +290,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               fillColor: AppColors.background,
                               border: OutlineInputBorder(
                                 borderRadius: AppDimensions.borderRadiusL,
-                                borderSide: BorderSide(color: AppColors.border),
+                                borderSide:
+                                    const BorderSide(color: AppColors.border),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: AppDimensions.borderRadiusL,
-                                borderSide: BorderSide(color: AppColors.border),
+                                borderSide:
+                                    const BorderSide(color: AppColors.border),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: AppColors.primary,
                                   width: AppDimensions.borderWidthM,
                                 ),
                                 borderRadius: AppDimensions.borderRadiusL,
                               ),
                               errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: AppColors.error,
                                   width: AppDimensions.borderWidthS,
                                 ),
                                 borderRadius: AppDimensions.borderRadiusL,
                               ),
                               focusedErrorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: AppColors.error,
                                   width: AppDimensions.borderWidthM,
                                 ),
@@ -354,7 +362,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ForgotPasswordScreen(),
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
                               ),
                             );
                           },
@@ -385,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           onPressed: _isLoading ? null : _login,
                           child: _isLoading
-                              ? SizedBox(
+                              ? const SizedBox(
                                   width: AppDimensions.loaderS,
                                   height: AppDimensions.loaderS,
                                   child: CircularProgressIndicator(
@@ -395,7 +404,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                 )
-                              : Text(
+                              : const Text(
                                   'כניסה',
                                   style: TextStyle(
                                     fontSize: AppDimensions.fontXXL,

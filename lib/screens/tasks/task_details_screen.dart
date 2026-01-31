@@ -56,18 +56,18 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
   Future<void> _updateWorkerStatus(String newStatus) async {
     if (_currentUid == null) return;
-    await _taskService.updateWorkerStatus(
-        task.id, _currentUid!, newStatus);
+    await _taskService.updateWorkerStatus(task.id, _currentUid!, newStatus);
     await _fetchTaskAndWorkers();
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null) return;
+    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null)
+      return;
     setState(() => _isSubmitting = true);
 
     try {
       await _taskService.addComment(task.id, {
-        'by': _currentUid!,
+        'by': _currentUid,
         'message': _commentController.text,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
@@ -122,7 +122,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingML, vertical: AppDimensions.paddingXS),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.paddingML,
+          vertical: AppDimensions.paddingXS),
       decoration: BoxDecoration(
         color: bgColor.withOpacity(0.1),
         borderRadius: AppDimensions.borderRadiusXXL,
@@ -184,7 +186,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         ],
                       ),
                       Text(task.title,
-                          style: AppTheme.screenTitle.copyWith(fontSize: AppDimensions.fontTitle)),
+                          style: AppTheme.screenTitle
+                              .copyWith(fontSize: AppDimensions.fontTitle)),
                       const SizedBox(height: AppDimensions.spacingXL),
                       TaskDescriptionSection(
                         description: task.description,
@@ -194,7 +197,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         task: task,
                       ),
                       const SizedBox(height: AppDimensions.spacingXXXL),
-                      Text("עובדים שהוקצו למשימה",
+                      const Text("עובדים שהוקצו למשימה",
                           style: AppTheme.sectionTitle),
                       const SizedBox(height: AppDimensions.spacingM),
                       ..._assignedWorkers.map((user) {
@@ -239,7 +242,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                         onPressed: _isSubmitting ? null : _addComment,
                         style: AppTheme.primaryButtonStyle,
                         child: _isSubmitting
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: AppDimensions.iconM,
                                 height: AppDimensions.iconM,
                                 child: CircularProgressIndicator(

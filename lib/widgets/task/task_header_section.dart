@@ -17,7 +17,7 @@ class TaskHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String time = DateFormat('HH:mm').format(dueDate);
+    final String time = DateFormat('HH:mm').format(dueDate);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

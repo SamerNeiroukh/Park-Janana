@@ -179,7 +179,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [AppColors.salmon, AppColors.darkRed],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -268,7 +268,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                           onPressed: () => Navigator.of(context).pop(true),
                           child: Ink(
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 colors: [AppColors.darkRed, AppColors.salmon],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -360,8 +360,11 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isClockedIn
-                    ? [Color(0xFFFF6A6A), Color(0xFFFFB88C)]
-                    : [Color.fromARGB(255, 79, 88, 254), Color(0xFF00f2fe)],
+                    ? [const Color(0xFFFF6A6A), const Color(0xFFFFB88C)]
+                    : [
+                        const Color.fromARGB(255, 79, 88, 254),
+                        const Color(0xFF00f2fe)
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

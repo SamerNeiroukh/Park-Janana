@@ -62,7 +62,7 @@ class WorkerReportsScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [AppColors.lightBlue, AppColors.deepBlue],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
@@ -83,7 +83,7 @@ class WorkerReportsScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [AppColors.redLight, AppColors.redDark],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
@@ -104,7 +104,7 @@ class WorkerReportsScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [AppColors.greenMedium, AppColors.darkGreen],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
@@ -137,7 +137,8 @@ class _ReportCard extends StatefulWidget {
   State<_ReportCard> createState() => _ReportCardState();
 }
 
-class _ReportCardState extends State<_ReportCard> with SingleTickerProviderStateMixin {
+class _ReportCardState extends State<_ReportCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnim;
 
@@ -187,7 +188,8 @@ class _ReportCardState extends State<_ReportCard> with SingleTickerProviderState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(widget.icon, size: AppDimensions.iconLarge, color: Colors.white),
+              Icon(widget.icon,
+                  size: AppDimensions.iconLarge, color: Colors.white),
               const SizedBox(height: AppDimensions.spacingM),
               Text(
                 widget.label,

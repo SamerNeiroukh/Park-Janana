@@ -46,7 +46,8 @@ class WelcomeScreen extends StatelessWidget {
             ),
             // 🔹 Logo & Buttons Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -63,7 +64,8 @@ class WelcomeScreen extends StatelessWidget {
                     context: context,
                     label: AppStrings.loginButtonText,
                     color: AppColors.primaryBlue,
-                    onPressed: () => _navigateToScreen(context, const LoginScreen()),
+                    onPressed: () =>
+                        _navigateToScreen(context, const LoginScreen()),
                   ),
                   const SizedBox(height: 16.0),
                   // 🔹 New Worker Registration Button
@@ -71,7 +73,8 @@ class WelcomeScreen extends StatelessWidget {
                     context: context,
                     label: AppStrings.newWorkerButtonText,
                     color: AppColors.secondaryYellow,
-                    onPressed: () => _navigateToScreen(context, const NewWorkerScreen()),
+                    onPressed: () =>
+                        _navigateToScreen(context, const NewWorkerScreen()),
                   ),
                 ],
               ),
@@ -115,8 +118,9 @@ class WelcomeScreen extends StatelessWidget {
           const end = Offset.zero;
           const curve = Curves.easeInOut;
 
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
+          final tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final offsetAnimation = animation.drive(tween);
 
           return SlideTransition(
             position: offsetAnimation,
@@ -132,7 +136,7 @@ class WelcomeScreen extends StatelessWidget {
 class BottomInclinedClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    Path path = Path();
+    final Path path = Path();
     path.lineTo(0, size.height - 50);
     path.quadraticBezierTo(
       size.width / 2,

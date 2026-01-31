@@ -32,12 +32,14 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                     builder: (context) => Directionality(
                       textDirection: TextDirection.rtl,
                       child: AlertDialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        title: Row(
-                          children:  [
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        title: const Row(
+                          children: [
                             Icon(Icons.logout, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('התנתקות', style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text('התנתקות',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                         content: const Padding(
@@ -54,24 +56,30 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.black,
                               backgroundColor: Colors.grey,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
                             ),
                             onPressed: () => Navigator.of(context).pop(false),
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              child: Text('ביטול', style: TextStyle(fontSize: 16)),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child:
+                                  Text('ביטול', style: TextStyle(fontSize: 16)),
                             ),
                           ),
                           TextButton(
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.white,
                               backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
                             ),
                             onPressed: () => Navigator.of(context).pop(true),
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              child: Text('התנתק', style: TextStyle(fontSize: 16)),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child:
+                                  Text('התנתק', style: TextStyle(fontSize: 16)),
                             ),
                           ),
                         ],

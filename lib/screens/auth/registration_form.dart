@@ -141,9 +141,10 @@ class _RegistrationFormState extends State<RegistrationForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('טופס הרשמה', style: AppTheme.titleStyle),
+                const Text('טופס הרשמה', style: AppTheme.titleStyle),
                 const SizedBox(height: 16.0),
-                _buildTextField(_fullNameController, 'שם מלא', 'הכנס את שמך המלא',
+                _buildTextField(
+                    _fullNameController, 'שם מלא', 'הכנס את שמך המלא',
                     errorText: _nameError, autofillHints: [AutofillHints.name]),
                 _buildTextField(
                   _phoneNumberController,
@@ -165,7 +166,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
                     errorText: _idError),
                 _buildTextField(
                     _emailController, 'אימייל', 'הכנס את כתובת האימייל שלך',
-                    errorText: _emailError, autofillHints: [AutofillHints.email]),
+                    errorText: _emailError,
+                    autofillHints: [AutofillHints.email]),
                 _buildTextField(_passwordController, 'סיסמה', 'בחר סיסמה',
                     obscureText: true,
                     errorText:
@@ -173,8 +175,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
                             ? _passwordError
                             : null,
                     autofillHints: [AutofillHints.newPassword]),
-                _buildTextField(
-                    _confirmPasswordController, 'אשר סיסמה', 'הכנס שוב את הסיסמה',
+                _buildTextField(_confirmPasswordController, 'אשר סיסמה',
+                    'הכנס שוב את הסיסמה',
                     obscureText: true,
                     errorText: _passwordError == 'הסיסמאות אינן תואמות'
                         ? _passwordError
@@ -191,13 +193,15 @@ class _RegistrationFormState extends State<RegistrationForm> {
                           ),
                         ),
                         onPressed: _registerUser,
-                        child: Text('שלח', style: AppTheme.buttonTextStyle),
+                        child:
+                            const Text('שלח', style: AppTheme.buttonTextStyle),
                       ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('חזור', style: AppTheme.secondaryButtonTextStyle),
+                  child: const Text('חזור',
+                      style: AppTheme.secondaryButtonTextStyle),
                 ),
               ],
             ),

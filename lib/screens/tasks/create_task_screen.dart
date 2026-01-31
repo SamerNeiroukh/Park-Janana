@@ -92,21 +92,24 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text("פרטי משימה", style: AppTheme.sectionTitle),
+                    const Text("פרטי משימה", style: AppTheme.sectionTitle),
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: _titleController,
-                      decoration: AppTheme.inputDecoration(hintText: "כותרת המשימה"),
-                      validator: (val) => val == null || val.isEmpty ? "שדה חובה" : null,
+                      decoration:
+                          AppTheme.inputDecoration(hintText: "כותרת המשימה"),
+                      validator: (val) =>
+                          val == null || val.isEmpty ? "שדה חובה" : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _descriptionController,
                       maxLines: 3,
-                      decoration: AppTheme.inputDecoration(hintText: "תיאור המשימה"),
+                      decoration:
+                          AppTheme.inputDecoration(hintText: "תיאור המשימה"),
                     ),
                     const SizedBox(height: 16),
-                    Text("הקצאת עובדים", style: AppTheme.sectionTitle),
+                    const Text("הקצאת עובדים", style: AppTheme.sectionTitle),
                     const SizedBox(height: 8),
                     Autocomplete<UserModel>(
                       optionsBuilder: (TextEditingValue textEditingValue) {
@@ -114,16 +117,21 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           return const Iterable<UserModel>.empty();
                         }
                         return _allUsers.where((user) =>
-                          user.fullName.toLowerCase().contains(textEditingValue.text.toLowerCase()) ||
-                          user.role.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                            user.fullName.toLowerCase().contains(
+                                textEditingValue.text.toLowerCase()) ||
+                            user.role
+                                .toLowerCase()
+                                .contains(textEditingValue.text.toLowerCase()));
                       },
                       displayStringForOption: (UserModel user) => user.fullName,
-                      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onFieldSubmitted) {
                         _searchController.text = controller.text;
                         return TextField(
                           controller: controller,
                           focusNode: focusNode,
-                          decoration: AppTheme.inputDecoration(hintText: "🔍 חיפוש לפי שם או תפקיד"),
+                          decoration: AppTheme.inputDecoration(
+                              hintText: "🔍 חיפוש לפי שם או תפקיד"),
                         );
                       },
                       onSelected: (UserModel user) {
@@ -140,13 +148,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 padding: EdgeInsets.zero,
                                 itemCount: options.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  final UserModel user = options.elementAt(index);
+                                  final UserModel user =
+                                      options.elementAt(index);
                                   final selected = _isSelected(user);
                                   return ListTile(
                                     title: Text(user.fullName),
                                     subtitle: Text(user.role),
                                     trailing: Icon(
-                                      selected ? Icons.check_circle : Icons.person_add,
+                                      selected
+                                          ? Icons.check_circle
+                                          : Icons.person_add,
                                       color: selected ? Colors.green : null,
                                     ),
                                     onTap: () => onSelected(user),
@@ -176,10 +187,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       decoration: AppTheme.inputDecoration(hintText: "עדיפות"),
                       items: const [
                         DropdownMenuItem(value: 'low', child: Text('נמוכה')),
-                        DropdownMenuItem(value: 'medium', child: Text('בינונית')),
+                        DropdownMenuItem(
+                            value: 'medium', child: Text('בינונית')),
                         DropdownMenuItem(value: 'high', child: Text('גבוהה')),
                       ],
-                      onChanged: (val) => setState(() => _priority = val ?? 'medium'),
+                      onChanged: (val) =>
+                          setState(() => _priority = val ?? 'medium'),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
@@ -187,13 +200,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       decoration: AppTheme.inputDecoration(hintText: "מחלקה"),
                       items: const [
                         DropdownMenuItem(value: 'general', child: Text('כללי')),
-                        DropdownMenuItem(value: 'paintball', child: Text('פיינטבול')),
-                        DropdownMenuItem(value: 'ropes', child: Text('פארק חבלים')),
-                        DropdownMenuItem(value: 'carting', child: Text('קרטינג')),
-                        DropdownMenuItem(value: 'water_park', child: Text('פארק מים')),
-                        DropdownMenuItem(value: 'jimbory', child: Text('ג׳ימבורי')),
+                        DropdownMenuItem(
+                            value: 'paintball', child: Text('פיינטבול')),
+                        DropdownMenuItem(
+                            value: 'ropes', child: Text('פארק חבלים')),
+                        DropdownMenuItem(
+                            value: 'carting', child: Text('קרטינג')),
+                        DropdownMenuItem(
+                            value: 'water_park', child: Text('פארק מים')),
+                        DropdownMenuItem(
+                            value: 'jimbory', child: Text('ג׳ימבורי')),
                       ],
-                      onChanged: (val) => setState(() => _department = val ?? 'general'),
+                      onChanged: (val) =>
+                          setState(() => _department = val ?? 'general'),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -246,7 +265,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }
 
   Future<void> _pickTime() async {
-    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final picked =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null) setState(() => _dueTime = picked);
   }
 
