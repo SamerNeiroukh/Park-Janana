@@ -38,8 +38,8 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
       body: Column(
         children: [
           const UserHeader(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.0),
             child: Text("המשימות שלי", style: AppTheme.screenTitle),
           ),
           _buildDateNavigation(),
@@ -65,17 +65,20 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                       }).toList();
                       if (_selectedStatus != 'all') {
                         tasks = tasks.where((t) {
-                          final workerStatus =
-                              t.workerProgress[currentUid]?['status'] ?? 'pending';
+                          final workerStatus = t.workerProgress[currentUid]
+                                  ?['status'] ??
+                              'pending';
                           return workerStatus == _selectedStatus;
                         }).toList();
                       }
                       return RefreshIndicator(
                         onRefresh: () => _refreshTasks(currentUid),
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           itemCount: tasks.length,
-                          itemBuilder: (context, index) => _buildTaskCard(tasks[index], currentUid),
+                          itemBuilder: (context, index) =>
+                              _buildTaskCard(tasks[index], currentUid),
                         ),
                       );
                     },
@@ -93,26 +96,36 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(icon: const Icon(Icons.chevron_left, size: 30), onPressed: () => _changeDate(-1)),
+          IconButton(
+              icon: const Icon(Icons.chevron_left, size: 30),
+              onPressed: () => _changeDate(-1)),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.white, Colors.grey.shade100]),
+              gradient:
+                  LinearGradient(colors: [Colors.white, Colors.grey.shade100]),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10)],
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10)
+              ],
             ),
             child: Row(
               children: [
-                Text(formattedDate, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(formattedDate,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _pickDate,
-                  child: const Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
+                  child: const Icon(Icons.calendar_today,
+                      size: 20, color: AppColors.primary),
                 ),
               ],
             ),
           ),
-          IconButton(icon: const Icon(Icons.chevron_right, size: 30), onPressed: () => _changeDate(1)),
+          IconButton(
+              icon: const Icon(Icons.chevron_right, size: 30),
+              onPressed: () => _changeDate(1)),
         ],
       ),
     );
@@ -158,16 +171,21 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 child: ElevatedButton(
-                  onPressed: () => setState(() => _selectedStatus = data['value']),
+                  onPressed: () =>
+                      setState(() => _selectedStatus = data['value']),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isSelected ? data['color'] : data['color'].withOpacity(0.2),
+                    backgroundColor: isSelected
+                        ? data['color']
+                        : data['color'].withOpacity(0.2),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
                     elevation: isSelected ? 4 : 0,
                   ),
                   child: FittedBox(
-                    child: Text(data['label'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(data['label'],
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -179,10 +197,11 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
   }
 
   Widget _buildTaskCard(TaskModel task, String uid) {
-    final String workerStatus = task.workerProgress[uid]?['status'] ?? 'pending';
+    final String workerStatus =
+        task.workerProgress[uid]?['status'] ?? 'pending';
     final DateTime date = task.dueDate.toDate();
     final String time = DateFormat('HH:mm').format(date);
-    Color bgColor = workerStatus == 'done'
+    final Color bgColor = workerStatus == 'done'
         ? Colors.green.shade50
         : workerStatus == 'in_progress'
             ? Colors.orange.shade50
@@ -248,8 +267,10 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (workerStatus != 'done') LiveCountdownTimer(dueDate: task.dueDate.toDate()),
-                if (workerStatus != 'done') _buildActionButtons(task, workerStatus, uid),
+                if (workerStatus != 'done')
+                  LiveCountdownTimer(dueDate: task.dueDate.toDate()),
+                if (workerStatus != 'done')
+                  _buildActionButtons(task, workerStatus, uid),
               ],
             )
           ],
@@ -277,7 +298,8 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     return Chip(
       labelPadding: const EdgeInsets.symmetric(horizontal: 10),
       backgroundColor: color.withOpacity(0.15),
-      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+      label: Text(label,
+          style: TextStyle(color: color, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -290,7 +312,8 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text("התחל"),
           ),
@@ -300,7 +323,8 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text("סיום"),
           ),
@@ -330,7 +354,8 @@ class _LiveCountdownTimerState extends State<LiveCountdownTimer> {
   void initState() {
     super.initState();
     _updateRemainingTime();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateRemainingTime());
+    _timer = Timer.periodic(
+        const Duration(seconds: 1), (_) => _updateRemainingTime());
   }
 
   void _updateRemainingTime() {
@@ -367,7 +392,8 @@ class _LiveCountdownTimerState extends State<LiveCountdownTimer> {
       final hours = _remaining.inHours;
       final minutes = _remaining.inMinutes % 60;
       final seconds = _remaining.inSeconds % 60;
-      label = "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+      label =
+          "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
       color = _remaining.inMinutes < 60 ? Colors.red : Colors.green;
     }
 
@@ -375,7 +401,9 @@ class _LiveCountdownTimerState extends State<LiveCountdownTimer> {
       children: [
         Image.asset('assets/gifs/sand_watch1.gif', height: 28, width: 28),
         const SizedBox(width: 6),
-        Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(label,
+            style: TextStyle(
+                color: color, fontWeight: FontWeight.bold, fontSize: 14)),
       ],
     );
   }

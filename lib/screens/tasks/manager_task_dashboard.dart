@@ -47,8 +47,8 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
       body: Column(
         children: [
           const UserHeader(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.0),
             child: Text("ניהול משימות", style: AppTheme.screenTitle),
           ),
           _buildDateNavigation(),
@@ -84,9 +84,9 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       }
 
                       if (tasks.isEmpty) {
-                        return Column(
+                        return const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             SizedBox(height: 40),
                             Text(
                               "אין משימות ליום זה",

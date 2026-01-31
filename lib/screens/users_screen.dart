@@ -45,7 +45,8 @@ class _UsersScreenState extends State<UsersScreen> {
     }
 
     try {
-      List<UserModel> fetchedUsers = await _workerService.fetchAllWorkers();
+      final List<UserModel> fetchedUsers =
+          await _workerService.fetchAllWorkers();
       if (mounted) {
         setState(() {
           users = fetchedUsers;
@@ -61,7 +62,7 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   void filterUsers(String query) {
-    List<UserModel> results = users.where((user) {
+    final List<UserModel> results = users.where((user) {
       final nameLower = user.fullName.toLowerCase();
       final roleLower = user.role.toLowerCase();
       final searchLower = query.toLowerCase();

@@ -80,11 +80,12 @@ class ShiftCardState extends State<ShiftCard> {
                 ),
               ),
               const SizedBox(height: 20),
-              Row(
+              const Row(
                 children: [
-                  Icon(Icons.chat_rounded, color: AppColors.deepBlue, size: AppDimensions.iconXL),
-                  const SizedBox(width: 10),
-                  const Text(
+                  Icon(Icons.chat_rounded,
+                      color: AppColors.deepBlue, size: AppDimensions.iconXL),
+                  SizedBox(width: 10),
+                  Text(
                     "הודעה למשמרת",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -104,12 +105,12 @@ class ShiftCardState extends State<ShiftCard> {
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
                     borderRadius: AppDimensions.borderRadiusXL,
-                    borderSide: BorderSide(color: AppColors.deepBlue),
+                    borderSide: const BorderSide(color: AppColors.deepBlue),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: AppDimensions.borderRadiusXL,
                     borderSide:
-                        BorderSide(color: AppColors.deepBlue, width: 2),
+                        const BorderSide(color: AppColors.deepBlue, width: 2),
                   ),
                 ),
               ),
@@ -219,7 +220,7 @@ class ShiftCardState extends State<ShiftCard> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          List<UserModel>? workers = snapshot.data;
+          final List<UserModel>? workers = snapshot.data;
 
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -248,7 +249,7 @@ class ShiftCardState extends State<ShiftCard> {
                       OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          side: BorderSide(color: AppColors.primary),
+                          side: const BorderSide(color: AppColors.primary),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0)),
                           padding: const EdgeInsets.symmetric(
@@ -279,7 +280,7 @@ class ShiftCardState extends State<ShiftCard> {
                 ),
                 const Divider(),
                 (workers == null || workers.isEmpty)
-                    ? Align(
+                    ? const Align(
                         alignment: Alignment.centerRight,
                         child: Text("אין עובדים מוקצים למשמרת זו",
                             style: AppTheme.bodyText),
@@ -350,13 +351,13 @@ class ShiftCardState extends State<ShiftCard> {
 
   Future<List<UserModel>> _fetchWorkerDetailsWithCache(
       List<String> workerIds) async {
-    List<UserModel> workers = [];
+    final List<UserModel> workers = [];
 
     for (String id in workerIds) {
       if (_workerCache.containsKey(id)) {
         workers.add(_workerCache[id]!);
       } else {
-        UserModel? user = await widget.workerService.getUserDetails(id);
+        final UserModel? user = await widget.workerService.getUserDetails(id);
         if (user != null) {
           // ✅ Ensure user is not null before adding
           _workerCache[id] = user;
@@ -380,9 +381,9 @@ class ShiftCardState extends State<ShiftCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text("📩 הודעות מנהלים", style: AppTheme.sectionTitle),
+              const Text("📩 הודעות מנהלים", style: AppTheme.sectionTitle),
               if (messages.isEmpty)
-                Text("אין הודעות זמינות", style: AppTheme.bodyText),
+                const Text("אין הודעות זמינות", style: AppTheme.bodyText),
               ...messages.map((msg) {
                 return MessageBubble(
                   message: msg['message'],
@@ -406,13 +407,13 @@ class ShiftCardState extends State<ShiftCard> {
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           padding: EdgeInsets.zero,
-          shape:
-              RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusXL),
+          shape: RoundedRectangleBorder(
+              borderRadius: AppDimensions.borderRadiusXL),
         ),
         onPressed: () => _showCommentBottomSheet(context),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [AppColors.lightBlue, AppColors.deepBlue],
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
@@ -422,9 +423,9 @@ class ShiftCardState extends State<ShiftCard> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             alignment: Alignment.center,
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(Icons.chat_bubble_outline, color: Colors.white),
                 SizedBox(width: 8),
                 Text(

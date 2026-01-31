@@ -20,8 +20,8 @@ class DateTimeUtils {
   /// 🟢 Format date with Hebrew weekday name
   static String formatDateWithDay(String date) {
     try {
-      DateTime dateTime = DateFormat('dd/MM/yyyy').parse(date);
-      String day = getHebrewWeekdayName(dateTime.weekday);
+      final DateTime dateTime = DateFormat('dd/MM/yyyy').parse(date);
+      final String day = getHebrewWeekdayName(dateTime.weekday);
       return "$day, ${formatDate(dateTime)}";
     } catch (e) {
       debugPrint("Error parsing date: $e");

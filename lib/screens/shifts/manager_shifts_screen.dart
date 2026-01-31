@@ -31,8 +31,9 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
   void initState() {
     super.initState();
     _selectedDay = DateTime.now();
-    int initialTabIndex = _selectedDay.weekday % 7;
-    _tabController = TabController(length: 7, vsync: this, initialIndex: initialTabIndex);
+    final int initialTabIndex = _selectedDay.weekday % 7;
+    _tabController =
+        TabController(length: 7, vsync: this, initialIndex: initialTabIndex);
   }
 
   @override
@@ -59,7 +60,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
                     child: TabBarView(
                       controller: _tabController,
                       children: List.generate(7, (index) {
-                        DateTime day = _currentWeekStart.add(Duration(days: index));
+                        final DateTime day =
+                            _currentWeekStart.add(Duration(days: index));
                         return _buildShiftList(day);
                       }),
                     ),
@@ -86,9 +88,11 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 28),
+            icon: const Icon(Icons.arrow_back,
+                color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
-              _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
+              _currentWeekStart =
+                  _currentWeekStart.subtract(const Duration(days: 7));
             }),
           ),
           Expanded(
@@ -100,9 +104,11 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
             ),
           ),
           IconButton(
-            icon: Icon(Icons.arrow_forward, color: AppColors.primary, size: 28),
+            icon: const Icon(Icons.arrow_forward,
+                color: AppColors.primary, size: 28),
             onPressed: () => setState(() {
-              _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
+              _currentWeekStart =
+                  _currentWeekStart.add(const Duration(days: 7));
             }),
           ),
         ],
@@ -126,7 +132,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
           ),
           isScrollable: true,
           tabs: List.generate(7, (index) {
-            DateTime day = _currentWeekStart.add(Duration(days: index));
+            final DateTime day = _currentWeekStart.add(Duration(days: index));
             return SizedBox(
               width: MediaQuery.of(context).size.width / 7,
               child: Column(
@@ -138,7 +144,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
                   ),
                   Text(
                     DateFormat('dd').format(day),
-                    style: AppTheme.bodyText.copyWith(fontSize: 14, color: AppColors.textSecondary),
+                    style: AppTheme.bodyText
+                        .copyWith(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -162,7 +169,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
 
         List<ShiftModel> shifts = snapshot.data!;
         shifts = shifts.where((shift) {
-          DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(shift.date);
+          final DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(shift.date);
           return shiftDate.day == selectedDay.day &&
               shiftDate.month == selectedDay.month &&
               shiftDate.year == selectedDay.year;
@@ -190,12 +197,12 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
   }
 
   Widget _buildEmptyShiftsMessage() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.work_off, size: 50, color: AppColors.textSecondary),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text('אין משמרות זמינות ליום זה', style: AppTheme.bodyText),
         ],
       ),
@@ -210,17 +217,18 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen>
           ? null
           : () async {
               setState(() => _isNavigating = true);
-              DateTime selectedDate =
+              final DateTime selectedDate =
                   _currentWeekStart.add(Duration(days: _tabController.index));
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => CreateShiftScreen(initialDate: selectedDate)),
+                    builder: (context) =>
+                        CreateShiftScreen(initialDate: selectedDate)),
               );
               if (mounted) setState(() => _isNavigating = false);
             },
       icon: const Icon(Icons.add, size: 30, color: Colors.white),
-      label: Text("יצירת משמרת", style: AppTheme.buttonTextStyle),
+      label: const Text("יצירת משמרת", style: AppTheme.buttonTextStyle),
     );
   }
 }

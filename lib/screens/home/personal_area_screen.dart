@@ -93,7 +93,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                 "תמונת הפרופיל עודכנה בהצלחה.",
                 style: AppTheme.bodyText,
@@ -201,16 +201,19 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                   // For other users, we'd need to fetch from cache
                   // For now, show loading if not available
                   return FutureBuilder<UserModel?>(
-                    future: context.read<UserProvider>().getUserById(widget.uid),
+                    future:
+                        context.read<UserProvider>().getUserById(widget.uid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasError) {
-                        return const Center(child: Text("שגיאה בטעינת הפרופיל."));
+                        return const Center(
+                            child: Text("שגיאה בטעינת הפרופיל."));
                       }
                       if (!snapshot.hasData || snapshot.data == null) {
-                        return const Center(child: Text("לא נמצאו נתונים להצגה."));
+                        return const Center(
+                            child: Text("לא נמצאו נתונים להצגה."));
                       }
                       userData = snapshot.data;
                       return _buildProfileContent(userData!);
@@ -263,8 +266,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                   child: const CircleAvatar(
                     backgroundColor: AppColors.background,
                     radius: 22,
-                    child: Icon(Icons.camera_alt,
-                        color: Colors.blue, size: 22),
+                    child: Icon(Icons.camera_alt, color: Colors.blue, size: 22),
                   ),
                 ),
               ),
@@ -323,7 +325,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Widget _buildLicensesSection(UserModel userData) {
     final List<String> licensed = userData.licensedDepartments;
-    final List<String> departments = allDepartments;
+    const List<String> departments = allDepartments;
 
     final Map<String, IconData> departmentIcons = {
       "פארק חבלים": Icons.hiking,
@@ -344,7 +346,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text("הרשאות עבודה לפי מחלקה", style: AppTheme.sectionTitle),
+            const Text("הרשאות עבודה לפי מחלקה", style: AppTheme.sectionTitle),
             const SizedBox(height: 10),
             ...departments.map((dept) {
               final bool isLicensed = licensed.contains(dept);

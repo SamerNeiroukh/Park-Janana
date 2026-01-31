@@ -8,11 +8,13 @@ class TaskCommentsSection extends StatelessWidget {
   final List<Map<String, dynamic>> comments;
   final String taskId;
 
-  const TaskCommentsSection({super.key, required this.comments, required this.taskId});
+  const TaskCommentsSection(
+      {super.key, required this.comments, required this.taskId});
 
   Future<String> _fetchUserName(String uid) async {
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (doc.exists && doc.data() != null) {
         return doc.data()!['fullName'] ?? 'משתמש';
       }
@@ -23,8 +25,8 @@ class TaskCommentsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (comments.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: Text("אין תגובות עדיין", style: AppTheme.bodyText),
       );
     }
@@ -34,7 +36,8 @@ class TaskCommentsSection extends StatelessWidget {
       children: comments.map((comment) {
         final message = comment['message'] ?? '';
         final uid = comment['by'] ?? '';
-        final timestamp = comment['timestamp'] ?? DateTime.now().millisecondsSinceEpoch;
+        final timestamp =
+            comment['timestamp'] ?? DateTime.now().millisecondsSinceEpoch;
         final time = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
         return FutureBuilder<String>(

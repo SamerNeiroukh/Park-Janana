@@ -42,7 +42,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Text(
                       'אין משמרות זמינות לשבוע זה',
                       style: AppTheme.bodyText,
@@ -52,14 +52,18 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
 
                 List<ShiftModel> shifts = snapshot.data!;
                 shifts = shifts.where((shift) {
-                  DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(shift.date);
-                  return shiftDate.isAfter(_currentWeekStart.subtract(const Duration(days: 1))) &&
-                         shiftDate.isBefore(_currentWeekStart.add(const Duration(days: 7)));
+                  final DateTime shiftDate =
+                      DateFormat('dd/MM/yyyy').parse(shift.date);
+                  return shiftDate.isAfter(_currentWeekStart
+                          .subtract(const Duration(days: 1))) &&
+                      shiftDate.isBefore(
+                          _currentWeekStart.add(const Duration(days: 7)));
                 }).toList();
 
-                Map<String, List<ShiftModel>> weeklyShifts = {};
+                final Map<String, List<ShiftModel>> weeklyShifts = {};
                 for (var shift in shifts) {
-                  String dayLabel = DateTimeUtils.formatDateWithDay(shift.date);
+                  final String dayLabel =
+                      DateTimeUtils.formatDateWithDay(shift.date);
                   if (!weeklyShifts.containsKey(dayLabel)) {
                     weeklyShifts[dayLabel] = [];
                   }
@@ -72,7 +76,9 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(entry.key, style: AppTheme.sectionTitle.copyWith(color: AppColors.primary)),
+                        Text(entry.key,
+                            style: AppTheme.sectionTitle
+                                .copyWith(color: AppColors.primary)),
                         ...entry.value.map((shift) => ShiftCard(
                               shift: shift,
                               shiftService: _shiftService,
@@ -102,7 +108,8 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
             color: AppColors.primary,
             iconSize: 28,
             onPressed: () => setState(() {
-              _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
+              _currentWeekStart =
+                  _currentWeekStart.subtract(const Duration(days: 7));
             }),
           ),
           Text(
@@ -114,7 +121,8 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
             color: AppColors.primary,
             iconSize: 28,
             onPressed: () => setState(() {
-              _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
+              _currentWeekStart =
+                  _currentWeekStart.add(const Duration(days: 7));
             }),
           ),
         ],
@@ -133,7 +141,8 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 setState(() => _isNavigating = true);
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CreateShiftScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const CreateShiftScreen()),
                 );
                 if (mounted) setState(() => _isNavigating = false);
               },

@@ -4,7 +4,8 @@ class DatePickerWidget extends StatefulWidget {
   final DateTime initialDate;
   final Function(DateTime) onDateSelected;
 
-  const DatePickerWidget({super.key, required this.initialDate, required this.onDateSelected});
+  const DatePickerWidget(
+      {super.key, required this.initialDate, required this.onDateSelected});
 
   @override
   State<DatePickerWidget> createState() => _DatePickerWidgetState();
@@ -23,7 +24,7 @@ class _DatePickerWidgetState extends State<DatePickerWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
+        final DateTime? pickedDate = await showDatePicker(
           context: context,
           initialDate: selectedDate,
           firstDate: DateTime.now(),
@@ -48,7 +49,8 @@ class TimePickerWidget extends StatefulWidget {
   final TimeOfDay initialTime;
   final Function(TimeOfDay) onTimeSelected;
 
-  const TimePickerWidget({super.key, required this.initialTime, required this.onTimeSelected});
+  const TimePickerWidget(
+      {super.key, required this.initialTime, required this.onTimeSelected});
 
   @override
   State<TimePickerWidget> createState() => _TimePickerWidgetState();
@@ -67,7 +69,7 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        TimeOfDay? pickedTime = await showTimePicker(
+        final TimeOfDay? pickedTime = await showTimePicker(
           context: context,
           initialTime: selectedTime,
         );

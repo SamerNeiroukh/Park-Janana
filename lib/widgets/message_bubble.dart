@@ -46,10 +46,10 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Future<void> _getCurrentUser() async {
-    User? user = _auth.currentUser;
+    final User? user = _auth.currentUser;
     if (user != null) {
       _currentUserId = user.uid;
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
@@ -73,12 +73,12 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime messageTime =
+    final DateTime messageTime =
         DateTime.fromMillisecondsSinceEpoch(widget.timestamp);
-    String formattedTime =
+    final String formattedTime =
         "${messageTime.hour.toString().padLeft(2, '0')}:${messageTime.minute.toString().padLeft(2, '0')}";
 
-    bool canEditOrDelete =
+    final bool canEditOrDelete =
         (_currentUserId == widget.senderId) || (_currentUserRole == "owner");
 
     return Directionality(

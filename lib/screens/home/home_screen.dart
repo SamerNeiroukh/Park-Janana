@@ -52,16 +52,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final currentUser = authProvider.user;
 
-    if (currentUser == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text('לא נמצא משתמש מחובר', style: AppTheme.bodyText),
-        ),
-      );
-    }
-
-    // Show loading while data is being fetched
-    if (userProvider.isLoading || userProvider.currentUser == null) {
+    // Show loading while user is null (logging out) or data is being fetched
+    if (currentUser == null || userProvider.isLoading || userProvider.currentUser == null) {
       return const Scaffold(
         appBar: UserHeader(showLogoutButton: true),
         body: Center(child: CircularProgressIndicator()),

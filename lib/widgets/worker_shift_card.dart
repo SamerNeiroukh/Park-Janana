@@ -43,9 +43,11 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists) {
-        var shiftData = snapshot.data() as Map<String, dynamic>;
-        List<dynamic> requestedWorkers = shiftData['requestedWorkers'] ?? [];
-        List<dynamic> assignedWorkers = shiftData['assignedWorkers'] ?? [];
+        final shiftData = snapshot.data() as Map<String, dynamic>;
+        final List<dynamic> requestedWorkers =
+            shiftData['requestedWorkers'] ?? [];
+        final List<dynamic> assignedWorkers =
+            shiftData['assignedWorkers'] ?? [];
 
         setState(() {
           _hasRequested = requestedWorkers.contains(_currentUser?.uid);
@@ -81,8 +83,9 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime shiftDate = DateFormat('dd/MM/yyyy').parse(widget.shift.date);
-    bool isOutdated = shiftDate.isBefore(DateTime.now());
+    final DateTime shiftDate =
+        DateFormat('dd/MM/yyyy').parse(widget.shift.date);
+    final bool isOutdated = shiftDate.isBefore(DateTime.now());
     Color cardColor = Colors.white.withOpacity(0.9);
 
     if (isOutdated) {
@@ -221,13 +224,13 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
   }
 
   Future<void> _fetchAssignedWorkers() async {
-    List<UserModel> workers = [];
+    final List<UserModel> workers = [];
     for (String workerId in widget.shift.assignedWorkers) {
       if (_workerCache.containsKey(workerId)) {
         workers.add(_workerCache[workerId]!);
       } else {
         try {
-          UserModel worker = await widget.shiftService
+          final UserModel worker = await widget.shiftService
               .fetchWorkerDetails([workerId]).then((users) => users.first);
           _workerCache[workerId] = worker;
           workers.add(worker);

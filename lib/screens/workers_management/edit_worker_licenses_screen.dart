@@ -17,7 +17,8 @@ class EditWorkerLicensesScreen extends StatefulWidget {
   });
 
   @override
-  State<EditWorkerLicensesScreen> createState() => _EditWorkerLicensesScreenState();
+  State<EditWorkerLicensesScreen> createState() =>
+      _EditWorkerLicensesScreenState();
 }
 
 class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
@@ -32,10 +33,14 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
 
   Future<void> _loadWorkerLicenses() async {
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .get();
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
-        final List<String> licensed = List<String>.from(data['licensedDepartments'] ?? []);
+        final List<String> licensed =
+            List<String>.from(data['licensedDepartments'] ?? []);
         setState(() {
           _selectedDepartments.addAll(licensed);
         });
@@ -59,7 +64,10 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
 
   Future<void> _saveChanges() async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(widget.uid).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .update({
         'licensedDepartments': _selectedDepartments,
       });
 
@@ -87,7 +95,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 : Directionality(
                     textDirection: TextDirection.rtl,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXXL, vertical: AppDimensions.paddingXXL),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimensions.paddingXXL,
+                          vertical: AppDimensions.paddingXXL),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -111,7 +121,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                           ),
                           const SizedBox(height: AppDimensions.spacingXXXL),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingXL),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppDimensions.paddingXL,
+                                vertical: AppDimensions.paddingXL),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
                               borderRadius: AppDimensions.borderRadiusXL,
@@ -128,17 +140,21 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                               children: [
                                 Text(
                                   "בחר מחלקות מורשות",
-                                  style: AppTheme.sectionTitle.copyWith(fontSize: AppDimensions.fontXXL),
+                                  style: AppTheme.sectionTitle.copyWith(
+                                      fontSize: AppDimensions.fontXXL),
                                 ),
-                                const Divider(height: AppDimensions.spacingXXXL),
+                                const Divider(
+                                    height: AppDimensions.spacingXXXL),
                                 ...allDepartments.map((dept) {
-                                  final bool selected = _selectedDepartments.contains(dept);
+                                  final bool selected =
+                                      _selectedDepartments.contains(dept);
                                   return CheckboxListTile(
                                     value: selected,
                                     onChanged: (_) => _toggleDepartment(dept),
                                     title: Text(
                                       dept,
-                                      style: const TextStyle(fontSize: AppDimensions.fontML),
+                                      style: const TextStyle(
+                                          fontSize: AppDimensions.fontML),
                                     ),
                                     activeColor: AppColors.primary,
                                     checkboxShape: RoundedRectangleBorder(
@@ -157,8 +173,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                               child: ElevatedButton.icon(
                                 onPressed: _saveChanges,
                                 icon: const Icon(Icons.save),
-                                label: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingM),
+                                label: const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: AppDimensions.paddingM),
                                   child: Text(
                                     "שמור שינויים",
                                     style: TextStyle(

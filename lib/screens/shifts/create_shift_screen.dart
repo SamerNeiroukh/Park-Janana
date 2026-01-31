@@ -38,7 +38,8 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate ?? DateTime.now(); // ✅ Use initial date if provided
+    _selectedDate =
+        widget.initialDate ?? DateTime.now(); // ✅ Use initial date if provided
   }
 
   void _createShift() async {
@@ -57,7 +58,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text("✅ משמרת נוצרה בהצלחה!", style: AppTheme.bodyText),
             backgroundColor: AppColors.success,
           ),
@@ -88,10 +89,9 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           children: [
             const UserHeader(),
             const SizedBox(height: AppDimensions.spacingXL),
-            Text("יצירת משמרת חדשה", style: AppTheme.screenTitle),
+            const Text("יצירת משמרת חדשה", style: AppTheme.screenTitle),
             const SizedBox(height: AppDimensions.spacingXL),
-
-            Align(
+            const Align(
               alignment: Alignment.centerRight,
               child: Text("בחר תאריך", style: AppTheme.sectionTitle),
             ),
@@ -102,8 +102,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               }),
             ),
             const SizedBox(height: AppDimensions.spacingXL),
-
-            Align(
+            const Align(
               alignment: Alignment.centerRight,
               child: Text("בחר מחלקה", style: AppTheme.sectionTitle),
             ),
@@ -124,10 +123,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               }).toList(),
             ),
             const SizedBox(height: AppDimensions.spacingXL),
-
-            Align(
+            const Align(
               alignment: Alignment.centerRight,
-              child: Text("מספר מקסימלי של עובדים", style: AppTheme.sectionTitle),
+              child:
+                  Text("מספר מקסימלי של עובדים", style: AppTheme.sectionTitle),
             ),
             Slider(
               value: _maxWorkers.toDouble(),
@@ -143,8 +142,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               },
             ),
             const SizedBox(height: AppDimensions.spacingXL),
-
-            Align(
+            const Align(
               alignment: Alignment.centerRight,
               child: Text("זמן התחלה", style: AppTheme.sectionTitle),
             ),
@@ -155,8 +153,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               }),
             ),
             const SizedBox(height: AppDimensions.spacingXL),
-
-            Align(
+            const Align(
               alignment: Alignment.centerRight,
               child: Text("זמן סיום", style: AppTheme.sectionTitle),
             ),
@@ -167,21 +164,19 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               }),
             ),
             const SizedBox(height: AppDimensions.spacingXXXL),
-
             ElevatedButton(
               style: AppTheme.primaryButtonStyle,
               onPressed: _isCreating ? null : _createShift,
               child: _isCreating
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text("צור משמרת", style: AppTheme.buttonTextStyle),
+                  : const Text("צור משמרת", style: AppTheme.buttonTextStyle),
             ),
             const SizedBox(height: AppDimensions.spacingL),
-
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("חזור", style: AppTheme.linkTextStyle),
+              child: const Text("חזור", style: AppTheme.linkTextStyle),
             ),
           ],
         ),

@@ -19,7 +19,8 @@ class PdfExportService {
     required DateTime month,
   }) async {
     final pdf = pw.Document();
-    final ttf = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
+    final ttf = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
     final imageLogo = await imageFromAssetBundle('assets/images/park_logo.png');
     final formattedMonth = DateFormat.yMMMM('he').format(month);
 
@@ -28,7 +29,8 @@ class PdfExportService {
         theme: pw.ThemeData.withFont(base: ttf, bold: ttf),
         textDirection: pw.TextDirection.rtl,
         build: (pw.Context context) => [
-          _buildHeader('דו״ח נוכחות חודשי', userName, formattedMonth, imageLogo, ttf),
+          _buildHeader(
+              'דו״ח נוכחות חודשי', userName, formattedMonth, imageLogo, ttf),
           pw.SizedBox(height: 10),
           _buildSummary(attendance, ttf),
           pw.SizedBox(height: 10),
@@ -37,7 +39,8 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'דו״ח נוכחות - $formattedMonth.pdf');
+    await Printing.sharePdf(
+        bytes: await pdf.save(), filename: 'דו״ח נוכחות - $formattedMonth.pdf');
   }
 
   static Future<void> exportTaskReportPdf({
@@ -49,7 +52,8 @@ class PdfExportService {
     required String userId,
   }) async {
     final pdf = pw.Document();
-    final ttf = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
+    final ttf = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
     final imageLogo = await imageFromAssetBundle('assets/images/park_logo.png');
     final formattedMonth = DateFormat.yMMMM('he').format(month);
 
@@ -65,7 +69,8 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'דו״ח משימות - $formattedMonth.pdf');
+    await Printing.sharePdf(
+        bytes: await pdf.save(), filename: 'דו״ח משימות - $formattedMonth.pdf');
   }
 
   static Future<void> exportShiftReportPdf({
@@ -78,7 +83,8 @@ class PdfExportService {
     required Map<String, String> uidToNameMap, // ✅ NEW
   }) async {
     final pdf = pw.Document();
-    final ttf = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
+    final ttf = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
     final imageLogo = await imageFromAssetBundle('assets/images/park_logo.png');
     final formattedMonth = DateFormat.yMMMM('he').format(month);
 
@@ -89,24 +95,31 @@ class PdfExportService {
         build: (pw.Context context) => [
           _buildHeader('דו״ח משמרות', userName, formattedMonth, imageLogo, ttf),
           pw.SizedBox(height: 10),
-          ..._buildShiftDetails(shifts, userId, uidToNameMap, ttf), // ✅ Pass map
+          ..._buildShiftDetails(
+              shifts, userId, uidToNameMap, ttf), // ✅ Pass map
         ],
       ),
     );
 
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'דו״ח משמרות - $formattedMonth.pdf');
+    await Printing.sharePdf(
+        bytes: await pdf.save(), filename: 'דו״ח משמרות - $formattedMonth.pdf');
   }
 
-  static pw.Widget _buildHeader(String title, String userName, String month, pw.ImageProvider logo, pw.Font font) {
+  static pw.Widget _buildHeader(String title, String userName, String month,
+      pw.ImageProvider logo, pw.Font font) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text(title, style: pw.TextStyle(font: font, fontSize: 22, fontWeight: pw.FontWeight.bold)),
-            pw.Text('שם העובד: $userName', style: pw.TextStyle(font: font, fontSize: 14)),
-            pw.Text('חודש: $month', style: pw.TextStyle(font: font, fontSize: 14)),
+            pw.Text(title,
+                style: pw.TextStyle(
+                    font: font, fontSize: 22, fontWeight: pw.FontWeight.bold)),
+            pw.Text('שם העובד: $userName',
+                style: pw.TextStyle(font: font, fontSize: 14)),
+            pw.Text('חודש: $month',
+                style: pw.TextStyle(font: font, fontSize: 14)),
           ],
         ),
         pw.Image(logo, width: 60),
@@ -124,14 +137,18 @@ class PdfExportService {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text('סה״כ ימים: ${attendance.daysWorked}', style: pw.TextStyle(font: font, fontSize: 14)),
-          pw.Text('סה״כ שעות: ${attendance.totalHoursWorked.toStringAsFixed(1)}', style: pw.TextStyle(font: font, fontSize: 14)),
+          pw.Text('סה״כ ימים: ${attendance.daysWorked}',
+              style: pw.TextStyle(font: font, fontSize: 14)),
+          pw.Text(
+              'סה״כ שעות: ${attendance.totalHoursWorked.toStringAsFixed(1)}',
+              style: pw.TextStyle(font: font, fontSize: 14)),
         ],
       ),
     );
   }
 
-  static pw.Widget _buildSessionTable(AttendanceModel attendance, pw.Font font) {
+  static pw.Widget _buildSessionTable(
+      AttendanceModel attendance, pw.Font font) {
     return pw.TableHelper.fromTextArray(
       headers: ['משך', 'יציאה', 'כניסה', 'תאריך'],
       data: attendance.sessions.map((s) {
@@ -139,7 +156,8 @@ class PdfExportService {
         final inTime = DateFormat('HH:mm').format(s.clockIn);
         final outTime = DateFormat('HH:mm').format(s.clockOut);
         final duration = s.clockOut.difference(s.clockIn);
-        final durationStr = '${duration.inHours}ש׳ ${duration.inMinutes.remainder(60)}ד׳';
+        final durationStr =
+            '${duration.inHours}ש׳ ${duration.inMinutes.remainder(60)}ד׳';
 
         return [durationStr, outTime, inTime, date];
       }).toList(),
@@ -151,11 +169,20 @@ class PdfExportService {
     );
   }
 
-  static pw.Widget _buildExpandedTaskTable(List<TaskModel> tasks, String userId, pw.Font font) {
+  static pw.Widget _buildExpandedTaskTable(
+      List<TaskModel> tasks, String userId, pw.Font font) {
     return pw.TableHelper.fromTextArray(
-      headers: ['סיום', 'התחלה', 'הוגש', 'סטטוס עובד', 'תאריך יעד', 'תיאור', 'משימה'],
+      headers: [
+        'סיום',
+        'התחלה',
+        'הוגש',
+        'סטטוס עובד',
+        'תאריך יעד',
+        'תיאור',
+        'משימה'
+      ],
       data: tasks.map((task) {
-        final dueDate = (task.dueDate as Timestamp).toDate();
+        final dueDate = (task.dueDate).toDate();
         final progress = task.workerProgress[userId] ?? {};
 
         String formatTs(dynamic ts) {
@@ -192,38 +219,42 @@ class PdfExportService {
     );
   }
 
-  static List<pw.Widget> _buildShiftDetails(List<ShiftModel> shifts, String userId, Map<String, String> uidToNameMap, pw.Font font) {
+  static List<pw.Widget> _buildShiftDetails(List<ShiftModel> shifts,
+      String userId, Map<String, String> uidToNameMap, pw.Font font) {
     final formatter = DateFormat('dd/MM/yyyy HH:mm');
-    List<pw.Widget> widgets = [];
+    final List<pw.Widget> widgets = [];
 
-    String resolveName(dynamic uid) => uidToNameMap[uid] ?? uid?.toString() ?? '---';
+    String resolveName(dynamic uid) =>
+        uidToNameMap[uid] ?? uid?.toString() ?? '---';
 
     for (final shift in shifts) {
       final allEntries = shift.assignedWorkerData
-  .where((data) => data['userId'] == userId)
-  .toList();
+          .where((data) => data['userId'] == userId)
+          .toList();
 
-allEntries.sort((a, b) {
-  final aTime = a['decisionAt'] ?? a['requestedAt'];
-  final bTime = b['decisionAt'] ?? b['requestedAt'];
-  return (bTime as Timestamp).compareTo(aTime as Timestamp);
-});
+      allEntries.sort((a, b) {
+        final aTime = a['decisionAt'] ?? a['requestedAt'];
+        final bTime = b['decisionAt'] ?? b['requestedAt'];
+        return (bTime as Timestamp).compareTo(aTime as Timestamp);
+      });
 
-final workerData = allEntries.isNotEmpty ? allEntries.first : {};
+      final workerData = allEntries.isNotEmpty ? allEntries.first : {};
 
       final decision = workerData['decision'] ?? '';
       final decisionColor = {
-        'accepted': PdfColors.green,
-        'rejected': PdfColors.red,
-        'removed': PdfColors.orange,
-      }[decision] ?? PdfColors.grey;
+            'accepted': PdfColors.green,
+            'rejected': PdfColors.red,
+            'removed': PdfColors.orange,
+          }[decision] ??
+          PdfColors.grey;
 
       final hebrewDecision = {
-        'accepted': 'מאושר',
-        'rejected': 'נדחה',
-        'removed': 'הוסר',
-        '': 'ממתין'
-      }[decision] ?? decision;
+            'accepted': 'מאושר',
+            'rejected': 'נדחה',
+            'removed': 'הוסר',
+            '': 'ממתין'
+          }[decision] ??
+          decision;
 
       final statusTranslation = {
         'active': 'פעילה',
@@ -235,7 +266,9 @@ final workerData = allEntries.isNotEmpty ? allEntries.first : {};
 
       String? format(dynamic val) {
         if (val == null) return null;
-        return val is Timestamp ? formatter.format(val.toDate()) : val.toString();
+        return val is Timestamp
+            ? formatter.format(val.toDate())
+            : val.toString();
       }
 
       pw.Widget infoLine(String label, dynamic value) {
@@ -244,9 +277,14 @@ final workerData = allEntries.isNotEmpty ? allEntries.first : {};
         return pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.end,
           children: [
-            pw.Text('$label:', style: pw.TextStyle(font: font, fontSize: 11, fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.right),
+            pw.Text('$label:',
+                style: pw.TextStyle(
+                    font: font, fontSize: 11, fontWeight: pw.FontWeight.bold),
+                textAlign: pw.TextAlign.right),
             pw.SizedBox(width: 6),
-            pw.Text(formatted, style: pw.TextStyle(font: font, fontSize: 11), textAlign: pw.TextAlign.right),
+            pw.Text(formatted,
+                style: pw.TextStyle(font: font, fontSize: 11),
+                textAlign: pw.TextAlign.right),
           ],
         );
       }
@@ -266,22 +304,42 @@ final workerData = allEntries.isNotEmpty ? allEntries.first : {};
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text('תאריך: ${shift.date}', style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold, fontSize: 13), textAlign: pw.TextAlign.right),
-                pw.Text('שעות: ${shift.startTime} - ${shift.endTime}', style: pw.TextStyle(font: font, fontSize: 12), textAlign: pw.TextAlign.right),
-                pw.Text('מחלקה: ${shift.department}', style: pw.TextStyle(font: font, fontSize: 12), textAlign: pw.TextAlign.right),
-                pw.Text('סטטוס כללי: $hebrewStatus', style: pw.TextStyle(font: font, fontSize: 12), textAlign: pw.TextAlign.right),
+                pw.Text('תאריך: ${shift.date}',
+                    style: pw.TextStyle(
+                        font: font,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 13),
+                    textAlign: pw.TextAlign.right),
+                pw.Text('שעות: ${shift.startTime} - ${shift.endTime}',
+                    style: pw.TextStyle(font: font, fontSize: 12),
+                    textAlign: pw.TextAlign.right),
+                pw.Text('מחלקה: ${shift.department}',
+                    style: pw.TextStyle(font: font, fontSize: 12),
+                    textAlign: pw.TextAlign.right),
+                pw.Text('סטטוס כללי: $hebrewStatus',
+                    style: pw.TextStyle(font: font, fontSize: 12),
+                    textAlign: pw.TextAlign.right),
                 pw.Divider(),
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.end,
                   children: [
-                    pw.Text('החלטה:', style: pw.TextStyle(font: font, fontSize: 12), textAlign: pw.TextAlign.right),
+                    pw.Text('החלטה:',
+                        style: pw.TextStyle(font: font, fontSize: 12),
+                        textAlign: pw.TextAlign.right),
                     pw.SizedBox(width: 6),
-                    pw.Text(hebrewDecision, style: pw.TextStyle(font: font, color: decisionColor, fontWeight: pw.FontWeight.bold, fontSize: 12), textAlign: pw.TextAlign.right),
+                    pw.Text(hebrewDecision,
+                        style: pw.TextStyle(
+                            font: font,
+                            color: decisionColor,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 12),
+                        textAlign: pw.TextAlign.right),
                   ],
                 ),
                 infoLine('אושר ע״י', resolveName(workerData['decisionBy'])),
                 infoLine('בתאריך', workerData['decisionAt']),
-                infoLine('תפקיד בעת השיבוץ', _translateRole(workerData['roleAtAssignment'])),
+                infoLine('תפקיד בעת השיבוץ',
+                    _translateRole(workerData['roleAtAssignment'])),
                 infoLine('זמן בקשה', workerData['requestedAt']),
                 infoLine('הוסר ע״י', resolveName(workerData['removedBy'])),
                 infoLine('זמן הסרה', workerData['removedAt']),
