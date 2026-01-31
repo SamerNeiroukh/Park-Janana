@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,6 +12,7 @@ import 'features/home/screens/personal_area_screen.dart';
 import 'features/auth/screens/welcome_screen.dart';
 import 'core/constants/app_theme.dart';
 import 'core/widgets/error_state_widget.dart';
+import 'core/services/notification_service.dart';
 import 'features/home/providers/user_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/home/providers/app_state_provider.dart';
@@ -18,7 +20,7 @@ import 'features/home/providers/app_state_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Lock orientation to portrait only
+  // Lock orientation to portrait only
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -31,6 +33,12 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // Set up background message handler for FCM
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+    // Initialize notification service
+    await NotificationService().initialize();
   } catch (e) {
     debugPrint('Error initializing Firebase: $e');
     firebaseError = 'לא ניתן להתחבר לשרתי האפליקציה. אנא בדוק את החיבור לאינטרנט ונסה שוב.';

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
 import 'package:park_janana/core/services/firebase_service.dart';
+import 'package:park_janana/core/services/notification_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -187,12 +188,15 @@ class AuthService {
     }
   }
 
-  // 🟢 Logout (Clears Cached Data)
+  // Logout (Clears Cached Data and FCM Token)
   Future<void> signOut() async {
     try {
+      // Remove FCM token before signing out
+      await NotificationService().removeTokenOnLogout();
+
       await _auth.signOut();
 
-      // ✅ Clear cached user data on logout
+      // Clear cached user data on logout
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove('userRole');
       await prefs.remove('userProfile');
