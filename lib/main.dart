@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // ✅ For locking orientation
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart';
-import 'screens/splash_screen.dart';
-import 'screens/home/home_screen.dart';
-import 'screens/home/personal_area_screen.dart';
-import 'screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
-import 'constants/app_theme.dart';
-import 'widgets/error_state_widget.dart';
-import 'providers/user_provider.dart';
-import 'providers/auth_provider.dart';
-import 'providers/app_state_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'firebase_options.dart';
+import 'features/home/screens/splash_screen.dart';
+import 'features/home/screens/home_screen.dart';
+import 'features/home/screens/personal_area_screen.dart';
+import 'features/auth/screens/welcome_screen.dart';
+import 'core/constants/app_theme.dart';
+import 'core/widgets/error_state_widget.dart';
+import 'features/home/providers/user_provider.dart';
+import 'features/auth/providers/auth_provider.dart';
+import 'features/home/providers/app_state_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
