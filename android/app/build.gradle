@@ -7,11 +7,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.temp_build_test"
+    namespace = "com.example.park_janana"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "26.1.10909125"
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -21,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.temp_build_test"
+        applicationId = "com.example.park_janana"
         minSdkVersion 23  // Required by cloud_firestore
         targetSdkVersion 34
         versionCode 1
@@ -42,4 +43,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 }
