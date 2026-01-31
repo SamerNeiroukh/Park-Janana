@@ -96,6 +96,9 @@ class AuthService {
       // Cache user role
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userRole', data['role'] ?? 'worker');
+
+      // Save FCM token for push notifications
+      await NotificationService().saveTokenAfterLogin();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         throw CustomException('האימייל לא נמצא במערכת');

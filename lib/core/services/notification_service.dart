@@ -226,6 +226,31 @@ class NotificationService {
     }
   }
 
+  /// Save FCM token after user login (public method)
+  Future<void> saveTokenAfterLogin() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      debugPrint('saveTokenAfterLogin: No user logged in');
+      return;
+    }
+
+    final token = await getToken();
+    if (token == null) {
+      debugPrint('saveTokenAfterLogin: No FCM token available');
+      return;
+    }
+
+    try {
+      await _firestore.collection('users').doc(user.uid).update({
+        'fcmTokens': FieldValue.arrayUnion([token]),
+        'lastTokenUpdate': FieldValue.serverTimestamp(),
+      });
+      debugPrint('FCM token saved after login for user: ${user.uid}');
+    } catch (e) {
+      debugPrint('Error saving FCM token after login: $e');
+    }
+  }
+
   /// Remove token from Firestore (call on logout)
   Future<void> removeTokenOnLogout() async {
     final user = FirebaseAuth.instance.currentUser;

@@ -6,7 +6,8 @@
  * - New messages in shifts
  */
 
-const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
@@ -125,10 +126,10 @@ exports.onShiftUpdated = onDocumentUpdated("shifts/{shiftId}", async (event) => 
 
   // Check for rejected workers
   const beforeRejected = (beforeData.rejectedWorkerData || []).map(
-    (w) => w.odekId || w.odek_id
+    (w) => w.userId
   );
   const afterRejected = (afterData.rejectedWorkerData || []).map(
-    (w) => w.odekId || w.odek_id
+    (w) => w.userId
   );
 
   const newlyRejected = afterRejected.filter(
@@ -139,7 +140,7 @@ exports.onShiftUpdated = onDocumentUpdated("shifts/{shiftId}", async (event) => 
   for (const odekId of newlyRejected) {
     // Find the actual user ID from the rejected data
     const rejectedWorker = afterData.rejectedWorkerData.find(
-      (w) => (w.odekId || w.odek_id) === odekId
+      (w) => w.userId === odekId
     );
     if (!rejectedWorker) continue;
 
@@ -225,9 +226,9 @@ exports.onShiftMessageAdded = onDocumentUpdated(
     const newMessage = afterMessages[afterMessages.length - 1];
     if (!newMessage) return;
 
-    const senderName = newMessage.senderName || "מנהל";
-    const messageText = newMessage.text || "";
     const senderId = newMessage.senderId;
+    const senderName = newMessage.senderName || await getUserName(senderId) || "מנהל";
+    const messageText = newMessage.message || newMessage.text || "";
 
     // Get all assigned workers
     const assignedWorkers = afterData.assignedWorkers || [];
@@ -279,9 +280,9 @@ exports.onTaskCommentAdded = onDocumentUpdated(
     const newComment = afterComments[afterComments.length - 1];
     if (!newComment) return;
 
-    const commenterName = newComment.userName || "משתמש";
-    const commentText = newComment.text || "";
-    const commenterId = newComment.userId;
+    const commenterId = newComment.userId || newComment.by;
+    const commenterName = newComment.userName || (commenterId ? await getUserName(commenterId) : "משתמש");
+    const commentText = newComment.text || newComment.message || "";
     const taskTitle = afterData.title || "משימה";
 
     // Get all assigned workers and the creator
@@ -317,3 +318,149 @@ exports.onTaskCommentAdded = onDocumentUpdated(
     }
   }
 );
+
+/**
+ * Trigger: When a new task is created
+ * Sends notifications to all assigned workers
+ */
+exports.onTaskCreated = onDocumentCreated("tasks/{taskId}", async (event) => {
+  const taskData = event.data.data();
+  if (!taskData) return;
+
+  const taskId = event.params.taskId;
+  const taskTitle = taskData.title || "משימה חדשה";
+  const assignedTo = taskData.assignedTo || [];
+
+  // Send notification to all assigned workers
+  for (const userId of assignedTo) {
+    const tokens = await getUserTokens(userId);
+    if (tokens.length > 0) {
+      await sendNotification(
+        tokens,
+        {
+          title: "משימה חדשה! 📋",
+          body: `קיבלת משימה חדשה: ${taskTitle}`,
+        },
+        {
+          type: "task_assigned",
+          taskId: taskId,
+        }
+      );
+    }
+  }
+});
+
+/**
+ * Trigger: When a new user is created (pending approval)
+ * Sends notification to all managers
+ */
+exports.onNewUserPending = onDocumentCreated("users/{userId}", async (event) => {
+  const userData = event.data.data();
+  if (!userData) return;
+
+  // Only notify if user is not approved (pending)
+  if (userData.approved === true) return;
+
+  const newUserName = userData.fullName || "משתמש חדש";
+
+  // Get all managers and admins
+  const managersQuery = await db.collection("users")
+    .where("role", "in", ["manager", "admin"])
+    .where("approved", "==", true)
+    .get();
+
+  // Send notification to each manager
+  for (const managerDoc of managersQuery.docs) {
+    const managerData = managerDoc.data();
+    const tokens = managerData.fcmTokens || [];
+
+    if (tokens.length > 0) {
+      await sendNotification(
+        tokens,
+        {
+          title: "בקשת הרשמה חדשה 👤",
+          body: `${newUserName} נרשם למערכת וממתין לאישור`,
+        },
+        {
+          type: "new_user_pending",
+          userId: event.params.userId,
+        }
+      );
+    }
+  }
+});
+
+/**
+ * Helper: Parse date string (dd/MM/yyyy) and time string (HH:mm) to Date
+ */
+function parseShiftDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return null;
+
+  const [day, month, year] = dateStr.split("/").map(Number);
+  const [hours, minutes] = timeStr.split(":").map(Number);
+
+  if (!day || !month || !year || isNaN(hours) || isNaN(minutes)) return null;
+
+  return new Date(year, month - 1, day, hours, minutes);
+}
+
+/**
+ * Scheduled: Run every 15 minutes to check for shifts starting in ~1 hour
+ * Sends reminder notifications to assigned workers
+ */
+exports.shiftReminder = onSchedule("every 15 minutes", async (event) => {
+  const now = new Date();
+  const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+  const oneHour15Later = new Date(now.getTime() + 75 * 60 * 1000);
+
+  // Format today's date as dd/MM/yyyy for query
+  const todayStr = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
+
+  // Get all shifts for today
+  const shiftsQuery = await db.collection("shifts")
+    .where("date", "==", todayStr)
+    .get();
+
+  for (const shiftDoc of shiftsQuery.docs) {
+    const shiftData = shiftDoc.data();
+    const shiftId = shiftDoc.id;
+
+    // Check if we already sent a reminder for this shift
+    if (shiftData.reminderSent === true) continue;
+
+    const shiftDateTime = parseShiftDateTime(shiftData.date, shiftData.startTime);
+    if (!shiftDateTime) continue;
+
+    // Check if shift starts within the next 60-75 minutes
+    if (shiftDateTime >= oneHourLater && shiftDateTime <= oneHour15Later) {
+      const department = shiftData.department || "Unknown";
+      const startTime = shiftData.startTime || "";
+      const assignedWorkers = shiftData.assignedWorkers || [];
+
+      // Send reminder to all assigned workers
+      for (const userId of assignedWorkers) {
+        const tokens = await getUserTokens(userId);
+        if (tokens.length > 0) {
+          await sendNotification(
+            tokens,
+            {
+              title: "תזכורת משמרת ⏰",
+              body: `המשמרת שלך ב${department} מתחילה בעוד שעה (${startTime})`,
+            },
+            {
+              type: "shift_reminder",
+              shiftId: shiftId,
+            }
+          );
+        }
+      }
+
+      // Mark reminder as sent to avoid duplicate notifications
+      await db.collection("shifts").doc(shiftId).update({
+        reminderSent: true,
+      });
+
+      console.log(`Sent shift reminder for shift ${shiftId}`);
+    }
+  }
+});
