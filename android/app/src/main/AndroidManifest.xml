@@ -1,12 +1,11 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.temp_build_test">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ✅ Required permissions for geolocator -->
+    <!-- Required permissions for geolocator -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
-        android:label="temp_build_test"
+        android:label="Park Janana"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
