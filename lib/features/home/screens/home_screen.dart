@@ -12,6 +12,7 @@ import 'package:park_janana/features/tasks/screens/worker_task_screen.dart';
 import 'package:park_janana/features/tasks/screens/manager_task_dashboard.dart';
 import 'package:park_janana/features/workers/screens/manage_workers_screen.dart';
 import 'package:park_janana/features/attendance/widgets/clock_in_out_widget.dart';
+import 'package:park_janana/features/newsfeed/screens/newsfeed_screen.dart';
 import 'package:park_janana/core/widgets/custom_card.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/home/providers/app_state_provider.dart';
@@ -118,6 +119,18 @@ class _HomeScreenState extends State<HomeScreen> {
     final roleOperations = appStateProvider.getOperationsForRole(role);
 
     final List<ActionButton> buttons = [
+      ActionButton(
+        title: 'לוח מודעות',
+        icon: Icons.newspaper_rounded,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NewsfeedScreen(),
+            ),
+          );
+        },
+      ),
       ActionButton(
         title: 'פרופיל',
         icon: Icons.person_rounded,
