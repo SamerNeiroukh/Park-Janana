@@ -99,10 +99,12 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     if (_ongoingSession != null) {
       _elapsed = DateTime.now().difference(_ongoingSession!.clockIn);
       _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (mounted) {
+        if (mounted && _ongoingSession != null) {
           setState(() {
             _elapsed = DateTime.now().difference(_ongoingSession!.clockIn);
           });
+        } else {
+          _elapsedTimer?.cancel();
         }
       });
     }

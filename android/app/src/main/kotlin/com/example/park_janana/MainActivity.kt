@@ -1,4 +1,4 @@
-package com.example.temp_build_test
+package com.example.park_janana
 
 import io.flutter.embedding.android.FlutterActivity
 

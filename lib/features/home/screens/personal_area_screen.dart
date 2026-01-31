@@ -83,7 +83,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
         // Update Firestore with storage path
         await _firestore.collection('users').doc(widget.uid).update({
-          'profilePicturePath': storageRef.fullPath,
+          'profile_picture_path': storageRef.fullPath,
         });
 
         // Refresh user data in provider to reflect the new profile picture
