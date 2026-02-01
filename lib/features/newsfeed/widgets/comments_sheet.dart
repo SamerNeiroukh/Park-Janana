@@ -277,21 +277,10 @@ class _CommentsSheetState extends State<CommentsSheet>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 20, 14),
       child: Row(
+        textDirection: TextDirection.rtl,
         children: [
-          Material(
-            color: AppColors.greyLight.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => Navigator.pop(context),
-              borderRadius: BorderRadius.circular(12),
-              child: const Padding(
-                padding: EdgeInsets.all(8),
-                child: Icon(Icons.close_rounded, size: 22),
-              ),
-            ),
-          ),
-          const Spacer(),
           Row(
+            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -312,7 +301,7 @@ class _CommentsSheetState extends State<CommentsSheet>
               ),
               const SizedBox(width: 10),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'תגובות',
@@ -331,6 +320,19 @@ class _CommentsSheetState extends State<CommentsSheet>
                 ],
               ),
             ],
+          ),
+          const Spacer(),
+          Material(
+            color: AppColors.greyLight.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.pop(context),
+              borderRadius: BorderRadius.circular(12),
+              child: const Padding(
+                padding: EdgeInsets.all(8),
+                child: Icon(Icons.close_rounded, size: 22),
+              ),
+            ),
           ),
         ],
       ),
@@ -381,12 +383,8 @@ class _CommentsSheetState extends State<CommentsSheet>
           ],
         ),
         child: Row(
+          textDirection: TextDirection.rtl,
           children: [
-            _SendButton(
-              isSubmitting: _isSubmitting,
-              onTap: _submitComment,
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -400,6 +398,7 @@ class _CommentsSheetState extends State<CommentsSheet>
                   controller: _commentController,
                   focusNode: _focusNode,
                   textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
                   maxLines: null,
                   style: const TextStyle(fontSize: 15),
                   decoration: InputDecoration(
@@ -415,6 +414,11 @@ class _CommentsSheetState extends State<CommentsSheet>
                   ),
                 ),
               ),
+            ),
+            const SizedBox(width: 12),
+            _SendButton(
+              isSubmitting: _isSubmitting,
+              onTap: _submitComment,
             ),
           ],
         ),
@@ -557,7 +561,42 @@ class _CommentCardState extends State<_CommentCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            textDirection: TextDirection.rtl,
             children: [
+              _buildAvatar(),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.comment.userName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      Text(
+                        widget.timestamp,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.greyMedium.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 11,
+                        color: AppColors.greyMedium.withOpacity(0.6),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const Spacer(),
               if (widget.canDelete)
                 Material(
                   color: Colors.red.withOpacity(0.08),
@@ -575,39 +614,6 @@ class _CommentCardState extends State<_CommentCard> {
                     ),
                   ),
                 ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    widget.comment.userName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 11,
-                        color: AppColors.greyMedium.withOpacity(0.6),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.timestamp,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.greyMedium.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(width: 12),
-              _buildAvatar(),
             ],
           ),
           const SizedBox(height: 12),

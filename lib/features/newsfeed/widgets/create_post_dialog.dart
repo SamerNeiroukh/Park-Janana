@@ -236,24 +236,26 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         ],
       ),
       child: Row(
+        textDirection: TextDirection.rtl,
         children: [
-          Material(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => Navigator.pop(context),
-              borderRadius: BorderRadius.circular(12),
-              child: const Padding(
-                padding: EdgeInsets.all(8),
-                child: Icon(Icons.close_rounded, color: Colors.white, size: 22),
-              ),
-            ),
-          ),
-          const Spacer(),
           Row(
+            textDirection: TextDirection.rtl,
             children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.edit_note_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 14),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'פוסט חדש',
@@ -272,20 +274,20 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                   ),
                 ],
               ),
-              const SizedBox(width: 14),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.edit_note_rounded,
-                  color: Colors.white,
-                  size: 26,
-                ),
-              ),
             ],
+          ),
+          const Spacer(),
+          Material(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.pop(context),
+              borderRadius: BorderRadius.circular(12),
+              child: const Padding(
+                padding: EdgeInsets.all(8),
+                child: Icon(Icons.close_rounded, color: Colors.white, size: 22),
+              ),
+            ),
           ),
         ],
       ),
@@ -294,9 +296,10 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
   Widget _buildCategorySection() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          textDirection: TextDirection.rtl,
           children: [
             Icon(
               Icons.category_rounded,
@@ -318,6 +321,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         Wrap(
           spacing: 10,
           runSpacing: 10,
+          alignment: WrapAlignment.end,
           children: _categories.map((category) {
             final isSelected = _selectedCategory == category['value'];
             final color = category['color'] as Color;
@@ -354,6 +358,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       category['icon'] as IconData,
@@ -381,9 +386,10 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
   Widget _buildTitleField() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          textDirection: TextDirection.rtl,
           children: [
             Icon(
               Icons.title_rounded,
@@ -406,6 +412,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           controller: _titleController,
           focusNode: _titleFocus,
           textAlign: TextAlign.right,
+          textDirection: TextDirection.rtl,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           decoration: _inputDecoration(
             hint: 'הזן כותרת לפוסט...',
@@ -421,9 +428,10 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
   Widget _buildContentField() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          textDirection: TextDirection.rtl,
           children: [
             Icon(
               Icons.notes_rounded,
@@ -446,6 +454,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           controller: _contentController,
           focusNode: _contentFocus,
           textAlign: TextAlign.right,
+          textDirection: TextDirection.rtl,
           maxLines: 5,
           style: const TextStyle(fontSize: 15, height: 1.5),
           decoration: _inputDecoration(
@@ -547,9 +556,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      textDirection: TextDirection.rtl,
                       children: const [
-                        Icon(Icons.send_rounded, color: Colors.white, size: 22),
-                        SizedBox(width: 10),
                         Text(
                           'פרסם פוסט',
                           style: TextStyle(
@@ -558,6 +566,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        SizedBox(width: 10),
+                        Icon(Icons.send_rounded, color: Colors.white, size: 22),
                       ],
                     ),
             ),

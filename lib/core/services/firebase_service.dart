@@ -61,6 +61,67 @@ class FirebaseService {
     }
   }
 
+  // 🔒 Check if email already exists
+  Future<bool> isEmailTaken(String email) async {
+    try {
+      final query = await _firestore
+          .collection(AppConstants.usersCollection)
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+      return query.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 🔒 Check if phone number already exists
+  Future<bool> isPhoneNumberTaken(String phoneNumber) async {
+    try {
+      final query = await _firestore
+          .collection(AppConstants.usersCollection)
+          .where('phoneNumber', isEqualTo: phoneNumber)
+          .limit(1)
+          .get();
+      return query.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 🔒 Check if ID number already exists
+  Future<bool> isIdNumberTaken(String idNumber) async {
+    try {
+      final query = await _firestore
+          .collection(AppConstants.usersCollection)
+          .where('idNumber', isEqualTo: idNumber)
+          .limit(1)
+          .get();
+      return query.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 🔒 Validate user uniqueness (email, phone, ID)
+  Future<Map<String, bool>> validateUserUniqueness({
+    required String email,
+    required String phoneNumber,
+    required String idNumber,
+  }) async {
+    final results = await Future.wait([
+      isEmailTaken(email),
+      isPhoneNumberTaken(phoneNumber),
+      isIdNumberTaken(idNumber),
+    ]);
+
+    return {
+      'emailTaken': results[0],
+      'phoneTaken': results[1],
+      'idTaken': results[2],
+    };
+  }
+
   // 🟢 Fetch all shifts as a stream
   Stream<QuerySnapshot> getShiftsStream() {
     return _firestore.collection(AppConstants.shiftsCollection).snapshots();
