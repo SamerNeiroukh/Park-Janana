@@ -33,7 +33,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
   String _selectedCategory = 'general';
   bool _isSubmitting = false;
 
-  final List<Map<String, dynamic>> _categories = [
+  final List<Map<String, dynamic>> _categories = const [
     {
       'value': 'announcement',
       'label': 'הודעה',
@@ -83,34 +83,30 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
         content: _contentController.text.trim(),
         category: _selectedCategory,
         createdAt: Timestamp.now(),
-        comments: [],
-        likedBy: [],
+        comments: const [],
+        likedBy: const [],
       );
 
       await _newsfeedService.createPost(post);
 
-      if (mounted) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('הפוסט פורסם בהצלחה'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('הפוסט פורסם בהצלחה'),
+          backgroundColor: AppColors.success,
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('שגיאה בפרסום הפוסט: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('שגיאה בפרסום הפוסט: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -119,79 +115,85 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+              // ===== Header =====
               Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                   gradient: LinearGradient(
                     colors: [AppColors.primaryBlue, AppColors.deepBlue],
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                   ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
                 ),
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                      icon:
+                          const Icon(Icons.close_rounded, color: Colors.white),
                     ),
                     const Spacer(),
-                    const Text(
-                      'פוסט חדש',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const Row(
+                      children: [
+                        Text(
+                          'פוסט חדש',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.edit_note_rounded, color: Colors.white),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.create_rounded, color: Colors.white),
                   ],
                 ),
               ),
 
-              // Form
+              // ===== Form =====
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Category selection
+                        // Category
                         const Text(
                           'קטגוריה',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
                             fontSize: 14,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
+
                         Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.start,
+                          spacing: 10,
+                          runSpacing: 10,
                           children: _categories.map((category) {
                             final isSelected =
                                 _selectedCategory == category['value'];
+
                             return ChoiceChip(
                               selected: isSelected,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() =>
-                                      _selectedCategory = category['value']);
-                                }
+                              onSelected: (_) {
+                                setState(() {
+                                  _selectedCategory =
+                                      category['value'] as String;
+                                });
                               },
                               avatar: Icon(
                                 category['icon'] as IconData,
@@ -210,7 +212,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                               backgroundColor: Colors.white,
                               selectedColor: category['color'] as Color,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(22),
                                 side: BorderSide(
                                   color: category['color'] as Color,
                                   width: isSelected ? 0 : 1,
@@ -220,66 +222,68 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                           }).toList(),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Title field
+                        // Title
                         TextFormField(
                           controller: _titleController,
+                          textAlign: TextAlign.right,
                           decoration: AppTheme.inputDecoration(
                             hintText: 'כותרת הפוסט',
                           ).copyWith(
-                            prefixIcon:
-                                const Icon(Icons.title, color: AppColors.primaryBlue),
+                            prefixIcon: const Icon(
+                              Icons.title_rounded,
+                              color: AppColors.primaryBlue,
+                            ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'יש להזין כותרת';
-                            }
-                            return null;
-                          },
-                          textAlign: TextAlign.right,
+                          validator: (value) =>
+                              value == null || value.trim().isEmpty
+                                  ? 'יש להזין כותרת'
+                                  : null,
                         ),
 
                         const SizedBox(height: 16),
 
-                        // Content field
+                        // Content
                         TextFormField(
                           controller: _contentController,
+                          textAlign: TextAlign.right,
                           maxLines: 5,
                           decoration: AppTheme.inputDecoration(
                             hintText: 'תוכן הפוסט...',
                           ).copyWith(
+                            alignLabelWithHint: true,
                             prefixIcon: const Padding(
                               padding: EdgeInsets.only(bottom: 80),
-                              child: Icon(Icons.notes, color: AppColors.primaryBlue),
+                              child: Icon(
+                                Icons.notes_rounded,
+                                color: AppColors.primaryBlue,
+                              ),
                             ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'יש להזין תוכן';
-                            }
-                            return null;
-                          },
-                          textAlign: TextAlign.right,
+                          validator: (value) =>
+                              value == null || value.trim().isEmpty
+                                  ? 'יש להזין תוכן'
+                                  : null,
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
 
-                        // Submit button
+                        // Submit
                         ElevatedButton(
                           onPressed: _isSubmitting ? null : _submitPost,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryBlue,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                           ),
                           child: _isSubmitting
                               ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
+                                  width: 22,
+                                  height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color: Colors.white,

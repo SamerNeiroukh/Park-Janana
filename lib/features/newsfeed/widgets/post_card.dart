@@ -29,22 +29,16 @@ class PostCard extends StatelessWidget {
   String _formatTimestamp(Timestamp timestamp) {
     final now = DateTime.now();
     final date = timestamp.toDate();
-    final difference = now.difference(date);
+    final diff = now.difference(date);
 
-    if (difference.inMinutes < 1) {
-      return 'עכשיו';
-    } else if (difference.inMinutes < 60) {
-      return 'לפני ${difference.inMinutes} דקות';
-    } else if (difference.inHours < 24) {
-      return 'לפני ${difference.inHours} שעות';
-    } else if (difference.inDays < 7) {
-      return 'לפני ${difference.inDays} ימים';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
+    if (diff.inMinutes < 1) return 'עכשיו';
+    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דק׳';
+    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
+    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    return '${date.day}/${date.month}/${date.year}';
   }
 
-  Color _getCategoryColor() {
+  Color _categoryColor() {
     switch (post.category) {
       case 'announcement':
         return AppColors.salmon;
@@ -57,7 +51,7 @@ class PostCard extends StatelessWidget {
     }
   }
 
-  IconData _getCategoryIcon() {
+  IconData _categoryIcon() {
     switch (post.category) {
       case 'announcement':
         return Icons.campaign_rounded;
@@ -73,48 +67,49 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLiked = post.isLikedBy(currentUserId);
+    final categoryColor = _categoryColor();
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity( 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Pinned indicator
+            // ===== PINNED STRIP =====
             if (post.isPinned)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.secondaryYellow.withOpacity( 0.2),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+                  color: AppColors.secondaryYellow.withOpacity(0.25),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
                   ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
+                  children: const [
                     Text(
                       'פוסט נעוץ',
                       style: TextStyle(
-                        color: AppColors.deepOrange,
-                        fontWeight: FontWeight.bold,
                         fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.deepOrange,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 6),
                     Icon(
                       Icons.push_pin_rounded,
                       size: 16,
@@ -129,136 +124,104 @@ class PostCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Author row
+                  // ===== HEADER =====
                   Row(
                     children: [
-                      // More options menu (for managers)
                       if (isManager || post.authorId == currentUserId)
                         PopupMenuButton<String>(
-                          icon: Icon(Icons.more_vert, color: AppColors.greyMedium),
+                          icon: Icon(
+                            Icons.more_vert_rounded,
+                            color: AppColors.greyMedium,
+                          ),
                           onSelected: (value) {
-                            if (value == 'delete') {
-                              onDelete?.call();
-                            } else if (value == 'pin') {
-                              onPin?.call();
-                            }
+                            if (value == 'delete') onDelete?.call();
+                            if (value == 'pin') onPin?.call();
                           },
-                          itemBuilder: (context) => [
+                          itemBuilder: (_) => [
                             if (isManager)
                               PopupMenuItem(
                                 value: 'pin',
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Text(post.isPinned ? 'בטל נעיצה' : 'נעץ פוסט'),
+                                    Text(post.isPinned
+                                        ? 'בטל נעיצה'
+                                        : 'נעץ פוסט'),
                                     const SizedBox(width: 8),
                                     Icon(
                                       post.isPinned
                                           ? Icons.push_pin_outlined
-                                          : Icons.push_pin,
-                                      size: 20,
+                                          : Icons.push_pin_rounded,
+                                      size: 18,
                                     ),
                                   ],
                                 ),
                               ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'מחק פוסט',
                                     style: TextStyle(color: Colors.red),
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.delete, size: 20, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.delete_outline,
+                                      size: 18, color: Colors.red),
                                 ],
                               ),
                             ),
                           ],
                         ),
-
                       const Spacer(),
-
-                      // Author info
-                      Expanded(
-                        flex: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                // Category badge
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _getCategoryColor().withOpacity( 0.15),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        post.categoryDisplayName,
-                                        style: TextStyle(
-                                          color: _getCategoryColor(),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Icon(
-                                        _getCategoryIcon(),
-                                        size: 12,
-                                        color: _getCategoryColor(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  post.authorName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _formatTimestamp(post.createdAt),
-                              style: TextStyle(
-                                color: AppColors.greyMedium,
-                                fontSize: 12,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              _CategoryBadge(
+                                label: post.categoryDisplayName,
+                                color: categoryColor,
+                                icon: _categoryIcon(),
                               ),
+                              const SizedBox(width: 8),
+                              Text(
+                                post.authorName,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _formatTimestamp(post.createdAt),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.greyMedium,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-
                       const SizedBox(width: 12),
-
-                      // Author avatar
                       CircleAvatar(
                         radius: 24,
-                        backgroundColor: AppColors.primaryBlue.withOpacity( 0.2),
+                        backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
                         backgroundImage: post.authorProfilePicture.isNotEmpty
-                            ? CachedNetworkImageProvider(post.authorProfilePicture)
+                            ? CachedNetworkImageProvider(
+                                post.authorProfilePicture)
                             : null,
                         child: post.authorProfilePicture.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
-                                style: TextStyle(
-                                  color: AppColors.primaryBlue,
-                                  fontWeight: FontWeight.bold,
+                                style: const TextStyle(
                                   fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryBlue,
                                 ),
                               )
                             : null,
@@ -266,9 +229,9 @@ class PostCard extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
 
-                  // Post title
+                  // ===== TITLE =====
                   Text(
                     post.title,
                     textAlign: TextAlign.right,
@@ -281,60 +244,54 @@ class PostCard extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // Post content
+                  // ===== CONTENT =====
                   Text(
                     post.content,
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
+                      height: 1.55,
                       color: AppColors.textSecondary,
-                      height: 1.5,
                     ),
                   ),
 
-                  // Post image (if exists)
+                  // ===== IMAGE =====
                   if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       child: CachedNetworkImage(
                         imageUrl: post.imageUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
+                        placeholder: (_, __) => Container(
                           height: 200,
                           color: AppColors.greyLight,
                           child: const Center(
                             child: CircularProgressIndicator(),
                           ),
                         ),
-                        errorWidget: (context, url, error) => Container(
+                        errorWidget: (_, __, ___) => Container(
                           height: 200,
                           color: AppColors.greyLight,
-                          child: const Icon(Icons.error),
+                          child: const Icon(Icons.broken_image),
                         ),
                       ),
                     ),
                   ],
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
+                  const Divider(height: 1),
+                  const SizedBox(height: 10),
 
-                  // Divider
-                  Divider(color: AppColors.greyLight, height: 1),
-
-                  const SizedBox(height: 12),
-
-                  // Actions row
+                  // ===== ACTIONS =====
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // Comments count
                       _ActionButton(
                         icon: Icons.chat_bubble_outline_rounded,
                         label: '${post.commentsCount}',
                         onTap: onComment,
                       ),
-
-                      // Like button
                       _ActionButton(
                         icon: isLiked
                             ? Icons.favorite_rounded
@@ -350,6 +307,47 @@ class PostCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// ===============================
+/// Sub widgets
+/// ===============================
+
+class _CategoryBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData icon;
+
+  const _CategoryBadge({
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(icon, size: 12, color: color),
+        ],
       ),
     );
   }
@@ -372,7 +370,7 @@ class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
@@ -380,8 +378,8 @@ class _ActionButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: color ?? AppColors.greyDark,
                 fontWeight: FontWeight.w500,
+                color: color ?? AppColors.greyDark,
               ),
             ),
             const SizedBox(width: 6),
