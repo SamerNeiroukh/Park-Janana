@@ -408,6 +408,12 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         }
 
         if (snapshot.hasError) {
+          debugPrint('Newsfeed error: ${snapshot.error}');
+          // If filtering by category, show empty state instead of error
+          // (likely missing Firestore index)
+          if (_selectedCategory != null) {
+            return _EmptyState(isManager: isManager);
+          }
           return _ErrorState(onRetry: () => setState(() {}));
         }
 
