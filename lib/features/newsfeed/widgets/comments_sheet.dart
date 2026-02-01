@@ -1,8 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
@@ -33,6 +33,7 @@ class _CommentsSheetState extends State<CommentsSheet>
   final NewsfeedService _newsfeedService = NewsfeedService();
   final FocusNode _focusNode = FocusNode();
   late AnimationController _animController;
+  late Stream<PostModel?> _postStream;
   bool _isSubmitting = false;
 
   @override
@@ -43,6 +44,13 @@ class _CommentsSheetState extends State<CommentsSheet>
       duration: const Duration(milliseconds: 300),
     );
     _animController.forward();
+
+    // Create a stream to listen for real-time updates
+    _postStream = FirebaseFirestore.instance
+        .collection('posts')
+        .doc(widget.post.id)
+        .snapshots()
+        .map((doc) => doc.exists ? PostModel.fromFirestore(doc) : null);
   }
 
   @override
@@ -226,14 +234,22 @@ class _CommentsSheetState extends State<CommentsSheet>
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildHandle(),
-              _buildHeader(),
-              const Divider(height: 1),
-              Expanded(child: _buildCommentsList()),
-              _buildInputBar(),
-            ],
+          child: StreamBuilder<PostModel?>(
+            stream: _postStream,
+            initialData: widget.post,
+            builder: (context, snapshot) {
+              final post = snapshot.data ?? widget.post;
+
+              return Column(
+                children: [
+                  _buildHandle(),
+                  _buildHeader(post),
+                  const Divider(height: 1),
+                  Expanded(child: _buildCommentsList(post)),
+                  _buildInputBar(),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -257,7 +273,7 @@ class _CommentsSheetState extends State<CommentsSheet>
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(PostModel post) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 20, 14),
       child: Row(
@@ -306,7 +322,7 @@ class _CommentsSheetState extends State<CommentsSheet>
                     ),
                   ),
                   Text(
-                    '${widget.post.commentsCount} תגובות',
+                    '${post.commentsCount} תגובות',
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.greyMedium.withOpacity(0.8),
@@ -321,35 +337,24 @@ class _CommentsSheetState extends State<CommentsSheet>
     );
   }
 
-  Widget _buildCommentsList() {
-    if (widget.post.comments.isEmpty) {
-      return _EmptyComments();
+  Widget _buildCommentsList(PostModel post) {
+    if (post.comments.isEmpty) {
+      return const _EmptyComments();
     }
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      itemCount: widget.post.comments.length,
+      itemCount: post.comments.length,
       itemBuilder: (context, index) {
-        final comment = widget.post.comments[index];
+        final comment = post.comments[index];
         final canDelete = comment.userId == widget.currentUserId || widget.isManager;
 
-        return TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: Duration(milliseconds: 200 + (index * 50)),
-          curve: Curves.easeOut,
-          builder: (context, value, child) => Opacity(
-            opacity: value,
-            child: Transform.translate(
-              offset: Offset(20 * (1 - value), 0),
-              child: child,
-            ),
-          ),
-          child: _CommentCard(
-            comment: comment,
-            canDelete: canDelete,
-            onDelete: () => _deleteComment(comment),
-            timestamp: _formatTimestamp(comment.createdAt),
-          ),
+        return _CommentCard(
+          key: ValueKey(comment.id),
+          comment: comment,
+          canDelete: canDelete,
+          onDelete: () => _deleteComment(comment),
+          timestamp: _formatTimestamp(comment.createdAt),
         );
       },
     );
@@ -423,6 +428,8 @@ class _CommentsSheetState extends State<CommentsSheet>
 // ===============================
 
 class _EmptyComments extends StatelessWidget {
+  const _EmptyComments();
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -464,13 +471,14 @@ class _EmptyComments extends StatelessWidget {
   }
 }
 
-class _CommentCard extends StatelessWidget {
+class _CommentCard extends StatefulWidget {
   final PostComment comment;
   final bool canDelete;
   final VoidCallback onDelete;
   final String timestamp;
 
   const _CommentCard({
+    super.key,
     required this.comment,
     required this.canDelete,
     required this.onDelete,
@@ -478,17 +486,66 @@ class _CommentCard extends StatelessWidget {
   });
 
   @override
+  State<_CommentCard> createState() => _CommentCardState();
+}
+
+class _CommentCardState extends State<_CommentCard> {
+  String? _resolvedProfileUrl;
+  bool _isLoadingImage = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveProfilePicture();
+  }
+
+  Future<void> _resolveProfilePicture() async {
+    final picUrl = widget.comment.userProfilePicture;
+
+    if (picUrl.isEmpty) {
+      setState(() => _isLoadingImage = false);
+      return;
+    }
+
+    // If it's already a full URL (starts with http), use it directly
+    if (picUrl.startsWith('http')) {
+      setState(() {
+        _resolvedProfileUrl = picUrl;
+        _isLoadingImage = false;
+      });
+      return;
+    }
+
+    // If it's a Firebase Storage path, get the download URL
+    try {
+      final ref = FirebaseStorage.instance.ref(picUrl);
+      final url = await ref.getDownloadURL();
+      if (mounted) {
+        setState(() {
+          _resolvedProfileUrl = url;
+          _isLoadingImage = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error resolving profile picture: $e');
+      if (mounted) {
+        setState(() => _isLoadingImage = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
-            const Color(0xFFF8FAFC),
-            const Color(0xFFF1F5F9),
+            Color(0xFFF8FAFC),
+            Color(0xFFF1F5F9),
           ],
         ),
         borderRadius: BorderRadius.circular(18),
@@ -501,12 +558,12 @@ class _CommentCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (canDelete)
+              if (widget.canDelete)
                 Material(
                   color: Colors.red.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(8),
                   child: InkWell(
-                    onTap: onDelete,
+                    onTap: widget.onDelete,
                     borderRadius: BorderRadius.circular(8),
                     child: const Padding(
                       padding: EdgeInsets.all(6),
@@ -523,7 +580,7 @@ class _CommentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    comment.userName,
+                    widget.comment.userName,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
@@ -539,7 +596,7 @@ class _CommentCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        timestamp,
+                        widget.timestamp,
                         style: TextStyle(
                           fontSize: 11,
                           color: AppColors.greyMedium.withOpacity(0.7),
@@ -550,41 +607,12 @@ class _CommentCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryBlue.withOpacity(0.2),
-                      AppColors.primaryBlue.withOpacity(0.1),
-                    ],
-                  ),
-                ),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage: comment.userProfilePicture.isNotEmpty
-                      ? CachedNetworkImageProvider(comment.userProfilePicture)
-                      : null,
-                  child: comment.userProfilePicture.isEmpty
-                      ? Text(
-                          comment.userName.isNotEmpty
-                              ? comment.userName[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            color: AppColors.primaryBlue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        )
-                      : null,
-                ),
-              ),
+              _buildAvatar(),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            comment.content,
+            widget.comment.content,
             textAlign: TextAlign.right,
             style: const TextStyle(
               fontSize: 14,
@@ -593,6 +621,48 @@ class _CommentCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar() {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryBlue.withOpacity(0.2),
+            AppColors.primaryBlue.withOpacity(0.1),
+          ],
+        ),
+      ),
+      child: CircleAvatar(
+        radius: 18,
+        backgroundColor: Colors.transparent,
+        backgroundImage: _resolvedProfileUrl != null
+            ? CachedNetworkImageProvider(_resolvedProfileUrl!)
+            : null,
+        child: _isLoadingImage
+            ? SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primaryBlue.withOpacity(0.5),
+                ),
+              )
+            : (_resolvedProfileUrl == null
+                ? Text(
+                    widget.comment.userName.isNotEmpty
+                        ? widget.comment.userName[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                      color: AppColors.primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  )
+                : null),
       ),
     );
   }

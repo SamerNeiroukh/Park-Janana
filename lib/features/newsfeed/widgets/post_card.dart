@@ -109,21 +109,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     final isLiked = widget.post.isLikedBy(widget.currentUserId);
     final categoryColor = _categoryColor();
 
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) => Transform.scale(
-        scale: _scaleAnimation.value,
-        child: child,
-      ),
-      child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
-        onTapUp: (_) => _controller.reverse(),
-        onTapCancel: () => _controller.reverse(),
-        onTap: () {
-          HapticFeedback.selectionClick();
-          widget.onTap?.call();
-        },
-        child: Container(
+    // Card without full-tap interaction - only buttons are interactive
+    return Container(
           margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
@@ -222,8 +209,6 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 
