@@ -373,7 +373,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             height: 44,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              reverse: true,
+              reverse: false,
               itemCount: _categories.length,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
