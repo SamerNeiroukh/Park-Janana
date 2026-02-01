@@ -16,6 +16,23 @@ class AuthService {
   // 🟢 Create a new user with a default profile picture uploaded to Firebase
   Future<void> createUser(String email, String password, String fullName,
       String idNumber, String phoneNumber) async {
+    // 🔒 First, validate that email, phone, and ID are unique
+    final validation = await _firebaseService.validateUserUniqueness(
+      email: email,
+      phoneNumber: phoneNumber,
+      idNumber: idNumber,
+    );
+
+    if (validation['emailTaken'] ?? false) {
+      throw CustomException('כתובת האימייל כבר קיימת במערכת.');
+    }
+    if (validation['phoneTaken'] ?? false) {
+      throw CustomException('מספר הטלפון כבר קיים במערכת.');
+    }
+    if (validation['idTaken'] ?? false) {
+      throw CustomException('מספר תעודת הזהות כבר קיים במערכת.');
+    }
+
     try {
       final UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -43,7 +60,13 @@ class AuthService {
       // ✅ Cache user role
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userRole', 'worker');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw CustomException('כתובת האימייל כבר קיימת במערכת.');
+      }
+      throw CustomException('שגיאה ביצירת משתמש.');
     } catch (e) {
+      if (e is CustomException) rethrow;
       throw CustomException('שגיאה ביצירת משתמש.');
     }
   }

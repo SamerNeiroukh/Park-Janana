@@ -24,78 +24,78 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: showLogoutButton
           ? [
               IconButton(
-                icon: const Icon(Icons.logout),
-                tooltip: 'התנתקות',
-                onPressed: () async {
-                  final shouldLogout = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: AlertDialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        title: const Row(
-                          children: [
-                            Icon(Icons.logout, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('התנתקות',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        content: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.0),
-                          child: Text(
-                            'האם אתה בטוח שברצונך להתנתק?',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        ),
-                        actionsAlignment: MainAxisAlignment.spaceBetween,
-                        actions: [
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.black,
-                              backgroundColor: Colors.grey,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child:
-                                  Text('ביטול', style: TextStyle(fontSize: 16)),
-                            ),
-                          ),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child:
-                                  Text('התנתק', style: TextStyle(fontSize: 16)),
-                            ),
-                          ),
+              icon: const Icon(Icons.logout),
+              tooltip: 'התנתקות',
+              onPressed: () async {
+                final shouldLogout = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: AlertDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      title: const Row(
+                        children: [
+                          Icon(Icons.logout, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('התנתקות',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
+                      content: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                        child: Text(
+                          'האם אתה בטוח שברצונך להתנתק?',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      actionsAlignment: MainAxisAlignment.spaceBetween,
+                      actions: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.grey,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child:
+                                Text('ביטול', style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child:
+                                Text('התנתק', style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                  if (shouldLogout ?? false) {
-                    await AuthService().signOut();
-                    if (context.mounted) {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/login', (route) => false);
-                    }
+                  ),
+                );
+                if (shouldLogout ?? false) {
+                  await AuthService().signOut();
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/login', (route) => false);
                   }
-                },
-              ),
-            ]
+                }
+              },
+            ),
+          ]
           : null,
     );
   }

@@ -11,7 +11,8 @@ import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import '../widgets/post_card.dart';
 import '../widgets/create_post_dialog.dart';
-import '../widgets/comments_sheet.dart';
+import '../widgets/post_detail_sheet.dart';
+import '../widgets/likers_sheet.dart';
 
 class NewsfeedScreen extends StatefulWidget {
   const NewsfeedScreen({super.key});
@@ -24,21 +25,20 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     with SingleTickerProviderStateMixin {
   final NewsfeedService _newsfeedService = NewsfeedService();
   final ScrollController _scrollController = ScrollController();
-  String? _selectedCategory;
   bool _showFab = true;
 
-  final List<Map<String, dynamic>> _categories = const [
-    {'value': null, 'label': 'הכל', 'icon': Icons.dashboard_rounded},
-    {'value': 'announcement', 'label': 'הודעות', 'icon': Icons.campaign_rounded},
-    {'value': 'update', 'label': 'עדכונים', 'icon': Icons.update_rounded},
-    {'value': 'event', 'label': 'אירועים', 'icon': Icons.event_rounded},
-    {'value': 'general', 'label': 'כללי', 'icon': Icons.article_rounded},
-  ];
+  // Cache the stream to avoid recreating it on every build
+  Stream<List<PostModel>>? _postsStream;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _initStream();
+  }
+
+  void _initStream() {
+    _postsStream ??= _newsfeedService.getPostsStream();
   }
 
   @override
@@ -91,22 +91,39 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     );
   }
 
-  void _showCommentsSheet(BuildContext context, PostModel post) {
+  void _showPostDetailSheet(BuildContext context, PostModel post, String userId) {
     HapticFeedback.selectionClick();
     final authProvider = context.read<AppAuthProvider>();
     final userProvider = context.read<UserProvider>();
     final currentUser = userProvider.currentUser;
+    final isManager = _isManager(authProvider.userRole);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => CommentsSheet(
+      builder: (_) => PostDetailSheet(
         post: post,
         currentUserId: authProvider.uid ?? '',
         currentUserName: currentUser?.fullName ?? 'משתמש',
         currentUserProfilePicture: currentUser?.profilePicturePath ?? currentUser?.profilePicture ?? '',
-        isManager: _isManager(authProvider.userRole),
+        isManager: isManager,
+        onLike: () => _handleLike(post, userId),
+        onDelete: () => _handleDelete(post),
+        onPin: () => _handlePin(post),
+        onShowLikers: () => _showLikersSheet(context, post),
+      ),
+    );
+  }
+
+  void _showLikersSheet(BuildContext context, PostModel post) {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => LikersSheet(
+        likedByUserIds: post.likedBy,
       ),
     );
   }
@@ -327,69 +344,39 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
+        textDirection: TextDirection.rtl,
         children: [
-          // Title with gradient
-          Row(
-            children: [
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [AppColors.primaryBlue, AppColors.deepBlue],
-                ).createShader(bounds),
-                child: const Text(
-                  'לוח מודעות',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'SuezOne',
-                    color: Colors.white,
-                  ),
-                ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryBlue.withOpacity(0.15),
+                  AppColors.primaryBlue.withOpacity(0.05),
+                ],
               ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryBlue.withOpacity(0.15),
-                      AppColors.primaryBlue.withOpacity(0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.newspaper_rounded,
-                  color: AppColors.primaryBlue,
-                  size: 24,
-                ),
-              ),
-            ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.newspaper_rounded,
+              color: AppColors.primaryBlue,
+              size: 24,
+            ),
           ),
-          const SizedBox(height: 16),
-          // Category chips
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              reverse: false,
-              itemCount: _categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final isSelected = _selectedCategory == category['value'];
-
-                return _CategoryChip(
-                  label: category['label'] as String,
-                  icon: category['icon'] as IconData,
-                  isSelected: isSelected,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _selectedCategory = category['value']);
-                  },
-                );
-              },
+          const SizedBox(width: 10),
+          ShaderMask(
+            shaderCallback: (bounds) => LinearGradient(
+              colors: [AppColors.primaryBlue, AppColors.deepBlue],
+            ).createShader(bounds),
+            child: const Text(
+              'לוח מודעות',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'SuezOne',
+                color: Colors.white,
+              ),
             ),
           ),
         ],
@@ -399,9 +386,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
   Widget _buildFeed(bool isManager, String userId) {
     return StreamBuilder<List<PostModel>>(
-      stream: _selectedCategory == null
-          ? _newsfeedService.getPostsStream()
-          : _newsfeedService.getPostsByCategory(_selectedCategory!),
+      // Use the cached stream to avoid recreating on every build
+      stream: _postsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _buildShimmerLoading();
@@ -409,12 +395,12 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
         if (snapshot.hasError) {
           debugPrint('Newsfeed error: ${snapshot.error}');
-          // If filtering by category, show empty state instead of error
-          // (likely missing Firestore index)
-          if (_selectedCategory != null) {
-            return _EmptyState(isManager: isManager);
-          }
-          return _ErrorState(onRetry: () => setState(() {}));
+          return _ErrorState(onRetry: () {
+            setState(() {
+              _postsStream = null;
+              _initStream();
+            });
+          });
         }
 
         final posts = snapshot.data ?? [];
@@ -426,7 +412,11 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         return RefreshIndicator(
           onRefresh: () async {
             HapticFeedback.mediumImpact();
-            setState(() {});
+            // Force recreate stream to get fresh data
+            setState(() {
+              _postsStream = null;
+              _initStream();
+            });
             await Future.delayed(const Duration(milliseconds: 500));
           },
           color: AppColors.primaryBlue,
@@ -440,30 +430,18 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             itemCount: posts.length,
             itemBuilder: (context, index) {
               final post = posts[index];
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: Duration(milliseconds: 300 + (index * 50)),
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: PostCard(
-                  post: post,
-                  currentUserId: userId,
-                  isManager: isManager,
-                  index: index,
-                  onLike: () => _handleLike(post, userId),
-                  onComment: () => _showCommentsSheet(context, post),
-                  onDelete: () => _handleDelete(post),
-                  onPin: () => _handlePin(post),
-                  onTap: () => _showCommentsSheet(context, post),
-                ),
+              return PostCard(
+                key: ValueKey(post.id),
+                post: post,
+                currentUserId: userId,
+                isManager: isManager,
+                index: index,
+                onLike: () => _handleLike(post, userId),
+                onComment: () => _showPostDetailSheet(context, post, userId),
+                onDelete: () => _handleDelete(post),
+                onPin: () => _handlePin(post),
+                onTap: () => _showPostDetailSheet(context, post, userId),
+                onShowLikers: () => _showLikersSheet(context, post),
               );
             },
           ),
@@ -527,73 +505,6 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 // ===============================
 // Sub Widgets
 // ===============================
-
-class _CategoryChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _CategoryChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          gradient: isSelected
-              ? const LinearGradient(
-                  colors: [AppColors.primaryBlue, AppColors.deepBlue],
-                )
-              : null,
-          color: isSelected ? null : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected
-                ? Colors.transparent
-                : AppColors.greyLight.withOpacity(0.8),
-            width: 1.5,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryBlue.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? Colors.white : AppColors.primaryBlue,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _EmptyState extends StatelessWidget {
   final bool isManager;

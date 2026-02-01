@@ -16,6 +16,7 @@ class PostCard extends StatefulWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
   final VoidCallback? onTap;
+  final VoidCallback? onShowLikers;
   final int index;
 
   const PostCard({
@@ -28,6 +29,7 @@ class PostCard extends StatefulWidget {
     this.onDelete,
     this.onPin,
     this.onTap,
+    this.onShowLikers,
     this.index = 0,
   });
 
@@ -220,16 +222,74 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
                           const SizedBox(height: 10),
 
-                          // ===== CONTENT =====
-                          Text(
-                            widget.post.content,
-                            textAlign: TextAlign.right,
-                            maxLines: 4,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              height: 1.6,
-                              color: AppColors.textSecondary.withOpacity(0.9),
+                          // ===== CONTENT (tappable) =====
+                          GestureDetector(
+                            onTap: widget.onTap,
+                            behavior: HitTestBehavior.opaque,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    // Check if text will be truncated
+                                    final textSpan = TextSpan(
+                                      text: widget.post.content,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        height: 1.6,
+                                        color: AppColors.textSecondary.withOpacity(0.9),
+                                      ),
+                                    );
+                                    final textPainter = TextPainter(
+                                      text: textSpan,
+                                      maxLines: 4,
+                                      textDirection: TextDirection.rtl,
+                                    );
+                                    textPainter.layout(maxWidth: constraints.maxWidth);
+                                    final isOverflowing = textPainter.didExceedMaxLines;
+
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          widget.post.content,
+                                          textAlign: TextAlign.right,
+                                          maxLines: 4,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            height: 1.6,
+                                            color: AppColors.textSecondary.withOpacity(0.9),
+                                          ),
+                                        ),
+                                        if (isOverflowing)
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 8),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                Icon(
+                                                  Icons.arrow_back_ios_rounded,
+                                                  size: 12,
+                                                  color: AppColors.primaryBlue,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  'קרא עוד',
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.primaryBlue,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
 
@@ -428,13 +488,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             PopupMenuItem(
               value: 'pin',
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                textDirection: TextDirection.rtl,
                 children: [
-                  Text(
-                    widget.post.isPinned ? 'בטל נעיצה' : 'נעץ פוסט',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(width: 10),
                   Icon(
                     widget.post.isPinned
                         ? Icons.push_pin_outlined
@@ -442,23 +497,28 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     size: 18,
                     color: AppColors.primaryBlue,
                   ),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.post.isPinned ? 'בטל נעיצה' : 'נעץ פוסט',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
                 ],
               ),
             ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'delete',
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              textDirection: TextDirection.rtl,
               children: [
-                Text(
+                const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                const SizedBox(width: 10),
+                const Text(
                   'מחק פוסט',
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(width: 10),
-                Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
               ],
             ),
           ),
@@ -517,14 +577,17 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
+        textDirection: TextDirection.rtl,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _ActionButton(
-            icon: Icons.chat_bubble_outline_rounded,
-            label: '${widget.post.commentsCount}',
-            onTap: () {
+          _LikeButton(
+            isLiked: isLiked,
+            count: widget.post.likesCount,
+            isAnimating: _isLikeAnimating,
+            onTap: _handleLikeTap,
+            onShowLikers: () {
               HapticFeedback.selectionClick();
-              widget.onComment?.call();
+              widget.onShowLikers?.call();
             },
           ),
           Container(
@@ -532,11 +595,13 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             height: 24,
             color: AppColors.greyMedium.withOpacity(0.3),
           ),
-          _LikeButton(
-            isLiked: isLiked,
-            count: widget.post.likesCount,
-            isAnimating: _isLikeAnimating,
-            onTap: _handleLikeTap,
+          _ActionButton(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: '${widget.post.commentsCount}',
+            onTap: () {
+              HapticFeedback.selectionClick();
+              widget.onComment?.call();
+            },
           ),
         ],
       ),
@@ -643,25 +708,29 @@ class _LikeButton extends StatelessWidget {
   final int count;
   final bool isAnimating;
   final VoidCallback? onTap;
+  final VoidCallback? onShowLikers;
 
   const _LikeButton({
     required this.isLiked,
     required this.count,
     required this.isAnimating,
     this.onTap,
+    this.onShowLikers,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Row(
-          textDirection: TextDirection.rtl,
-          children: [
-            AnimatedScale(
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      textDirection: TextDirection.rtl,
+      children: [
+        // Like/Unlike button (heart icon)
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: AnimatedScale(
               scale: isAnimating ? 1.3 : 1.0,
               duration: const Duration(milliseconds: 150),
               child: Icon(
@@ -670,8 +739,15 @@ class _LikeButton extends StatelessWidget {
                 color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.7),
               ),
             ),
-            const SizedBox(width: 6),
-            Text(
+          ),
+        ),
+        // Likes count (tappable to show likers)
+        InkWell(
+          onTap: onShowLikers,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Text(
               '$count',
               style: TextStyle(
                 fontSize: 14,
@@ -679,9 +755,9 @@ class _LikeButton extends StatelessWidget {
                 color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
