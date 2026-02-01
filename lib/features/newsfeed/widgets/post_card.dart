@@ -275,7 +275,14 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              textDirection: TextDirection.rtl,
               children: const [
+                Icon(
+                  Icons.push_pin_rounded,
+                  size: 14,
+                  color: AppColors.deepOrange,
+                ),
+                SizedBox(width: 4),
                 Text(
                   'פוסט נעוץ',
                   style: TextStyle(
@@ -283,12 +290,6 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     fontWeight: FontWeight.bold,
                     color: AppColors.deepOrange,
                   ),
-                ),
-                SizedBox(width: 4),
-                Icon(
-                  Icons.push_pin_rounded,
-                  size: 14,
-                  color: AppColors.deepOrange,
                 ),
               ],
             ),
@@ -300,21 +301,16 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
   Widget _buildHeader(Color categoryColor) {
     return Row(
+      textDirection: TextDirection.rtl,
       children: [
-        if (widget.isManager || widget.post.authorId == widget.currentUserId)
-          _buildOptionsMenu(),
-        const Spacer(),
+        _buildAvatar(),
+        const SizedBox(width: 12),
         Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              textDirection: TextDirection.rtl,
               children: [
-                _CategoryBadge(
-                  label: widget.post.categoryDisplayName,
-                  color: categoryColor,
-                  icon: _categoryIcon(),
-                ),
-                const SizedBox(width: 10),
                 Text(
                   widget.post.authorName,
                   style: const TextStyle(
@@ -323,17 +319,18 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     color: AppColors.textPrimary,
                   ),
                 ),
+                const SizedBox(width: 10),
+                _CategoryBadge(
+                  label: widget.post.categoryDisplayName,
+                  color: categoryColor,
+                  icon: _categoryIcon(),
+                ),
               ],
             ),
             const SizedBox(height: 4),
             Row(
+              textDirection: TextDirection.rtl,
               children: [
-                Icon(
-                  Icons.access_time_rounded,
-                  size: 12,
-                  color: AppColors.greyMedium.withOpacity(0.7),
-                ),
-                const SizedBox(width: 4),
                 Text(
                   _formatTimestamp(widget.post.createdAt),
                   style: TextStyle(
@@ -341,12 +338,19 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     color: AppColors.greyMedium.withOpacity(0.8),
                   ),
                 ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 12,
+                  color: AppColors.greyMedium.withOpacity(0.7),
+                ),
               ],
             ),
           ],
         ),
-        const SizedBox(width: 12),
-        _buildAvatar(),
+        const Spacer(),
+        if (widget.isManager || widget.post.authorId == widget.currentUserId)
+          _buildOptionsMenu(),
       ],
     );
   }
@@ -574,7 +578,10 @@ class _CategoryBadge extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        textDirection: TextDirection.rtl,
         children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
@@ -583,8 +590,6 @@ class _CategoryBadge extends StatelessWidget {
               color: color,
             ),
           ),
-          const SizedBox(width: 4),
-          Icon(icon, size: 12, color: color),
         ],
       ),
     );
@@ -610,7 +615,14 @@ class _ActionButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Row(
+          textDirection: TextDirection.rtl,
           children: [
+            Icon(
+              icon,
+              size: 20,
+              color: AppColors.greyDark.withOpacity(0.7),
+            ),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
@@ -618,12 +630,6 @@ class _ActionButton extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: AppColors.greyDark.withOpacity(0.8),
               ),
-            ),
-            const SizedBox(width: 6),
-            Icon(
-              icon,
-              size: 20,
-              color: AppColors.greyDark.withOpacity(0.7),
             ),
           ],
         ),
@@ -653,16 +659,8 @@ class _LikeButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Row(
+          textDirection: TextDirection.rtl,
           children: [
-            Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(width: 6),
             AnimatedScale(
               scale: isAnimating ? 1.3 : 1.0,
               duration: const Duration(milliseconds: 150),
@@ -670,6 +668,15 @@ class _LikeButton extends StatelessWidget {
                 isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                 size: 22,
                 color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
               ),
             ),
           ],
