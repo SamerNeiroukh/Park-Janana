@@ -41,7 +41,8 @@ void main() async {
     await NotificationService().initialize();
   } catch (e) {
     debugPrint('Error initializing Firebase: $e');
-    firebaseError = 'לא ניתן להתחבר לשרתי האפליקציה. אנא בדוק את החיבור לאינטרנט ונסה שוב.';
+    firebaseError =
+        'לא ניתן להתחבר לשרתי האפליקציה. אנא בדוק את החיבור לאינטרנט ונסה שוב.';
   }
 
   runApp(

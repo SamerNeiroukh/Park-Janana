@@ -26,8 +26,8 @@ class CommentsSheet extends StatefulWidget {
 }
 
 class _CommentsSheetState extends State<CommentsSheet> {
-  final _commentController = TextEditingController();
-  final _newsfeedService = NewsfeedService();
+  final TextEditingController _commentController = TextEditingController();
+  final NewsfeedService _newsfeedService = NewsfeedService();
   bool _isSubmitting = false;
 
   @override
@@ -39,19 +39,13 @@ class _CommentsSheetState extends State<CommentsSheet> {
   String _formatTimestamp(Timestamp timestamp) {
     final now = DateTime.now();
     final date = timestamp.toDate();
-    final difference = now.difference(date);
+    final diff = now.difference(date);
 
-    if (difference.inMinutes < 1) {
-      return 'עכשיו';
-    } else if (difference.inMinutes < 60) {
-      return 'לפני ${difference.inMinutes} דק\'';
-    } else if (difference.inHours < 24) {
-      return 'לפני ${difference.inHours} שעות';
-    } else if (difference.inDays < 7) {
-      return 'לפני ${difference.inDays} ימים';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
+    if (diff.inMinutes < 1) return 'עכשיו';
+    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דק׳';
+    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
+    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   Future<void> _submitComment() async {
@@ -70,47 +64,45 @@ class _CommentsSheetState extends State<CommentsSheet> {
       );
 
       _commentController.clear();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('התגובה נוספה בהצלחה'),
-            backgroundColor: AppColors.success,
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('התגובה נוספה'),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 1),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('שגיאה בהוספת תגובה: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('שגיאה בהוספת תגובה: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   Future<void> _deleteComment(PostComment comment) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => Directionality(
+      builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('מחיקת תגובה'),
           content: const Text('האם אתה בטוח שברצונך למחוק את התגובה?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => Navigator.pop(context, false),
               child: const Text('ביטול'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('מחק'),
             ),
@@ -119,28 +111,26 @@ class _CommentsSheetState extends State<CommentsSheet> {
       ),
     );
 
-    if (confirm == true) {
-      try {
-        await _newsfeedService.deleteComment(widget.post.id, comment);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('התגובה נמחקה'),
-              backgroundColor: AppColors.success,
-              duration: Duration(seconds: 1),
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('שגיאה במחיקת תגובה: $e'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      }
+    if (confirm != true) return;
+
+    try {
+      await _newsfeedService.deleteComment(widget.post.id, comment);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('התגובה נמחקה'),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('שגיאה במחיקת תגובה: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -150,22 +140,18 @@ class _CommentsSheetState extends State<CommentsSheet> {
       textDirection: TextDirection.rtl,
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.75,
+          maxHeight: MediaQuery.of(context).size.height * 0.78,
         ),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
+            // Drag handle
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 12),
-              width: 40,
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 42,
               height: 4,
               decoration: BoxDecoration(
                 color: AppColors.greyLight,
@@ -175,219 +161,258 @@ class _CommentsSheetState extends State<CommentsSheet> {
 
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded),
                   ),
                   const Spacer(),
-                  Text(
-                    'תגובות (${widget.post.commentsCount})',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.chat_bubble_outline,
+                          color: AppColors.primaryBlue),
+                      const SizedBox(width: 6),
+                      Text(
+                        'תגובות (${widget.post.commentsCount})',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chat_bubble_outline, color: AppColors.primaryBlue),
                 ],
               ),
             ),
 
-            const Divider(),
+            const Divider(height: 1),
 
             // Comments list
             Expanded(
               child: widget.post.comments.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.chat_bubble_outline,
-                            size: 64,
-                            color: AppColors.greyLight,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'אין תגובות עדיין',
-                            style: TextStyle(
-                              color: AppColors.greyMedium,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'היה הראשון להגיב!',
-                            style: TextStyle(
-                              color: AppColors.greyMedium,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
+                  ? _EmptyComments()
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                       itemCount: widget.post.comments.length,
                       itemBuilder: (context, index) {
                         final comment = widget.post.comments[index];
-                        final canDelete = comment.userId == widget.currentUserId ||
-                            widget.isManager;
+                        final canDelete =
+                            comment.userId == widget.currentUserId ||
+                                widget.isManager;
 
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundLight,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Comment header
-                              Row(
-                                children: [
-                                  if (canDelete)
-                                    IconButton(
-                                      onPressed: () => _deleteComment(comment),
-                                      icon: const Icon(
-                                        Icons.delete_outline,
-                                        size: 18,
-                                        color: Colors.red,
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                    ),
-                                  const Spacer(),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        comment.userName,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatTimestamp(comment.createdAt),
-                                        style: TextStyle(
-                                          color: AppColors.greyMedium,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 10),
-                                  CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor:
-                                        AppColors.primaryBlue.withOpacity( 0.2),
-                                    backgroundImage:
-                                        comment.userProfilePicture.isNotEmpty
-                                            ? CachedNetworkImageProvider(
-                                                comment.userProfilePicture)
-                                            : null,
-                                    child: comment.userProfilePicture.isEmpty
-                                        ? Text(
-                                            comment.userName.isNotEmpty
-                                                ? comment.userName[0].toUpperCase()
-                                                : '?',
-                                            style: TextStyle(
-                                              color: AppColors.primaryBlue,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          )
-                                        : null,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              // Comment content
-                              Text(
-                                comment.content,
-                                textAlign: TextAlign.right,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
+                        return _CommentCard(
+                          comment: comment,
+                          canDelete: canDelete,
+                          onDelete: () => _deleteComment(comment),
+                          timestamp: _formatTimestamp(comment.createdAt),
                         );
                       },
                     ),
             ),
 
-            // Comment input
-            Container(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 12,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity( 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Send button
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBlue,
-                      shape: BoxShape.circle,
+            // Input bar
+            SafeArea(
+              top: false,
+              child: Container(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 12,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, -6),
                     ),
-                    child: IconButton(
-                      onPressed: _isSubmitting ? null : _submitComment,
-                      icon: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.send_rounded, color: Colors.white),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    _SendButton(
+                      isSubmitting: _isSubmitting,
+                      onTap: _submitComment,
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Text field
-                  Expanded(
-                    child: TextField(
-                      controller: _commentController,
-                      textAlign: TextAlign.right,
-                      decoration: InputDecoration(
-                        hintText: 'כתוב תגובה...',
-                        hintStyle: TextStyle(color: AppColors.greyMedium),
-                        filled: true,
-                        fillColor: AppColors.backgroundLight,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _commentController,
+                        textAlign: TextAlign.right,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: 'כתוב תגובה...',
+                          filled: true,
+                          fillColor: AppColors.backgroundLight,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                       ),
-                      maxLines: null,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// ===============================
+/// Sub-widgets
+/// ===============================
+
+class _EmptyComments extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.chat_bubble_outline, size: 72, color: AppColors.greyLight),
+          SizedBox(height: 16),
+          Text(
+            'אין תגובות עדיין',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.greyMedium,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            'היה הראשון להגיב',
+            style: TextStyle(color: AppColors.greyMedium),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommentCard extends StatelessWidget {
+  final PostComment comment;
+  final bool canDelete;
+  final VoidCallback onDelete;
+  final String timestamp;
+
+  const _CommentCard({
+    required this.comment,
+    required this.canDelete,
+    required this.onDelete,
+    required this.timestamp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              if (canDelete)
+                IconButton(
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline,
+                      size: 18, color: Colors.red),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              const Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    comment.userName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  Text(
+                    timestamp,
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.greyMedium),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 10),
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
+                backgroundImage: comment.userProfilePicture.isNotEmpty
+                    ? CachedNetworkImageProvider(comment.userProfilePicture)
+                    : null,
+                child: comment.userProfilePicture.isEmpty
+                    ? Text(
+                        comment.userName.isNotEmpty
+                            ? comment.userName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: AppColors.primaryBlue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            comment.content,
+            textAlign: TextAlign.right,
+            style: const TextStyle(fontSize: 14, height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SendButton extends StatelessWidget {
+  final bool isSubmitting;
+  final VoidCallback onTap;
+
+  const _SendButton({
+    required this.isSubmitting,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.primaryBlue,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        onPressed: isSubmitting ? null : onTap,
+        icon: isSubmitting
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.send_rounded, color: Colors.white),
       ),
     );
   }

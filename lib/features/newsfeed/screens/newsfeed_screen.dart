@@ -21,9 +21,13 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
   final NewsfeedService _newsfeedService = NewsfeedService();
   String? _selectedCategory;
 
-  final List<Map<String, dynamic>> _categories = [
+  final List<Map<String, dynamic>> _categories = const [
     {'value': null, 'label': 'הכל', 'icon': Icons.dashboard_rounded},
-    {'value': 'announcement', 'label': 'הודעות', 'icon': Icons.campaign_rounded},
+    {
+      'value': 'announcement',
+      'label': 'הודעות',
+      'icon': Icons.campaign_rounded
+    },
     {'value': 'update', 'label': 'עדכונים', 'icon': Icons.update_rounded},
     {'value': 'event', 'label': 'אירועים', 'icon': Icons.event_rounded},
     {'value': 'general', 'label': 'כללי', 'icon': Icons.article_rounded},
@@ -40,7 +44,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => CreatePostDialog(
+      builder: (_) => CreatePostDialog(
         authorId: authProvider.uid ?? '',
         authorName: currentUser?.fullName ?? 'משתמש',
         authorRole: authProvider.userRole ?? 'worker',
@@ -58,7 +62,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CommentsSheet(
+      builder: (_) => CommentsSheet(
         post: post,
         currentUserId: authProvider.uid ?? '',
         currentUserName: currentUser?.fullName ?? 'משתמש',
@@ -76,40 +80,40 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
         await _newsfeedService.likePost(post.id, userId);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('שגיאה: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('שגיאה: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
   Future<void> _handleDelete(PostModel post) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => Directionality(
+      builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text('מחיקת פוסט'),
-              const SizedBox(width: 8),
-              Icon(Icons.delete, color: Colors.red),
+            children: const [
+              Text('מחיקת פוסט'),
+              SizedBox(width: 8),
+              Icon(Icons.delete_outline, color: Colors.red),
             ],
           ),
           content: const Text('האם אתה בטוח שברצונך למחוק את הפוסט?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => Navigator.pop(context, false),
               child: const Text('ביטול'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('מחק'),
             ),
@@ -118,57 +122,53 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
       ),
     );
 
-    if (confirm == true) {
-      try {
-        await _newsfeedService.deletePost(post.id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('הפוסט נמחק בהצלחה'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('שגיאה במחיקת הפוסט: $e'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      }
+    if (confirm != true) return;
+
+    try {
+      await _newsfeedService.deletePost(post.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('הפוסט נמחק בהצלחה'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('שגיאה במחיקת הפוסט: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
   Future<void> _handlePin(PostModel post) async {
     try {
       await _newsfeedService.togglePin(post.id, !post.isPinned);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(post.isPinned ? 'הפוסט הוסר מהנעוצים' : 'הפוסט נועץ'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(post.isPinned ? 'הפוסט הוסר מהנעוצים' : 'הפוסט ננעץ'),
+          backgroundColor: AppColors.success,
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('שגיאה: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('שגיאה: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppAuthProvider>(
-      builder: (context, authProvider, child) {
+      builder: (context, authProvider, _) {
         final isManager = _isManager(authProvider.userRole);
         final userId = authProvider.uid ?? '';
 
@@ -180,97 +180,70 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
               children: [
                 const UserHeader(),
 
-                // Title and category filter
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                /// ===== Title & Filters =====
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Title row
                       Row(
-                        children: [
-                          if (isManager)
-                            IconButton(
-                              onPressed: () => _showCreatePostDialog(context),
-                              icon: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryBlue,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          const Spacer(),
-                          const Text(
+                        children: const [
+                          Text(
                             'לוח מודעות',
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'SuezOne',
                               color: AppColors.primaryBlue,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.newspaper_rounded,
-                            color: AppColors.primaryBlue,
-                            size: 28,
-                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.newspaper_rounded,
+                              color: AppColors.primaryBlue, size: 28),
                         ],
                       ),
-
                       const SizedBox(height: 12),
-
-                      // Category chips
                       SizedBox(
-                        height: 40,
-                        child: ListView.builder(
+                        height: 42,
+                        child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           reverse: true,
                           itemCount: _categories.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 8),
                           itemBuilder: (context, index) {
                             final category = _categories[index];
                             final isSelected =
                                 _selectedCategory == category['value'];
 
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: FilterChip(
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  setState(() {
-                                    _selectedCategory = category['value'];
-                                  });
-                                },
-                                avatar: Icon(
-                                  category['icon'] as IconData,
-                                  size: 16,
+                            return ChoiceChip(
+                              selected: isSelected,
+                              onSelected: (_) {
+                                setState(() {
+                                  _selectedCategory = category['value'];
+                                });
+                              },
+                              avatar: Icon(
+                                category['icon'] as IconData,
+                                size: 16,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.primaryBlue,
+                              ),
+                              label: Text(category['label'] as String),
+                              selectedColor: AppColors.primaryBlue,
+                              backgroundColor: Colors.white,
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                side: BorderSide(
                                   color: isSelected
-                                      ? Colors.white
-                                      : AppColors.primaryBlue,
-                                ),
-                                label: Text(category['label'] as String),
-                                labelStyle: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : AppColors.textPrimary,
-                                  fontSize: 13,
-                                ),
-                                backgroundColor: Colors.white,
-                                selectedColor: AppColors.primaryBlue,
-                                checkmarkColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? AppColors.primaryBlue
-                                        : AppColors.greyLight,
-                                  ),
+                                      ? AppColors.primaryBlue
+                                      : AppColors.greyLight,
                                 ),
                               ),
                             );
@@ -281,9 +254,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 8),
-
-                // Posts list
+                /// ===== Feed =====
                 Expanded(
                   child: StreamBuilder<List<PostModel>>(
                     stream: _selectedCategory == null
@@ -300,69 +271,19 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
                       }
 
                       if (snapshot.hasError) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: AppColors.greyMedium,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'שגיאה בטעינת הפוסטים',
-                                style: TextStyle(
-                                  color: AppColors.greyMedium,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                        return const _ErrorState();
                       }
 
                       final posts = snapshot.data ?? [];
 
                       if (posts.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.article_outlined,
-                                size: 80,
-                                color: AppColors.greyLight,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'אין פוסטים עדיין',
-                                style: TextStyle(
-                                  color: AppColors.greyMedium,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              if (isManager)
-                                Text(
-                                  'לחץ על + כדי לפרסם פוסט ראשון',
-                                  style: TextStyle(
-                                    color: AppColors.greyMedium,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        );
+                        return _EmptyState(isManager: isManager);
                       }
 
                       return RefreshIndicator(
-                        onRefresh: () async {
-                          setState(() {});
-                        },
+                        onRefresh: () async => setState(() {}),
                         child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 100),
+                          padding: const EdgeInsets.only(bottom: 120),
                           itemCount: posts.length,
                           itemBuilder: (context, index) {
                             final post = posts[index];
@@ -371,7 +292,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
                               currentUserId: userId,
                               isManager: isManager,
                               onLike: () => _handleLike(post, userId),
-                              onComment: () => _showCommentsSheet(context, post),
+                              onComment: () =>
+                                  _showCommentsSheet(context, post),
                               onDelete: () => _handleDelete(post),
                               onPin: () => _handlePin(post),
                               onTap: () => _showCommentsSheet(context, post),
@@ -384,13 +306,12 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
                 ),
               ],
             ),
-
-            // FAB for managers
             floatingActionButton: isManager
                 ? FloatingActionButton.extended(
                     onPressed: () => _showCreatePostDialog(context),
                     backgroundColor: AppColors.primaryBlue,
-                    icon: const Icon(Icons.create_rounded, color: Colors.white),
+                    icon: const Icon(Icons.edit_note_rounded,
+                        color: Colors.white),
                     label: const Text(
                       'פוסט חדש',
                       style: TextStyle(
@@ -403,6 +324,63 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// ===============================
+/// Empty & Error States
+/// ===============================
+class _EmptyState extends StatelessWidget {
+  final bool isManager;
+
+  const _EmptyState({required this.isManager});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.article_outlined, size: 80, color: AppColors.greyLight),
+          const SizedBox(height: 16),
+          const Text(
+            'אין פוסטים עדיין',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.greyMedium,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (isManager)
+            const Text(
+              'לחץ על "פוסט חדש" כדי לפרסם',
+              style: TextStyle(color: AppColors.greyMedium),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.error_outline, size: 64, color: AppColors.greyMedium),
+          SizedBox(height: 12),
+          Text(
+            'שגיאה בטעינת הפוסטים',
+            style: TextStyle(color: AppColors.greyMedium),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Model for a comment on a post
+/// ===============================
+/// Comment Model
+/// ===============================
 class PostComment {
   final String id;
   final String userId;
@@ -9,7 +11,7 @@ class PostComment {
   final String content;
   final Timestamp createdAt;
 
-  PostComment({
+  const PostComment({
     required this.id,
     required this.userId,
     required this.userName,
@@ -20,12 +22,13 @@ class PostComment {
 
   factory PostComment.fromMap(Map<String, dynamic> map) {
     return PostComment(
-      id: map['id'] ?? '',
-      userId: map['userId'] ?? '',
-      userName: map['userName'] ?? '',
-      userProfilePicture: map['userProfilePicture'] ?? '',
-      content: map['content'] ?? '',
-      createdAt: map['createdAt'] ?? Timestamp.now(),
+      id: map['id'] as String? ?? '',
+      userId: map['userId'] as String? ?? '',
+      userName: map['userName'] as String? ?? '',
+      userProfilePicture: map['userProfilePicture'] as String? ?? '',
+      content: map['content'] as String? ?? '',
+      createdAt:
+          map['createdAt'] is Timestamp ? map['createdAt'] : Timestamp.now(),
     );
   }
 
@@ -41,24 +44,34 @@ class PostComment {
   }
 }
 
-/// Model for a newsfeed post
+/// ===============================
+/// Post Model
+/// ===============================
 class PostModel {
   final String id;
+
+  // Author
   final String authorId;
   final String authorName;
   final String authorRole;
   final String authorProfilePicture;
+
+  // Content
   final String title;
   final String content;
   final String? imageUrl;
-  final String category; // announcement, update, event, general
+  final String category; // announcement | update | event | general
+
+  // Metadata
   final bool isPinned;
   final Timestamp createdAt;
   final Timestamp? updatedAt;
+
+  // Engagement
   final List<PostComment> comments;
   final List<String> likedBy;
 
-  PostModel({
+  const PostModel({
     required this.id,
     required this.authorId,
     required this.authorName,
@@ -75,29 +88,38 @@ class PostModel {
     this.likedBy = const [],
   });
 
+  /// -------------------------------
+  /// Firestore → Model
+  /// -------------------------------
   factory PostModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+
     return PostModel(
       id: doc.id,
-      authorId: data['authorId'] ?? '',
-      authorName: data['authorName'] ?? '',
-      authorRole: data['authorRole'] ?? '',
-      authorProfilePicture: data['authorProfilePicture'] ?? '',
-      title: data['title'] ?? '',
-      content: data['content'] ?? '',
-      imageUrl: data['imageUrl'],
-      category: data['category'] ?? 'general',
-      isPinned: data['isPinned'] ?? false,
-      createdAt: data['createdAt'] ?? Timestamp.now(),
-      updatedAt: data['updatedAt'],
+      authorId: data['authorId'] as String? ?? '',
+      authorName: data['authorName'] as String? ?? '',
+      authorRole: data['authorRole'] as String? ?? '',
+      authorProfilePicture: data['authorProfilePicture'] as String? ?? '',
+      title: data['title'] as String? ?? '',
+      content: data['content'] as String? ?? '',
+      imageUrl: data['imageUrl'] as String?,
+      category: data['category'] as String? ?? 'general',
+      isPinned: data['isPinned'] as bool? ?? false,
+      createdAt:
+          data['createdAt'] is Timestamp ? data['createdAt'] : Timestamp.now(),
+      updatedAt: data['updatedAt'] as Timestamp?,
       comments: (data['comments'] as List<dynamic>?)
-              ?.map((c) => PostComment.fromMap(c as Map<String, dynamic>))
+              ?.whereType<Map<String, dynamic>>()
+              .map(PostComment.fromMap)
               .toList() ??
-          [],
-      likedBy: List<String>.from(data['likedBy'] ?? []),
+          const [],
+      likedBy: List<String>.from(data['likedBy'] ?? const []),
     );
   }
 
+  /// -------------------------------
+  /// Model → Firestore
+  /// -------------------------------
   Map<String, dynamic> toMap() {
     return {
       'authorId': authorId,
@@ -116,6 +138,9 @@ class PostModel {
     };
   }
 
+  /// -------------------------------
+  /// Copy helper
+  /// -------------------------------
   PostModel copyWith({
     String? id,
     String? authorId,
@@ -150,6 +175,9 @@ class PostModel {
     );
   }
 
+  /// -------------------------------
+  /// Helpers
+  /// -------------------------------
   int get likesCount => likedBy.length;
   int get commentsCount => comments.length;
 

@@ -4,64 +4,104 @@ import '../models/post_model.dart';
 
 class NewsfeedService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collection = 'posts';
+  static const String _collectionName = 'posts';
 
-  /// Get all posts as a stream, ordered by pinned first, then by date
+  CollectionReference<Map<String, dynamic>> get _postsRef =>
+      _firestore.collection(_collectionName);
+
+  // ===============================
+  // Streams
+  // ===============================
+
+  /// Get all posts ordered by:
+  /// 1. Pinned posts first
+  /// 2. Newest posts first
   Stream<List<PostModel>> getPostsStream() {
-    return _firestore
-        .collection(_collection)
+    return _postsRef
         .orderBy('isPinned', descending: true)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => PostModel.fromFirestore(doc))
-            .toList());
+        .map(_mapSnapshotToPosts);
   }
 
-  /// Get a single post by ID
+  /// Get posts filtered by category
+  Stream<List<PostModel>> getPostsByCategory(String category) {
+    return _postsRef
+        .where('category', isEqualTo: category)
+        .orderBy('isPinned', descending: true)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(_mapSnapshotToPosts);
+  }
+
+  // ===============================
+  // Single fetch
+  // ===============================
+
+  /// Fetch a single post by ID
   Future<PostModel?> getPost(String postId) async {
-    final doc = await _firestore.collection(_collection).doc(postId).get();
+    final doc = await _postsRef.doc(postId).get();
     if (!doc.exists) return null;
     return PostModel.fromFirestore(doc);
   }
 
+  // ===============================
+  // Mutations
+  // ===============================
+
   /// Create a new post
   Future<void> createPost(PostModel post) async {
-    await _firestore.collection(_collection).doc(post.id).set(post.toMap());
+    await _postsRef.doc(post.id).set(post.toMap());
   }
 
   /// Update an existing post
-  Future<void> updatePost(String postId, Map<String, dynamic> updates) async {
-    updates['updatedAt'] = FieldValue.serverTimestamp();
-    await _firestore.collection(_collection).doc(postId).update(updates);
+  Future<void> updatePost(
+    String postId,
+    Map<String, dynamic> updates,
+  ) async {
+    await _postsRef.doc(postId).update({
+      ...updates,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
-  /// Delete a post
+  /// Delete a post permanently
   Future<void> deletePost(String postId) async {
-    await _firestore.collection(_collection).doc(postId).delete();
+    await _postsRef.doc(postId).delete();
   }
 
-  /// Toggle pin status
+  /// Pin or unpin a post
   Future<void> togglePin(String postId, bool isPinned) async {
-    await _firestore.collection(_collection).doc(postId).update({
+    await _postsRef.doc(postId).update({
       'isPinned': isPinned,
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Add a like to a post
+  // ===============================
+  // Likes
+  // ===============================
+
+  /// Add like from user
   Future<void> likePost(String postId, String userId) async {
-    await _firestore.collection(_collection).doc(postId).update({
+    await _postsRef.doc(postId).update({
       'likedBy': FieldValue.arrayUnion([userId]),
     });
   }
 
-  /// Remove a like from a post
+  /// Remove like from user
   Future<void> unlikePost(String postId, String userId) async {
-    await _firestore.collection(_collection).doc(postId).update({
+    await _postsRef.doc(postId).update({
       'likedBy': FieldValue.arrayRemove([userId]),
     });
   }
+
+  // ===============================
+  // Comments (array-based)
+  // ===============================
+  // NOTE:
+  // This works well for small-to-medium scale.
+  // In the future, comments should move to a subcollection.
 
   /// Add a comment to a post
   Future<void> addComment({
@@ -80,28 +120,27 @@ class NewsfeedService {
       createdAt: Timestamp.now(),
     );
 
-    await _firestore.collection(_collection).doc(postId).update({
+    await _postsRef.doc(postId).update({
       'comments': FieldValue.arrayUnion([comment.toMap()]),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Delete a comment from a post
+  /// Remove a comment from a post
   Future<void> deleteComment(String postId, PostComment comment) async {
-    await _firestore.collection(_collection).doc(postId).update({
+    await _postsRef.doc(postId).update({
       'comments': FieldValue.arrayRemove([comment.toMap()]),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Get posts by category
-  Stream<List<PostModel>> getPostsByCategory(String category) {
-    return _firestore
-        .collection(_collection)
-        .where('category', isEqualTo: category)
-        .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => PostModel.fromFirestore(doc))
-            .toList());
+  // ===============================
+  // Helpers
+  // ===============================
+
+  List<PostModel> _mapSnapshotToPosts(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    return snapshot.docs.map((doc) => PostModel.fromFirestore(doc)).toList();
   }
 }
