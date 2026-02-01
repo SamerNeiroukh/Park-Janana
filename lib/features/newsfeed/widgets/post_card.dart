@@ -1,10 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import '../models/post_model.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final PostModel post;
   final String currentUserId;
   final bool isManager;
@@ -13,6 +15,7 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
   final VoidCallback? onTap;
+  final int index;
 
   const PostCard({
     super.key,
@@ -24,7 +27,35 @@ class PostCard extends StatelessWidget {
     this.onDelete,
     this.onPin,
     this.onTap,
+    this.index = 0,
   });
+
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  bool _isLikeAnimating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   String _formatTimestamp(Timestamp timestamp) {
     final now = DateTime.now();
@@ -39,7 +70,7 @@ class PostCard extends StatelessWidget {
   }
 
   Color _categoryColor() {
-    switch (post.category) {
+    switch (widget.post.category) {
       case 'announcement':
         return AppColors.salmon;
       case 'update':
@@ -52,7 +83,7 @@ class PostCard extends StatelessWidget {
   }
 
   IconData _categoryIcon() {
-    switch (post.category) {
+    switch (widget.post.category) {
       case 'announcement':
         return Icons.campaign_rounded;
       case 'update':
@@ -64,257 +95,419 @@ class PostCard extends StatelessWidget {
     }
   }
 
+  void _handleLikeTap() {
+    HapticFeedback.lightImpact();
+    setState(() => _isLikeAnimating = true);
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _isLikeAnimating = false);
+    });
+    widget.onLike?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLiked = post.isLikedBy(currentUserId);
+    final isLiked = widget.post.isLikedBy(widget.currentUserId);
     final categoryColor = _categoryColor();
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ===== PINNED STRIP =====
-            if (post.isPinned)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) => Transform.scale(
+        scale: _scaleAnimation.value,
+        child: child,
+      ),
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) => _controller.reverse(),
+        onTapCancel: () => _controller.reverse(),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          widget.onTap?.call();
+        },
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryBlue.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.secondaryYellow.withOpacity(0.25),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.95),
+                      Colors.white.withOpacity(0.85),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.5),
+                    width: 1.5,
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
-                    Text(
-                      'פוסט נעוץ',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.deepOrange,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ===== PINNED STRIP =====
+                    if (widget.post.isPinned) _buildPinnedStrip(),
+
+                    Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // ===== HEADER =====
+                          _buildHeader(categoryColor),
+
+                          const SizedBox(height: 16),
+
+                          // ===== TITLE =====
+                          Text(
+                            widget.post.title,
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                              letterSpacing: -0.3,
+                              height: 1.3,
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // ===== CONTENT =====
+                          Text(
+                            widget.post.content,
+                            textAlign: TextAlign.right,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              height: 1.6,
+                              color: AppColors.textSecondary.withOpacity(0.9),
+                            ),
+                          ),
+
+                          // ===== IMAGE =====
+                          if (widget.post.imageUrl != null &&
+                              widget.post.imageUrl!.isNotEmpty)
+                            _buildImage(),
+
+                          const SizedBox(height: 16),
+
+                          // ===== ACTIONS =====
+                          _buildActions(isLiked),
+                        ],
                       ),
-                    ),
-                    SizedBox(width: 6),
-                    Icon(
-                      Icons.push_pin_rounded,
-                      size: 16,
-                      color: AppColors.deepOrange,
                     ),
                   ],
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _buildPinnedStrip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.secondaryYellow.withOpacity(0.3),
+            AppColors.deepOrange.withOpacity(0.15),
+          ],
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.deepOrange.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'פוסט נעוץ',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.deepOrange,
+                  ),
+                ),
+                SizedBox(width: 4),
+                Icon(
+                  Icons.push_pin_rounded,
+                  size: 14,
+                  color: AppColors.deepOrange,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(Color categoryColor) {
+    return Row(
+      children: [
+        if (widget.isManager || widget.post.authorId == widget.currentUserId)
+          _buildOptionsMenu(),
+        const Spacer(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              children: [
+                _CategoryBadge(
+                  label: widget.post.categoryDisplayName,
+                  color: categoryColor,
+                  icon: _categoryIcon(),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  widget.post.authorName,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 12,
+                  color: AppColors.greyMedium.withOpacity(0.7),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _formatTimestamp(widget.post.createdAt),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.greyMedium.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(width: 12),
+        _buildAvatar(),
+      ],
+    );
+  }
+
+  Widget _buildAvatar() {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryBlue.withOpacity(0.2),
+            AppColors.primaryBlue.withOpacity(0.1),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryBlue.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        radius: 24,
+        backgroundColor: Colors.transparent,
+        backgroundImage: widget.post.authorProfilePicture.isNotEmpty
+            ? CachedNetworkImageProvider(widget.post.authorProfilePicture)
+            : null,
+        child: widget.post.authorProfilePicture.isEmpty
+            ? Text(
+                widget.post.authorName.isNotEmpty
+                    ? widget.post.authorName[0].toUpperCase()
+                    : '?',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryBlue,
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildOptionsMenu() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.greyLight.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: PopupMenuButton<String>(
+        icon: Icon(
+          Icons.more_horiz_rounded,
+          color: AppColors.greyMedium,
+          size: 20,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 8,
+        onSelected: (value) {
+          HapticFeedback.selectionClick();
+          if (value == 'delete') widget.onDelete?.call();
+          if (value == 'pin') widget.onPin?.call();
+        },
+        itemBuilder: (_) => [
+          if (widget.isManager)
+            PopupMenuItem(
+              value: 'pin',
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // ===== HEADER =====
-                  Row(
-                    children: [
-                      if (isManager || post.authorId == currentUserId)
-                        PopupMenuButton<String>(
-                          icon: Icon(
-                            Icons.more_vert_rounded,
-                            color: AppColors.greyMedium,
-                          ),
-                          onSelected: (value) {
-                            if (value == 'delete') onDelete?.call();
-                            if (value == 'pin') onPin?.call();
-                          },
-                          itemBuilder: (_) => [
-                            if (isManager)
-                              PopupMenuItem(
-                                value: 'pin',
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(post.isPinned
-                                        ? 'בטל נעיצה'
-                                        : 'נעץ פוסט'),
-                                    const SizedBox(width: 8),
-                                    Icon(
-                                      post.isPinned
-                                          ? Icons.push_pin_outlined
-                                          : Icons.push_pin_rounded,
-                                      size: 18,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'מחק פוסט',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.delete_outline,
-                                      size: 18, color: Colors.red),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              _CategoryBadge(
-                                label: post.categoryDisplayName,
-                                color: categoryColor,
-                                icon: _categoryIcon(),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                post.authorName,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _formatTimestamp(post.createdAt),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.greyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 12),
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
-                        backgroundImage: post.authorProfilePicture.isNotEmpty
-                            ? CachedNetworkImageProvider(
-                                post.authorProfilePicture)
-                            : null,
-                        child: post.authorProfilePicture.isEmpty
-                            ? Text(
-                                post.authorName.isNotEmpty
-                                    ? post.authorName[0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryBlue,
-                                ),
-                              )
-                            : null,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // ===== TITLE =====
                   Text(
-                    post.title,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                    widget.post.isPinned ? 'בטל נעיצה' : 'נעץ פוסט',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
-
-                  const SizedBox(height: 8),
-
-                  // ===== CONTENT =====
-                  Text(
-                    post.content,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.55,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-
-                  // ===== IMAGE =====
-                  if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: CachedNetworkImage(
-                        imageUrl: post.imageUrl!,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(
-                          height: 200,
-                          color: AppColors.greyLight,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                        errorWidget: (_, __, ___) => Container(
-                          height: 200,
-                          color: AppColors.greyLight,
-                          child: const Icon(Icons.broken_image),
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 18),
-                  const Divider(height: 1),
-                  const SizedBox(height: 10),
-
-                  // ===== ACTIONS =====
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _ActionButton(
-                        icon: Icons.chat_bubble_outline_rounded,
-                        label: '${post.commentsCount}',
-                        onTap: onComment,
-                      ),
-                      _ActionButton(
-                        icon: isLiked
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        label: '${post.likesCount}',
-                        color: isLiked ? Colors.red : null,
-                        onTap: onLike,
-                      ),
-                    ],
+                  const SizedBox(width: 10),
+                  Icon(
+                    widget.post.isPinned
+                        ? Icons.push_pin_outlined
+                        : Icons.push_pin_rounded,
+                    size: 18,
+                    color: AppColors.primaryBlue,
                   ),
                 ],
               ),
             ),
-          ],
+          const PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  'מחק פוסט',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(width: 10),
+                Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImage() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: CachedNetworkImage(
+          imageUrl: widget.post.imageUrl!,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => Container(
+            height: 180,
+            decoration: BoxDecoration(
+              color: AppColors.greyLight.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primaryBlue.withOpacity(0.5),
+                ),
+              ),
+            ),
+          ),
+          errorWidget: (_, __, ___) => Container(
+            height: 180,
+            decoration: BoxDecoration(
+              color: AppColors.greyLight.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              Icons.broken_image_rounded,
+              color: AppColors.greyMedium,
+              size: 40,
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildActions(bool isLiked) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.greyLight.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _ActionButton(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: '${widget.post.commentsCount}',
+            onTap: () {
+              HapticFeedback.selectionClick();
+              widget.onComment?.call();
+            },
+          ),
+          Container(
+            width: 1,
+            height: 24,
+            color: AppColors.greyMedium.withOpacity(0.3),
+          ),
+          _LikeButton(
+            isLiked: isLiked,
+            count: widget.post.likesCount,
+            isAnimating: _isLikeAnimating,
+            onTap: _handleLikeTap,
+          ),
+        ],
       ),
     );
   }
 }
 
-/// ===============================
-/// Sub widgets
-/// ===============================
+// ===============================
+// Sub Widgets
+// ===============================
 
 class _CategoryBadge extends StatelessWidget {
   final String label;
@@ -330,18 +523,28 @@ class _CategoryBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(14),
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.2),
+            color.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: color,
             ),
           ),
@@ -356,13 +559,11 @@ class _CategoryBadge extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Color? color;
   final VoidCallback? onTap;
 
   const _ActionButton({
     required this.icon,
     required this.label,
-    this.color,
     this.onTap,
   });
 
@@ -372,21 +573,69 @@ class _ActionButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Row(
           children: [
             Text(
               label,
               style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: color ?? AppColors.greyDark,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.greyDark.withOpacity(0.8),
               ),
             ),
             const SizedBox(width: 6),
             Icon(
               icon,
-              size: 22,
-              color: color ?? AppColors.greyDark,
+              size: 20,
+              color: AppColors.greyDark.withOpacity(0.7),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LikeButton extends StatelessWidget {
+  final bool isLiked;
+  final int count;
+  final bool isAnimating;
+  final VoidCallback? onTap;
+
+  const _LikeButton({
+    required this.isLiked,
+    required this.count,
+    required this.isAnimating,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Row(
+          children: [
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
+              ),
+            ),
+            const SizedBox(width: 6),
+            AnimatedScale(
+              scale: isAnimating ? 1.3 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: Icon(
+                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                size: 22,
+                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.7),
+              ),
             ),
           ],
         ),
