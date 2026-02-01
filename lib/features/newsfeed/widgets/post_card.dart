@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import '../models/post_model.dart';
 
@@ -39,6 +40,10 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   late Animation<double> _scaleAnimation;
   bool _isLikeAnimating = false;
 
+  // Profile picture resolution
+  String? _resolvedProfileUrl;
+  bool _isLoadingProfilePic = true;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +54,42 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+    _resolveProfilePicture();
+  }
+
+  Future<void> _resolveProfilePicture() async {
+    final picUrl = widget.post.authorProfilePicture;
+
+    if (picUrl.isEmpty) {
+      setState(() => _isLoadingProfilePic = false);
+      return;
+    }
+
+    // If it's already a full URL, use it directly
+    if (picUrl.startsWith('http')) {
+      setState(() {
+        _resolvedProfileUrl = picUrl;
+        _isLoadingProfilePic = false;
+      });
+      return;
+    }
+
+    // If it's a Firebase Storage path, get the download URL
+    try {
+      final ref = FirebaseStorage.instance.ref(picUrl);
+      final url = await ref.getDownloadURL();
+      if (mounted) {
+        setState(() {
+          _resolvedProfileUrl = url;
+          _isLoadingProfilePic = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error resolving author profile picture: $e');
+      if (mounted) {
+        setState(() => _isLoadingProfilePic = false);
+      }
+    }
   }
 
   @override
@@ -331,21 +372,30 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
       child: CircleAvatar(
         radius: 24,
         backgroundColor: Colors.transparent,
-        backgroundImage: widget.post.authorProfilePicture.isNotEmpty
-            ? CachedNetworkImageProvider(widget.post.authorProfilePicture)
+        backgroundImage: _resolvedProfileUrl != null
+            ? CachedNetworkImageProvider(_resolvedProfileUrl!)
             : null,
-        child: widget.post.authorProfilePicture.isEmpty
-            ? Text(
-                widget.post.authorName.isNotEmpty
-                    ? widget.post.authorName[0].toUpperCase()
-                    : '?',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
+        child: _isLoadingProfilePic
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primaryBlue.withOpacity(0.5),
                 ),
               )
-            : null,
+            : (_resolvedProfileUrl == null
+                ? Text(
+                    widget.post.authorName.isNotEmpty
+                        ? widget.post.authorName[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryBlue,
+                    ),
+                  )
+                : null),
       ),
     );
   }

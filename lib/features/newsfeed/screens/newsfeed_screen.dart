@@ -74,7 +74,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         authorId: authProvider.uid ?? '',
         authorName: currentUser?.fullName ?? 'משתמש',
         authorRole: authProvider.userRole ?? 'worker',
-        authorProfilePicture: currentUser?.profilePicture ?? '',
+        authorProfilePicture: currentUser?.profilePicturePath ?? currentUser?.profilePicture ?? '',
       ),
       transitionBuilder: (context, anim1, anim2, child) {
         return SlideTransition(
@@ -105,7 +105,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         post: post,
         currentUserId: authProvider.uid ?? '',
         currentUserName: currentUser?.fullName ?? 'משתמש',
-        currentUserProfilePicture: currentUser?.profilePicture ?? '',
+        currentUserProfilePicture: currentUser?.profilePicturePath ?? currentUser?.profilePicture ?? '',
         isManager: _isManager(authProvider.userRole),
       ),
     );
