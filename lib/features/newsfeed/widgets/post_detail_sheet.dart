@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
+import 'video_player_widget.dart';
 
 class PostDetailSheet extends StatefulWidget {
   final PostModel post;
@@ -41,12 +42,14 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
   final NewsfeedService _newsfeedService = NewsfeedService();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
+  final PageController _mediaPageController = PageController();
 
   Stream<PostModel?>? _postStream;
 
   bool _isSubmitting = false;
   String? _resolvedProfileUrl;
   bool _isLoadingProfilePic = true;
+  int _currentMediaIndex = 0;
 
   @override
   void initState() {
@@ -92,6 +95,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     _commentController.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
+    _mediaPageController.dispose();
     super.dispose();
   }
 
@@ -342,8 +346,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 _buildTitle(post.title),
                 const SizedBox(height: 14),
                 _buildContent(post.content),
-                if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
-                  _buildPostImage(post.imageUrl!),
+                if (post.hasMedia) _buildMediaGallery(post),
                 const SizedBox(height: 20),
                 _buildEngagementBar(post, isLiked),
               ],
@@ -575,29 +578,167 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     );
   }
 
-  Widget _buildPostImage(String imageUrl) {
+  Widget _buildMediaGallery(PostModel post) {
+    final allMedia = post.allMedia;
+    if (allMedia.isEmpty) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.only(top: 20),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          placeholder: (_, __) => Container(
-            height: 200,
-            color: Colors.grey.shade200,
-            child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
+      child: Column(
+        children: [
+          // Media PageView
+          SizedBox(
+            height: 280,
+            child: PageView.builder(
+              controller: _mediaPageController,
+              itemCount: allMedia.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentMediaIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                final media = allMedia[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: GestureDetector(
+                    onTap: () => _openFullScreenMedia(allMedia, index),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: media.isVideo
+                          ? _buildVideoThumbnail(media)
+                          : _buildImage(media),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          errorWidget: (_, __, ___) => Container(
-            height: 200,
-            color: Colors.grey.shade200,
-            child: Icon(Icons.broken_image_rounded,
-                color: Colors.grey.shade400, size: 48),
+          // Page indicator dots (if more than 1 item)
+          if (allMedia.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  allMedia.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: index == _currentMediaIndex ? 24 : 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: index == _currentMediaIndex
+                          ? AppColors.primaryBlue
+                          : AppColors.greyLight,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _openFullScreenMedia(List<PostMedia> allMedia, int initialIndex) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _FullScreenMediaViewer(
+            mediaList: allMedia,
+            initialIndex: initialIndex,
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+
+  Widget _buildVideoThumbnail(PostMedia media) {
+    return Container(
+      color: AppColors.greyDark,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (media.thumbnailUrl != null)
+            CachedNetworkImage(
+              imageUrl: media.thumbnailUrl!,
+              fit: BoxFit.contain,
+            )
+          else
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.videocam_rounded,
+                    color: Colors.white54,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'הקש לצפייה בסרטון',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Play button overlay
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImage(PostMedia media) {
+    return Container(
+      color: Colors.grey.shade100,
+      child: CachedNetworkImage(
+        imageUrl: media.url,
+        fit: BoxFit.contain,
+        placeholder: (_, __) => Container(
+          color: Colors.grey.shade200,
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
+        errorWidget: (_, __, ___) => Container(
+          color: Colors.grey.shade200,
+          child: Icon(Icons.broken_image_rounded,
+              color: Colors.grey.shade400, size: 48),
+        ),
       ),
+    );
+  }
+
+  Widget _buildVideoPlayer(PostMedia media) {
+    return VideoPlayerWidget(
+      videoUrl: media.url,
+      autoPlay: false,
+      showControls: true,
     );
   }
 
@@ -1210,6 +1351,140 @@ class _DeleteConfirmDialog extends StatelessWidget {
             child: const Text('מחק'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FullScreenMediaViewer extends StatefulWidget {
+  final List<PostMedia> mediaList;
+  final int initialIndex;
+
+  const _FullScreenMediaViewer({
+    required this.mediaList,
+    required this.initialIndex,
+  });
+
+  @override
+  State<_FullScreenMediaViewer> createState() => _FullScreenMediaViewerState();
+}
+
+class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Media PageView
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.mediaList.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                final media = widget.mediaList[index];
+                return Center(
+                  child: media.isVideo
+                      ? VideoPlayerWidget(
+                          videoUrl: media.url,
+                          autoPlay: true,
+                          showControls: true,
+                        )
+                      : InteractiveViewer(
+                          minScale: 0.5,
+                          maxScale: 4.0,
+                          child: CachedNetworkImage(
+                            imageUrl: media.url,
+                            fit: BoxFit.contain,
+                            placeholder: (_, __) => const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            errorWidget: (_, __, ___) => const Icon(
+                              Icons.broken_image_rounded,
+                              color: Colors.white54,
+                              size: 64,
+                            ),
+                          ),
+                        ),
+                );
+              },
+            ),
+            // Close button
+            Positioned(
+              top: 16,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+            // Page indicator
+            if (widget.mediaList.length > 1)
+              Positioned(
+                bottom: 32,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${_currentIndex + 1} / ${widget.mediaList.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

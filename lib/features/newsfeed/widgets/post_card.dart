@@ -37,7 +37,8 @@ class PostCard extends StatefulWidget {
   State<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin {
+class _PostCardState extends State<PostCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isLikeAnimating = false;
@@ -154,162 +155,171 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
     // Card without full-tap interaction - only buttons are interactive
     return Container(
-          margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryBlue.withOpacity(0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-                spreadRadius: 0,
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryBlue.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(0.95),
-                      Colors.white.withOpacity(0.85),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.5),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ===== PINNED STRIP =====
-                    if (widget.post.isPinned) _buildPinnedStrip(),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.95),
+                  Colors.white.withOpacity(0.85),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.5),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ===== PINNED STRIP =====
+                if (widget.post.isPinned) _buildPinnedStrip(),
 
-                    Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // ===== HEADER =====
-                          _buildHeader(categoryColor),
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ===== HEADER =====
+                      _buildHeader(categoryColor),
 
-                          const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                          // ===== TITLE =====
-                          Text(
-                            widget.post.title,
-                            textAlign: TextAlign.right,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                              letterSpacing: -0.3,
-                              height: 1.3,
-                            ),
-                          ),
+                      // ===== TITLE =====
+                      Text(
+                        widget.post.title,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.3,
+                          height: 1.3,
+                        ),
+                      ),
 
-                          const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                          // ===== CONTENT (tappable) =====
-                          GestureDetector(
-                            onTap: widget.onTap,
-                            behavior: HitTestBehavior.opaque,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    // Check if text will be truncated
-                                    final textSpan = TextSpan(
-                                      text: widget.post.content,
+                      // ===== CONTENT (tappable) =====
+                      GestureDetector(
+                        onTap: widget.onTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Check if text will be truncated
+                                final textSpan = TextSpan(
+                                  text: widget.post.content,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    height: 1.6,
+                                    color: AppColors.textSecondary
+                                        .withOpacity(0.9),
+                                  ),
+                                );
+                                final textPainter = TextPainter(
+                                  text: textSpan,
+                                  maxLines: 4,
+                                  textDirection: TextDirection.rtl,
+                                );
+                                textPainter.layout(
+                                    maxWidth: constraints.maxWidth);
+                                final isOverflowing =
+                                    textPainter.didExceedMaxLines;
+
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      widget.post.content,
+                                      textAlign: TextAlign.right,
+                                      maxLines: 4,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 14,
                                         height: 1.6,
-                                        color: AppColors.textSecondary.withOpacity(0.9),
+                                        color: AppColors.textSecondary
+                                            .withOpacity(0.9),
                                       ),
-                                    );
-                                    final textPainter = TextPainter(
-                                      text: textSpan,
-                                      maxLines: 4,
-                                      textDirection: TextDirection.rtl,
-                                    );
-                                    textPainter.layout(maxWidth: constraints.maxWidth);
-                                    final isOverflowing = textPainter.didExceedMaxLines;
-
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text(
-                                          widget.post.content,
-                                          textAlign: TextAlign.right,
-                                          maxLines: 4,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            height: 1.6,
-                                            color: AppColors.textSecondary.withOpacity(0.9),
-                                          ),
-                                        ),
-                                        if (isOverflowing)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 8),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                Icon(
-                                                  Icons.arrow_back_ios_rounded,
-                                                  size: 12,
-                                                  color: AppColors.primaryBlue,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  'קרא עוד',
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: AppColors.primaryBlue,
-                                                  ),
-                                                ),
-                                              ],
+                                    ),
+                                    if (isOverflowing)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Icon(
+                                              Icons.arrow_back_ios_rounded,
+                                              size: 12,
+                                              color: AppColors.primaryBlue,
                                             ),
-                                          ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ],
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'קרא עוד',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.primaryBlue,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
                             ),
-                          ),
-
-                          // ===== IMAGE =====
-                          if (widget.post.imageUrl != null &&
-                              widget.post.imageUrl!.isNotEmpty)
-                            _buildImage(),
-
-                          const SizedBox(height: 16),
-
-                          // ===== ACTIONS =====
-                          _buildActions(isLiked),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+
+                      // ===== MEDIA =====
+                      if (widget.post.hasMedia)
+                        GestureDetector(
+                          onTap: widget.onTap,
+                          behavior: HitTestBehavior.opaque,
+                          child: _buildMediaSection(),
+                        ),
+
+                      const SizedBox(height: 16),
+
+                      // ===== ACTIONS =====
+                      _buildActions(isLiked),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
+        ),
+      ),
     );
   }
 
@@ -510,7 +520,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             child: Row(
               textDirection: TextDirection.rtl,
               children: [
-                const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                const Icon(Icons.delete_outline_rounded,
+                    size: 18, color: Colors.red),
                 const SizedBox(width: 10),
                 const Text(
                   'מחק פוסט',
@@ -527,43 +538,160 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildMediaSection() {
+    final allMedia = widget.post.allMedia;
+    if (allMedia.isEmpty) return const SizedBox.shrink();
+
+    // Single media item - show full width
+    if (allMedia.length == 1) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: _buildMediaItem(allMedia.first, height: 200),
+      );
+    }
+
+    // Multiple media items - show grid with "+X more" overlay
+    final displayCount = allMedia.length > 4 ? 4 : allMedia.length;
+    final remainingCount = allMedia.length - 4;
+
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: CachedNetworkImage(
-          imageUrl: widget.post.imageUrl!,
-          fit: BoxFit.cover,
-          placeholder: (_, __) => Container(
-            height: 180,
-            decoration: BoxDecoration(
-              color: AppColors.greyLight.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+        child: SizedBox(
+          height: 200,
+          child: Row(
+            children: [
+              // Left side - first image (larger)
+              Expanded(
+                flex: 2,
+                child: _buildMediaItem(allMedia[0], height: 200),
+              ),
+              const SizedBox(width: 4),
+              // Right side - grid of remaining images
+              if (allMedia.length > 1)
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _buildMediaItem(allMedia[1]),
+                      ),
+                      if (allMedia.length > 2) ...[
+                        const SizedBox(height: 4),
+                        Expanded(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              _buildMediaItem(
+                                allMedia.length > 3 ? allMedia[3] : allMedia[2],
+                              ),
+                              // Show "+X more" overlay on last visible item
+                              if (remainingCount > 0)
+                                Container(
+                                  color: Colors.black54,
+                                  child: Center(
+                                    child: Text(
+                                      '+$remainingCount',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaItem(PostMedia media, {double? height}) {
+    if (media.isVideo) {
+      return Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: AppColors.greyDark,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Video thumbnail or placeholder
+            if (media.thumbnailUrl != null)
+              CachedNetworkImage(
+                imageUrl: media.thumbnailUrl!,
+                fit: BoxFit.cover,
+              )
+            else
+              const Center(
+                child: Icon(
+                  Icons.videocam_rounded,
+                  color: Colors.white54,
+                  size: 40,
+                ),
+              ),
+            // Play button overlay
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 32,
                 ),
               ),
             ),
-          ),
-          errorWidget: (_, __, ___) => Container(
-            height: 180,
-            decoration: BoxDecoration(
-              color: AppColors.greyLight.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(16),
+          ],
+        ),
+      );
+    }
+
+    // Image
+    return CachedNetworkImage(
+      imageUrl: media.url,
+      fit: BoxFit.cover,
+      height: height,
+      placeholder: (_, __) => Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: AppColors.greyLight.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primaryBlue.withOpacity(0.5),
             ),
-            child: Icon(
-              Icons.broken_image_rounded,
-              color: AppColors.greyMedium,
-              size: 40,
-            ),
           ),
+        ),
+      ),
+      errorWidget: (_, __, ___) => Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: AppColors.greyLight.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Icons.broken_image_rounded,
+          color: AppColors.greyMedium,
+          size: 40,
         ),
       ),
     );
@@ -734,9 +862,12 @@ class _LikeButton extends StatelessWidget {
               scale: isAnimating ? 1.3 : 1.0,
               duration: const Duration(milliseconds: 150),
               child: Icon(
-                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                isLiked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
                 size: 22,
-                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.7),
+                color:
+                    isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.7),
               ),
             ),
           ),
@@ -752,7 +883,8 @@ class _LikeButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
+                color:
+                    isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
               ),
             ),
           ),

@@ -1,6 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// ===============================
+/// Media Model (for posts)
+/// ===============================
+class PostMedia {
+  final String url;
+  final String type; // 'image' or 'video'
+  final String? thumbnailUrl; // For videos
+
+  const PostMedia({
+    required this.url,
+    required this.type,
+    this.thumbnailUrl,
+  });
+
+  bool get isVideo => type == 'video';
+  bool get isImage => type == 'image';
+
+  factory PostMedia.fromMap(Map<String, dynamic> map) {
+    return PostMedia(
+      url: map['url'] as String? ?? '',
+      type: map['type'] as String? ?? 'image',
+      thumbnailUrl: map['thumbnailUrl'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'url': url,
+      'type': type,
+      if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+    };
+  }
+}
+
+/// ===============================
 /// Comment Model
 /// ===============================
 class PostComment {
@@ -59,7 +93,8 @@ class PostModel {
   // Content
   final String title;
   final String content;
-  final String? imageUrl;
+  final String? imageUrl; // Legacy - kept for backward compatibility
+  final List<PostMedia> media; // New - supports multiple photos/videos
   final String category; // announcement | update | event | general
 
   // Metadata
@@ -80,6 +115,7 @@ class PostModel {
     required this.title,
     required this.content,
     this.imageUrl,
+    this.media = const [],
     required this.category,
     this.isPinned = false,
     required this.createdAt,
@@ -103,6 +139,11 @@ class PostModel {
       title: data['title'] as String? ?? '',
       content: data['content'] as String? ?? '',
       imageUrl: data['imageUrl'] as String?,
+      media: (data['media'] as List<dynamic>?)
+              ?.whereType<Map<String, dynamic>>()
+              .map(PostMedia.fromMap)
+              .toList() ??
+          const [],
       category: data['category'] as String? ?? 'general',
       isPinned: data['isPinned'] as bool? ?? false,
       createdAt:
@@ -129,6 +170,7 @@ class PostModel {
       'title': title,
       'content': content,
       'imageUrl': imageUrl,
+      'media': media.map((m) => m.toMap()).toList(),
       'category': category,
       'isPinned': isPinned,
       'createdAt': createdAt,
@@ -150,6 +192,7 @@ class PostModel {
     String? title,
     String? content,
     String? imageUrl,
+    List<PostMedia>? media,
     String? category,
     bool? isPinned,
     Timestamp? createdAt,
@@ -166,6 +209,7 @@ class PostModel {
       title: title ?? this.title,
       content: content ?? this.content,
       imageUrl: imageUrl ?? this.imageUrl,
+      media: media ?? this.media,
       category: category ?? this.category,
       isPinned: isPinned ?? this.isPinned,
       createdAt: createdAt ?? this.createdAt,
@@ -182,6 +226,19 @@ class PostModel {
   int get commentsCount => comments.length;
 
   bool isLikedBy(String userId) => likedBy.contains(userId);
+
+  /// Check if post has any media (new media array or legacy imageUrl)
+  bool get hasMedia => media.isNotEmpty || (imageUrl != null && imageUrl!.isNotEmpty);
+
+  /// Get all media items (combines legacy imageUrl with new media array)
+  List<PostMedia> get allMedia {
+    final List<PostMedia> result = [...media];
+    // Add legacy imageUrl as first item if exists and media is empty
+    if (media.isEmpty && imageUrl != null && imageUrl!.isNotEmpty) {
+      result.add(PostMedia(url: imageUrl!, type: 'image'));
+    }
+    return result;
+  }
 
   String get categoryDisplayName {
     switch (category) {
