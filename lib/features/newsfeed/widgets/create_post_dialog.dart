@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import '../models/post_model.dart';
@@ -35,6 +37,12 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
   String _selectedCategory = 'general';
   bool _isSubmitting = false;
+  String _uploadStatus = '';
+
+  // Media handling
+  final List<File> _selectedMedia = [];
+  final ImagePicker _imagePicker = ImagePicker();
+  static const int _maxMediaCount = 10;
 
   final List<Map<String, dynamic>> _categories = const [
     {
@@ -76,6 +84,206 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     super.dispose();
   }
 
+  // ===============================
+  // Media Picker Methods
+  // ===============================
+
+  Future<void> _pickImages() async {
+    if (_selectedMedia.length >= _maxMediaCount) {
+      _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
+      return;
+    }
+
+    final remaining = _maxMediaCount - _selectedMedia.length;
+    final images = await _imagePicker.pickMultiImage(
+      imageQuality: 80,
+      limit: remaining,
+    );
+
+    if (images.isNotEmpty) {
+      setState(() {
+        for (final image in images) {
+          if (_selectedMedia.length < _maxMediaCount) {
+            _selectedMedia.add(File(image.path));
+          }
+        }
+      });
+    }
+  }
+
+  Future<void> _pickVideo() async {
+    if (_selectedMedia.length >= _maxMediaCount) {
+      _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
+      return;
+    }
+
+    final video = await _imagePicker.pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(minutes: 5),
+    );
+
+    if (video != null) {
+      setState(() {
+        _selectedMedia.add(File(video.path));
+      });
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    if (_selectedMedia.length >= _maxMediaCount) {
+      _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
+      return;
+    }
+
+    final photo = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80,
+    );
+
+    if (photo != null) {
+      setState(() {
+        _selectedMedia.add(File(photo.path));
+      });
+    }
+  }
+
+  void _removeMedia(int index) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _selectedMedia.removeAt(index);
+    });
+  }
+
+  void _showMediaPickerOptions() {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.greyLight,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'הוסף מדיה',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildMediaOption(
+              icon: Icons.photo_library_rounded,
+              label: 'בחר תמונות',
+              subtitle: 'בחר תמונות מהגלריה',
+              color: AppColors.primaryBlue,
+              onTap: () {
+                Navigator.pop(context);
+                _pickImages();
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMediaOption(
+              icon: Icons.videocam_rounded,
+              label: 'בחר סרטון',
+              subtitle: 'בחר סרטון מהגלריה',
+              color: AppColors.success,
+              onTap: () {
+                Navigator.pop(context);
+                _pickVideo();
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMediaOption(
+              icon: Icons.camera_alt_rounded,
+              label: 'צלם תמונה',
+              subtitle: 'פתח את המצלמה',
+              color: AppColors.salmon,
+              onTap: () {
+                Navigator.pop(context);
+                _takePhoto();
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaOption({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.greyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _isVideoFile(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    return ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'mpeg', 'mpg', 'm4v'].contains(ext);
+  }
+
   Future<void> _submitPost() async {
     if (!_formKey.currentState!.validate()) {
       HapticFeedback.heavyImpact();
@@ -83,17 +291,40 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     }
 
     HapticFeedback.mediumImpact();
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+      _uploadStatus = 'מכין להעלאה...';
+    });
 
     try {
+      final postId = const Uuid().v4();
+      List<PostMedia> uploadedMedia = [];
+
+      // Upload media if any selected
+      if (_selectedMedia.isNotEmpty) {
+        setState(() => _uploadStatus = 'מעלה קבצים...');
+        uploadedMedia = await _newsfeedService.uploadPostMedia(
+          postId: postId,
+          files: _selectedMedia,
+          onProgress: (current, total) {
+            if (mounted) {
+              setState(() => _uploadStatus = 'מעלה $current מתוך $total...');
+            }
+          },
+        );
+      }
+
+      setState(() => _uploadStatus = 'מפרסם פוסט...');
+
       final post = PostModel(
-        id: const Uuid().v4(),
+        id: postId,
         authorId: widget.authorId,
         authorName: widget.authorName,
         authorRole: widget.authorRole,
         authorProfilePicture: widget.authorProfilePicture,
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
+        media: uploadedMedia,
         category: _selectedCategory,
         createdAt: Timestamp.now(),
         comments: const [],
@@ -109,7 +340,12 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       if (!mounted) return;
       _showErrorSnackbar('שגיאה בפרסום הפוסט');
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _uploadStatus = '';
+        });
+      }
     }
   }
 
@@ -203,6 +439,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                         _buildTitleField(),
                         const SizedBox(height: 18),
                         _buildContentField(),
+                        const SizedBox(height: 20),
+                        _buildMediaSection(),
                         const SizedBox(height: 28),
                         _buildSubmitButton(),
                       ],
@@ -468,6 +706,181 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     );
   }
 
+  Widget _buildMediaSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          textDirection: TextDirection.rtl,
+          children: [
+            Icon(
+              Icons.photo_library_rounded,
+              size: 18,
+              color: AppColors.primaryBlue.withOpacity(0.7),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'מדיה (${_selectedMedia.length}/$_maxMediaCount)',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Media preview grid
+        if (_selectedMedia.isNotEmpty) ...[
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.greyLight.withOpacity(0.5),
+                width: 1.5,
+              ),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
+              children: [
+                ..._selectedMedia.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final file = entry.value;
+                  final isVideo = _isVideoFile(file.path);
+
+                  return Stack(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.greyLight,
+                            width: 1,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(11),
+                          child: isVideo
+                              ? Container(
+                                  color: AppColors.greyDark,
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.videocam_rounded,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                )
+                              : Image.file(
+                                  file,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: AppColors.greyLight,
+                                    child: const Icon(Icons.broken_image_rounded),
+                                  ),
+                                ),
+                        ),
+                      ),
+                      // Remove button
+                      Positioned(
+                        top: -4,
+                        left: -4,
+                        child: GestureDetector(
+                          onTap: () => _removeMedia(index),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Video indicator
+                      if (isVideo)
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'וידאו',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // Add media button
+        GestureDetector(
+          onTap: _isSubmitting ? null : _showMediaPickerOptions,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.primaryBlue.withOpacity(0.3),
+                width: 1.5,
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              textDirection: TextDirection.rtl,
+              children: [
+                Icon(
+                  Icons.add_photo_alternate_rounded,
+                  color: AppColors.primaryBlue.withOpacity(0.7),
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _selectedMedia.isEmpty ? 'הוסף תמונות או סרטונים' : 'הוסף עוד',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryBlue.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   InputDecoration _inputDecoration({
     required String hint,
     IconData? prefixIcon,
@@ -546,13 +959,28 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Center(
               child: _isSubmitting
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (_uploadStatus.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            _uploadStatus,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
