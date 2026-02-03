@@ -215,22 +215,24 @@ class ReviewWorkerScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.accent),
-          const SizedBox(width: AppDimensions.spacingL),
-          Text("$label:",
-              style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: AppDimensions.fontML)),
-          const SizedBox(width: AppDimensions.spacingM),
-          Expanded(
-            child: Text(value,
-                style: const TextStyle(fontSize: AppDimensions.fontML),
-                overflow: TextOverflow.ellipsis),
-          ),
-        ],
+    return IgnorePointer(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.accent),
+            const SizedBox(width: AppDimensions.spacingL),
+            Text("$label:",
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: AppDimensions.fontML)),
+            const SizedBox(width: AppDimensions.spacingM),
+            Expanded(
+              child: Text(value,
+                  style: const TextStyle(fontSize: AppDimensions.fontML),
+                  overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -270,11 +270,11 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         final isManager = _isManager(authProvider.userRole);
         final userId = authProvider.uid ?? '';
 
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Scaffold(
-            backgroundColor: const Color(0xFFF8FAFC),
-            body: Stack(
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          body: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Stack(
               children: [
                 // Background gradient
                 Positioned(
@@ -315,7 +315,11 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                 // Main content
                 Column(
                   children: [
-                    const UserHeader(),
+                    // Keep UserHeader in LTR so back arrow is on the left
+                    const Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: UserHeader(),
+                    ),
                     _buildHeader(),
                     Expanded(
                       child: _buildFeed(isManager, userId),
@@ -324,18 +328,18 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                 ),
               ],
             ),
-            floatingActionButton: isManager
-                ? AnimatedSlide(
-                    offset: _showFab ? Offset.zero : const Offset(0, 2),
-                    duration: const Duration(milliseconds: 200),
-                    child: AnimatedOpacity(
-                      opacity: _showFab ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: _buildFab(),
-                    ),
-                  )
-                : null,
           ),
+          floatingActionButton: isManager
+              ? AnimatedSlide(
+                  offset: _showFab ? Offset.zero : const Offset(0, 2),
+                  duration: const Duration(milliseconds: 200),
+                  child: AnimatedOpacity(
+                    opacity: _showFab ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: _buildFab(),
+                  ),
+                )
+              : null,
         );
       },
     );

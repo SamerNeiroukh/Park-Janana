@@ -8,6 +8,7 @@ import 'package:park_janana/features/home/widgets/user_card.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
 import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 import 'package:park_janana/features/shifts/screens/manager_shifts_screen.dart';
+import 'package:park_janana/features/shifts/screens/my_weekly_schedule_screen.dart';
 import 'package:park_janana/features/tasks/screens/worker_task_screen.dart';
 import 'package:park_janana/features/tasks/screens/manager_task_dashboard.dart';
 import 'package:park_janana/features/workers/screens/manage_workers_screen.dart';
@@ -196,6 +197,18 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) => const ShiftsScreen(),
+              ),
+            );
+          },
+        ),
+        ActionButton(
+          title: 'סידור עבודה',
+          icon: Icons.calendar_view_week_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const MyWeeklyScheduleScreen(),
               ),
             );
           },
