@@ -193,24 +193,26 @@ class ApproveWorkerScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
-      child: Row(
-        children: [
-          Text(
-            "$label:",
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: AppDimensions.fontML),
-          ),
-          const SizedBox(width: AppDimensions.spacingM),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: AppDimensions.fontML),
-              overflow: TextOverflow.ellipsis,
+    return IgnorePointer(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
+        child: Row(
+          children: [
+            Text(
+              "$label:",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: AppDimensions.fontML),
             ),
-          ),
-        ],
+            const SizedBox(width: AppDimensions.spacingM),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: AppDimensions.fontML),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
