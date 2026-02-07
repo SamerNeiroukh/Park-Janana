@@ -280,4 +280,182 @@ class NotificationService {
     await _messaging.unsubscribeFromTopic(topic);
     debugPrint('Unsubscribed from topic: $topic');
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // SHIFT NOTIFICATIONS
+  // ═══════════════════════════════════════════════════════════
+
+  /// Send notification about shift updates to affected workers
+  /// Creates a notification request in Firestore to be processed by Cloud Functions
+  Future<void> notifyShiftUpdate({
+    required String shiftId,
+    required List<String> workerIds,
+    required String shiftDate,
+    required String department,
+    required List<String> changes,
+  }) async {
+    if (workerIds.isEmpty) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      // Create notification request for Cloud Function to process
+      await _firestore.collection('notification_requests').add({
+        'type': 'shift_update',
+        'shiftId': shiftId,
+        'recipientIds': workerIds,
+        'title': 'עדכון משמרת - $department',
+        'body': 'המשמרת ב-$shiftDate עודכנה: ${changes.join(', ')}',
+        'data': {
+          'type': 'shift_update',
+          'shiftId': shiftId,
+          'changes': changes,
+        },
+        'createdBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'processed': false,
+      });
+
+      debugPrint('Shift update notification request created for ${workerIds.length} workers');
+    } catch (e) {
+      debugPrint('Error creating shift update notification: $e');
+    }
+  }
+
+  /// Send notification when a worker is assigned to a shift
+  Future<void> notifyWorkerAssigned({
+    required String workerId,
+    required String shiftId,
+    required String shiftDate,
+    required String department,
+    required String startTime,
+    required String endTime,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore.collection('notification_requests').add({
+        'type': 'shift_assigned',
+        'shiftId': shiftId,
+        'recipientIds': [workerId],
+        'title': 'שובצת למשמרת!',
+        'body': '$department - $shiftDate, $startTime-$endTime',
+        'data': {
+          'type': 'shift_assigned',
+          'shiftId': shiftId,
+        },
+        'createdBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'processed': false,
+      });
+
+      debugPrint('Worker assigned notification request created');
+    } catch (e) {
+      debugPrint('Error creating worker assigned notification: $e');
+    }
+  }
+
+  /// Send notification when a worker is removed from a shift
+  Future<void> notifyWorkerRemoved({
+    required String workerId,
+    required String shiftId,
+    required String shiftDate,
+    required String department,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore.collection('notification_requests').add({
+        'type': 'shift_removed',
+        'shiftId': shiftId,
+        'recipientIds': [workerId],
+        'title': 'הוסרת ממשמרת',
+        'body': '$department - $shiftDate',
+        'data': {
+          'type': 'shift_removed',
+          'shiftId': shiftId,
+        },
+        'createdBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'processed': false,
+      });
+
+      debugPrint('Worker removed notification request created');
+    } catch (e) {
+      debugPrint('Error creating worker removed notification: $e');
+    }
+  }
+
+  /// Send notification when a shift is cancelled
+  Future<void> notifyShiftCancelled({
+    required String shiftId,
+    required List<String> workerIds,
+    required String shiftDate,
+    required String department,
+    String? reason,
+  }) async {
+    if (workerIds.isEmpty) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore.collection('notification_requests').add({
+        'type': 'shift_cancelled',
+        'shiftId': shiftId,
+        'recipientIds': workerIds,
+        'title': 'משמרת בוטלה',
+        'body': '$department - $shiftDate${reason != null ? '\nסיבה: $reason' : ''}',
+        'data': {
+          'type': 'shift_cancelled',
+          'shiftId': shiftId,
+          'reason': reason,
+        },
+        'createdBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'processed': false,
+      });
+
+      debugPrint('Shift cancelled notification request created for ${workerIds.length} workers');
+    } catch (e) {
+      debugPrint('Error creating shift cancelled notification: $e');
+    }
+  }
+
+  /// Send notification for new message in shift
+  Future<void> notifyNewShiftMessage({
+    required String shiftId,
+    required List<String> workerIds,
+    required String department,
+    required String senderName,
+  }) async {
+    if (workerIds.isEmpty) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore.collection('notification_requests').add({
+        'type': 'shift_message',
+        'shiftId': shiftId,
+        'recipientIds': workerIds,
+        'title': 'הודעה חדשה - $department',
+        'body': 'הודעה חדשה מ-$senderName',
+        'data': {
+          'type': 'shift_message',
+          'shiftId': shiftId,
+        },
+        'createdBy': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'processed': false,
+      });
+
+      debugPrint('Shift message notification request created');
+    } catch (e) {
+      debugPrint('Error creating shift message notification: $e');
+    }
+  }
 }
