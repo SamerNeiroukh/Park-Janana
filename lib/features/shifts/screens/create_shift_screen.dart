@@ -26,11 +26,27 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   bool _isCreating = false;
 
   final List<Map<String, dynamic>> departments = [
-    {'name': 'פארק חבלים', 'icon': Icons.park, 'color': const Color(0xFF43A047)},
-    {'name': 'פיינטבול', 'icon': Icons.sports_esports, 'color': const Color(0xFFE53935)},
-    {'name': 'קרטינג', 'icon': Icons.directions_car, 'color': const Color(0xFFFF9800)},
+    {
+      'name': 'פארק חבלים',
+      'icon': Icons.park,
+      'color': const Color(0xFF43A047)
+    },
+    {
+      'name': 'פיינטבול',
+      'icon': Icons.sports_esports,
+      'color': const Color(0xFFE53935)
+    },
+    {
+      'name': 'קרטינג',
+      'icon': Icons.directions_car,
+      'color': const Color(0xFFFF9800)
+    },
     {'name': 'פארק מים', 'icon': Icons.pool, 'color': const Color(0xFF1E88E5)},
-    {'name': 'גמבורי', 'icon': Icons.child_care, 'color': const Color(0xFF8E24AA)},
+    {
+      'name': 'גמבורי',
+      'icon': Icons.child_care,
+      'color': const Color(0xFF8E24AA)
+    },
   ];
 
   Color get _selectedColor {
@@ -198,8 +214,8 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [_selectedColor, _selectedColor.withOpacity(0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
@@ -211,6 +227,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         ],
       ),
       child: Row(
+        textDirection: TextDirection.rtl,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -221,27 +238,29 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             child: const Icon(Icons.add_circle_outline,
                 color: Colors.white, size: 28),
           ),
-          const Spacer(),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'יצירת משמרת חדשה',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'יצירת משמרת חדשה',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'מלא את הפרטים ליצירת משמרת',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
+                SizedBox(height: 4),
+                Text(
+                  'מלא את הפרטים ליצירת משמרת',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -301,16 +320,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               border: Border.all(color: _selectedColor.withOpacity(0.2)),
             ),
             child: Row(
+              textDirection: TextDirection.rtl,
               children: [
-                Icon(Icons.edit_calendar, color: _selectedColor, size: 22),
-                const Spacer(),
-                Text(
-                  DateTimeUtils.getHebrewWeekdayName(_selectedDate.weekday),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
+                Icon(Icons.calendar_today_rounded,
+                    color: _selectedColor, size: 22),
                 const SizedBox(width: 12),
                 Text(
                   DateFormat('dd/MM/yyyy').format(_selectedDate),
@@ -321,8 +334,15 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Icon(Icons.calendar_today_rounded,
-                    color: _selectedColor, size: 22),
+                Text(
+                  DateTimeUtils.getHebrewWeekdayName(_selectedDate.weekday),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const Spacer(),
+                Icon(Icons.edit_calendar, color: _selectedColor, size: 22),
               ],
             ),
           ),
@@ -340,6 +360,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.end,
+          textDirection: TextDirection.rtl,
           children: departments.map((dept) {
             final isSelected = dept['name'] == _selectedDepartment;
             final color = dept['color'] as Color;
@@ -369,7 +390,14 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  textDirection: TextDirection.rtl,
                   children: [
+                    Icon(
+                      dept['icon'] as IconData,
+                      size: 18,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       dept['name'] as String,
                       style: TextStyle(
@@ -377,12 +405,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                         fontWeight: FontWeight.w600,
                         color: isSelected ? Colors.white : color,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      dept['icon'] as IconData,
-                      size: 18,
-                      color: isSelected ? Colors.white : color,
                     ),
                   ],
                 ),
@@ -400,8 +422,9 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
+          textDirection: TextDirection.rtl,
           children: [
-            Expanded(child: _buildTimeButton('סיום', _endTime, false)),
+            Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
             const SizedBox(width: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -409,10 +432,11 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_back, color: Colors.grey.shade500, size: 18),
+              child:
+                  Icon(Icons.arrow_back, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
-            Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
+            Expanded(child: _buildTimeButton('סיום', _endTime, false)),
           ],
         ),
       ),
@@ -441,7 +465,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              textDirection: TextDirection.rtl,
               children: [
+                Icon(Icons.access_time, color: _selectedColor, size: 18),
+                const SizedBox(width: 6),
                 Text(
                   time.format(context),
                   style: TextStyle(
@@ -450,8 +477,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                     color: _selectedColor,
                   ),
                 ),
-                const SizedBox(width: 6),
-                Icon(Icons.access_time, color: _selectedColor, size: 18),
               ],
             ),
           ],
@@ -465,60 +490,41 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       title: 'מספר עובדים מקסימלי',
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Column(
+        child: Row(
+          textDirection: TextDirection.rtl,
           children: [
-            Row(
-              children: [
-                _buildWorkerCountButton(Icons.remove, () {
-                  if (_maxWorkers > 1) setState(() => _maxWorkers--);
-                }),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: BoxDecoration(
-                      color: _selectedColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$_maxWorkers',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: _selectedColor,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(Icons.people, color: _selectedColor, size: 28),
-                      ],
-                    ),
-                  ),
+            _buildWorkerCountButton(Icons.add, () {
+              setState(() => _maxWorkers++);
+            }),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: _selectedColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                _buildWorkerCountButton(Icons.add, () {
-                  if (_maxWorkers < 20) setState(() => _maxWorkers++);
-                }),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: _selectedColor,
-                inactiveTrackColor: _selectedColor.withOpacity(0.2),
-                thumbColor: _selectedColor,
-                overlayColor: _selectedColor.withOpacity(0.2),
-                trackHeight: 6,
-              ),
-              child: Slider(
-                value: _maxWorkers.toDouble(),
-                min: 1,
-                max: 20,
-                divisions: 19,
-                onChanged: (value) => setState(() => _maxWorkers = value.toInt()),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Icon(Icons.people, color: _selectedColor, size: 28),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$_maxWorkers',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: _selectedColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+            _buildWorkerCountButton(Icons.remove, () {
+              if (_maxWorkers > 1) setState(() => _maxWorkers--);
+            }),
           ],
         ),
       ),
@@ -575,7 +581,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               )
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                textDirection: TextDirection.rtl,
                 children: [
+                  Icon(Icons.check_circle, size: 22),
+                  SizedBox(width: 8),
                   Text(
                     'צור משמרת',
                     style: TextStyle(
@@ -583,8 +592,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Icon(Icons.check_circle, size: 22),
                 ],
               ),
       ),
@@ -600,7 +607,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
+        textDirection: TextDirection.rtl,
         children: [
+          Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
+          const SizedBox(width: 6),
           Text(
             'ביטול',
             style: TextStyle(
@@ -609,8 +619,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               color: Colors.grey.shade600,
             ),
           ),
-          const SizedBox(width: 6),
-          Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
         ],
       ),
     );
