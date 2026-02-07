@@ -344,9 +344,9 @@ class ShiftService {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('shifts')
         .where('date',
-            isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekStart))
+            isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekStart))
         .where('date',
-            isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekEnd))
+            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekEnd))
         .get();
 
     return querySnapshot.docs
