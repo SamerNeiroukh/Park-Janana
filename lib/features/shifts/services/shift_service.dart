@@ -344,13 +344,95 @@ class ShiftService {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('shifts')
         .where('date',
-            isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekStart))
+            isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekStart))
         .where('date',
-            isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(weekEnd))
+            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekEnd))
         .get();
 
     return querySnapshot.docs
         .map((doc) => ShiftModel.fromFirestore(doc))
         .toList();
+  }
+
+  /// Updates shift details and returns list of affected worker IDs for notifications
+  Future<List<String>> updateShiftDetails({
+    required String shiftId,
+    String? date,
+    String? startTime,
+    String? endTime,
+    String? department,
+    int? maxWorkers,
+    String? status,
+  }) async {
+    final manager = FirebaseAuth.instance.currentUser;
+    if (manager == null) throw CustomException("Manager not logged in");
+
+    try {
+      final DocumentReference shiftRef =
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final DocumentSnapshot shiftDoc = await shiftRef.get();
+
+      if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
+
+      final shiftData = shiftDoc.data() as Map<String, dynamic>;
+
+      // Get all affected workers (assigned + requested)
+      final List<String> affectedWorkers = [
+        ...List<String>.from(shiftData['assignedWorkers'] ?? []),
+        ...List<String>.from(shiftData['requestedWorkers'] ?? []),
+      ];
+
+      // Build update map with only provided fields
+      final Map<String, dynamic> updates = {
+        'lastUpdatedBy': manager.uid,
+        'lastUpdatedAt': Timestamp.now(),
+      };
+
+      if (date != null) updates['date'] = date;
+      if (startTime != null) updates['startTime'] = startTime;
+      if (endTime != null) updates['endTime'] = endTime;
+      if (department != null) updates['department'] = department;
+      if (maxWorkers != null) updates['maxWorkers'] = maxWorkers;
+      if (status != null) updates['status'] = status;
+
+      await shiftRef.update(updates);
+
+      return affectedWorkers;
+    } catch (e) {
+      throw CustomException('שגיאה בעדכון פרטי המשמרת.');
+    }
+  }
+
+  /// Cancels a shift with a reason
+  Future<List<String>> cancelShift(String shiftId, String reason) async {
+    final manager = FirebaseAuth.instance.currentUser;
+    if (manager == null) throw CustomException("Manager not logged in");
+
+    try {
+      final DocumentReference shiftRef =
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
+      final DocumentSnapshot shiftDoc = await shiftRef.get();
+
+      if (!shiftDoc.exists) throw CustomException("המשמרת לא קיימת");
+
+      final shiftData = shiftDoc.data() as Map<String, dynamic>;
+
+      // Get all affected workers
+      final List<String> affectedWorkers = [
+        ...List<String>.from(shiftData['assignedWorkers'] ?? []),
+        ...List<String>.from(shiftData['requestedWorkers'] ?? []),
+      ];
+
+      await shiftRef.update({
+        'status': 'cancelled',
+        'cancelReason': reason,
+        'lastUpdatedBy': manager.uid,
+        'lastUpdatedAt': Timestamp.now(),
+      });
+
+      return affectedWorkers;
+    } catch (e) {
+      throw CustomException('שגיאה בביטול המשמרת.');
+    }
   }
 }
