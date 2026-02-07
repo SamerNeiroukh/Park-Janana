@@ -7,11 +7,13 @@ import 'package:park_janana/core/utils/profile_image_provider.dart'; // ✅ NEW
 class UsersScreen extends StatefulWidget {
   final String shiftId;
   final List<String> assignedWorkerIds;
+  final bool draftMode;
 
   const UsersScreen({
     super.key,
     required this.shiftId,
     required this.assignedWorkerIds,
+    this.draftMode = false,
   });
 
   @override
@@ -26,6 +28,7 @@ class _UsersScreenState extends State<UsersScreen> {
   bool _isLoading = true;
 
   final Set<String> _inProgressWorkerIds = {};
+  final Set<String> _selectedDraftIds = {};
   static final Map<String, List<UserModel>> _userCache = {};
 
   @override
@@ -152,6 +155,8 @@ class _UsersScreenState extends State<UsersScreen> {
                             final worker = filteredUsers[index];
                             final isAssigned =
                                 widget.assignedWorkerIds.contains(worker.uid);
+                            final isDraftSelected =
+                                _selectedDraftIds.contains(worker.uid);
                             final isProcessing =
                                 _inProgressWorkerIds.contains(worker.uid);
 
@@ -184,38 +189,113 @@ class _UsersScreenState extends State<UsersScreen> {
                                 ),
                                 subtitle: Text(worker.role,
                                     textAlign: TextAlign.right),
-                                trailing: IconButton(
-                                  icon: isProcessing
-                                      ? const SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 2),
-                                        )
-                                      : Icon(
-                                          isAssigned
-                                              ? Icons.person_remove
-                                              : Icons.person_add,
-                                          color: isAssigned
-                                              ? Colors.red
-                                              : Colors.green,
-                                          size: 24,
-                                        ),
-                                  onPressed: isProcessing
-                                      ? null
-                                      : () {
-                                          isAssigned
-                                              ? removeWorkerFromShift(
-                                                  worker.uid)
-                                              : assignWorkerToShift(worker.uid);
-                                        },
-                                ),
+                                trailing: widget.draftMode
+                                    ? Icon(
+                                        isAssigned
+                                            ? Icons.check_circle
+                                            : isDraftSelected
+                                                ? Icons.check_circle
+                                                : Icons.add_circle_outline,
+                                        color: isAssigned
+                                            ? Colors.grey
+                                            : isDraftSelected
+                                                ? Colors.green
+                                                : Colors.green,
+                                        size: 28,
+                                      )
+                                    : IconButton(
+                                        icon: isProcessing
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                    strokeWidth: 2),
+                                              )
+                                            : Icon(
+                                                isAssigned
+                                                    ? Icons.person_remove
+                                                    : Icons.person_add,
+                                                color: isAssigned
+                                                    ? Colors.red
+                                                    : Colors.green,
+                                                size: 24,
+                                              ),
+                                        onPressed: isProcessing
+                                            ? null
+                                            : () {
+                                                isAssigned
+                                                    ? removeWorkerFromShift(
+                                                        worker.uid)
+                                                    : assignWorkerToShift(worker.uid);
+                                              },
+                                      ),
+                                onTap: widget.draftMode && !isAssigned
+                                    ? () {
+                                        setState(() {
+                                          if (isDraftSelected) {
+                                            _selectedDraftIds.remove(worker.uid);
+                                          } else {
+                                            _selectedDraftIds.add(worker.uid);
+                                          }
+                                        });
+                                      }
+                                    : null,
                               ),
                             );
                           },
                         ),
             ),
           ),
+          if (widget.draftMode && _selectedDraftIds.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Material(
+                borderRadius: BorderRadius.circular(16),
+                elevation: 3,
+                shadowColor: Colors.green.withOpacity(0.3),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => Navigator.pop(context, _selectedDraftIds.toList()),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        textDirection: TextDirection.rtl,
+                        children: [
+                          const Icon(Icons.person_add, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'הוסף ${_selectedDraftIds.length} עובדים',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -33,6 +33,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
   bool _isShiftFull = false;
   bool _isAssigned = false;
   bool _isLoading = false;
+  bool _isCancelled = false;
 
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -109,6 +110,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
           _isAssigned = assignedWorkers.contains(widget.currentUser.uid);
           _isShiftFull =
               assignedWorkers.length >= (shiftData['maxWorkers'] ?? 0);
+          _isCancelled = shiftData['status'] == 'cancelled';
         });
       }
     });
@@ -165,20 +167,22 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _isCancelled ? Colors.grey.shade50 : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: isOutdated
-                    ? Colors.grey.withOpacity(0.15)
-                    : _departmentColor.withOpacity(0.15),
+                color: _isCancelled
+                    ? Colors.grey.withOpacity(0.1)
+                    : isOutdated
+                        ? Colors.grey.withOpacity(0.15)
+                        : _departmentColor.withOpacity(0.15),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Opacity(
-            opacity: isOutdated ? 0.6 : 1.0,
+            opacity: _isCancelled ? 0.65 : isOutdated ? 0.6 : 1.0,
             child: Column(
               children: [
                 // Top gradient strip
@@ -186,10 +190,12 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                   height: 6,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        _departmentColor,
-                        _departmentColor.withOpacity(0.6),
-                      ],
+                      colors: _isCancelled
+                          ? [Colors.red.shade400, Colors.red.shade200]
+                          : [
+                              _departmentColor,
+                              _departmentColor.withOpacity(0.6),
+                            ],
                     ),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(24),
@@ -203,67 +209,80 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                     children: [
                       // Header row
                       Row(
+                        textDirection: TextDirection.rtl,
                         children: [
+                          // Department icon
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: _isCancelled
+                                  ? Colors.red.shade50
+                                  : _departmentColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              _isCancelled ? Icons.cancel_rounded : _departmentIcon,
+                              color: _isCancelled ? Colors.red.shade400 : _departmentColor,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Department info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.shift.department,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isCancelled
+                                        ? Colors.grey.shade500
+                                        : _departmentColor,
+                                    decoration: _isCancelled
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                    decorationColor: Colors.red.shade300,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  textDirection: TextDirection.rtl,
+                                  children: [
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      size: 16,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${widget.shift.startTime} - ${widget.shift.endTime}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                           // Action button
                           _buildActionButton(isOutdated),
-                          const Spacer(),
-                          // Department info
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    widget.shift.department,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: _departmentColor,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: _departmentColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: Icon(
-                                      _departmentIcon,
-                                      color: _departmentColor,
-                                      size: 22,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Text(
-                                    '${widget.shift.startTime} - ${widget.shift.endTime}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.access_time_rounded,
-                                    size: 16,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       // Status & Progress row
                       Row(
+                        textDirection: TextDirection.rtl,
                         children: [
-                          _buildStatusChip(isOutdated),
-                          const Spacer(),
+                          Icon(
+                            Icons.people,
+                            size: 16,
+                            color: Colors.grey.shade500,
+                          ),
+                          const SizedBox(width: 6),
                           Text(
                             '${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers}',
                             style: TextStyle(
@@ -274,12 +293,8 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                                   : _departmentColor,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.people,
-                            size: 16,
-                            color: Colors.grey.shade500,
-                          ),
+                          const Spacer(),
+                          _buildStatusChip(isOutdated),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -307,6 +322,14 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
   }
 
   Widget _buildActionButton(bool isOutdated) {
+    if (_isCancelled) {
+      return _buildStatusButton(
+        label: 'בוטלה',
+        color: Colors.red.shade400,
+        icon: Icons.cancel,
+      );
+    }
+
     if (isOutdated) {
       return _buildStatusButton(
         label: _isAssigned ? 'עבדת' : 'הסתיים',
@@ -407,6 +430,9 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
   }
 
   Widget _buildStatusChip(bool isOutdated) {
+    if (_isCancelled) {
+      return _buildChip('המשמרת בוטלה', Colors.red.shade400, Icons.cancel);
+    }
     if (isOutdated) {
       return _buildChip('עבר התאריך', Colors.grey, Icons.history);
     }
@@ -543,6 +569,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
+                textDirection: TextDirection.rtl,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
@@ -553,27 +580,29 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                     child: const Icon(Icons.info_outline,
                         color: Colors.white, size: 22),
                   ),
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        widget.shift.department,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.shift.department,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${widget.shift.date} | ${widget.shift.startTime} - ${widget.shift.endTime}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withOpacity(0.9),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${widget.shift.date} | ${widget.shift.startTime} - ${widget.shift.endTime}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -617,17 +646,8 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
 
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      textDirection: TextDirection.rtl,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade800,
-          ),
-        ),
-        const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
@@ -635,6 +655,15 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 18, color: widget.departmentColor),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade800,
+          ),
         ),
       ],
     );

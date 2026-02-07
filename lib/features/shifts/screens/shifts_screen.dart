@@ -147,13 +147,15 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
     return Container(
       height: 90,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        reverse: true,
-        itemCount: 7,
-        itemBuilder: (context, index) {
-          final day = _currentWeekStart.add(Duration(days: index));
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          reverse: true, // Shows Sunday on right, Saturday on left
+          itemCount: 7,
+          itemBuilder: (context, index) {
+            final day = _currentWeekStart.add(Duration(days: index));
           final isSelected = DateUtils.isSameDay(day, _selectedDay);
           final isToday = DateUtils.isSameDay(day, DateTime.now());
 
@@ -230,7 +232,8 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
               ),
             ),
           );
-        },
+          },
+        ),
       ),
     );
   }

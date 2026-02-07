@@ -88,8 +88,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   Widget _buildWeekHeader() {
     final startDate = DateTimeUtils.formatDate(_currentWeekStart);
     final endDate = DateTimeUtils.formatDate(
-      _currentWeekStart.add(const Duration(days: 6)),
-    );
+        _currentWeekStart.add(const Duration(days: 6)));
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -100,8 +99,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
             AppColors.primary,
             AppColors.primary.withOpacity(0.8),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -157,7 +154,10 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
     );
   }
 
-  Widget _buildNavButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildNavButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return Material(
       color: Colors.white.withOpacity(0.2),
       borderRadius: BorderRadius.circular(12),
@@ -173,22 +173,26 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // DAY SELECTOR
+  // DAY SELECTOR — FIXED RTL ORDER (SAT → SUN)
   // ═══════════════════════════════════════════════════════════
 
   Widget _buildDaySelector() {
     return Container(
       height: 90,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        reverse: true,
-        itemCount: 7,
-        itemBuilder: (context, index) {
-          final day = _currentWeekStart.add(Duration(days: index));
-          final isSelected = DateUtils.isSameDay(day, _selectedDay);
-          final isToday = DateUtils.isSameDay(day, DateTime.now());
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          reverse: true, // Shows Sunday on right, Saturday on left
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: 7,
+          itemBuilder: (context, index) {
+            // RTL order: Sunday (index 0) on right → Saturday (index 6) on left
+            final DateTime day = _currentWeekStart.add(Duration(days: index));
+
+          final bool isSelected = DateUtils.isSameDay(day, _selectedDay);
+          final bool isToday = DateUtils.isSameDay(day, DateTime.now());
 
           return GestureDetector(
             onTap: () => setState(() => _selectedDay = day),
@@ -263,7 +267,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
               ),
             ),
           );
-        },
+          },
+        ),
       ),
     );
   }
@@ -308,11 +313,11 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   Widget _buildShiftCard(ShiftModel shift) {
     final color = _getDepartmentColor(shift.department);
     final icon = _getDepartmentIcon(shift.department);
-    final isFull = shift.assignedWorkers.length >= shift.maxWorkers;
-    final hasRequests = shift.requestedWorkers.isNotEmpty;
-    final progress = shift.maxWorkers == 0
-        ? 0.0
-        : shift.assignedWorkers.length / shift.maxWorkers;
+    final assignedCount = shift.assignedWorkers.length;
+    final maxWorkers = shift.maxWorkers;
+    final requestsCount = shift.requestedWorkers.length;
+    final isFull = assignedCount >= maxWorkers;
+    final isCancelled = shift.status == 'cancelled';
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -325,214 +330,229 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
           ),
         ),
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.12),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Top color strip
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color, color.withOpacity(0.7)],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+      child: Opacity(
+        opacity: isCancelled ? 0.65 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: isCancelled ? Colors.grey.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: isCancelled
+                    ? Colors.grey.withOpacity(0.1)
+                    : color.withOpacity(0.12),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Top color strip
+              Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isCancelled ? Colors.red.shade400 : color,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Arrow icon
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Main row
+                    Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isCancelled
+                                ? Colors.red.shade50
+                                : color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            isCancelled ? Icons.cancel_rounded : icon,
+                            color: isCancelled ? Colors.red.shade400 : color,
+                            size: 22,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.chevron_left,
-                          color: Colors.grey.shade500,
-                          size: 20,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Department info
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 shift.department,
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.bold,
-                                  color: color,
+                                  color: isCancelled
+                                      ? Colors.grey.shade500
+                                      : color,
+                                  decoration: isCancelled
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                  decorationColor: Colors.red.shade300,
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: color.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Icon(icon, color: color, size: 22),
+                              const SizedBox(height: 4),
+                              Row(
+                                textDirection: TextDirection.rtl,
+                                children: [
+                                  Icon(Icons.access_time_rounded,
+                                      size: 14, color: Colors.grey.shade500),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${shift.startTime} - ${shift.endTime}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade600,
+                                      decoration: isCancelled
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                      decorationColor: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Text(
-                                '${shift.startTime} - ${shift.endTime}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.access_time_rounded,
-                                size: 16,
-                                color: Colors.grey.shade500,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Progress bar
-                  Row(
-                    children: [
-                      // Status badges
-                      if (isFull)
-                        _buildStatusBadge('מלא', AppColors.success, Icons.check)
-                      else if (hasRequests)
-                        _buildStatusBadge(
-                          '${shift.requestedWorkers.length} בקשות',
-                          AppColors.warningOrange,
-                          Icons.pending_actions,
                         ),
-                      const Spacer(),
-                      // Worker count
-                      Text(
-                        '${shift.assignedWorkers.length}/${shift.maxWorkers}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isFull ? AppColors.success : color,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(Icons.people, size: 16, color: Colors.grey.shade500),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  // Progress bar visual
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress.clamp(0.0, 1.0),
-                      backgroundColor: Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation(
-                        isFull ? AppColors.success : color,
-                      ),
-                      minHeight: 6,
+                        Icon(Icons.chevron_right, color: Colors.grey.shade400),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    // Info row
+                    Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        if (!isCancelled) ...[
+                          // Workers count
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isFull
+                                  ? AppColors.success.withOpacity(0.1)
+                                  : color.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              textDirection: TextDirection.rtl,
+                              children: [
+                                Icon(
+                                  Icons.people,
+                                  size: 14,
+                                  color: isFull ? AppColors.success : color,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$assignedCount/$maxWorkers',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isFull ? AppColors.success : color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Pending requests
+                          if (requestsCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.warningOrange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                textDirection: TextDirection.rtl,
+                                children: [
+                                  const Icon(
+                                    Icons.pending_actions,
+                                    size: 14,
+                                    color: AppColors.warningOrange,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$requestsCount בקשות',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.warningOrange,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                        const Spacer(),
+                        // Status chip
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: shift.status == 'active'
+                                ? AppColors.success.withOpacity(0.1)
+                                : shift.status == 'cancelled'
+                                    ? Colors.red.withOpacity(0.1)
+                                    : Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            textDirection: TextDirection.rtl,
+                            children: [
+                              if (isCancelled)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 4),
+                                  child: Icon(Icons.cancel, size: 14,
+                                      color: Colors.red.shade600),
+                                ),
+                              Text(
+                                shift.status == 'active'
+                                    ? 'פעיל'
+                                    : shift.status == 'cancelled'
+                                        ? 'בוטלה'
+                                        : shift.status,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: shift.status == 'active'
+                                      ? AppColors.success
+                                      : shift.status == 'cancelled'
+                                          ? Colors.red.shade600
+                                          : Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(String text, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
+            ],
           ),
-          const SizedBox(width: 4),
-          Icon(icon, size: 14, color: color),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.event_busy_rounded,
-                size: 56,
-                color: AppColors.primary.withOpacity(0.5),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'אין משמרות ליום זה',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'לחץ על + ליצירת משמרת חדשה',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return const Center(
+      child: Text('אין משמרות ליום זה'),
     );
   }
 
@@ -541,45 +561,25 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   // ═══════════════════════════════════════════════════════════
 
   Widget _buildCreateShiftButton() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+    return FloatingActionButton.extended(
+      backgroundColor: AppColors.primary,
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text(
+        'משמרת חדשה',
+        style: TextStyle(color: Colors.white),
       ),
-      child: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
-        label: const Text(
-          'משמרת חדשה',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        onPressed: _isNavigating
-            ? null
-            : () async {
-                setState(() => _isNavigating = true);
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CreateShiftScreen(initialDate: _selectedDay),
-                  ),
-                );
-                if (mounted) setState(() => _isNavigating = false);
-              },
-      ),
+      onPressed: _isNavigating
+          ? null
+          : () async {
+              setState(() => _isNavigating = true);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CreateShiftScreen(initialDate: _selectedDay),
+                ),
+              );
+              if (mounted) setState(() => _isNavigating = false);
+            },
     );
   }
 }
