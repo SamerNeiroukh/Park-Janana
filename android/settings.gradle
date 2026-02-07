@@ -27,13 +27,13 @@ plugins {
 
 include ":app"
 
-// ✅ Compatibility fix for geolocator_android
+// ✅ Compatibility fix for Flutter plugins that need flutter extension properties
 gradle.beforeProject { project ->
-    if (project.name == "geolocator_android") {
+    if (project.name != "app" && project.name != "android") {
         project.ext.set("flutter", [
             compileSdkVersion: 34,
             targetSdkVersion: 34,
-            minSdkVersion: 21,
+            minSdkVersion: 23,
             versionCode: 1,
             versionName: "1.0"
         ])

@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import '../models/shift_model.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/widgets/message_bubble.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/constants/app_colors.dart';
 
 class WorkerShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -24,25 +26,79 @@ class WorkerShiftCard extends StatefulWidget {
   State<WorkerShiftCard> createState() => _WorkerShiftCardState();
 }
 
-class _WorkerShiftCardState extends State<WorkerShiftCard> {
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
+class _WorkerShiftCardState extends State<WorkerShiftCard>
+    with SingleTickerProviderStateMixin {
+  StreamSubscription<DocumentSnapshot>? _shiftSubscription;
   bool _hasRequested = false;
   bool _isShiftFull = false;
   bool _isAssigned = false;
+  bool _isLoading = false;
+  bool _isCancelled = false;
+
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  Color get _departmentColor {
+    switch (widget.shift.department) {
+      case 'פיינטבול':
+        return const Color(0xFFE53935);
+      case 'פארק חבלים':
+        return const Color(0xFF43A047);
+      case 'קרטינג':
+        return const Color(0xFFFF9800);
+      case 'פארק מים':
+        return const Color(0xFF1E88E5);
+      case 'גמבורי':
+        return const Color(0xFF8E24AA);
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  IconData get _departmentIcon {
+    switch (widget.shift.department) {
+      case 'פיינטבול':
+        return Icons.sports_esports;
+      case 'פארק חבלים':
+        return Icons.park;
+      case 'קרטינג':
+        return Icons.directions_car;
+      case 'פארק מים':
+        return Icons.pool;
+      case 'גמבורי':
+        return Icons.child_care;
+      default:
+        return Icons.work;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _listenToShiftUpdates();
   }
 
+  @override
+  void dispose() {
+    _shiftSubscription?.cancel();
+    _animationController.dispose();
+    super.dispose();
+  }
+
   void _listenToShiftUpdates() {
-    FirebaseFirestore.instance
+    _shiftSubscription = FirebaseFirestore.instance
         .collection('shifts')
         .doc(widget.shift.id)
         .snapshots()
         .listen((snapshot) {
-      if (snapshot.exists) {
+      if (snapshot.exists && mounted) {
         final shiftData = snapshot.data() as Map<String, dynamic>;
         final List<dynamic> requestedWorkers =
             shiftData['requestedWorkers'] ?? [];
@@ -50,22 +106,30 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
             shiftData['assignedWorkers'] ?? [];
 
         setState(() {
-          _hasRequested = requestedWorkers.contains(_currentUser?.uid);
-          _isAssigned = assignedWorkers.contains(_currentUser?.uid);
+          _hasRequested = requestedWorkers.contains(widget.currentUser.uid);
+          _isAssigned = assignedWorkers.contains(widget.currentUser.uid);
           _isShiftFull =
               assignedWorkers.length >= (shiftData['maxWorkers'] ?? 0);
+          _isCancelled = shiftData['status'] == 'cancelled';
         });
       }
     });
   }
 
-  void _toggleShiftRequest() async {
-    if (_hasRequested) {
-      await widget.shiftService
-          .cancelShiftRequest(widget.shift.id, _currentUser!.uid);
-    } else {
-      await widget.shiftService
-          .requestShift(widget.shift.id, _currentUser!.uid);
+  Future<void> _toggleShiftRequest() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    try {
+      if (_hasRequested) {
+        await widget.shiftService
+            .cancelShiftRequest(widget.shift.id, widget.currentUser.uid);
+      } else {
+        await widget.shiftService
+            .requestShift(widget.shift.id, widget.currentUser.uid);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -77,6 +141,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
       builder: (_) => ShiftDetailsPopup(
         shift: widget.shift,
         shiftService: widget.shiftService,
+        departmentColor: _departmentColor,
       ),
     );
   }
@@ -85,126 +150,344 @@ class _WorkerShiftCardState extends State<WorkerShiftCard> {
   Widget build(BuildContext context) {
     final DateTime shiftDate =
         DateFormat('dd/MM/yyyy').parse(widget.shift.date);
-    final bool isOutdated = shiftDate.isBefore(DateTime.now());
-    Color cardColor = Colors.white.withOpacity(0.9);
+    final bool isOutdated = shiftDate.isBefore(
+      DateTime.now().subtract(const Duration(days: 1)),
+    );
+    final progress = widget.shift.maxWorkers == 0
+        ? 0.0
+        : widget.shift.assignedWorkers.length / widget.shift.maxWorkers;
 
-    if (isOutdated) {
-      cardColor = Colors.grey.shade300;
-    } else if (_isAssigned) {
-      cardColor = Colors.green.shade50;
-    } else if (_isShiftFull) {
-      cardColor = Colors.red.shade50;
-    }
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-      elevation: 12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      shadowColor: Colors.blueAccent.withOpacity(0.3),
-      color: cardColor,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return GestureDetector(
+      onTapDown: (_) => _animationController.forward(),
+      onTapUp: (_) => _animationController.reverse(),
+      onTapCancel: () => _animationController.reverse(),
+      onTap: _showShiftDetails,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: _isCancelled ? Colors.grey.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: _isCancelled
+                    ? Colors.grey.withOpacity(0.1)
+                    : isOutdated
+                        ? Colors.grey.withOpacity(0.15)
+                        : _departmentColor.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Opacity(
+            opacity: _isCancelled ? 0.65 : isOutdated ? 0.6 : 1.0,
+            child: Column(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.event_note,
-                      color: Colors.blue.shade700, size: 30),
-                ),
-                if (_isAssigned)
-                  _buildStatusLabel(isOutdated ? "עבדת במשמרת" : "משובץ",
-                      Colors.blue, Icons.check_circle)
-                else if (isOutdated)
-                  _buildStatusLabel("עבר זמנו", Colors.grey, Icons.history)
-                else if (_isShiftFull)
-                  _buildStatusLabel("מלא", Colors.red, Icons.block)
-                else
-                  ElevatedButton(
-                    onPressed: isOutdated
-                        ? null
-                        : (_isShiftFull && !_hasRequested
-                            ? null
-                            : _toggleShiftRequest),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _hasRequested
-                          ? Colors.redAccent
-                          : (_isShiftFull ? Colors.grey : Colors.green),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                // Top gradient strip
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: _isCancelled
+                          ? [Colors.red.shade400, Colors.red.shade200]
+                          : [
+                              _departmentColor,
+                              _departmentColor.withOpacity(0.6),
+                            ],
                     ),
-                    child: Text(
-                      _hasRequested ? "ביטול בקשה" : "הצטרף",
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
                     ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    children: [
+                      // Header row
+                      Row(
+                        textDirection: TextDirection.rtl,
+                        children: [
+                          // Department icon
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: _isCancelled
+                                  ? Colors.red.shade50
+                                  : _departmentColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              _isCancelled ? Icons.cancel_rounded : _departmentIcon,
+                              color: _isCancelled ? Colors.red.shade400 : _departmentColor,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Department info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.shift.department,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isCancelled
+                                        ? Colors.grey.shade500
+                                        : _departmentColor,
+                                    decoration: _isCancelled
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                    decorationColor: Colors.red.shade300,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  textDirection: TextDirection.rtl,
+                                  children: [
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      size: 16,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${widget.shift.startTime} - ${widget.shift.endTime}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Action button
+                          _buildActionButton(isOutdated),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Status & Progress row
+                      Row(
+                        textDirection: TextDirection.rtl,
+                        children: [
+                          Icon(
+                            Icons.people,
+                            size: 16,
+                            color: Colors.grey.shade500,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _isShiftFull
+                                  ? AppColors.success
+                                  : _departmentColor,
+                            ),
+                          ),
+                          const Spacer(),
+                          _buildStatusChip(isOutdated),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Progress bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          backgroundColor: Colors.grey.shade200,
+                          valueColor: AlwaysStoppedAnimation(
+                            _isShiftFull ? AppColors.success : _departmentColor,
+                          ),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              "${widget.shift.date} | ${widget.shift.department}",
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.black87),
-              textAlign: TextAlign.right,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "שעות: ${widget.shift.startTime} - ${widget.shift.endTime}",
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
-              textAlign: TextAlign.right,
-            ),
-            const SizedBox(height: 14),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon:
-                    const Icon(Icons.expand_more, color: Colors.blue, size: 28),
-                onPressed: _showShiftDetails,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStatusLabel(String label, Color color, IconData icon) {
+  Widget _buildActionButton(bool isOutdated) {
+    if (_isCancelled) {
+      return _buildStatusButton(
+        label: 'בוטלה',
+        color: Colors.red.shade400,
+        icon: Icons.cancel,
+      );
+    }
+
+    if (isOutdated) {
+      return _buildStatusButton(
+        label: _isAssigned ? 'עבדת' : 'הסתיים',
+        color: Colors.grey,
+        icon: _isAssigned ? Icons.check_circle : Icons.history,
+      );
+    }
+
+    if (_isAssigned) {
+      return _buildStatusButton(
+        label: 'משובץ',
+        color: AppColors.success,
+        icon: Icons.check_circle,
+      );
+    }
+
+    if (_isShiftFull && !_hasRequested) {
+      return _buildStatusButton(
+        label: 'מלא',
+        color: Colors.red.shade400,
+        icon: Icons.block,
+      );
+    }
+
+    return Material(
+      color: _hasRequested
+          ? Colors.red.shade50
+          : AppColors.success.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: _isLoading ? null : _toggleShiftRequest,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: _isLoading
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: _hasRequested ? Colors.red : AppColors.success,
+                  ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _hasRequested ? 'ביטול' : 'הצטרף',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            _hasRequested ? Colors.red.shade600 : AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(
+                      _hasRequested ? Icons.close_rounded : Icons.add_rounded,
+                      size: 18,
+                      color:
+                          _hasRequested ? Colors.red.shade600 : AppColors.success,
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusButton({
+    required String label,
+    required Color color,
+    required IconData icon,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: color, width: 2),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 18),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
           const SizedBox(width: 6),
-          Text(label,
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.bold, fontSize: 14)),
+          Icon(icon, size: 16, color: color),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(bool isOutdated) {
+    if (_isCancelled) {
+      return _buildChip('המשמרת בוטלה', Colors.red.shade400, Icons.cancel);
+    }
+    if (isOutdated) {
+      return _buildChip('עבר התאריך', Colors.grey, Icons.history);
+    }
+    if (_isAssigned) {
+      return _buildChip('אתה משובץ', AppColors.success, Icons.check);
+    }
+    if (_hasRequested) {
+      return _buildChip('ממתין לאישור', AppColors.warningOrange, Icons.hourglass_top);
+    }
+    if (_isShiftFull) {
+      return _buildChip('המשמרת מלאה', Colors.red.shade400, Icons.block);
+    }
+    return _buildChip('פתוח להרשמה', _departmentColor, Icons.event_available);
+  }
+
+  Widget _buildChip(String text, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(icon, size: 14, color: color),
         ],
       ),
     );
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// SHIFT DETAILS POPUP
+// ═══════════════════════════════════════════════════════════
+
 class ShiftDetailsPopup extends StatefulWidget {
   final ShiftModel shift;
   final ShiftService shiftService;
+  final Color departmentColor;
 
   const ShiftDetailsPopup({
     super.key,
     required this.shift,
     required this.shiftService,
+    required this.departmentColor,
   });
 
   @override
@@ -248,108 +531,251 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.85,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (_, controller) => Container(
-        padding: const EdgeInsets.all(20.0),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          color: Colors.white,
-        ),
-        child: ListView(
-          controller: controller,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, controller) => Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            color: Color(0xFFF8F9FB),
+          ),
+          child: Column(
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(4),
-                ),
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
               ),
             ),
-
-            /// 👥 Workers (compact)
-            const Text("👥 עובדים מוקצים",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-            const SizedBox(height: 12),
-            isLoadingWorkers
-                ? const Center(child: CircularProgressIndicator())
-                : assignedWorkers.isEmpty
-                    ? const Text("אין עובדים מוקצים")
-                    : Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: assignedWorkers.map((worker) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FutureBuilder<ImageProvider>(
-                                future: ProfileImageProvider.resolve(
-                                  storagePath: worker.profilePicturePath,
-                                  fallbackUrl: worker.profilePicture,
-                                ),
-                                builder: (context, snapshot) {
-                                  return CircleAvatar(
-                                    radius: 26,
-                                    backgroundImage: snapshot.data,
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 4),
-                              Text(worker.fullName,
-                                  style: const TextStyle(fontSize: 12)),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 16),
-
-            /// 💬 Messages (full space)
-            const Text("📩 הודעות",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-            const SizedBox(height: 12),
-            StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('shifts')
-                  .doc(widget.shift.id)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || !snapshot.data!.exists) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final data = snapshot.data!.data() as Map<String, dynamic>;
-                final messages =
-                    List<Map<String, dynamic>>.from(data['messages'] ?? []);
-
-                if (messages.isEmpty) {
-                  return const Text("אין הודעות זמינות");
-                }
-
-                return Column(
-                  children: messages.map((msg) {
-                    return MessageBubble(
-                      message: msg['message'],
-                      timestamp: msg['timestamp'],
-                      senderId: msg['senderId'],
-                      shiftId: widget.shift.id,
-                    );
-                  }).toList(),
-                );
-              },
+            // Header
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    widget.departmentColor,
+                    widget.departmentColor.withOpacity(0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.info_outline,
+                        color: Colors.white, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.shift.department,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${widget.shift.date} | ${widget.shift.startTime} - ${widget.shift.endTime}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
+            // Content
+            Expanded(
+              child: ListView(
+                controller: controller,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: [
+                  // Workers section
+                  _buildSectionTitle('עובדים משובצים', Icons.people),
+                  const SizedBox(height: 12),
+                  isLoadingWorkers
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: CircularProgressIndicator(
+                              color: widget.departmentColor,
+                            ),
+                          ),
+                        )
+                      : assignedWorkers.isEmpty
+                          ? _buildEmptyCard('אין עובדים משובצים עדיין')
+                          : _buildWorkersGrid(),
+                  const SizedBox(height: 24),
+                  // Messages section
+                  _buildSectionTitle('הודעות', Icons.chat_bubble_outline),
+                  const SizedBox(height: 12),
+                  _buildMessagesSection(),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      textDirection: TextDirection.rtl,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: widget.departmentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: widget.departmentColor),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade800,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyCard(String text) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkersGrid() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        alignment: WrapAlignment.end,
+        children: assignedWorkers.map((worker) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FutureBuilder<ImageProvider>(
+                future: ProfileImageProvider.resolve(
+                  storagePath: worker.profilePicturePath,
+                  fallbackUrl: worker.profilePicture,
+                ),
+                builder: (context, snapshot) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: widget.departmentColor.withOpacity(0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: widget.departmentColor.withOpacity(0.1),
+                      backgroundImage: snapshot.data,
+                      child: snapshot.data == null
+                          ? Icon(Icons.person, color: widget.departmentColor)
+                          : null,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 6),
+              Text(
+                worker.fullName,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildMessagesSection() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('shifts')
+          .doc(widget.shift.id)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return _buildEmptyCard('טוען הודעות...');
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final messages =
+            List<Map<String, dynamic>>.from(data['messages'] ?? []);
+
+        if (messages.isEmpty) {
+          return _buildEmptyCard('אין הודעות עדיין');
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: messages.map((msg) {
+              return MessageBubble(
+                message: msg['message'],
+                timestamp: msg['timestamp'],
+                senderId: msg['senderId'],
+                shiftId: widget.shift.id,
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 }

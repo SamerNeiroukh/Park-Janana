@@ -191,7 +191,7 @@ class _Timeline extends StatelessWidget {
         }
 
         final shifts = (snapshot.data ?? [])
-            .where((s) => s.isUserAssigned(userId))
+            .where((s) => s.isUserAssigned(userId) && s.status != 'cancelled')
             .toList();
 
         if (shifts.isEmpty) {
