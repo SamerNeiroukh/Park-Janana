@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -26,12 +26,17 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          const UserHeader(),
-          _buildWeekNavigation(),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            const Directionality(
+              textDirection: TextDirection.ltr,
+              child: UserHeader(),
+            ),
+            _buildWeekNavigation(),
           _buildCreateShiftButton(),
           Expanded(
             child: StreamBuilder<List<ShiftModel>>(
@@ -94,7 +99,8 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildWeekNavigation() {
@@ -147,7 +153,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 if (mounted) setState(() => _isNavigating = false);
               },
         style: AppTheme.primaryButtonStyle,
-        child: const Text("➕ יצירת משמרת"),
+        child: const Text("יצירת משמרת"),
       ),
     );
   }

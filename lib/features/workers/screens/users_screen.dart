@@ -114,10 +114,15 @@ class _UsersScreenState extends State<UsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const UserHeader(),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        body: Column(
+          children: [
+            const Directionality(
+              textDirection: TextDirection.ltr,
+              child: UserHeader(),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TextField(
@@ -159,7 +164,7 @@ class _UsersScreenState extends State<UsersScreen> {
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 10.0, vertical: 8.0),
-                                trailing: FutureBuilder<ImageProvider>(
+                                leading: FutureBuilder<ImageProvider>(
                                   future: ProfileImageProvider.resolve(
                                     storagePath: worker.profilePicturePath,
                                     fallbackUrl: worker.profilePicture,
@@ -179,7 +184,7 @@ class _UsersScreenState extends State<UsersScreen> {
                                 ),
                                 subtitle: Text(worker.role,
                                     textAlign: TextAlign.right),
-                                leading: IconButton(
+                                trailing: IconButton(
                                   icon: isProcessing
                                       ? const SizedBox(
                                           width: 24,
@@ -211,7 +216,8 @@ class _UsersScreenState extends State<UsersScreen> {
                         ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
