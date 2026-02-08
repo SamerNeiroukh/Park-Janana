@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/attendance/services/clock_service.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 /// UserProvider manages user data and work statistics
 /// Provides centralized access to current user information
@@ -48,7 +49,7 @@ class UserProvider extends ChangeNotifier {
 
     try {
       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(uid)
           .get();
 
@@ -96,7 +97,7 @@ class UserProvider extends ChangeNotifier {
 
     try {
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(_currentUser!.uid)
           .update({'profile_picture': profilePictureUrl});
 
@@ -151,7 +152,7 @@ class UserProvider extends ChangeNotifier {
 
     try {
       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(uid)
           .get();
 

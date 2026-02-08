@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 
 class ReportService {
@@ -11,7 +12,7 @@ class ReportService {
     final endOfMonth = DateTime(month.year, month.month + 1, 0);
 
     final snapshot = await FirebaseFirestore.instance
-        .collection('shifts')
+        .collection(AppConstants.shiftsCollection)
         .get(); // Removed server-side filter for full inclusion
 
     final List<ShiftModel> relevantShifts = [];

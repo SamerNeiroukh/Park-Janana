@@ -17,7 +17,7 @@ class ShiftService {
     final DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     return _firestore
-        .collection('shifts')
+        .collection(AppConstants.shiftsCollection)
         .where('date',
             isGreaterThanOrEqualTo:
                 DateFormat('dd/MM/yyyy').format(startOfWeek))
@@ -39,7 +39,7 @@ class ShiftService {
   Future<List<ShiftModel>> getShiftsByDate(DateTime date) async {
     try {
       final querySnapshot = await _firestore
-          .collection('shifts')
+          .collection(AppConstants.shiftsCollection)
           .where('date', isEqualTo: DateFormat('dd/MM/yyyy').format(date))
           .get();
 
@@ -165,7 +165,7 @@ class ShiftService {
     try {
       // 1. Fetch worker info
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(workerId)
           .get();
       if (!userDoc.exists) throw CustomException("Worker not found");
@@ -203,7 +203,7 @@ class ShiftService {
 
     try {
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(workerId)
           .get();
       if (!userDoc.exists) throw CustomException("Worker not found");
@@ -239,7 +239,7 @@ class ShiftService {
 
     try {
       final DocumentReference shiftRef =
-          _firestore.collection('shifts').doc(shiftId);
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
       final DocumentSnapshot doc = await shiftRef.get();
 
       if (!doc.exists) throw CustomException("Shift not found");
@@ -342,7 +342,7 @@ class ShiftService {
   Future<List<ShiftModel>> getShiftsByWeek(DateTime weekStart) async {
     final weekEnd = weekStart.add(const Duration(days: 6));
     final querySnapshot = await FirebaseFirestore.instance
-        .collection('shifts')
+        .collection(AppConstants.shiftsCollection)
         .where('date',
             isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekStart))
         .where('date',

@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/task_model.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class TaskService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collection = 'tasks';
+  final String _collection = AppConstants.tasksCollection;
 
   // 🟢 Create a new task
   Future<void> createTask(TaskModel task) async {
@@ -152,7 +153,7 @@ class TaskService {
       final lastDay = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
 
       final query = await FirebaseFirestore.instance
-          .collection('tasks')
+          .collection(AppConstants.tasksCollection)
           .where('assignedTo', arrayContains: userId)
           .where('dueDate', isGreaterThanOrEqualTo: firstDay)
           .where('dueDate', isLessThanOrEqualTo: lastDay)

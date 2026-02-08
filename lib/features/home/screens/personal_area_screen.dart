@@ -13,6 +13,7 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -82,7 +83,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         await storageRef.putFile(_imageFile!);
 
         // Update Firestore with storage path
-        await _firestore.collection('users').doc(widget.uid).update({
+        await _firestore.collection(AppConstants.usersCollection).doc(widget.uid).update({
           'profile_picture_path': storageRef.fullPath,
         });
 
