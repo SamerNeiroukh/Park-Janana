@@ -9,6 +9,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   final List<UserModel>? initialSelectedUsers;
@@ -52,7 +53,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }
 
   Future<void> _loadAllUsers() async {
-    final query = await _firestore.collection('users').get();
+    final query = await _firestore.collection(AppConstants.usersCollection).get();
     final users = query.docs.map((doc) {
       final data = doc.data();
       return UserModel.fromMap({...data, 'uid': doc.id});

@@ -5,6 +5,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class EditWorkerLicensesScreen extends StatefulWidget {
   final String uid;
@@ -34,7 +35,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
   Future<void> _loadWorkerLicenses() async {
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(widget.uid)
           .get();
       if (doc.exists) {
@@ -65,7 +66,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
   Future<void> _saveChanges() async {
     try {
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(widget.uid)
           .update({
         'licensedDepartments': _selectedDepartments,

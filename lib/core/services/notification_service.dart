@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 /// Background message handler - must be top-level function
 @pragma('vm:entry-point')
@@ -216,7 +217,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
         'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
@@ -241,7 +242,7 @@ class NotificationService {
     }
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
         'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
@@ -260,7 +261,7 @@ class NotificationService {
     if (token == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
         'fcmTokens': FieldValue.arrayRemove([token]),
       });
       debugPrint('FCM token removed from Firestore');
@@ -301,7 +302,7 @@ class NotificationService {
 
     try {
       // Create notification request for Cloud Function to process
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_update',
         'shiftId': shiftId,
         'recipientIds': workerIds,
@@ -336,7 +337,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_assigned',
         'shiftId': shiftId,
         'recipientIds': [workerId],
@@ -368,7 +369,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_removed',
         'shiftId': shiftId,
         'recipientIds': [workerId],
@@ -403,7 +404,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_cancelled',
         'shiftId': shiftId,
         'recipientIds': workerIds,
@@ -438,7 +439,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_message',
         'shiftId': shiftId,
         'recipientIds': workerIds,

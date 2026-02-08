@@ -8,6 +8,7 @@ import 'package:park_janana/features/workers/widgets/shifts_button.dart';
 import 'package:park_janana/features/tasks/screens/create_task_screen.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -320,7 +321,7 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
 
     if (confirm) {
-      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

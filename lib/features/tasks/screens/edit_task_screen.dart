@@ -6,6 +6,7 @@ import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final TaskModel task;
@@ -50,7 +51,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     _dueDate = DateTime(due.year, due.month, due.day);
     _dueTime = TimeOfDay(hour: due.hour, minute: due.minute);
 
-    final query = await _firestore.collection('users').get();
+    final query = await _firestore.collection(AppConstants.usersCollection).get();
     final users = query.docs.map((doc) {
       final data = doc.data();
       return UserModel.fromMap({...data, 'uid': doc.id});

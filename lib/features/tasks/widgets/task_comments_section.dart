@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class TaskCommentsSection extends StatelessWidget {
   final List<Map<String, dynamic>> comments;
@@ -14,7 +15,7 @@ class TaskCommentsSection extends StatelessWidget {
   Future<String> _fetchUserName(String uid) async {
     try {
       final doc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+          await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).get();
       if (doc.exists && doc.data() != null) {
         return doc.data()!['fullName'] ?? 'משתמש';
       }

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class LikersSheet extends StatefulWidget {
   final List<String> likedByUserIds;
@@ -54,7 +55,7 @@ class _LikersSheetState extends State<LikersSheet>
       for (var i = 0; i < widget.likedByUserIds.length; i += 10) {
         final batch = widget.likedByUserIds.skip(i).take(10).toList();
         final snapshot = await FirebaseFirestore.instance
-            .collection('users')
+            .collection(AppConstants.usersCollection)
             .where(FieldPath.documentId, whereIn: batch)
             .get();
 

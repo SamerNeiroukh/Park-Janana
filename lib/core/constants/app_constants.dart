@@ -2,6 +2,10 @@ class AppConstants {
   // 🔥 Firebase Collections
   static const String usersCollection = 'users';
   static const String shiftsCollection = 'shifts';
+  static const String postsCollection = 'posts';
+  static const String tasksCollection = 'tasks';
+  static const String attendanceCollection = 'attendance_logs';
+  static const String notificationRequestsCollection = 'notification_requests';
 
   // 🖼️ Asset Paths
   static const String parkLogo = 'assets/images/park_logo.png';

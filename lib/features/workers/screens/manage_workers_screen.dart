@@ -7,6 +7,7 @@ import 'package:park_janana/features/workers/screens/review_worker_screen.dart';
 import 'package:park_janana/features/workers/screens/approve_worker_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class ManageWorkersScreen extends StatefulWidget {
   const ManageWorkersScreen({super.key});
@@ -69,7 +70,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
   Widget _buildNewWorkersTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .where('role', isEqualTo: 'worker')
           .where('approved', isEqualTo: false)
           .snapshots(),
@@ -172,7 +173,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
   Widget _buildApprovedWorkersTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .where('role', isEqualTo: 'worker')
           .where('approved', isEqualTo: true)
           .snapshots(),

@@ -223,7 +223,7 @@ class WorkerService {
 
     try {
       final DocumentReference shiftRef =
-          _firestore.collection('shifts').doc(shiftId);
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
       final DocumentSnapshot doc = await shiftRef.get();
 
       if (!doc.exists) throw CustomException("Shift not found");
@@ -299,7 +299,7 @@ class WorkerService {
   Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
     final List<UserModel> users = [];
     for (String id in userIds) {
-      final doc = await _firestore.collection('users').doc(id).get();
+      final doc = await _firestore.collection(AppConstants.usersCollection).doc(id).get();
       if (doc.exists && doc.data() != null) {
         users.add(UserModel.fromMap(doc.data()!));
       }

@@ -50,7 +50,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (user != null) {
       _currentUserId = user.uid;
       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(user.uid)
           .get();
       if (userDoc.exists) {

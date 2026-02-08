@@ -5,12 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/post_model.dart';
 
 class NewsfeedService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  static const String _collectionName = 'posts';
+  static const String _collectionName = AppConstants.postsCollection;
 
   CollectionReference<Map<String, dynamic>> get _postsRef =>
       _firestore.collection(_collectionName);

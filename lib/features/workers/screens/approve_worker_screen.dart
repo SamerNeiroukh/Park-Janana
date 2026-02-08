@@ -4,6 +4,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -12,7 +13,7 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Future<void> _approveWorker(BuildContext context) async {
     final String uid = userData['uid'];
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+    await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).update({
       'approved': true,
     });
 
@@ -24,7 +25,7 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Future<void> _rejectWorker(BuildContext context) async {
     final String uid = userData['uid'];
-    await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+    await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(

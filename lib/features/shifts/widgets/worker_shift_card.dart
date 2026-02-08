@@ -9,6 +9,7 @@ import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/widgets/message_bubble.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class WorkerShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -94,7 +95,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
   void _listenToShiftUpdates() {
     _shiftSubscription = FirebaseFirestore.instance
-        .collection('shifts')
+        .collection(AppConstants.shiftsCollection)
         .doc(widget.shift.id)
         .snapshots()
         .listen((snapshot) {
@@ -743,7 +744,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
   Widget _buildMessagesSection() {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('shifts')
+          .collection(AppConstants.shiftsCollection)
           .doc(widget.shift.id)
           .snapshots(),
       builder: (context, snapshot) {

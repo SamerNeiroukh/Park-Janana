@@ -5,6 +5,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_durations.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
 
@@ -180,7 +181,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
   Widget _buildShiftList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('shifts')
+          .collection(AppConstants.shiftsCollection)
           .where('assignedWorkers', arrayContains: widget.uid)
           .orderBy('date', descending: true)
           .snapshots(),
