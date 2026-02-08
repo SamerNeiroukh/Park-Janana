@@ -292,7 +292,9 @@ class NewsfeedService {
       for (final item in result.items) {
         await item.delete();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Error deleting media for post $postId: $e');
+    }
   }
 
   // ===============================

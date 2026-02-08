@@ -318,20 +318,47 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       }
     }
 
-    if (_ongoingSession == null) {
-      await _clockService.clockIn(userName);
-    } else {
-      await _clockService.clockOut();
-    }
+    try {
+      if (_ongoingSession == null) {
+        await _clockService.clockIn(userName);
+      } else {
+        await _clockService.clockOut();
+      }
 
-    setState(() => _justSubmitted = true);
-    _cardPulseController.forward(from: 0).then((_) {
-      _cardPulseController.reverse().then((_) {
-        setState(() => _justSubmitted = false);
+      setState(() => _justSubmitted = true);
+      _cardPulseController.forward(from: 0).then((_) {
+        _cardPulseController.reverse().then((_) {
+          setState(() => _justSubmitted = false);
+        });
       });
-    });
 
-    await _fetchSession();
+      await _fetchSession();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(
+                    'שגיאה בדיווח נוכחות: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
     _key.currentState?.reset();
   }
 

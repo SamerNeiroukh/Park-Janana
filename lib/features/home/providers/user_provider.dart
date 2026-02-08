@@ -82,6 +82,11 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading work stats: $e');
+      _workStats = {
+        'hoursWorked': 0.0,
+        'daysWorked': 0.0,
+      };
+      notifyListeners();
     }
   }
 
