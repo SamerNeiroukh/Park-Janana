@@ -73,6 +73,7 @@ class ClockService {
       });
     } catch (e) {
       debugPrint('Error clocking out: $e');
+      rethrow;
     }
   }
 
