@@ -13,7 +13,7 @@ import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ManagerTaskDashboard extends StatefulWidget {
@@ -404,17 +404,10 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                   children: assignedUsers.map((user) {
                     return Container(
                       margin: const EdgeInsets.only(left: 6),
-                      child: FutureBuilder<ImageProvider>(
-                        future: ProfileImageProvider.resolve(
-                          storagePath: user.profilePicturePath,
-                          fallbackUrl: user.profilePicture,
-                        ),
-                        builder: (context, imageSnapshot) {
-                          return CircleAvatar(
-                            radius: 16,
-                            backgroundImage: imageSnapshot.data,
-                          );
-                        },
+                      child: ProfileAvatar(
+                        storagePath: user.profilePicturePath,
+                        fallbackUrl: user.profilePicture,
+                        radius: 16,
                       ),
                     );
                   }).toList(),

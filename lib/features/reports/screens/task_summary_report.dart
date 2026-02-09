@@ -7,7 +7,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
 import 'package:park_janana/features/reports/services/pdf_export_service.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart'; // ✅ NEW
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class TaskSummaryReport extends StatefulWidget {
   final String userId;
@@ -104,18 +104,11 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                     horizontal: 12.0, vertical: 10.0),
                 child: Row(
                   children: [
-                    FutureBuilder<ImageProvider>(
-                      future: ProfileImageProvider.resolve(
-                        storagePath: widget.profilePicturePath,
-                        fallbackUrl: widget.profileUrl,
-                      ),
-                      builder: (context, snapshot) {
-                        return CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.grey.shade300,
-                          backgroundImage: snapshot.data,
-                        );
-                      },
+                    ProfileAvatar(
+                      storagePath: widget.profilePicturePath,
+                      fallbackUrl: widget.profileUrl,
+                      radius: 28,
+                      backgroundColor: Colors.grey.shade300,
                     ),
                     const SizedBox(width: 12),
                     Expanded(

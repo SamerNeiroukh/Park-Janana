@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -1221,25 +1221,17 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          FutureBuilder<ImageProvider>(
-            future: ProfileImageProvider.resolve(
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: departmentColor.withOpacity(0.3), width: 2),
+            ),
+            child: ProfileAvatar(
               storagePath: user.profilePicturePath,
               fallbackUrl: user.profilePicture,
-            ),
-            builder: (_, snap) => Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: departmentColor.withOpacity(0.3), width: 2),
-              ),
-              child: CircleAvatar(
-                radius: 26,
-                backgroundColor: departmentColor.withOpacity(0.1),
-                backgroundImage: snap.data,
-                child: snap.data == null
-                    ? Icon(Icons.person, color: departmentColor)
-                    : null,
-              ),
+              radius: 26,
+              backgroundColor: departmentColor.withOpacity(0.1),
             ),
           ),
           const SizedBox(width: 12),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +11,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 /// 3. Default asset image
 class ProfileImageProvider {
   static const String _defaultAsset = 'assets/images/default_profile.png';
+
+  static const AssetImage defaultImage = AssetImage(_defaultAsset);
 
   /// Cache resolved Storage download URLs to avoid repeated API calls.
   static final Map<String, String> _urlCache = {};
@@ -25,30 +28,33 @@ class ProfileImageProvider {
     String? storagePath,
     String? fallbackUrl,
   }) async {
-    try {
-      // 1️⃣ Preferred: Firebase Storage path (with URL cache)
-      if (storagePath != null && storagePath.isNotEmpty) {
+    // 1. Preferred: Firebase Storage path (with URL cache)
+    if (storagePath != null && storagePath.isNotEmpty) {
+      try {
         final cachedUrl = _urlCache[storagePath];
         if (cachedUrl != null) {
           return CachedNetworkImageProvider(cachedUrl);
         }
         final ref = FirebaseStorage.instance.ref(storagePath);
-        final downloadUrl = await ref.getDownloadURL();
+        final downloadUrl = await ref
+            .getDownloadURL()
+            .timeout(const Duration(seconds: 5));
         _urlCache[storagePath] = downloadUrl;
         return CachedNetworkImageProvider(downloadUrl);
+      } catch (e) {
+        debugPrint('ProfileImageProvider storage error: $e');
+        // Fall through to try fallbackUrl
       }
-
-      // 2️⃣ Legacy fallback: static URL
-      if (fallbackUrl != null &&
-          fallbackUrl.isNotEmpty &&
-          fallbackUrl.startsWith('http')) {
-        return CachedNetworkImageProvider(fallbackUrl);
-      }
-    } catch (e) {
-      debugPrint('ProfileImageProvider error: $e');
     }
 
-    // 3️⃣ Final fallback
-    return const AssetImage(_defaultAsset);
+    // 2. Legacy fallback: static URL
+    if (fallbackUrl != null &&
+        fallbackUrl.isNotEmpty &&
+        fallbackUrl.startsWith('http')) {
+      return CachedNetworkImageProvider(fallbackUrl);
+    }
+
+    // 3. Final fallback
+    return defaultImage;
   }
 }

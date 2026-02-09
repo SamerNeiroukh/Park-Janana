@@ -13,6 +13,7 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
@@ -248,21 +249,14 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              FutureBuilder<ImageProvider>(
-                future: ProfileImageProvider.resolve(
+              CircleAvatar(
+                radius: 85,
+                backgroundColor: AppColors.accent,
+                child: ProfileAvatar(
                   storagePath: userData.profilePicturePath,
                   fallbackUrl: userData.profilePicture,
+                  radius: 80,
                 ),
-                builder: (context, imageSnapshot) {
-                  return CircleAvatar(
-                    radius: 85,
-                    backgroundColor: AppColors.accent,
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundImage: imageSnapshot.data,
-                    ),
-                  );
-                },
               ),
               Positioned(
                 right: 5,

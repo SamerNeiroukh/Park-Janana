@@ -7,7 +7,7 @@ import 'package:park_janana/core/constants/app_durations.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class ShiftsButtonScreen extends StatefulWidget {
   final String uid;
@@ -94,18 +94,11 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
         ),
         child: Row(
           children: [
-            FutureBuilder<ImageProvider>(
-              future: ProfileImageProvider.resolve(
-                storagePath: widget.profilePicturePath,
-                fallbackUrl: widget.profilePicture,
-              ),
-              builder: (context, snapshot) {
-                return CircleAvatar(
-                  radius: AppDimensions.avatarS * 0.75,
-                  backgroundColor: AppColors.greyLight,
-                  backgroundImage: snapshot.data,
-                );
-              },
+            ProfileAvatar(
+              storagePath: widget.profilePicturePath,
+              fallbackUrl: widget.profilePicture,
+              radius: AppDimensions.avatarS * 0.75,
+              backgroundColor: AppColors.greyLight,
             ),
             const SizedBox(width: AppDimensions.spacingXL),
             Expanded(

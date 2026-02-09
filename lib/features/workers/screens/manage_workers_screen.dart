@@ -6,7 +6,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/workers/screens/review_worker_screen.dart';
 import 'package:park_janana/features/workers/screens/approve_worker_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
@@ -169,18 +169,11 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                         horizontal: 12.0, vertical: 10.0),
                     child: Row(
                       children: [
-                        FutureBuilder<ImageProvider>(
-                          future: ProfileImageProvider.resolve(
-                            storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
-                            fallbackUrl: data['profile_picture'],
-                          ),
-                          builder: (context, snapshot) {
-                            return CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Colors.grey.shade300,
-                              backgroundImage: snapshot.data,
-                            );
-                          },
+                        ProfileAvatar(
+                          storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
+                          fallbackUrl: data['profile_picture'],
+                          radius: 28,
+                          backgroundColor: Colors.grey.shade300,
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -285,18 +278,11 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                         horizontal: 12.0, vertical: 10.0),
                     child: Row(
                       children: [
-                        FutureBuilder<ImageProvider>(
-                          future: ProfileImageProvider.resolve(
-                            storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
-                            fallbackUrl: data['profile_picture'],
-                          ),
-                          builder: (context, snapshot) {
-                            return CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Colors.grey.shade300,
-                              backgroundImage: snapshot.data,
-                            );
-                          },
+                        ProfileAvatar(
+                          storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
+                          fallbackUrl: data['profile_picture'],
+                          radius: 28,
+                          backgroundColor: Colors.grey.shade300,
                         ),
                         const SizedBox(width: 12),
                         Column(

@@ -12,7 +12,7 @@ import 'package:park_janana/features/tasks/widgets/task_comments_section.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -211,16 +211,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             borderRadius: AppDimensions.borderRadiusL,
                           ),
                           child: ListTile(
-                            leading: FutureBuilder<ImageProvider>(
-                              future: ProfileImageProvider.resolve(
-                                storagePath: user.profilePicturePath,
-                                fallbackUrl: user.profilePicture,
-                              ),
-                              builder: (context, snapshot) {
-                                return CircleAvatar(
-                                  backgroundImage: snapshot.data,
-                                );
-                              },
+                            leading: ProfileAvatar(
+                              storagePath: user.profilePicturePath,
+                              fallbackUrl: user.profilePicture,
                             ),
                             title: Text(user.fullName),
                             trailing: _buildWorkerStatusBadge(workerStatus),

@@ -4,7 +4,7 @@ import '../services/firebase_service.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class MessageBubble extends StatefulWidget {
   final String message;
@@ -90,18 +90,10 @@ class _MessageBubbleState extends State<MessageBubble> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FutureBuilder<ImageProvider>(
-              future: ProfileImageProvider.resolve(
-                storagePath: profilePicturePath,
-                fallbackUrl:
-                    profilePictureUrl ?? AppConstants.defaultProfileImage,
-              ),
-              builder: (context, snapshot) {
-                return CircleAvatar(
-                  radius: 25.0,
-                  backgroundImage: snapshot.data,
-                );
-              },
+            ProfileAvatar(
+              storagePath: profilePicturePath,
+              fallbackUrl: profilePictureUrl ?? AppConstants.defaultProfileImage,
+              radius: 25.0,
             ),
             const SizedBox(width: 8),
             Expanded(
