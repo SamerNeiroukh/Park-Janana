@@ -20,21 +20,21 @@ class NewsfeedService {
   // Streams
   // ===============================
 
-  Stream<List<PostModel>> getPostsStream() {
-    return _postsRef
+  Stream<List<PostModel>> getPostsStream({int? limit}) {
+    Query<Map<String, dynamic>> query = _postsRef
         .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(_mapSnapshotToPosts);
+        .orderBy('createdAt', descending: true);
+    if (limit != null) query = query.limit(limit);
+    return query.snapshots().map(_mapSnapshotToPosts);
   }
 
-  Stream<List<PostModel>> getPostsByCategory(String category) {
-    return _postsRef
+  Stream<List<PostModel>> getPostsByCategory(String category, {int? limit}) {
+    Query<Map<String, dynamic>> query = _postsRef
         .where('category', isEqualTo: category)
         .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(_mapSnapshotToPosts);
+        .orderBy('createdAt', descending: true);
+    if (limit != null) query = query.limit(limit);
+    return query.snapshots().map(_mapSnapshotToPosts);
   }
 
   // ===============================

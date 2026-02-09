@@ -27,6 +27,12 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   final ScrollController _scrollController = ScrollController();
   bool _showFab = true;
 
+  // Pagination
+  static const int _pageSize = 10;
+  int _postLimit = _pageSize;
+  bool _hasMorePosts = true;
+  bool _isLoadingMore = false;
+
   // Cache the stream to avoid recreating it on every build
   Stream<List<PostModel>>? _postsStream;
 
@@ -38,7 +44,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   void _initStream() {
-    _postsStream ??= _newsfeedService.getPostsStream();
+    _postsStream ??= _newsfeedService.getPostsStream(limit: _postLimit);
   }
 
   @override
@@ -52,6 +58,22 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     if (showFab != _showFab) {
       setState(() => _showFab = showFab);
     }
+
+    // Load more posts when near bottom
+    if (!_isLoadingMore &&
+        _hasMorePosts &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      _loadMorePosts();
+    }
+  }
+
+  void _loadMorePosts() {
+    _isLoadingMore = true;
+    setState(() {
+      _postLimit += _pageSize;
+      _postsStream = _newsfeedService.getPostsStream(limit: _postLimit);
+    });
   }
 
   bool _isManager(String? role) {
@@ -401,6 +423,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           debugPrint('Newsfeed error: ${snapshot.error}');
           return _ErrorState(onRetry: () {
             setState(() {
+              _postLimit = _pageSize;
+              _hasMorePosts = true;
               _postsStream = null;
               _initStream();
             });
@@ -409,6 +433,12 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
         final posts = snapshot.data ?? [];
 
+        // Update pagination state
+        if (snapshot.hasData) {
+          _isLoadingMore = false;
+          _hasMorePosts = posts.length >= _postLimit;
+        }
+
         if (posts.isEmpty) {
           return _EmptyState(isManager: isManager);
         }
@@ -416,8 +446,9 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         return RefreshIndicator(
           onRefresh: () async {
             HapticFeedback.mediumImpact();
-            // Force recreate stream to get fresh data
             setState(() {
+              _postLimit = _pageSize;
+              _hasMorePosts = true;
               _postsStream = null;
               _initStream();
             });
@@ -431,8 +462,19 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
             ),
-            itemCount: posts.length,
+            itemCount: posts.length + (_hasMorePosts ? 1 : 0),
             itemBuilder: (context, index) {
+              if (index >= posts.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                );
+              }
+
               final post = posts[index];
               return PostCard(
                 key: ValueKey(post.id),
