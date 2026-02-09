@@ -12,6 +12,15 @@ class ShiftService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final Map<String, UserModel> _workerCache = {};
+  static const Duration _cacheTtl = Duration(minutes: 10);
+  DateTime _cacheTimestamp = DateTime.now();
+
+  void _checkCacheExpiry() {
+    if (DateTime.now().difference(_cacheTimestamp) > _cacheTtl) {
+      _workerCache.clear();
+      _cacheTimestamp = DateTime.now();
+    }
+  }
 
   Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
     final dates = List.generate(
@@ -273,6 +282,7 @@ class ShiftService {
   }
 
   Future<List<UserModel>> fetchWorkerDetails(List<String> workerIds) async {
+    _checkCacheExpiry();
     final List<UserModel> workers = [];
     final List<String> missingWorkerIds = [];
 
