@@ -8,6 +8,15 @@ import 'package:park_janana/core/constants/app_constants.dart';
 class WorkerService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, UserModel> _workerCache = {};
+  static const Duration _cacheTtl = Duration(minutes: 10);
+  DateTime _cacheTimestamp = DateTime.now();
+
+  void _checkCacheExpiry() {
+    if (DateTime.now().difference(_cacheTimestamp) > _cacheTtl) {
+      _workerCache.clear();
+      _cacheTimestamp = DateTime.now();
+    }
+  }
 
   Future<void> approveWorker(String shiftId, String workerId) async {
     try {
@@ -257,6 +266,7 @@ class WorkerService {
   }
 
   Future<UserModel?> getUserDetails(String userId) async {
+    _checkCacheExpiry();
     if (_workerCache.containsKey(userId)) {
       return _workerCache[userId]!;
     }
@@ -298,6 +308,7 @@ class WorkerService {
 
   Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
     if (userIds.isEmpty) return [];
+    _checkCacheExpiry();
 
     final List<UserModel> users = [];
     final List<String> missingIds = [];
