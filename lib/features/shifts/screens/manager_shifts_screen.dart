@@ -282,7 +282,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
       stream: _shiftService.getShiftsForWeek(_currentWeekStart),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           );
         }

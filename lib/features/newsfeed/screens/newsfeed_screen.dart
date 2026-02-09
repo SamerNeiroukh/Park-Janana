@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -392,7 +391,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           ),
           const SizedBox(width: 10),
           ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
+            shaderCallback: (bounds) => const LinearGradient(
               colors: [AppColors.primaryBlue, AppColors.deepBlue],
             ).createShader(bounds),
             child: const Text(

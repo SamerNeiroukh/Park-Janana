@@ -177,7 +177,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               ),
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'הוסף מדיה',
               style: TextStyle(
                 fontSize: 18,
@@ -257,7 +257,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -265,7 +265,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.greyMedium,
                     ),
@@ -352,9 +352,9 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   void _showSuccessSnackbar() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
+        content: const Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: const [
+          children: [
             Text(
               'הפוסט פורסם בהצלחה',
               style: TextStyle(fontWeight: FontWeight.w500),
@@ -982,10 +982,10 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                         ],
                       ],
                     )
-                  : Row(
+                  : const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       textDirection: TextDirection.rtl,
-                      children: const [
+                      children: [
                         Text(
                           'פרסם פוסט',
                           style: TextStyle(

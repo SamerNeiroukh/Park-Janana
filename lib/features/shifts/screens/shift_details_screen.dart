@@ -226,15 +226,15 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               textDirection: TextDirection.rtl,
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'השינויים נשמרו בהצלחה!',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ],

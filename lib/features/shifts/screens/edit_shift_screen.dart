@@ -285,15 +285,15 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               textDirection: TextDirection.rtl,
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'המשמרת עודכנה בהצלחה!',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600),
                     textAlign: TextAlign.right,
                   ),
                 ),

@@ -61,8 +61,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null)
+    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null) {
       return;
+    }
     setState(() => _isSubmitting = true);
 
     try {
