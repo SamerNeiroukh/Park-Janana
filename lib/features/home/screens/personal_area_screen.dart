@@ -81,10 +81,15 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
 
         await storageRef.putFile(_imageFile!);
+        final downloadUrl = await storageRef.getDownloadURL();
 
-        // Update Firestore with storage path
+        // Invalidate the cached download URL so the new one is fetched
+        ProfileImageProvider.invalidate(storageRef.fullPath);
+
+        // Update Firestore with both the storage path and the fresh download URL
         await _firestore.collection(AppConstants.usersCollection).doc(widget.uid).update({
           'profile_picture_path': storageRef.fullPath,
+          'profile_picture': downloadUrl,
         });
 
         // Refresh user data in provider to reflect the new profile picture

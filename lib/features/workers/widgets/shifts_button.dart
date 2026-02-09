@@ -13,12 +13,14 @@ class ShiftsButtonScreen extends StatefulWidget {
   final String uid;
   final String fullName;
   final String profilePicture; // legacy URL support
+  final String? profilePicturePath; // Firebase Storage path
 
   const ShiftsButtonScreen({
     super.key,
     required this.uid,
     required this.fullName,
     required this.profilePicture,
+    this.profilePicturePath,
   });
 
   @override
@@ -94,7 +96,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
           children: [
             FutureBuilder<ImageProvider>(
               future: ProfileImageProvider.resolve(
-                storagePath: 'profile_pictures/${widget.uid}/profile.jpg',
+                storagePath: widget.profilePicturePath,
                 fallbackUrl: widget.profilePicture,
               ),
               builder: (context, snapshot) {

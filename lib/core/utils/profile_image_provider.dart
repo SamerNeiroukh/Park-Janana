@@ -14,6 +14,12 @@ class ProfileImageProvider {
   /// Cache resolved Storage download URLs to avoid repeated API calls.
   static final Map<String, String> _urlCache = {};
 
+  /// Invalidate a cached download URL so the next resolve() fetches a fresh one.
+  /// Call this after uploading a new profile picture.
+  static void invalidate(String storagePath) {
+    _urlCache.remove(storagePath);
+  }
+
   /// Returns an ImageProvider that can be used in CircleAvatar / Image widgets.
   static Future<ImageProvider> resolve({
     String? storagePath,

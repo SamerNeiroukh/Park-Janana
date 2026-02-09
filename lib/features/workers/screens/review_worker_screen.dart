@@ -71,6 +71,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                                 uid: uid,
                                 fullName: fullName,
                                 profilePicture: data['profile_picture'] ?? '',
+                                profilePicturePath: data['profile_picture_path'],
                               ),
                             ),
                           );
