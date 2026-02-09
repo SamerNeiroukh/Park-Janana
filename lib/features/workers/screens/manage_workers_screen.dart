@@ -171,7 +171,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                       children: [
                         FutureBuilder<ImageProvider>(
                           future: ProfileImageProvider.resolve(
-                            storagePath: data['profile_picture_path'],
+                            storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
                             fallbackUrl: data['profile_picture'],
                           ),
                           builder: (context, snapshot) {
@@ -287,7 +287,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                       children: [
                         FutureBuilder<ImageProvider>(
                           future: ProfileImageProvider.resolve(
-                            storagePath: data['profile_picture_path'],
+                            storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
                             fallbackUrl: data['profile_picture'],
                           ),
                           builder: (context, snapshot) {

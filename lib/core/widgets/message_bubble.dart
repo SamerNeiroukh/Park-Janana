@@ -65,7 +65,8 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (userDoc.exists) {
       final userData = userDoc.data() as Map<String, dynamic>;
       senderName = userData['fullName'] ?? "מנהל";
-      profilePicturePath = userData['profile_picture_path'];
+      profilePicturePath = userData['profile_picture_path']
+          ?? 'profile_pictures/${widget.senderId}/profile.jpg';
       profilePictureUrl = userData['profile_picture'];
     }
     if (mounted) setState(() {});
