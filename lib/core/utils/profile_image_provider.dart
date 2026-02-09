@@ -11,16 +11,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 class ProfileImageProvider {
   static const String _defaultAsset = 'assets/images/default_profile.png';
 
+  /// Cache resolved Storage download URLs to avoid repeated API calls.
+  static final Map<String, String> _urlCache = {};
+
   /// Returns an ImageProvider that can be used in CircleAvatar / Image widgets.
   static Future<ImageProvider> resolve({
     String? storagePath,
     String? fallbackUrl,
   }) async {
     try {
-      // 1️⃣ Preferred: Firebase Storage path
+      // 1️⃣ Preferred: Firebase Storage path (with URL cache)
       if (storagePath != null && storagePath.isNotEmpty) {
+        final cachedUrl = _urlCache[storagePath];
+        if (cachedUrl != null) {
+          return CachedNetworkImageProvider(cachedUrl);
+        }
         final ref = FirebaseStorage.instance.ref(storagePath);
         final downloadUrl = await ref.getDownloadURL();
+        _urlCache[storagePath] = downloadUrl;
         return CachedNetworkImageProvider(downloadUrl);
       }
 

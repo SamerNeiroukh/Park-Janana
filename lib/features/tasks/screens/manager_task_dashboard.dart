@@ -103,12 +103,30 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                         );
                       }
 
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) =>
-                            _buildTaskCard(tasks[index]),
+                      // Batch-fetch all assigned workers once
+                      final allUserIds = tasks
+                          .expand((t) => t.assignedTo)
+                          .toSet()
+                          .toList();
+
+                      return FutureBuilder<List<UserModel>>(
+                        future: _workerService.getUsersByIds(allUserIds),
+                        builder: (context, usersSnapshot) {
+                          final usersMap = <String, UserModel>{};
+                          if (usersSnapshot.hasData) {
+                            for (final user in usersSnapshot.data!) {
+                              usersMap[user.uid] = user;
+                            }
+                          }
+
+                          return ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            itemCount: tasks.length,
+                            itemBuilder: (context, index) =>
+                                _buildTaskCard(tasks[index], usersMap),
+                          );
+                        },
                       );
                     },
                   ),
@@ -246,10 +264,17 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     );
   }
 
-  Widget _buildTaskCard(TaskModel task) {
+  Widget _buildTaskCard(TaskModel task, Map<String, UserModel> usersMap) {
     final DateTime date = task.dueDate.toDate();
     final String time = DateFormat('HH:mm').format(date);
     final String dateFormatted = DateFormat('dd/MM/yyyy').format(date);
+
+    // Resolve assigned workers from pre-fetched map
+    final assignedUsers = task.assignedTo
+        .where((id) => usersMap.containsKey(id))
+        .map((id) => usersMap[id]!)
+        .take(3)
+        .toList();
 
     return InkWell(
       onTap: () {
@@ -327,33 +352,24 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                FutureBuilder<List<UserModel>>(
-                  future: _workerService.getUsersByIds(task.assignedTo),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return Row(
-                      children: snapshot.data!.take(3).map((user) {
-                        return Container(
-                          margin: const EdgeInsets.only(left: 6),
-                          child: FutureBuilder<ImageProvider>(
-                            future: ProfileImageProvider.resolve(
-                              storagePath: user.profilePicturePath,
-                              fallbackUrl: user.profilePicture,
-                            ),
-                            builder: (context, imageSnapshot) {
-                              return CircleAvatar(
-                                radius: 16,
-                                backgroundImage: imageSnapshot.data,
-                              );
-                            },
-                          ),
-                        );
-                      }).toList(),
+                Row(
+                  children: assignedUsers.map((user) {
+                    return Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      child: FutureBuilder<ImageProvider>(
+                        future: ProfileImageProvider.resolve(
+                          storagePath: user.profilePicturePath,
+                          fallbackUrl: user.profilePicture,
+                        ),
+                        builder: (context, imageSnapshot) {
+                          return CircleAvatar(
+                            radius: 16,
+                            backgroundImage: imageSnapshot.data,
+                          );
+                        },
+                      ),
                     );
-                  },
+                  }).toList(),
                 ),
                 Text(
                   dateFormatted,

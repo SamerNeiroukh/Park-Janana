@@ -297,13 +297,38 @@ class WorkerService {
   }
 
   Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
+    if (userIds.isEmpty) return [];
+
     final List<UserModel> users = [];
-    for (String id in userIds) {
-      final doc = await _firestore.collection(AppConstants.usersCollection).doc(id).get();
-      if (doc.exists && doc.data() != null) {
-        users.add(UserModel.fromMap(doc.data()!));
+    final List<String> missingIds = [];
+
+    // Return cached users, collect missing IDs
+    for (final id in userIds) {
+      if (_workerCache.containsKey(id)) {
+        users.add(_workerCache[id]!);
+      } else {
+        missingIds.add(id);
       }
     }
+
+    // Batch-fetch missing users (whereIn supports up to 30)
+    for (var i = 0; i < missingIds.length; i += 30) {
+      final batch = missingIds.sublist(
+        i,
+        i + 30 > missingIds.length ? missingIds.length : i + 30,
+      );
+      final snapshot = await _firestore
+          .collection(AppConstants.usersCollection)
+          .where(FieldPath.documentId, whereIn: batch)
+          .get();
+
+      for (final doc in snapshot.docs) {
+        final user = UserModel.fromMap(doc.data());
+        _workerCache[user.uid] = user;
+        users.add(user);
+      }
+    }
+
     return users;
   }
 }
