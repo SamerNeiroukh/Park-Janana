@@ -42,6 +42,7 @@ class AuthService {
       final String uid = userCredential.user!.uid;
 
       // ✅ Upload default profile picture to Firebase Storage
+      final String storagePath = 'profile_pictures/$uid/profile.jpg';
       final String defaultProfilePictureUrl =
           await _uploadDefaultProfilePicture(uid);
 
@@ -53,8 +54,9 @@ class AuthService {
         'idNumber': idNumber,
         'phoneNumber': phoneNumber,
         'profile_picture': defaultProfilePictureUrl,
+        'profile_picture_path': storagePath,
         'role': 'worker',
-        'approved': false, // 🔥 This line is required
+        'approved': false,
       });
 
       // ✅ Cache user role
@@ -199,6 +201,7 @@ class AuthService {
           'idNumber': data['idNumber'] ?? '',
           'phoneNumber': data['phoneNumber'] ?? '',
           'profile_picture': profilePicture,
+          'profile_picture_path': data['profile_picture_path'] ?? '',
           'role': data['role'] ?? '',
         };
 
