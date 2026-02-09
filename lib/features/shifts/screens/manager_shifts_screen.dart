@@ -279,7 +279,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
 
   Widget _buildShiftList() {
     return StreamBuilder<List<ShiftModel>>(
-      stream: _shiftService.getShiftsStream(),
+      stream: _shiftService.getShiftsForWeek(_currentWeekStart),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -292,8 +292,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
         }
 
         final shifts = snapshot.data!.where((shift) {
-          final shiftDate = DateFormat('dd/MM/yyyy').parse(shift.date);
-          return DateUtils.isSameDay(shiftDate, _selectedDay);
+          return shift.date == DateFormat('dd/MM/yyyy').format(_selectedDay);
         }).toList();
 
         if (shifts.isEmpty) {

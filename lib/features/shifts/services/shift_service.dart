@@ -14,26 +14,27 @@ class ShiftService {
   final Map<String, UserModel> _workerCache = {};
 
   Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
-    final DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+    final dates = List.generate(
+      7,
+      (i) => DateFormat('dd/MM/yyyy').format(startOfWeek.add(Duration(days: i))),
+    );
 
     return _firestore
         .collection(AppConstants.shiftsCollection)
-        .where('date',
-            isGreaterThanOrEqualTo:
-                DateFormat('dd/MM/yyyy').format(startOfWeek))
-        .where('date',
-            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(endOfWeek))
+        .where('date', whereIn: dates)
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList());
   }
 
-  Stream<List<ShiftModel>> getShiftsStream() {
-    return _firebaseService.getShiftsStream().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return ShiftModel.fromMap(doc.id, doc.data() as Map<String, dynamic>);
-      }).toList();
-    });
+  /// Returns a real-time stream for a single shift document.
+  Stream<ShiftModel> getShiftStream(String shiftId) {
+    return _firestore
+        .collection(AppConstants.shiftsCollection)
+        .doc(shiftId)
+        .snapshots()
+        .where((doc) => doc.exists)
+        .map((doc) => ShiftModel.fromFirestore(doc));
   }
 
   Future<List<ShiftModel>> getShiftsByDate(DateTime date) async {
@@ -340,13 +341,14 @@ class ShiftService {
   }
 
   Future<List<ShiftModel>> getShiftsByWeek(DateTime weekStart) async {
-    final weekEnd = weekStart.add(const Duration(days: 6));
+    final dates = List.generate(
+      7,
+      (i) => DateFormat('dd/MM/yyyy').format(weekStart.add(Duration(days: i))),
+    );
+
     final querySnapshot = await FirebaseFirestore.instance
         .collection(AppConstants.shiftsCollection)
-        .where('date',
-            isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekStart))
-        .where('date',
-            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekEnd))
+        .where('date', whereIn: dates)
         .get();
 
     return querySnapshot.docs

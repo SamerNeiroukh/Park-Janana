@@ -450,18 +450,11 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         textDirection: TextDirection.rtl,
         child: Scaffold(
           backgroundColor: const Color(0xFFF8F9FB),
-          body: StreamBuilder<List<ShiftModel>>(
-            stream: widget.shiftService.getShiftsStream(),
+          body: StreamBuilder<ShiftModel>(
+            stream: widget.shiftService.getShiftStream(widget.shift.id),
+            initialData: widget.shift,
             builder: (context, snapshot) {
-              // Get the current shift data from stream (real-time updates)
-              ShiftModel currentShift = widget.shift;
-              if (snapshot.hasData) {
-                final updatedShift = snapshot.data!.firstWhere(
-                  (s) => s.id == widget.shift.id,
-                  orElse: () => widget.shift,
-                );
-                currentShift = updatedShift;
-              }
+              final ShiftModel currentShift = snapshot.data ?? widget.shift;
 
               final departmentColor =
                   _getDepartmentColor(currentShift.department);

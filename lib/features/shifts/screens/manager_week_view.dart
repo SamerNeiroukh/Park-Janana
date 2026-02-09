@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -40,7 +39,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
           _buildCreateShiftButton(),
           Expanded(
             child: StreamBuilder<List<ShiftModel>>(
-              stream: _shiftService.getShiftsStream(),
+              stream: _shiftService.getShiftsForWeek(_currentWeekStart),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -55,15 +54,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                   );
                 }
 
-                List<ShiftModel> shifts = snapshot.data!;
-                shifts = shifts.where((shift) {
-                  final DateTime shiftDate =
-                      DateFormat('dd/MM/yyyy').parse(shift.date);
-                  return shiftDate.isAfter(_currentWeekStart
-                          .subtract(const Duration(days: 1))) &&
-                      shiftDate.isBefore(
-                          _currentWeekStart.add(const Duration(days: 7)));
-                }).toList();
+                final List<ShiftModel> shifts = snapshot.data!;
 
                 final Map<String, List<ShiftModel>> weeklyShifts = {};
                 for (var shift in shifts) {

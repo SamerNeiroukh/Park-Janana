@@ -244,7 +244,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
   Widget _buildShiftList(User? currentUser) {
     return StreamBuilder<List<ShiftModel>>(
-      stream: _shiftService.getShiftsStream(),
+      stream: _shiftService.getShiftsForWeek(_currentWeekStart),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
