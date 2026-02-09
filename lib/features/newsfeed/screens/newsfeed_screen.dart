@@ -32,6 +32,10 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   bool _hasMorePosts = true;
   bool _isLoadingMore = false;
 
+  // Search
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   // Cache the stream to avoid recreating it on every build
   Stream<List<PostModel>>? _postsStream;
 
@@ -49,6 +53,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -342,6 +347,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                       child: UserHeader(),
                     ),
                     _buildHeader(),
+                    _buildSearchBar(),
                     Expanded(
                       child: _buildFeed(isManager, userId),
                     ),
@@ -363,6 +369,40 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               : null,
         );
       },
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.trim().toLowerCase();
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'חיפוש פוסט...',
+          prefixIcon: const Icon(Icons.search, color: AppColors.primaryBlue),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
     );
   }
 
@@ -430,13 +470,25 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           });
         }
 
-        final posts = snapshot.data ?? [];
+        final allPosts = snapshot.data ?? [];
 
         // Update pagination state
         if (snapshot.hasData) {
           _isLoadingMore = false;
-          _hasMorePosts = posts.length >= _postLimit;
+          _hasMorePosts = allPosts.length >= _postLimit;
         }
+
+        // Filter by search query
+        final posts = _searchQuery.isEmpty
+            ? allPosts
+            : allPosts.where((post) {
+                final title = post.title.toLowerCase();
+                final content = post.content.toLowerCase();
+                final author = post.authorName.toLowerCase();
+                return title.contains(_searchQuery) ||
+                    content.contains(_searchQuery) ||
+                    author.contains(_searchQuery);
+              }).toList();
 
         if (posts.isEmpty) {
           return _EmptyState(isManager: isManager);

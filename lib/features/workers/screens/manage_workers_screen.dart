@@ -8,6 +8,7 @@ import 'package:park_janana/features/workers/screens/approve_worker_screen.dart'
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ManageWorkersScreen extends StatefulWidget {
   const ManageWorkersScreen({super.key});
@@ -19,16 +20,24 @@ class ManageWorkersScreen extends StatefulWidget {
 class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.trim().toLowerCase();
+      });
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -48,6 +57,33 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
               Tab(text: "עובדים חדשים"),
               Tab(text: "עובדים פעילים"),
             ],
+          ),
+          const SizedBox(height: AppDimensions.spacingS),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'חיפוש עובד לפי שם...',
+                  prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () => _searchController.clear(),
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Expanded(
@@ -76,16 +112,29 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const ShimmerLoading(cardHeight: 70, cardBorderRadius: 16);
         }
 
-        if (snapshot.hasError ||
-            !snapshot.hasData ||
-            snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError || !snapshot.hasData) {
           return const Center(child: Text("אין עובדים שממתינים לאישור"));
         }
 
-        final newWorkers = snapshot.data!.docs;
+        final allWorkers = snapshot.data!.docs;
+        final newWorkers = _searchQuery.isEmpty
+            ? allWorkers
+            : allWorkers.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final name = (data['fullName'] ?? '').toString().toLowerCase();
+                return name.contains(_searchQuery);
+              }).toList();
+
+        if (newWorkers.isEmpty) {
+          return Center(
+            child: Text(_searchQuery.isEmpty
+                ? "אין עובדים שממתינים לאישור"
+                : "לא נמצאו תוצאות"),
+          );
+        }
 
         return ListView.builder(
           padding: AppDimensions.paddingAllM,
@@ -179,16 +228,29 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const ShimmerLoading(cardHeight: 70, cardBorderRadius: 16);
         }
 
-        if (snapshot.hasError ||
-            !snapshot.hasData ||
-            snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError || !snapshot.hasData) {
           return const Center(child: Text("אין עובדים פעילים במערכת"));
         }
 
-        final workers = snapshot.data!.docs;
+        final allWorkers = snapshot.data!.docs;
+        final workers = _searchQuery.isEmpty
+            ? allWorkers
+            : allWorkers.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final name = (data['fullName'] ?? '').toString().toLowerCase();
+                return name.contains(_searchQuery);
+              }).toList();
+
+        if (workers.isEmpty) {
+          return Center(
+            child: Text(_searchQuery.isEmpty
+                ? "אין עובדים פעילים במערכת"
+                : "לא נמצאו תוצאות"),
+          );
+        }
 
         return ListView.builder(
           padding: AppDimensions.paddingAllM,
