@@ -4,7 +4,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class UserCard extends StatelessWidget {
   final String userName;
@@ -165,17 +165,10 @@ class UserCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: FutureBuilder<ImageProvider>(
-                        future: ProfileImageProvider.resolve(
-                          storagePath: profilePicturePath,
-                          fallbackUrl: profilePictureUrl,
-                        ),
-                        builder: (context, snapshot) {
-                          return CircleAvatar(
-                            radius: 42,
-                            backgroundImage: snapshot.data,
-                          );
-                        },
+                      child: ProfileAvatar(
+                        storagePath: profilePicturePath,
+                        fallbackUrl: profilePictureUrl,
+                        radius: 42,
                       ),
                     ),
                   ),

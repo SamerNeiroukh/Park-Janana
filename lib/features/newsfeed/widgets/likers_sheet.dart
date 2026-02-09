@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class LikersSheet extends StatefulWidget {
   final List<String> likedByUserIds;
@@ -372,28 +372,11 @@ class _LikerCardState extends State<_LikerCard> {
           ),
         ],
       ),
-      child: FutureBuilder<ImageProvider>(
-        future: ProfileImageProvider.resolve(
-          storagePath: widget.user.profilePicturePath,
-          fallbackUrl: widget.user.profilePicture,
-        ),
-        builder: (context, snapshot) {
-          return CircleAvatar(
-            radius: 22,
-            backgroundColor: AppColors.greyLight,
-            backgroundImage: snapshot.data,
-            child: !snapshot.hasData
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primaryBlue.withOpacity(0.5),
-                    ),
-                  )
-                : null,
-          );
-        },
+      child: ProfileAvatar(
+        storagePath: widget.user.profilePicturePath,
+        fallbackUrl: widget.user.profilePicture,
+        radius: 22,
+        backgroundColor: AppColors.greyLight,
       ),
     );
   }

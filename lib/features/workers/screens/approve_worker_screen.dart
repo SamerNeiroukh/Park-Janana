@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
@@ -131,18 +131,11 @@ class ApproveWorkerScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: FutureBuilder<ImageProvider>(
-            future: ProfileImageProvider.resolve(
-              storagePath: storagePath,
-              fallbackUrl: fallbackUrl,
-            ),
-            builder: (context, snapshot) {
-              return CircleAvatar(
-                radius: AppDimensions.avatarM,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: snapshot.data,
-              );
-            },
+          child: ProfileAvatar(
+            storagePath: storagePath,
+            fallbackUrl: fallbackUrl,
+            radius: AppDimensions.avatarM,
+            backgroundColor: Colors.grey.shade300,
           ),
         ),
         const SizedBox(height: AppDimensions.spacingXL),
