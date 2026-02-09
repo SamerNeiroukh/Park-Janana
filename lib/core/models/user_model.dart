@@ -50,7 +50,10 @@ class UserModel {
       idNumber: map['idNumber'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       profilePicture: map['profile_picture'] ?? '',
-      profilePicturePath: map['profile_picture_path'] as String?,
+      profilePicturePath: (map['profile_picture_path'] as String?)
+          ?? (map['uid'] != null && (map['uid'] as String).isNotEmpty
+              ? 'profile_pictures/${map['uid']}/profile.jpg'
+              : null),
       role: map['role'] ?? 'worker',
       licensedDepartments: List<String>.from(map['licensedDepartments'] ?? []),
     );

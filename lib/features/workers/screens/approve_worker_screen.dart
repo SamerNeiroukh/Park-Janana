@@ -71,10 +71,8 @@ class ApproveWorkerScreen extends StatelessWidget {
     final String id = data['idNumber'] ?? '';
     final String fallbackPicture = data['profile_picture'] ?? '';
 
-    // ✅ SAFE access (this is the fix)
-    final String? profilePicturePath = data.containsKey('profile_picture_path')
-        ? data['profile_picture_path']
-        : null;
+    final String? profilePicturePath = data['profile_picture_path'] as String?
+        ?? (data['uid'] != null ? 'profile_pictures/${data['uid']}/profile.jpg' : null);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundCard,
