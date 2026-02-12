@@ -16,18 +16,13 @@ class WorkerShiftReport extends StatefulWidget {
   final String uid;
   final String fullName;
 
-  /// Legacy URL (fallback)
   final String profilePicture;
-
-  /// NEW: Firebase Storage path (preferred)
-  final String? profilePicturePath;
 
   const WorkerShiftReport({
     super.key,
     required this.uid,
     required this.fullName,
     required this.profilePicture,
-    this.profilePicturePath,
   });
 
   @override
@@ -223,8 +218,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                 child: Row(
                   children: [
                     ProfileAvatar(
-                      storagePath: widget.profilePicturePath,
-                      fallbackUrl: widget.profilePicture,
+                      imageUrl: widget.profilePicture,
                       radius: AppDimensions.iconXL,
                       backgroundColor: AppColors.greyLight,
                     ),

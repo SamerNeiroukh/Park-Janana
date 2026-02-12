@@ -1228,8 +1228,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   color: departmentColor.withOpacity(0.3), width: 2),
             ),
             child: ProfileAvatar(
-              storagePath: user.profilePicturePath,
-              fallbackUrl: user.profilePicture,
+              imageUrl: user.profilePicture,
               radius: 26,
               backgroundColor: departmentColor.withOpacity(0.1),
             ),

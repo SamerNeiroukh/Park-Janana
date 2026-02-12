@@ -7,6 +7,7 @@ import 'package:park_janana/features/home/widgets/user_card.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
 import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 import 'package:park_janana/features/shifts/screens/manager_shifts_screen.dart';
+import 'package:park_janana/features/shifts/screens/manager_weekly_schedule_screen.dart';
 import 'package:park_janana/features/shifts/screens/my_weekly_schedule_screen.dart';
 import 'package:park_janana/features/tasks/screens/worker_task_screen.dart';
 import 'package:park_janana/features/tasks/screens/manager_task_dashboard.dart';
@@ -75,7 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
             UserCard(
               userName: userData.fullName,
               profilePictureUrl: userData.profilePicture,
-              profilePicturePath: userData.profilePicturePath,
               currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
               daysWorked: (workStats['daysWorked'] as double).toInt(),
               hoursWorked: workStats['hoursWorked'] as double,
@@ -217,6 +217,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (role == 'manager') {
       buttons.addAll([
+        ActionButton(
+          title: 'סידור שבועי',
+          icon: Icons.calendar_view_week_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ManagerWeeklyScheduleScreen(),
+              ),
+            );
+          },
+        ),
         ActionButton(
           title: 'ניהול משמרות',
           icon: Icons.manage_history_rounded,

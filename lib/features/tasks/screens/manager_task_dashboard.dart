@@ -405,8 +405,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                     return Container(
                       margin: const EdgeInsets.only(left: 6),
                       child: ProfileAvatar(
-                        storagePath: user.profilePicturePath,
-                        fallbackUrl: user.profilePicture,
+                        imageUrl: user.profilePicture,
                         radius: 16,
                       ),
                     );

@@ -713,8 +713,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                   ),
                 ),
                 child: ProfileAvatar(
-                  storagePath: worker.profilePicturePath,
-                  fallbackUrl: worker.profilePicture,
+                  imageUrl: worker.profilePicture,
                   radius: 28,
                   backgroundColor: widget.departmentColor.withOpacity(0.1),
                 ),

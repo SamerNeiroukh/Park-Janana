@@ -1,66 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
-/// A reusable avatar widget that resolves profile images from Firebase Storage.
+/// A fast, synchronous avatar widget that displays profile pictures.
 ///
-/// Unlike using FutureBuilder directly, this widget:
-/// - Caches the resolved image in state (no re-resolve on parent rebuilds)
-/// - Shows the default profile image while loading (no gray circle)
-/// - Only re-resolves when [storagePath] or [fallbackUrl] actually change
-class ProfileAvatar extends StatefulWidget {
-  final String? storagePath;
-  final String? fallbackUrl;
+/// Uses [CachedNetworkImage] for automatic disk + memory caching.
+/// Shows a shimmer placeholder while loading, default avatar on error.
+/// No async calls — the download URL is passed directly from Firestore.
+class ProfileAvatar extends StatelessWidget {
+  /// Direct download URL (from Firestore `profile_picture` field).
+  final String? imageUrl;
+
   final double radius;
   final Color? backgroundColor;
 
   const ProfileAvatar({
     super.key,
-    this.storagePath,
-    this.fallbackUrl,
+    this.imageUrl,
     this.radius = 20,
     this.backgroundColor,
   });
 
-  @override
-  State<ProfileAvatar> createState() => _ProfileAvatarState();
-}
-
-class _ProfileAvatarState extends State<ProfileAvatar> {
-  ImageProvider _image = ProfileImageProvider.defaultImage;
-
-  @override
-  void initState() {
-    super.initState();
-    _resolveImage();
-  }
-
-  @override
-  void didUpdateWidget(ProfileAvatar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.storagePath != widget.storagePath ||
-        oldWidget.fallbackUrl != widget.fallbackUrl) {
-      _resolveImage();
-    }
-  }
-
-  Future<void> _resolveImage() async {
-    final image = await ProfileImageProvider.resolve(
-      storagePath: widget.storagePath,
-      fallbackUrl: widget.fallbackUrl,
-    );
-    if (mounted) {
-      setState(() {
-        _image = image;
-      });
-    }
-  }
+  static const String _defaultAsset = 'assets/images/default_profile.png';
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: widget.radius,
-      backgroundColor: widget.backgroundColor,
-      backgroundImage: _image,
+    final url = imageUrl;
+    final bgColor = backgroundColor ?? Colors.grey.shade200;
+
+    if (url == null || url.isEmpty || !url.startsWith('http')) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: bgColor,
+        backgroundImage: const AssetImage(_defaultAsset),
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: url,
+      imageBuilder: (context, imageProvider) => CircleAvatar(
+        radius: radius,
+        backgroundColor: bgColor,
+        backgroundImage: imageProvider,
+      ),
+      placeholder: (context, url) => _ShimmerCircle(
+        radius: radius,
+        backgroundColor: bgColor,
+      ),
+      errorWidget: (context, url, error) => CircleAvatar(
+        radius: radius,
+        backgroundColor: bgColor,
+        backgroundImage: const AssetImage(_defaultAsset),
+      ),
+      fadeInDuration: const Duration(milliseconds: 200),
+      fadeOutDuration: const Duration(milliseconds: 200),
+      memCacheWidth: (radius * 4).toInt(), // 2x for retina
+      memCacheHeight: (radius * 4).toInt(),
+    );
+  }
+}
+
+class _ShimmerCircle extends StatelessWidget {
+  final double radius;
+  final Color backgroundColor;
+
+  const _ShimmerCircle({required this.radius, required this.backgroundColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: CircleAvatar(
+        radius: radius,
+        backgroundColor: backgroundColor,
+      ),
     );
   }
 }

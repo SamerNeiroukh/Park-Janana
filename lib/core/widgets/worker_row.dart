@@ -29,8 +29,7 @@ class WorkerRow extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: ProfileAvatar(
-        storagePath: worker.profilePicturePath,
-        fallbackUrl: worker.profilePicture,
+        imageUrl: worker.profilePicture,
         radius: 25.0,
       ),
       title: Text(

@@ -373,8 +373,7 @@ class _LikerCardState extends State<_LikerCard> {
         ],
       ),
       child: ProfileAvatar(
-        storagePath: widget.user.profilePicturePath,
-        fallbackUrl: widget.user.profilePicture,
+        imageUrl: widget.user.profilePicture,
         radius: 22,
         backgroundColor: AppColors.greyLight,
       ),

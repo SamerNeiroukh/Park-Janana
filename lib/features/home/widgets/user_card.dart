@@ -9,11 +9,7 @@ import 'package:park_janana/core/widgets/profile_avatar.dart';
 class UserCard extends StatelessWidget {
   final String userName;
 
-  /// Legacy URL (will be phased out later)
   final String profilePictureUrl;
-
-  /// NEW: Firebase Storage path (preferred)
-  final String? profilePicturePath;
 
   final String currentDate;
   final int daysWorked;
@@ -27,7 +23,6 @@ class UserCard extends StatelessWidget {
     super.key,
     required this.userName,
     required this.profilePictureUrl,
-    this.profilePicturePath,
     required this.currentDate,
     required this.daysWorked,
     required this.hoursWorked,
@@ -166,8 +161,7 @@ class UserCard extends StatelessWidget {
                         ],
                       ),
                       child: ProfileAvatar(
-                        storagePath: profilePicturePath,
-                        fallbackUrl: profilePictureUrl,
+                        imageUrl: profilePictureUrl,
                         radius: 42,
                       ),
                     ),

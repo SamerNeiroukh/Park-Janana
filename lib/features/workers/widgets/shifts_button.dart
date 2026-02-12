@@ -12,15 +12,13 @@ import 'package:park_janana/core/widgets/profile_avatar.dart';
 class ShiftsButtonScreen extends StatefulWidget {
   final String uid;
   final String fullName;
-  final String profilePicture; // legacy URL support
-  final String? profilePicturePath; // Firebase Storage path
+  final String profilePicture;
 
   const ShiftsButtonScreen({
     super.key,
     required this.uid,
     required this.fullName,
     required this.profilePicture,
-    this.profilePicturePath,
   });
 
   @override
@@ -95,8 +93,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
         child: Row(
           children: [
             ProfileAvatar(
-              storagePath: widget.profilePicturePath,
-              fallbackUrl: widget.profilePicture,
+              imageUrl: widget.profilePicture,
               radius: AppDimensions.avatarS * 0.75,
               backgroundColor: AppColors.greyLight,
             ),
