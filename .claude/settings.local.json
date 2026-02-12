@@ -13,7 +13,10 @@
       "Bash(gh pr create --base main --head feature/newsfeed --title \"feat: add weekly schedule screen and RTL fixes\" --body \"$\\(cat <<''EOF''\n## Summary\n- Add new \"סידור עבודה\" \\(My Weekly Schedule\\) screen where workers can view their assigned shifts organized by day\n- Color-coded days: past \\(gray\\), today \\(blue\\), future \\(unique color per weekday\\)\n- Pull-to-refresh, animated transitions, and tap to view shift details\n- Fix RTL alignment issues in newsfeed and weekly schedule screens\n- Fix crash on worker profile email tap with IgnorePointer wrapper\n\n## Test plan\n- [ ] Navigate to weekly schedule from home screen\n- [ ] Verify shifts display correctly organized by day\n- [ ] Test week navigation arrows \\(left = next, right = previous\\)\n- [ ] Verify RTL alignment is correct throughout\n- [ ] Test worker profile screens don''t crash when tapping email\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\nEOF\n\\)\")",
       "Bash(git pull:*)",
       "Bash(git merge:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git status:*)",
+      "Bash(dart fix:*)",
+      "Bash(flutter build:*)"
     ]
   }
 }

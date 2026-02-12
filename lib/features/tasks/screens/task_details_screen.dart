@@ -212,8 +212,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                           ),
                           child: ListTile(
                             leading: ProfileAvatar(
-                              storagePath: user.profilePicturePath,
-                              fallbackUrl: user.profilePicture,
+                              imageUrl: user.profilePicture,
                             ),
                             title: Text(user.fullName),
                             trailing: _buildWorkerStatusBadge(workerStatus),

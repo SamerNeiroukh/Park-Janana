@@ -34,7 +34,6 @@ class _MessageBubbleState extends State<MessageBubble> {
   String? _currentUserRole;
 
   String senderName = "מנהל";
-  String? profilePicturePath;
   String? profilePictureUrl;
 
   @override
@@ -65,8 +64,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (userDoc.exists) {
       final userData = userDoc.data() as Map<String, dynamic>;
       senderName = userData['fullName'] ?? "מנהל";
-      profilePicturePath = userData['profile_picture_path']
-          ?? 'profile_pictures/${widget.senderId}/profile.jpg';
       profilePictureUrl = userData['profile_picture'];
     }
     if (mounted) setState(() {});
@@ -91,8 +88,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ProfileAvatar(
-              storagePath: profilePicturePath,
-              fallbackUrl: profilePictureUrl ?? AppConstants.defaultProfileImage,
+              imageUrl: profilePictureUrl,
               radius: 25.0,
             ),
             const SizedBox(width: 8),

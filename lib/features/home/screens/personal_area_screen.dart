@@ -78,14 +78,17 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     if (_imageFile != null && !_isUploading) {
       setState(() => _isUploading = true);
       try {
+        // Evict old cached image so the new one loads fresh
+        final oldUrl = context.read<UserProvider>().currentUser?.profilePicture;
+        if (oldUrl != null) {
+          await ProfileImageProvider.evict(oldUrl);
+        }
+
         final storageRef =
             _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
 
         await storageRef.putFile(_imageFile!);
         final downloadUrl = await storageRef.getDownloadURL();
-
-        // Invalidate the cached download URL so the new one is fetched
-        ProfileImageProvider.invalidate(storageRef.fullPath);
 
         // Update Firestore with both the storage path and the fresh download URL
         await _firestore.collection(AppConstants.usersCollection).doc(widget.uid).update({
@@ -93,9 +96,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           'profile_picture': downloadUrl,
         });
 
-        // Refresh user data in provider to reflect the new profile picture
+        // Refresh user data in provider so all screens update instantly
         if (mounted) {
-          await context.read<UserProvider>().getUserById(widget.uid);
+          await context.read<UserProvider>().refresh();
         }
 
         if (mounted) {
@@ -108,7 +111,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               backgroundColor: AppColors.success,
             ),
           );
-          setState(() {});
         }
       } catch (e) {
         if (mounted) {
@@ -253,8 +255,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 radius: 85,
                 backgroundColor: AppColors.accent,
                 child: ProfileAvatar(
-                  storagePath: userData.profilePicturePath,
-                  fallbackUrl: userData.profilePicture,
+                  imageUrl: userData.profilePicture,
                   radius: 80,
                 ),
               ),

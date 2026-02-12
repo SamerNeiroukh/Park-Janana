@@ -71,7 +71,6 @@ class ReviewWorkerScreen extends StatelessWidget {
                                 uid: uid,
                                 fullName: fullName,
                                 profilePicture: data['profile_picture'] ?? '',
-                                profilePicturePath: data['profile_picture_path'],
                               ),
                             ),
                           );
@@ -153,8 +152,7 @@ class ReviewWorkerScreen extends StatelessWidget {
             ],
           ),
           child: ProfileAvatar(
-            storagePath: data['profile_picture_path'] ?? 'profile_pictures/${data['uid']}/profile.jpg',
-            fallbackUrl: data['profile_picture'],
+            imageUrl: data['profile_picture'],
             radius: AppDimensions.avatarM,
             backgroundColor: Colors.grey.shade300,
           ),

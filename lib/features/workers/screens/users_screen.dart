@@ -170,8 +170,7 @@ class _UsersScreenState extends State<UsersScreen> {
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 10.0, vertical: 8.0),
                                 leading: ProfileAvatar(
-                                  storagePath: worker.profilePicturePath,
-                                  fallbackUrl: worker.profilePicture,
+                                  imageUrl: worker.profilePicture,
                                   radius: 30.0,
                                 ),
                                 title: Text(

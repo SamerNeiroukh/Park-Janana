@@ -69,10 +69,7 @@ class ApproveWorkerScreen extends StatelessWidget {
     final String email = data['email'] ?? '';
     final String phone = data['phoneNumber'] ?? '';
     final String id = data['idNumber'] ?? '';
-    final String fallbackPicture = data['profile_picture'] ?? '';
-
-    final String? profilePicturePath = data['profile_picture_path'] as String?
-        ?? (data['uid'] != null ? 'profile_pictures/${data['uid']}/profile.jpg' : null);
+    final String profilePictureUrl = data['profile_picture'] ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundCard,
@@ -90,8 +87,7 @@ class ApproveWorkerScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildProfileHeader(
-                      profilePicturePath,
-                      fallbackPicture,
+                      profilePictureUrl,
                       fullName,
                     ),
                     const SizedBox(height: AppDimensions.spacingXXXL),
@@ -114,8 +110,7 @@ class ApproveWorkerScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(
-    String? storagePath,
-    String fallbackUrl,
+    String imageUrl,
     String name,
   ) {
     return Column(
@@ -132,8 +127,7 @@ class ApproveWorkerScreen extends StatelessWidget {
             ],
           ),
           child: ProfileAvatar(
-            storagePath: storagePath,
-            fallbackUrl: fallbackUrl,
+            imageUrl: imageUrl,
             radius: AppDimensions.avatarM,
             backgroundColor: Colors.grey.shade300,
           ),

@@ -13,18 +13,13 @@ class TaskSummaryReport extends StatefulWidget {
   final String userId;
   final String userName;
 
-  /// Legacy URL (fallback)
   final String profileUrl;
-
-  /// NEW: Firebase Storage path (preferred)
-  final String? profilePicturePath;
 
   const TaskSummaryReport({
     super.key,
     required this.userId,
     required this.userName,
     required this.profileUrl,
-    this.profilePicturePath,
   });
 
   @override
@@ -105,8 +100,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                 child: Row(
                   children: [
                     ProfileAvatar(
-                      storagePath: widget.profilePicturePath,
-                      fallbackUrl: widget.profileUrl,
+                      imageUrl: widget.profileUrl,
                       radius: 28,
                       backgroundColor: Colors.grey.shade300,
                     ),
