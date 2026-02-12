@@ -5,13 +5,14 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_durations.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class ShiftsButtonScreen extends StatefulWidget {
   final String uid;
   final String fullName;
-  final String profilePicture; // legacy URL support
+  final String profilePicture;
 
   const ShiftsButtonScreen({
     super.key,
@@ -91,18 +92,10 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
         ),
         child: Row(
           children: [
-            FutureBuilder<ImageProvider>(
-              future: ProfileImageProvider.resolve(
-                storagePath: 'profile_pictures/${widget.uid}/profile.jpg',
-                fallbackUrl: widget.profilePicture,
-              ),
-              builder: (context, snapshot) {
-                return CircleAvatar(
-                  radius: AppDimensions.avatarS * 0.75,
-                  backgroundColor: AppColors.greyLight,
-                  backgroundImage: snapshot.data,
-                );
-              },
+            ProfileAvatar(
+              imageUrl: widget.profilePicture,
+              radius: AppDimensions.avatarS * 0.75,
+              backgroundColor: AppColors.greyLight,
             ),
             const SizedBox(width: AppDimensions.spacingXL),
             Expanded(
@@ -180,7 +173,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
   Widget _buildShiftList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('shifts')
+          .collection(AppConstants.shiftsCollection)
           .where('assignedWorkers', arrayContains: widget.uid)
           .orderBy('date', descending: true)
           .snapshots(),

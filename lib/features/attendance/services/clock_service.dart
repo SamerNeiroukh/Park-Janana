@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/attendance_model.dart';
 
 class ClockService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String collectionName = 'attendance_logs';
+  final String collectionName = AppConstants.attendanceCollection;
 
   String _getDocId(String userId, DateTime date) =>
       '${userId}_${date.year}_${date.month.toString().padLeft(2, '0')}';
@@ -73,6 +74,7 @@ class ClockService {
       });
     } catch (e) {
       debugPrint('Error clocking out: $e');
+      rethrow;
     }
   }
 

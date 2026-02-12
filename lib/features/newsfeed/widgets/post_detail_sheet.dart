@@ -1,10 +1,10 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import 'video_player_widget.dart';
@@ -55,7 +55,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
   void initState() {
     super.initState();
     _postStream = FirebaseFirestore.instance
-        .collection('posts')
+        .collection(AppConstants.postsCollection)
         .doc(widget.post.id)
         .snapshots()
         .map((doc) => doc.exists ? PostModel.fromFirestore(doc) : null);
@@ -171,7 +171,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     HapticFeedback.mediumImpact();
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => _DeleteConfirmDialog(
+      builder: (_) => const _DeleteConfirmDialog(
         title: 'מחיקת תגובה',
         message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
       ),
@@ -673,7 +673,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               fit: BoxFit.contain,
             )
           else
-            Center(
+            const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -682,7 +682,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                     color: Colors.white54,
                     size: 48,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'הקש לצפייה בסרטון',
                     style: TextStyle(
@@ -806,9 +806,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
+          const Text(
             'תגובות',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,

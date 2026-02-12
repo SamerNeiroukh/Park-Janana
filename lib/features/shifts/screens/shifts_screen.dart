@@ -9,6 +9,7 @@ import 'package:park_janana/features/shifts/widgets/worker_shift_card.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
+import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ShiftsScreen extends StatefulWidget {
   const ShiftsScreen({super.key});
@@ -244,12 +245,10 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
   Widget _buildShiftList(User? currentUser) {
     return StreamBuilder<List<ShiftModel>>(
-      stream: _shiftService.getShiftsStream(),
+      stream: _shiftService.getShiftsForWeek(_currentWeekStart),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return const ShimmerLoading(cardHeight: 100, cardBorderRadius: 24);
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {

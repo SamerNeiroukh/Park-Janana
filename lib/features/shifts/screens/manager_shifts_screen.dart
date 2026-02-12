@@ -8,6 +8,7 @@ import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'create_shift_screen.dart';
 import 'shift_details_screen.dart';
+import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ManagerShiftsScreen extends StatefulWidget {
   const ManagerShiftsScreen({super.key});
@@ -279,12 +280,10 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
 
   Widget _buildShiftList() {
     return StreamBuilder<List<ShiftModel>>(
-      stream: _shiftService.getShiftsStream(),
+      stream: _shiftService.getShiftsForWeek(_currentWeekStart),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return const ShimmerLoading(cardHeight: 130, cardBorderRadius: 24);
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -292,8 +291,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
         }
 
         final shifts = snapshot.data!.where((shift) {
-          final shiftDate = DateFormat('dd/MM/yyyy').parse(shift.date);
-          return DateUtils.isSameDay(shiftDate, _selectedDay);
+          return shift.date == DateFormat('dd/MM/yyyy').format(_selectedDay);
         }).toList();
 
         if (shifts.isEmpty) {

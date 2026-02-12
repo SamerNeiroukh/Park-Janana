@@ -12,8 +12,9 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
-import 'package:intl/intl.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ManagerTaskDashboard extends StatefulWidget {
   const ManagerTaskDashboard({super.key});
@@ -28,6 +29,8 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
 
   String selectedStatus = 'all';
   DateTime selectedDate = DateTime.now();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   bool _isNavigating = false; // ✅ prevent multiple FAB presses
 
@@ -53,17 +56,16 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
           ),
           _buildDateNavigation(),
           _buildFilterButtons(),
+          _buildSearchBar(),
           Expanded(
             child: currentUid == null
                 ? const Center(child: Text("שגיאה בזיהוי המשתמש."))
                 : StreamBuilder<List<TaskModel>>(
                     stream: _taskService.getTasksCreatedBy(currentUid),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
+                      if (snapshot.connectionState == ConnectionState.waiting ||
+                          !snapshot.hasData) {
+                        return const ShimmerLoading(cardHeight: 140, cardBorderRadius: 18);
                       }
 
                       List<TaskModel> tasks = snapshot.data!;
@@ -80,6 +82,15 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       if (selectedStatus != 'all') {
                         tasks = tasks
                             .where((t) => t.status == selectedStatus)
+                            .toList();
+                      }
+
+                      // Filter by search query
+                      if (_searchQuery.isNotEmpty) {
+                        tasks = tasks
+                            .where((t) =>
+                                t.title.toLowerCase().contains(_searchQuery) ||
+                                t.description.toLowerCase().contains(_searchQuery))
                             .toList();
                       }
 
@@ -103,12 +114,30 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                         );
                       }
 
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) =>
-                            _buildTaskCard(tasks[index]),
+                      // Batch-fetch all assigned workers once
+                      final allUserIds = tasks
+                          .expand((t) => t.assignedTo)
+                          .toSet()
+                          .toList();
+
+                      return FutureBuilder<List<UserModel>>(
+                        future: _workerService.getUsersByIds(allUserIds),
+                        builder: (context, usersSnapshot) {
+                          final usersMap = <String, UserModel>{};
+                          if (usersSnapshot.hasData) {
+                            for (final user in usersSnapshot.data!) {
+                              usersMap[user.uid] = user;
+                            }
+                          }
+
+                          return ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            itemCount: tasks.length,
+                            itemBuilder: (context, index) =>
+                                _buildTaskCard(tasks[index], usersMap),
+                          );
+                        },
                       );
                     },
                   ),
@@ -203,6 +232,43 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     }
   }
 
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value.trim().toLowerCase();
+            });
+          },
+          decoration: InputDecoration(
+            hintText: 'חיפוש משימה לפי שם...',
+            prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, size: 20),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterButtons() {
     final List<Map<String, dynamic>> buttonData = [
       {'label': 'הכל', 'value': 'all', 'color': Colors.grey},
@@ -246,10 +312,17 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     );
   }
 
-  Widget _buildTaskCard(TaskModel task) {
+  Widget _buildTaskCard(TaskModel task, Map<String, UserModel> usersMap) {
     final DateTime date = task.dueDate.toDate();
     final String time = DateFormat('HH:mm').format(date);
     final String dateFormatted = DateFormat('dd/MM/yyyy').format(date);
+
+    // Resolve assigned workers from pre-fetched map
+    final assignedUsers = task.assignedTo
+        .where((id) => usersMap.containsKey(id))
+        .map((id) => usersMap[id]!)
+        .take(3)
+        .toList();
 
     return InkWell(
       onTap: () {
@@ -327,33 +400,16 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                FutureBuilder<List<UserModel>>(
-                  future: _workerService.getUsersByIds(task.assignedTo),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return Row(
-                      children: snapshot.data!.take(3).map((user) {
-                        return Container(
-                          margin: const EdgeInsets.only(left: 6),
-                          child: FutureBuilder<ImageProvider>(
-                            future: ProfileImageProvider.resolve(
-                              storagePath: user.profilePicturePath,
-                              fallbackUrl: user.profilePicture,
-                            ),
-                            builder: (context, imageSnapshot) {
-                              return CircleAvatar(
-                                radius: 16,
-                                backgroundImage: imageSnapshot.data,
-                              );
-                            },
-                          ),
-                        );
-                      }).toList(),
+                Row(
+                  children: assignedUsers.map((user) {
+                    return Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      child: ProfileAvatar(
+                        imageUrl: user.profilePicture,
+                        radius: 16,
+                      ),
                     );
-                  },
+                  }).toList(),
                 ),
                 Text(
                   dateFormatted,

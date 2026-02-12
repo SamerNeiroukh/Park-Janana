@@ -4,7 +4,7 @@ import '../services/firebase_service.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class MessageBubble extends StatefulWidget {
   final String message;
@@ -34,7 +34,6 @@ class _MessageBubbleState extends State<MessageBubble> {
   String? _currentUserRole;
 
   String senderName = "מנהל";
-  String? profilePicturePath;
   String? profilePictureUrl;
 
   @override
@@ -50,7 +49,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (user != null) {
       _currentUserId = user.uid;
       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(user.uid)
           .get();
       if (userDoc.exists) {
@@ -65,7 +64,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     if (userDoc.exists) {
       final userData = userDoc.data() as Map<String, dynamic>;
       senderName = userData['fullName'] ?? "מנהל";
-      profilePicturePath = userData['profile_picture_path'];
       profilePictureUrl = userData['profile_picture'];
     }
     if (mounted) setState(() {});
@@ -89,18 +87,9 @@ class _MessageBubbleState extends State<MessageBubble> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FutureBuilder<ImageProvider>(
-              future: ProfileImageProvider.resolve(
-                storagePath: profilePicturePath,
-                fallbackUrl:
-                    profilePictureUrl ?? AppConstants.defaultProfileImage,
-              ),
-              builder: (context, snapshot) {
-                return CircleAvatar(
-                  radius: 25.0,
-                  backgroundImage: snapshot.data,
-                );
-              },
+            ProfileAvatar(
+              imageUrl: profilePictureUrl,
+              radius: 25.0,
             ),
             const SizedBox(width: 8),
             Expanded(

@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class UserSummaryCard extends StatelessWidget {
   final String userName;
 
-  /// Legacy URL (fallback)
   final String profileUrl;
-
-  /// NEW: Firebase Storage path (preferred)
-  final String? profilePicturePath;
-
   final int daysWorked;
   final double totalHours;
   final String month;
@@ -20,7 +15,6 @@ class UserSummaryCard extends StatelessWidget {
     super.key,
     required this.userName,
     required this.profileUrl,
-    this.profilePicturePath,
     required this.daysWorked,
     required this.totalHours,
     required this.month,
@@ -46,18 +40,10 @@ class UserSummaryCard extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
             child: Row(
               children: [
-                FutureBuilder<ImageProvider>(
-                  future: ProfileImageProvider.resolve(
-                    storagePath: profilePicturePath,
-                    fallbackUrl: profileUrl,
-                  ),
-                  builder: (context, snapshot) {
-                    return CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage: snapshot.data,
-                    );
-                  },
+                ProfileAvatar(
+                  imageUrl: profileUrl,
+                  radius: 28,
+                  backgroundColor: Colors.grey.shade300,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -12,7 +13,7 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Future<void> _approveWorker(BuildContext context) async {
     final String uid = userData['uid'];
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+    await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).update({
       'approved': true,
     });
 
@@ -24,7 +25,7 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Future<void> _rejectWorker(BuildContext context) async {
     final String uid = userData['uid'];
-    await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+    await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -68,12 +69,7 @@ class ApproveWorkerScreen extends StatelessWidget {
     final String email = data['email'] ?? '';
     final String phone = data['phoneNumber'] ?? '';
     final String id = data['idNumber'] ?? '';
-    final String fallbackPicture = data['profile_picture'] ?? '';
-
-    // ✅ SAFE access (this is the fix)
-    final String? profilePicturePath = data.containsKey('profile_picture_path')
-        ? data['profile_picture_path']
-        : null;
+    final String profilePictureUrl = data['profile_picture'] ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundCard,
@@ -91,8 +87,7 @@ class ApproveWorkerScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildProfileHeader(
-                      profilePicturePath,
-                      fallbackPicture,
+                      profilePictureUrl,
                       fullName,
                     ),
                     const SizedBox(height: AppDimensions.spacingXXXL),
@@ -115,8 +110,7 @@ class ApproveWorkerScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(
-    String? storagePath,
-    String fallbackUrl,
+    String imageUrl,
     String name,
   ) {
     return Column(
@@ -132,18 +126,10 @@ class ApproveWorkerScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: FutureBuilder<ImageProvider>(
-            future: ProfileImageProvider.resolve(
-              storagePath: storagePath,
-              fallbackUrl: fallbackUrl,
-            ),
-            builder: (context, snapshot) {
-              return CircleAvatar(
-                radius: AppDimensions.avatarM,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: snapshot.data,
-              );
-            },
+          child: ProfileAvatar(
+            imageUrl: imageUrl,
+            radius: AppDimensions.avatarM,
+            backgroundColor: Colors.grey.shade300,
           ),
         ),
         const SizedBox(height: AppDimensions.spacingXL),

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +26,16 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   final ScrollController _scrollController = ScrollController();
   bool _showFab = true;
 
+  // Pagination
+  static const int _pageSize = 10;
+  int _postLimit = _pageSize;
+  bool _hasMorePosts = true;
+  bool _isLoadingMore = false;
+
+  // Search
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   // Cache the stream to avoid recreating it on every build
   Stream<List<PostModel>>? _postsStream;
 
@@ -38,12 +47,13 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   void _initStream() {
-    _postsStream ??= _newsfeedService.getPostsStream();
+    _postsStream ??= _newsfeedService.getPostsStream(limit: _postLimit);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -52,6 +62,22 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     if (showFab != _showFab) {
       setState(() => _showFab = showFab);
     }
+
+    // Load more posts when near bottom
+    if (!_isLoadingMore &&
+        _hasMorePosts &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+      _loadMorePosts();
+    }
+  }
+
+  void _loadMorePosts() {
+    _isLoadingMore = true;
+    setState(() {
+      _postLimit += _pageSize;
+      _postsStream = _newsfeedService.getPostsStream(limit: _postLimit);
+    });
   }
 
   bool _isManager(String? role) {
@@ -74,7 +100,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         authorId: authProvider.uid ?? '',
         authorName: currentUser?.fullName ?? 'משתמש',
         authorRole: authProvider.userRole ?? 'worker',
-        authorProfilePicture: currentUser?.profilePicturePath ?? currentUser?.profilePicture ?? '',
+        authorProfilePicture: currentUser?.profilePicture ?? '',
       ),
       transitionBuilder: (context, anim1, anim2, child) {
         return SlideTransition(
@@ -106,7 +132,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         post: post,
         currentUserId: authProvider.uid ?? '',
         currentUserName: currentUser?.fullName ?? 'משתמש',
-        currentUserProfilePicture: currentUser?.profilePicturePath ?? currentUser?.profilePicture ?? '',
+        currentUserProfilePicture: currentUser?.profilePicture ?? '',
         isManager: isManager,
         onLike: () => _handleLike(post, userId),
         onDelete: () => _handleDelete(post),
@@ -321,6 +347,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                       child: UserHeader(),
                     ),
                     _buildHeader(),
+                    _buildSearchBar(),
                     Expanded(
                       child: _buildFeed(isManager, userId),
                     ),
@@ -342,6 +369,40 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               : null,
         );
       },
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.trim().toLowerCase();
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'חיפוש פוסט...',
+          prefixIcon: const Icon(Icons.search, color: AppColors.primaryBlue),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
     );
   }
 
@@ -370,7 +431,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           ),
           const SizedBox(width: 10),
           ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
+            shaderCallback: (bounds) => const LinearGradient(
               colors: [AppColors.primaryBlue, AppColors.deepBlue],
             ).createShader(bounds),
             child: const Text(
@@ -401,13 +462,33 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           debugPrint('Newsfeed error: ${snapshot.error}');
           return _ErrorState(onRetry: () {
             setState(() {
+              _postLimit = _pageSize;
+              _hasMorePosts = true;
               _postsStream = null;
               _initStream();
             });
           });
         }
 
-        final posts = snapshot.data ?? [];
+        final allPosts = snapshot.data ?? [];
+
+        // Update pagination state
+        if (snapshot.hasData) {
+          _isLoadingMore = false;
+          _hasMorePosts = allPosts.length >= _postLimit;
+        }
+
+        // Filter by search query
+        final posts = _searchQuery.isEmpty
+            ? allPosts
+            : allPosts.where((post) {
+                final title = post.title.toLowerCase();
+                final content = post.content.toLowerCase();
+                final author = post.authorName.toLowerCase();
+                return title.contains(_searchQuery) ||
+                    content.contains(_searchQuery) ||
+                    author.contains(_searchQuery);
+              }).toList();
 
         if (posts.isEmpty) {
           return _EmptyState(isManager: isManager);
@@ -416,8 +497,9 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         return RefreshIndicator(
           onRefresh: () async {
             HapticFeedback.mediumImpact();
-            // Force recreate stream to get fresh data
             setState(() {
+              _postLimit = _pageSize;
+              _hasMorePosts = true;
               _postsStream = null;
               _initStream();
             });
@@ -431,8 +513,19 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
             ),
-            itemCount: posts.length,
+            itemCount: posts.length + (_hasMorePosts ? 1 : 0),
             itemBuilder: (context, index) {
+              if (index >= posts.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                );
+              }
+
               final post = posts[index];
               return PostCard(
                 key: ValueKey(post.id),

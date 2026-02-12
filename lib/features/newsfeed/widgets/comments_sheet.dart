@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 
@@ -47,7 +48,7 @@ class _CommentsSheetState extends State<CommentsSheet>
 
     // Create a stream to listen for real-time updates
     _postStream = FirebaseFirestore.instance
-        .collection('posts')
+        .collection(AppConstants.postsCollection)
         .doc(widget.post.id)
         .snapshots()
         .map((doc) => doc.exists ? PostModel.fromFirestore(doc) : null);

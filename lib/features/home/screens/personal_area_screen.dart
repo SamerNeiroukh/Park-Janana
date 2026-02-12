@@ -13,6 +13,8 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class PersonalAreaScreen extends StatefulWidget {
   final String uid;
@@ -76,19 +78,27 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
     if (_imageFile != null && !_isUploading) {
       setState(() => _isUploading = true);
       try {
+        // Evict old cached image so the new one loads fresh
+        final oldUrl = context.read<UserProvider>().currentUser?.profilePicture;
+        if (oldUrl != null) {
+          await ProfileImageProvider.evict(oldUrl);
+        }
+
         final storageRef =
             _storage.ref().child('profile_pictures/${widget.uid}/profile.jpg');
 
         await storageRef.putFile(_imageFile!);
+        final downloadUrl = await storageRef.getDownloadURL();
 
-        // Update Firestore with storage path
-        await _firestore.collection('users').doc(widget.uid).update({
+        // Update Firestore with both the storage path and the fresh download URL
+        await _firestore.collection(AppConstants.usersCollection).doc(widget.uid).update({
           'profile_picture_path': storageRef.fullPath,
+          'profile_picture': downloadUrl,
         });
 
-        // Refresh user data in provider to reflect the new profile picture
+        // Refresh user data in provider so all screens update instantly
         if (mounted) {
-          await context.read<UserProvider>().getUserById(widget.uid);
+          await context.read<UserProvider>().refresh();
         }
 
         if (mounted) {
@@ -101,7 +111,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               backgroundColor: AppColors.success,
             ),
           );
-          setState(() {});
         }
       } catch (e) {
         if (mounted) {
@@ -242,21 +251,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              FutureBuilder<ImageProvider>(
-                future: ProfileImageProvider.resolve(
-                  storagePath: userData.profilePicturePath,
-                  fallbackUrl: userData.profilePicture,
+              CircleAvatar(
+                radius: 85,
+                backgroundColor: AppColors.accent,
+                child: ProfileAvatar(
+                  imageUrl: userData.profilePicture,
+                  radius: 80,
                 ),
-                builder: (context, imageSnapshot) {
-                  return CircleAvatar(
-                    radius: 85,
-                    backgroundColor: AppColors.accent,
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundImage: imageSnapshot.data,
-                    ),
-                  );
-                },
               ),
               Positioned(
                 right: 5,

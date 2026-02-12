@@ -10,24 +10,19 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/services/firebase_service.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class WorkerShiftReport extends StatefulWidget {
   final String uid;
   final String fullName;
 
-  /// Legacy URL (fallback)
   final String profilePicture;
-
-  /// NEW: Firebase Storage path (preferred)
-  final String? profilePicturePath;
 
   const WorkerShiftReport({
     super.key,
     required this.uid,
     required this.fullName,
     required this.profilePicture,
-    this.profilePicturePath,
   });
 
   @override
@@ -222,18 +217,10 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                     horizontal: AppDimensions.paddingM, vertical: AppDimensions.paddingML),
                 child: Row(
                   children: [
-                    FutureBuilder<ImageProvider>(
-                      future: ProfileImageProvider.resolve(
-                        storagePath: widget.profilePicturePath,
-                        fallbackUrl: widget.profilePicture,
-                      ),
-                      builder: (context, snapshot) {
-                        return CircleAvatar(
-                          radius: AppDimensions.iconXL,
-                          backgroundColor: AppColors.greyLight,
-                          backgroundImage: snapshot.data,
-                        );
-                      },
+                    ProfileAvatar(
+                      imageUrl: widget.profilePicture,
+                      radius: AppDimensions.iconXL,
+                      backgroundColor: AppColors.greyLight,
                     ),
                     const SizedBox(width: AppDimensions.spacingL),
                     Expanded(

@@ -12,7 +12,7 @@ import 'package:park_janana/features/tasks/widgets/task_comments_section.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -61,8 +61,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 
   Future<void> _addComment() async {
-    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null)
+    if (_commentController.text.isEmpty || _isSubmitting || _currentUid == null) {
       return;
+    }
     setState(() => _isSubmitting = true);
 
     try {
@@ -210,16 +211,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             borderRadius: AppDimensions.borderRadiusL,
                           ),
                           child: ListTile(
-                            leading: FutureBuilder<ImageProvider>(
-                              future: ProfileImageProvider.resolve(
-                                storagePath: user.profilePicturePath,
-                                fallbackUrl: user.profilePicture,
-                              ),
-                              builder: (context, snapshot) {
-                                return CircleAvatar(
-                                  backgroundImage: snapshot.data,
-                                );
-                              },
+                            leading: ProfileAvatar(
+                              imageUrl: user.profilePicture,
                             ),
                             title: Text(user.fullName),
                             trailing: _buildWorkerStatusBadge(workerStatus),

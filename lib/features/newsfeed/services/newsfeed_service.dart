@@ -5,12 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/post_model.dart';
 
 class NewsfeedService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  static const String _collectionName = 'posts';
+  static const String _collectionName = AppConstants.postsCollection;
 
   CollectionReference<Map<String, dynamic>> get _postsRef =>
       _firestore.collection(_collectionName);
@@ -19,21 +20,21 @@ class NewsfeedService {
   // Streams
   // ===============================
 
-  Stream<List<PostModel>> getPostsStream() {
-    return _postsRef
+  Stream<List<PostModel>> getPostsStream({int? limit}) {
+    Query<Map<String, dynamic>> query = _postsRef
         .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(_mapSnapshotToPosts);
+        .orderBy('createdAt', descending: true);
+    if (limit != null) query = query.limit(limit);
+    return query.snapshots().map(_mapSnapshotToPosts);
   }
 
-  Stream<List<PostModel>> getPostsByCategory(String category) {
-    return _postsRef
+  Stream<List<PostModel>> getPostsByCategory(String category, {int? limit}) {
+    Query<Map<String, dynamic>> query = _postsRef
         .where('category', isEqualTo: category)
         .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(_mapSnapshotToPosts);
+        .orderBy('createdAt', descending: true);
+    if (limit != null) query = query.limit(limit);
+    return query.snapshots().map(_mapSnapshotToPosts);
   }
 
   // ===============================
@@ -292,7 +293,9 @@ class NewsfeedService {
       for (final item in result.items) {
         await item.delete();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Error deleting media for post $postId: $e');
+    }
   }
 
   // ===============================

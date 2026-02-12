@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart'; // ✅ NEW
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class UsersScreen extends StatefulWidget {
   final String shiftId;
@@ -169,17 +169,9 @@ class _UsersScreenState extends State<UsersScreen> {
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 10.0, vertical: 8.0),
-                                leading: FutureBuilder<ImageProvider>(
-                                  future: ProfileImageProvider.resolve(
-                                    storagePath: worker.profilePicturePath,
-                                    fallbackUrl: worker.profilePicture,
-                                  ),
-                                  builder: (context, snapshot) {
-                                    return CircleAvatar(
-                                      radius: 30.0,
-                                      backgroundImage: snapshot.data,
-                                    );
-                                  },
+                                leading: ProfileAvatar(
+                                  imageUrl: worker.profilePicture,
+                                  radius: 30.0,
                                 ),
                                 title: Text(
                                   worker.fullName,

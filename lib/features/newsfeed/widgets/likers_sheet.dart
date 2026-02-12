@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class LikersSheet extends StatefulWidget {
   final List<String> likedByUserIds;
@@ -54,7 +54,7 @@ class _LikersSheetState extends State<LikersSheet>
       for (var i = 0; i < widget.likedByUserIds.length; i += 10) {
         final batch = widget.likedByUserIds.skip(i).take(10).toList();
         final snapshot = await FirebaseFirestore.instance
-            .collection('users')
+            .collection(AppConstants.usersCollection)
             .where(FieldPath.documentId, whereIn: batch)
             .get();
 
@@ -297,47 +297,6 @@ class _LikerCard extends StatefulWidget {
 }
 
 class _LikerCardState extends State<_LikerCard> {
-  String? _resolvedProfileUrl;
-  bool _isLoadingPic = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _resolveProfilePicture();
-  }
-
-  Future<void> _resolveProfilePicture() async {
-    final picPath = widget.user.profilePicturePath ?? widget.user.profilePicture;
-
-    if (picPath.isEmpty) {
-      setState(() => _isLoadingPic = false);
-      return;
-    }
-
-    if (picPath.startsWith('http')) {
-      setState(() {
-        _resolvedProfileUrl = picPath;
-        _isLoadingPic = false;
-      });
-      return;
-    }
-
-    try {
-      final ref = FirebaseStorage.instance.ref(picPath);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoadingPic = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error resolving profile picture: $e');
-      if (mounted) {
-        setState(() => _isLoadingPic = false);
-      }
-    }
-  }
 
   String _getRoleDisplayName(String role) {
     switch (role.toLowerCase()) {
@@ -413,33 +372,10 @@ class _LikerCardState extends State<_LikerCard> {
           ),
         ],
       ),
-      child: CircleAvatar(
+      child: ProfileAvatar(
+        imageUrl: widget.user.profilePicture,
         radius: 22,
         backgroundColor: AppColors.greyLight,
-        backgroundImage: _resolvedProfileUrl != null
-            ? CachedNetworkImageProvider(_resolvedProfileUrl!)
-            : null,
-        child: _isLoadingPic
-            ? SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
-                ),
-              )
-            : (_resolvedProfileUrl == null
-                ? Text(
-                    widget.user.fullName.isNotEmpty
-                        ? widget.user.fullName[0].toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryBlue,
-                    ),
-                  )
-                : null),
       ),
     );
   }
