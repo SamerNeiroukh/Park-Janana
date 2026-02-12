@@ -269,8 +269,8 @@ class _PostCardState extends State<PostCard>
                                       ),
                                     ),
                                     if (isOverflowing)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8),
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 8),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
@@ -280,7 +280,7 @@ class _PostCardState extends State<PostCard>
                                               size: 12,
                                               color: AppColors.primaryBlue,
                                             ),
-                                            const SizedBox(width: 4),
+                                            SizedBox(width: 4),
                                             Text(
                                               'קרא עוד',
                                               style: TextStyle(
@@ -343,10 +343,10 @@ class _PostCardState extends State<PostCard>
               color: AppColors.deepOrange.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               textDirection: TextDirection.rtl,
-              children: const [
+              children: [
                 Icon(
                   Icons.push_pin_rounded,
                   size: 14,
@@ -481,7 +481,7 @@ class _PostCardState extends State<PostCard>
         borderRadius: BorderRadius.circular(10),
       ),
       child: PopupMenuButton<String>(
-        icon: Icon(
+        icon: const Icon(
           Icons.more_horiz_rounded,
           color: AppColors.greyMedium,
           size: 20,
@@ -515,15 +515,15 @@ class _PostCardState extends State<PostCard>
                 ],
               ),
             ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: 'delete',
             child: Row(
               textDirection: TextDirection.rtl,
               children: [
-                const Icon(Icons.delete_outline_rounded,
+                Icon(Icons.delete_outline_rounded,
                     size: 18, color: Colors.red),
-                const SizedBox(width: 10),
-                const Text(
+                SizedBox(width: 10),
+                Text(
                   'מחק פוסט',
                   style: TextStyle(
                     color: Colors.red,
@@ -644,7 +644,7 @@ class _PostCardState extends State<PostCard>
             Center(
               child: Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.black54,
                   shape: BoxShape.circle,
                 ),
@@ -688,7 +688,7 @@ class _PostCardState extends State<PostCard>
           color: AppColors.greyLight.withOpacity(0.5),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
+        child: const Icon(
           Icons.broken_image_rounded,
           color: AppColors.greyMedium,
           size: 40,

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 
 class AttendanceService {
@@ -8,7 +9,7 @@ class AttendanceService {
   ) async {
     final String docId = '${userId}_${month.year}_${month.month.toString().padLeft(2, '0')}';
     final docRef = FirebaseFirestore.instance
-        .collection('attendance_logs')
+        .collection(AppConstants.attendanceCollection)
         .doc(docId);
 
     final doc = await docRef.get();

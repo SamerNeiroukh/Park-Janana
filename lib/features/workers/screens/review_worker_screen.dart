@@ -7,7 +7,8 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/workers/widgets/shifts_button.dart';
 import 'package:park_janana/features/tasks/screens/create_task_screen.dart';
 import 'package:park_janana/core/models/user_model.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -139,30 +140,22 @@ class ReviewWorkerScreen extends StatelessWidget {
   Widget _buildSpiritualProfile(Map<String, dynamic> data) {
     return Column(
       children: [
-        FutureBuilder<ImageProvider>(
-          future: ProfileImageProvider.resolve(
-            storagePath: data['profile_picture_path'],
-            fallbackUrl: data['profile_picture'],
+        Container(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: AppDimensions.shadowBlurS,
+                offset: AppDimensions.shadowOffsetS,
+              ),
+            ],
           ),
-          builder: (context, snapshot) {
-            return Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: AppDimensions.shadowBlurS,
-                    offset: AppDimensions.shadowOffsetS,
-                  ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: AppDimensions.avatarM,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: snapshot.data,
-              ),
-            );
-          },
+          child: ProfileAvatar(
+            imageUrl: data['profile_picture'],
+            radius: AppDimensions.avatarM,
+            backgroundColor: Colors.grey.shade300,
+          ),
         ),
         const SizedBox(height: AppDimensions.spacingXL),
         Text(
@@ -320,7 +313,7 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
 
     if (confirm) {
-      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

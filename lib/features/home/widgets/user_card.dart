@@ -4,16 +4,12 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class UserCard extends StatelessWidget {
   final String userName;
 
-  /// Legacy URL (will be phased out later)
   final String profilePictureUrl;
-
-  /// NEW: Firebase Storage path (preferred)
-  final String? profilePicturePath;
 
   final String currentDate;
   final int daysWorked;
@@ -27,7 +23,6 @@ class UserCard extends StatelessWidget {
     super.key,
     required this.userName,
     required this.profilePictureUrl,
-    this.profilePicturePath,
     required this.currentDate,
     required this.daysWorked,
     required this.hoursWorked,
@@ -165,17 +160,9 @@ class UserCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: FutureBuilder<ImageProvider>(
-                        future: ProfileImageProvider.resolve(
-                          storagePath: profilePicturePath,
-                          fallbackUrl: profilePictureUrl,
-                        ),
-                        builder: (context, snapshot) {
-                          return CircleAvatar(
-                            radius: 42,
-                            backgroundImage: snapshot.data,
-                          );
-                        },
+                      child: ProfileAvatar(
+                        imageUrl: profilePictureUrl,
+                        radius: 42,
                       ),
                     ),
                   ),

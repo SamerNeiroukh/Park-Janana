@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
@@ -16,6 +17,9 @@ import 'core/services/notification_service.dart';
 import 'features/home/providers/user_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/home/providers/app_state_provider.dart';
+
+/// Global navigator key for notification deep linking.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +40,12 @@ void main() async {
 
     // Set up background message handler for FCM
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+    // Enable Firestore offline persistence with explicit config
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: 50 * 1024 * 1024, // 50 MB cache
+    );
 
     // Initialize notification service
     await NotificationService().initialize();
@@ -101,6 +111,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       localizationsDelegates: const [

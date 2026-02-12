@@ -122,11 +122,6 @@ class FirebaseService {
     };
   }
 
-  // 🟢 Fetch all shifts as a stream
-  Stream<QuerySnapshot> getShiftsStream() {
-    return _firestore.collection(AppConstants.shiftsCollection).snapshots();
-  }
-
   // 🟢 Create a new shift
   Future<void> createShift(Map<String, dynamic> shiftData) async {
     try {

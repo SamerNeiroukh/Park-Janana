@@ -12,34 +12,44 @@ class ShiftService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final Map<String, UserModel> _workerCache = {};
+  static const Duration _cacheTtl = Duration(minutes: 10);
+  DateTime _cacheTimestamp = DateTime.now();
+
+  void _checkCacheExpiry() {
+    if (DateTime.now().difference(_cacheTimestamp) > _cacheTtl) {
+      _workerCache.clear();
+      _cacheTimestamp = DateTime.now();
+    }
+  }
 
   Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
-    final DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+    final dates = List.generate(
+      7,
+      (i) => DateFormat('dd/MM/yyyy').format(startOfWeek.add(Duration(days: i))),
+    );
 
     return _firestore
-        .collection('shifts')
-        .where('date',
-            isGreaterThanOrEqualTo:
-                DateFormat('dd/MM/yyyy').format(startOfWeek))
-        .where('date',
-            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(endOfWeek))
+        .collection(AppConstants.shiftsCollection)
+        .where('date', whereIn: dates)
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => ShiftModel.fromFirestore(doc)).toList());
   }
 
-  Stream<List<ShiftModel>> getShiftsStream() {
-    return _firebaseService.getShiftsStream().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return ShiftModel.fromMap(doc.id, doc.data() as Map<String, dynamic>);
-      }).toList();
-    });
+  /// Returns a real-time stream for a single shift document.
+  Stream<ShiftModel> getShiftStream(String shiftId) {
+    return _firestore
+        .collection(AppConstants.shiftsCollection)
+        .doc(shiftId)
+        .snapshots()
+        .where((doc) => doc.exists)
+        .map((doc) => ShiftModel.fromFirestore(doc));
   }
 
   Future<List<ShiftModel>> getShiftsByDate(DateTime date) async {
     try {
       final querySnapshot = await _firestore
-          .collection('shifts')
+          .collection(AppConstants.shiftsCollection)
           .where('date', isEqualTo: DateFormat('dd/MM/yyyy').format(date))
           .get();
 
@@ -165,7 +175,7 @@ class ShiftService {
     try {
       // 1. Fetch worker info
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(workerId)
           .get();
       if (!userDoc.exists) throw CustomException("Worker not found");
@@ -203,7 +213,7 @@ class ShiftService {
 
     try {
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(AppConstants.usersCollection)
           .doc(workerId)
           .get();
       if (!userDoc.exists) throw CustomException("Worker not found");
@@ -239,7 +249,7 @@ class ShiftService {
 
     try {
       final DocumentReference shiftRef =
-          _firestore.collection('shifts').doc(shiftId);
+          _firestore.collection(AppConstants.shiftsCollection).doc(shiftId);
       final DocumentSnapshot doc = await shiftRef.get();
 
       if (!doc.exists) throw CustomException("Shift not found");
@@ -272,6 +282,7 @@ class ShiftService {
   }
 
   Future<List<UserModel>> fetchWorkerDetails(List<String> workerIds) async {
+    _checkCacheExpiry();
     final List<UserModel> workers = [];
     final List<String> missingWorkerIds = [];
 
@@ -340,13 +351,14 @@ class ShiftService {
   }
 
   Future<List<ShiftModel>> getShiftsByWeek(DateTime weekStart) async {
-    final weekEnd = weekStart.add(const Duration(days: 6));
+    final dates = List.generate(
+      7,
+      (i) => DateFormat('dd/MM/yyyy').format(weekStart.add(Duration(days: i))),
+    );
+
     final querySnapshot = await FirebaseFirestore.instance
-        .collection('shifts')
-        .where('date',
-            isGreaterThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekStart))
-        .where('date',
-            isLessThanOrEqualTo: DateFormat('dd/MM/yyyy').format(weekEnd))
+        .collection(AppConstants.shiftsCollection)
+        .where('date', whereIn: dates)
         .get();
 
     return querySnapshot.docs

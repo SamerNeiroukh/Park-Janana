@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
@@ -7,6 +8,7 @@ import '../services/auth_service.dart';
 /// (Named AppAuthProvider to avoid conflict with Firebase AuthProvider)
 class AppAuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  StreamSubscription<User?>? _authSubscription;
   User? _user;
   String? _userRole;
   bool _isLoading = false;
@@ -26,7 +28,7 @@ class AppAuthProvider extends ChangeNotifier {
 
   /// Initialize Firebase Auth state listener
   void _initAuthListener() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
       if (user != null) {
         _loadUserRole();
@@ -77,5 +79,11 @@ class AppAuthProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 }

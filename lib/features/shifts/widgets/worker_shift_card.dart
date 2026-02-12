@@ -7,8 +7,9 @@ import '../models/shift_model.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/widgets/message_bubble.dart';
-import 'package:park_janana/core/utils/profile_image_provider.dart';
+import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 class WorkerShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -94,7 +95,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
   void _listenToShiftUpdates() {
     _shiftSubscription = FirebaseFirestore.instance
-        .collection('shifts')
+        .collection(AppConstants.shiftsCollection)
         .doc(widget.shift.id)
         .snapshots()
         .listen((snapshot) {
@@ -703,30 +704,19 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              FutureBuilder<ImageProvider>(
-                future: ProfileImageProvider.resolve(
-                  storagePath: worker.profilePicturePath,
-                  fallbackUrl: worker.profilePicture,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: widget.departmentColor.withOpacity(0.3),
+                    width: 2,
+                  ),
                 ),
-                builder: (context, snapshot) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: widget.departmentColor.withOpacity(0.3),
-                        width: 2,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: widget.departmentColor.withOpacity(0.1),
-                      backgroundImage: snapshot.data,
-                      child: snapshot.data == null
-                          ? Icon(Icons.person, color: widget.departmentColor)
-                          : null,
-                    ),
-                  );
-                },
+                child: ProfileAvatar(
+                  imageUrl: worker.profilePicture,
+                  radius: 28,
+                  backgroundColor: widget.departmentColor.withOpacity(0.1),
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -743,7 +733,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
   Widget _buildMessagesSection() {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('shifts')
+          .collection(AppConstants.shiftsCollection)
           .doc(widget.shift.id)
           .snapshots(),
       builder: (context, snapshot) {

@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/main.dart' show navigatorKey;
 
 /// Background message handler - must be top-level function
 @pragma('vm:entry-point')
@@ -112,7 +115,15 @@ class NotificationService {
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
     debugPrint('Notification tapped: ${response.payload}');
-    // TODO: Navigate to appropriate screen based on payload
+    if (response.payload != null && response.payload!.isNotEmpty) {
+      try {
+        final data = Map<String, dynamic>.from(json.decode(response.payload!));
+        _navigateFromNotification(data);
+      } catch (e) {
+        debugPrint('Error parsing notification payload: $e');
+        _navigateToHome();
+      }
+    }
   }
 
   /// Set up FCM message handlers
@@ -134,18 +145,18 @@ class NotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
-    // Show local notification
+    // Show local notification with JSON payload for deep linking
     await _showLocalNotification(
       title: notification.title ?? 'Park Janana',
       body: notification.body ?? '',
-      payload: message.data.toString(),
+      payload: json.encode(message.data),
     );
   }
 
   /// Handle when user taps notification to open app
   void _handleNotificationOpen(RemoteMessage message) {
     debugPrint('App opened from notification: ${message.data}');
-    // TODO: Navigate based on message.data
+    _navigateFromNotification(message.data);
   }
 
   /// Check if app was opened from a notification when terminated
@@ -153,8 +164,41 @@ class NotificationService {
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       debugPrint('App opened from terminated state: ${initialMessage.data}');
-      // TODO: Navigate based on initialMessage.data
+      // Delay to ensure navigator is ready after app launch
+      await Future.delayed(const Duration(milliseconds: 500));
+      _navigateFromNotification(initialMessage.data);
     }
+  }
+
+  /// Navigate based on notification data
+  void _navigateFromNotification(Map<String, dynamic> data) {
+    final navigator = navigatorKey.currentState;
+    if (navigator == null) return;
+
+    final type = data['type'] as String?;
+    debugPrint('Navigating from notification type: $type');
+
+    // All notification types currently lead to home screen
+    // where the user can see the relevant shift/task updates.
+    // Specific screen routing can be added here per type.
+    switch (type) {
+      case 'shift_update':
+      case 'shift_assigned':
+      case 'shift_removed':
+      case 'shift_cancelled':
+      case 'shift_message':
+        navigator.pushNamedAndRemoveUntil('/home', (route) => false);
+        break;
+      default:
+        _navigateToHome();
+    }
+  }
+
+  /// Navigate to home screen
+  void _navigateToHome() {
+    final navigator = navigatorKey.currentState;
+    if (navigator == null) return;
+    navigator.pushNamedAndRemoveUntil('/home', (route) => false);
   }
 
   /// Show a local notification
@@ -216,7 +260,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
         'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
@@ -241,7 +285,7 @@ class NotificationService {
     }
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
         'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
@@ -260,7 +304,7 @@ class NotificationService {
     if (token == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
         'fcmTokens': FieldValue.arrayRemove([token]),
       });
       debugPrint('FCM token removed from Firestore');
@@ -301,7 +345,7 @@ class NotificationService {
 
     try {
       // Create notification request for Cloud Function to process
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_update',
         'shiftId': shiftId,
         'recipientIds': workerIds,
@@ -336,7 +380,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_assigned',
         'shiftId': shiftId,
         'recipientIds': [workerId],
@@ -368,7 +412,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_removed',
         'shiftId': shiftId,
         'recipientIds': [workerId],
@@ -403,7 +447,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_cancelled',
         'shiftId': shiftId,
         'recipientIds': workerIds,
@@ -438,7 +482,7 @@ class NotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('notification_requests').add({
+      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
         'type': 'shift_message',
         'shiftId': shiftId,
         'recipientIds': workerIds,

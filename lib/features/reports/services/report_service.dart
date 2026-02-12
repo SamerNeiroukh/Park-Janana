@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 
 class ReportService {
@@ -9,54 +11,33 @@ class ReportService {
   }) async {
     final startOfMonth = DateTime(month.year, month.month, 1);
     final endOfMonth = DateTime(month.year, month.month + 1, 0);
+    final daysInMonth = endOfMonth.day;
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('shifts')
-        .get(); // Removed server-side filter for full inclusion
+    // Generate all date strings for the month in dd/MM/yyyy format
+    final allDates = List.generate(
+      daysInMonth,
+      (i) => DateFormat('dd/MM/yyyy').format(startOfMonth.add(Duration(days: i))),
+    );
+
+    // Firestore whereIn supports up to 30 values — batch if needed
+    final List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs = [];
+    for (var i = 0; i < allDates.length; i += 30) {
+      final batch = allDates.sublist(i, i + 30 > allDates.length ? allDates.length : i + 30);
+      final snapshot = await FirebaseFirestore.instance
+          .collection(AppConstants.shiftsCollection)
+          .where('date', whereIn: batch)
+          .get();
+      allDocs.addAll(snapshot.docs);
+    }
 
     final List<ShiftModel> relevantShifts = [];
-
-    for (var doc in snapshot.docs) {
+    for (var doc in allDocs) {
       final data = doc.data();
-      final shiftDateStr = data['date']; // Expected format: dd/MM/yyyy
+      final assignedData = List<Map<String, dynamic>>.from(data['assignedWorkerData'] ?? []);
+      final wasInvolved = assignedData.any((d) => d['userId'] == userId);
 
-      try {
-        final parts = shiftDateStr.split('/');
-        final parsedDate = DateTime.parse('${parts[2]}-${parts[1]}-${parts[0]}');
-
-        if (parsedDate.isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
-            parsedDate.isBefore(endOfMonth.add(const Duration(days: 1)))) {
-          
-          final assignedData = List<Map<String, dynamic>>.from(data['assignedWorkerData'] ?? []);
-          final wasInvolved = assignedData.any((d) => d['userId'] == userId);
-
-          if (wasInvolved) {
-            relevantShifts.add(
-              ShiftModel(
-                id: doc.id,
-                date: data['date'] ?? '',
-                department: data['department'] ?? '',
-                startTime: data['startTime'] ?? '',
-                endTime: data['endTime'] ?? '',
-                maxWorkers: data['maxWorkers'] ?? 0,
-                requestedWorkers: List<String>.from(data['requestedWorkers'] ?? []),
-                assignedWorkers: List<String>.from(data['assignedWorkers'] ?? []),
-                messages: List<Map<String, dynamic>>.from(data['messages'] ?? []),
-                createdBy: data['createdBy'] ?? '',
-                lastUpdatedBy: data['lastUpdatedBy'] ?? '',
-                status: data['status'] ?? '',
-                cancelReason: data['cancelReason'] ?? '',
-                createdAt: data['createdAt'],
-                lastUpdatedAt: data['lastUpdatedAt'],
-                assignedWorkerData: assignedData,
-                rejectedWorkerData: List<Map<String, dynamic>>.from(data['rejectedWorkerData'] ?? []),
-                shiftManager: data['shiftManager'] ?? '',
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        continue; // Skip invalid dates
+      if (wasInvolved) {
+        relevantShifts.add(ShiftModel.fromFirestore(doc));
       }
     }
 

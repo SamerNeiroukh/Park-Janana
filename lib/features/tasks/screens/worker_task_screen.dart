@@ -10,6 +10,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
+import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class WorkerTaskScreen extends StatefulWidget {
   const WorkerTaskScreen({super.key});
@@ -51,7 +52,7 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
                     stream: _taskService.getTasksForUser(currentUid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const ShimmerLoading(cardHeight: 140, cardBorderRadius: 20);
                       }
                       if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Center(child: Text("אין משימות פעילות."));
