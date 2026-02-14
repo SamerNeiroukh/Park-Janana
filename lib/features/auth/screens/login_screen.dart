@@ -102,15 +102,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: AppDimensions.paddingHorizontalXXL,
-            child: Form(
-              key: _formKey,
-              child: AutofillGroup(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: AppDimensions.paddingHorizontalXXL,
+              child: Form(
+                key: _formKey,
+                child: AutofillGroup(
                 child: Container(
                   constraints: const BoxConstraints(
                       maxWidth: AppDimensions.maxWidthForm),
@@ -172,12 +174,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Padding(
-                            padding: EdgeInsets.only(
+                            padding: EdgeInsetsDirectional.only(
                                 bottom: AppDimensions.paddingS,
-                                right: AppDimensions.paddingXS),
+                                start: AppDimensions.paddingXS),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                Icon(
+                                  Icons.email_outlined,
+                                  size: AppDimensions.iconM,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: AppDimensions.spacingM),
                                 Text(
                                   'אימייל',
                                   style: TextStyle(
@@ -185,12 +192,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
-                                ),
-                                SizedBox(width: AppDimensions.spacingM),
-                                Icon(
-                                  Icons.email_outlined,
-                                  size: AppDimensions.iconM,
-                                  color: AppColors.primary,
                                 ),
                               ],
                             ),
@@ -259,12 +260,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Padding(
-                            padding: EdgeInsets.only(
+                            padding: EdgeInsetsDirectional.only(
                                 bottom: AppDimensions.paddingS,
-                                right: AppDimensions.paddingXS),
+                                start: AppDimensions.paddingXS),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                Icon(
+                                  Icons.lock_outlined,
+                                  size: AppDimensions.iconM,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: AppDimensions.spacingM),
                                 Text(
                                   'סיסמה',
                                   style: TextStyle(
@@ -272,12 +278,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
-                                ),
-                                SizedBox(width: AppDimensions.spacingM),
-                                Icon(
-                                  Icons.lock_outlined,
-                                  size: AppDimensions.iconM,
-                                  color: AppColors.primary,
                                 ),
                               ],
                             ),
@@ -356,7 +356,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Forgot Password Link
                       Align(
-                        alignment: Alignment.centerRight,
+                        alignment: AlignmentDirectional.centerStart,
                         child: GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -442,6 +442,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
