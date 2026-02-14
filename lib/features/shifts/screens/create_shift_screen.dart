@@ -227,7 +227,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -281,12 +280,12 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -320,7 +319,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               border: Border.all(color: _selectedColor.withOpacity(0.2)),
             ),
             child: Row(
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(Icons.calendar_today_rounded,
                     color: _selectedColor, size: 22),
@@ -360,7 +358,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.end,
-          textDirection: TextDirection.rtl,
           children: departments.map((dept) {
             final isSelected = dept['name'] == _selectedDepartment;
             final color = dept['color'] as Color;
@@ -390,7 +387,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       dept['icon'] as IconData,
@@ -422,7 +418,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
             const SizedBox(width: 12),
@@ -433,7 +428,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child:
-                  Icon(Icons.arrow_back, color: Colors.grey.shade500, size: 18),
+                  Icon(Icons.arrow_forward, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(child: _buildTimeButton('סיום', _endTime, false)),
@@ -465,7 +460,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(Icons.access_time, color: _selectedColor, size: 18),
                 const SizedBox(width: 6),
@@ -491,7 +485,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             _buildWorkerCountButton(Icons.add, () {
               setState(() => _maxWorkers++);
@@ -506,7 +499,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(Icons.people, color: _selectedColor, size: 28),
                     const SizedBox(width: 8),
@@ -581,7 +573,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               )
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.check_circle, size: 22),
                   SizedBox(width: 8),
@@ -607,7 +598,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),

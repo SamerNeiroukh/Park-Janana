@@ -523,7 +523,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       color: AppColors.warningOrange.withOpacity(0.1),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           const Icon(Icons.edit_note, size: 20, color: AppColors.warningOrange),
           const SizedBox(width: 8),
@@ -603,7 +602,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      textDirection: TextDirection.rtl,
                       children: [
                         const Icon(Icons.save, color: Colors.white, size: 22),
                         const SizedBox(width: 10),
@@ -650,10 +648,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding:
@@ -664,7 +661,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(departmentIcon, size: 16, color: departmentColor),
                     const SizedBox(width: 6),
@@ -690,7 +686,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    textDirection: TextDirection.rtl,
                     children: [
                       const Icon(Icons.pending_actions,
                           size: 14, color: AppColors.warningOrange),
@@ -760,11 +755,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           ),
           const SizedBox(height: 20),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.calendar_today_rounded,
                       size: 18, color: Colors.grey.shade500),
@@ -781,8 +774,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               ),
               const SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.access_time_rounded,
                       size: 18, color: Colors.grey.shade500),
@@ -801,7 +792,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           ),
           const SizedBox(height: 24),
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Text(
                 'עובדים',
@@ -1058,7 +1048,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       isFull ? Icons.check_circle : Icons.person_add_rounded,
@@ -1219,7 +1208,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             decoration: BoxDecoration(
@@ -1292,7 +1280,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(Icons.schedule, size: 14, color: color),
           const SizedBox(width: 4),
@@ -1477,7 +1464,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             padding: const EdgeInsets.all(8),

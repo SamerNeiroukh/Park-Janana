@@ -492,7 +492,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -556,12 +555,12 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -604,7 +603,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               ),
             ),
             child: Row(
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(Icons.calendar_today_rounded,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
@@ -666,7 +664,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.end,
-          textDirection: TextDirection.rtl,
           children: departments.map((dept) {
             final isSelected = dept['name'] == _selectedDepartment;
             final color = dept['color'] as Color;
@@ -698,7 +695,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       dept['icon'] as IconData,
@@ -732,7 +728,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
             const SizedBox(width: 12),
@@ -742,7 +737,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_back, color: Colors.grey.shade500, size: 18),
+              child: Icon(Icons.arrow_forward, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(child: _buildTimeButton('סיום', _endTime, false)),
@@ -785,7 +780,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(Icons.access_time,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
@@ -817,7 +811,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         child: Column(
           children: [
             Row(
-              textDirection: TextDirection.rtl,
               children: [
                 _buildWorkerCountButton(Icons.add, () {
                   setState(() => _maxWorkers++);
@@ -841,7 +834,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      textDirection: TextDirection.rtl,
                       children: [
                         Icon(Icons.people,
                             color: isChanged ? AppColors.warningOrange : _selectedColor,
@@ -878,7 +870,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     border: Border.all(color: Colors.red.withOpacity(0.3)),
                   ),
                   child: Row(
-                    textDirection: TextDirection.rtl,
                     children: [
                       const Icon(Icons.warning, size: 20, color: Colors.red),
                       const SizedBox(width: 8),
@@ -927,7 +918,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.end,
-          textDirection: TextDirection.rtl,
           children: statusOptions.map((status) {
             final isSelected = status['value'] == _status;
             final color = status['color'] as Color;
@@ -959,7 +949,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       status['icon'] as IconData,
@@ -1022,7 +1011,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(
                     _hasChanges ? Icons.save : Icons.check,
@@ -1057,7 +1045,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),
