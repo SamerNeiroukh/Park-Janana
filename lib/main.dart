@@ -18,6 +18,7 @@ import 'features/home/providers/user_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/home/providers/app_state_provider.dart';
 
+
 /// Global navigator key for notification deep linking.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

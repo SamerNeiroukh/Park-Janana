@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -45,6 +45,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _navigateToProfile(String uid) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PersonalAreaScreen(uid: uid),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Watch providers for automatic updates
@@ -68,7 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final weatherData = appStateProvider.weatherData;
 
     return Scaffold(
-      appBar: const UserHeader(showLogoutButton: true),
+      appBar: UserHeader(
+        showLogoutButton: true,
+        onProfileTap: () => _navigateToProfile(currentUser.uid),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 20),
         child: Column(
@@ -114,92 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
     String userName,
     String profileUrl,
   ) {
-    // Get role operations from provider
-    final appStateProvider = context.read<AppStateProvider>();
-    final roleOperations = appStateProvider.getOperationsForRole(role);
-
-    final List<ActionButton> buttons = [
-      ActionButton(
-        title: 'לוח מודעות',
-        icon: Icons.newspaper_rounded,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NewsfeedScreen(),
-            ),
-          );
-        },
-      ),
-      ActionButton(
-        title: 'פרופיל',
-        icon: Icons.person_rounded,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PersonalAreaScreen(uid: uid),
-            ),
-          );
-        },
-      ),
-      ActionButton(
-        title: 'הדו"חות שלי',
-        icon: Icons.stacked_bar_chart_rounded,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WorkerReportsScreen(
-                userId: uid,
-                userName: userName,
-                profileUrl: profileUrl,
-              ),
-            ),
-          );
-        },
-      ),
-    ];
-
-    // Add role-specific operations
-    if (roleOperations.isNotEmpty) {
-      buttons.addAll(
-        roleOperations.map<ActionButton>((operation) {
-          return ActionButton(
-            title: operation['title'],
-            icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
-            onTap: () {},
-          );
-        }).toList(),
-      );
-    }
+    final List<ActionButton> buttons = [];
 
     if (role == 'worker') {
       buttons.addAll([
-        ActionButton(
-          title: 'המשימות שלי',
-          icon: Icons.check_circle_outline_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const WorkerTaskScreen(),
-              ),
-            );
-          },
-        ),
-        ActionButton(
-          title: 'המשמרות שלי',
-          icon: Icons.schedule_outlined,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ShiftsScreen(),
-              ),
-            );
-          },
-        ),
+        // 1. Weekly Schedule
         ActionButton(
           title: 'סידור עבודה',
           icon: Icons.calendar_view_week_rounded,
@@ -212,11 +143,68 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        // 2. Newsfeed
+        ActionButton(
+          title: 'לוח מודעות',
+          icon: Icons.newspaper_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NewsfeedScreen(),
+              ),
+            );
+          },
+        ),
+        // 3. My Shifts
+        ActionButton(
+          title: 'המשמרות שלי',
+          icon: Icons.schedule_outlined,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ShiftsScreen(),
+              ),
+            );
+          },
+        ),
+        // 4. My Tasks
+        ActionButton(
+          title: 'המשימות שלי',
+          icon: Icons.check_circle_outline_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const WorkerTaskScreen(),
+              ),
+            );
+          },
+        ),
+        // 5. Reports
+        ActionButton(
+          title: 'הדו"חות שלי',
+          icon: Icons.stacked_bar_chart_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WorkerReportsScreen(
+                  userId: uid,
+                  userName: userName,
+                  profileUrl: profileUrl,
+                ),
+              ),
+            );
+          },
+        ),
       ]);
     }
 
     if (role == 'manager') {
       buttons.addAll([
+        // 1. Weekly Schedule
         ActionButton(
           title: 'סידור שבועי',
           icon: Icons.calendar_view_week_rounded,
@@ -229,6 +217,20 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        // 2. Newsfeed
+        ActionButton(
+          title: 'לוח מודעות',
+          icon: Icons.newspaper_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NewsfeedScreen(),
+              ),
+            );
+          },
+        ),
+        // 3. Manage Shifts
         ActionButton(
           title: 'ניהול משמרות',
           icon: Icons.manage_history_rounded,
@@ -241,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        // 4. Manage Tasks
         ActionButton(
           title: 'ניהול משימות',
           icon: Icons.assignment_turned_in_rounded,
@@ -253,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        // 5. Manage Workers
         ActionButton(
           title: 'ניהול עובדים',
           icon: Icons.group,
@@ -265,16 +269,77 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        // 6. Reports
+        ActionButton(
+          title: 'הדו"חות שלי',
+          icon: Icons.stacked_bar_chart_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WorkerReportsScreen(
+                  userId: uid,
+                  userName: userName,
+                  profileUrl: profileUrl,
+                ),
+              ),
+            );
+          },
+        ),
       ]);
     }
 
     if (role == 'owner') {
-      buttons.add(
+      buttons.addAll([
+        // Owners get newsfeed + business reports
+        ActionButton(
+          title: 'לוח מודעות',
+          icon: Icons.newspaper_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NewsfeedScreen(),
+              ),
+            );
+          },
+        ),
+        ActionButton(
+          title: 'הדו"חות שלי',
+          icon: Icons.stacked_bar_chart_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WorkerReportsScreen(
+                  userId: uid,
+                  userName: userName,
+                  profileUrl: profileUrl,
+                ),
+              ),
+            );
+          },
+        ),
         ActionButton(
           title: 'דו"חות עסקיים',
           icon: Icons.bar_chart_rounded,
           onTap: () {},
         ),
+      ]);
+    }
+
+    // Add role-specific operations from roles.json
+    final appStateProvider = context.read<AppStateProvider>();
+    final roleOperations = appStateProvider.getOperationsForRole(role);
+    if (roleOperations.isNotEmpty) {
+      buttons.addAll(
+        roleOperations.map<ActionButton>((operation) {
+          return ActionButton(
+            title: operation['title'],
+            icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
+            onTap: () {},
+          );
+        }).toList(),
       );
     }
 
