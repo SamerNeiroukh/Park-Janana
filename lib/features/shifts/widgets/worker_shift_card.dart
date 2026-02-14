@@ -570,7 +570,6 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
@@ -647,7 +646,6 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
 
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
-      textDirection: TextDirection.rtl,
       children: [
         Container(
           padding: const EdgeInsets.all(6),
@@ -699,7 +697,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
       child: Wrap(
         spacing: 16,
         runSpacing: 16,
-        alignment: WrapAlignment.end,
+        alignment: WrapAlignment.start,
         children: assignedWorkers.map((worker) {
           return Column(
             mainAxisSize: MainAxisSize.min,
