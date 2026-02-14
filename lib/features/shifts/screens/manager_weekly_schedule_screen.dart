@@ -221,12 +221,15 @@ class _ManagerWeeklyScheduleScreenState
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _ShiftDetailSheet(
-        shift: shift,
-        date: date,
-        workerMap: workerMap,
-        shiftService: _shiftService,
-        workerService: _workerService,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: _ShiftDetailSheet(
+          shift: shift,
+          date: date,
+          workerMap: workerMap,
+          shiftService: _shiftService,
+          workerService: _workerService,
+        ),
       ),
     );
   }
@@ -251,7 +254,7 @@ class _WeekHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final end = start.add(const Duration(days: 6));
     final range =
-        '${DateFormat('dd.MM').format(start)} – ${DateFormat('dd.MM').format(end)}';
+        '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
 
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -259,6 +262,7 @@ class _WeekHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
         child: Row(
           children: [
+            // LEFT side - next week (future)
             IconButton(
               onPressed: onNext,
               icon: const Icon(Icons.chevron_left_rounded, size: 28),
@@ -286,6 +290,7 @@ class _WeekHeader extends StatelessWidget {
                 ],
               ),
             ),
+            // RIGHT side - prev week (past)
             IconButton(
               onPressed: onPrev,
               icon: const Icon(Icons.chevron_right_rounded, size: 28),
@@ -319,7 +324,6 @@ class _DepartmentFilter extends StatelessWidget {
       height: 46,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        reverse: true,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: departments.length,
         itemBuilder: (context, index) {
@@ -769,7 +773,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(Icons.chevron_left_rounded,
+              Icon(Icons.chevron_right_rounded,
                   color: Colors.grey.shade400, size: 20),
             ],
           ),
@@ -1092,10 +1096,10 @@ class _ShiftDetailSheet extends StatelessWidget {
           // Navigate to full details
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
@@ -1108,19 +1112,55 @@ class _ShiftDetailSheet extends StatelessWidget {
                     ),
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _deptColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        _deptColor,
+                        _deptColor.withOpacity(0.8),
+                      ],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _deptColor.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'צפה בפרטי המשמרת',
-                  style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w600),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'צפה בפרטי המשמרת',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

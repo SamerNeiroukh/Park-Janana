@@ -131,7 +131,9 @@ class _RegistrationFormState extends State<RegistrationForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 600),
@@ -208,6 +210,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -224,7 +227,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: AppTheme.bodyText),
           const SizedBox(height: 8.0),

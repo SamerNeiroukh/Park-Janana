@@ -6,6 +6,7 @@ import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
+import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 
 class MyWeeklyScheduleScreen extends StatefulWidget {
   const MyWeeklyScheduleScreen({super.key});
@@ -97,7 +98,7 @@ class _WeekHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final end = start.add(const Duration(days: 6));
     final range =
-        '${DateFormat('dd.MM').format(start)} – ${DateFormat('dd.MM').format(end)}';
+        '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
 
     // Use explicit Directionality.ltr for this Row to control arrow placement manually
     return Directionality(
@@ -448,7 +449,10 @@ class _DayTimeline extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _ShiftDetailsSheet(shift: shift, date: date),
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: _ShiftDetailsSheet(shift: shift, date: date),
+      ),
     );
   }
 }
@@ -562,30 +566,17 @@ class _ShiftPillState extends State<_ShiftPill> {
                 ],
               ),
               const SizedBox(width: 16),
-              // Department & workers
+              // Department
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.shift.department,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers} עובדים',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  widget.shift.department,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              // Arrow indicator (points left in RTL = forward/expand)
+              // Arrow indicator
               Icon(
                 Icons.chevron_right_rounded,
                 color: Colors.grey.shade400,
@@ -706,33 +697,78 @@ class _ShiftDetailsSheet extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
 
-          // Workers count
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.people_outline_rounded, color: Colors.grey),
-                const SizedBox(width: 12),
-                Text(
-                  '${shift.assignedWorkers.length} מתוך ${shift.maxWorkers} עובדים',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey.shade700,
+          // View full details button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ShiftsScreen(initialDate: date),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        _departmentColor,
+                        _departmentColor.withOpacity(0.8),
+                      ],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _departmentColor.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'צפה בפרטי המשמרת',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
         ],
       ),
     );

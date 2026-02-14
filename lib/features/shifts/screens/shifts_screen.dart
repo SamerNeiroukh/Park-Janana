@@ -12,7 +12,9 @@ import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ShiftsScreen extends StatefulWidget {
-  const ShiftsScreen({super.key});
+  final DateTime? initialDate;
+
+  const ShiftsScreen({super.key, this.initialDate});
 
   @override
   State<ShiftsScreen> createState() => _ShiftsScreenState();
@@ -21,9 +23,16 @@ class ShiftsScreen extends StatefulWidget {
 class _ShiftsScreenState extends State<ShiftsScreen> {
   final ShiftService _shiftService = ShiftService();
 
-  DateTime _currentWeekStart =
-      DateTime.now().subtract(Duration(days: DateTime.now().weekday % 7));
-  DateTime _selectedDay = DateTime.now();
+  late DateTime _currentWeekStart;
+  late DateTime _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    final target = widget.initialDate ?? DateTime.now();
+    _currentWeekStart = target.subtract(Duration(days: target.weekday % 7));
+    _selectedDay = target;
+  }
 
   @override
   Widget build(BuildContext context) {
