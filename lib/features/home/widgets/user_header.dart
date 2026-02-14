@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
+
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool showLogoutButton;
-  const UserHeader({super.key, this.showLogoutButton = false});
+  final VoidCallback? onProfileTap;
+  const UserHeader({super.key, this.showLogoutButton = false, this.onProfileTap});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +16,13 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
+      leading: onProfileTap != null
+          ? IconButton(
+              icon: const Icon(Icons.person_rounded),
+              tooltip: 'פרופיל',
+              onPressed: onProfileTap,
+            )
+          : null,
       title: Padding(
         padding: const EdgeInsets.only(bottom: 10.0),
         child: Image.asset(
