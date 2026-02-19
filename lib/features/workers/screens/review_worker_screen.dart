@@ -5,7 +5,7 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/workers/screens/edit_worker_licenses_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/workers/widgets/shifts_button.dart';
-import 'package:park_janana/features/tasks/screens/create_task_screen.dart';
+import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -84,7 +84,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => CreateTaskScreen(
+                              builder: (_) => CreateTaskFlowScreen(
                                 initialSelectedUsers: [worker],
                               ),
                             ),

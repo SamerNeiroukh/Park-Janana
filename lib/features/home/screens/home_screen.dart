@@ -9,8 +9,8 @@ import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 import 'package:park_janana/features/shifts/screens/manager_shifts_screen.dart';
 import 'package:park_janana/features/shifts/screens/manager_weekly_schedule_screen.dart';
 import 'package:park_janana/features/shifts/screens/my_weekly_schedule_screen.dart';
-import 'package:park_janana/features/tasks/screens/worker_task_screen.dart';
-import 'package:park_janana/features/tasks/screens/manager_task_dashboard.dart';
+import 'package:park_janana/features/tasks/screens/worker_task_timeline_screen.dart';
+import 'package:park_janana/features/tasks/screens/manager_task_board_screen.dart';
 import 'package:park_janana/features/workers/screens/manage_workers_screen.dart';
 import 'package:park_janana/features/attendance/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/features/newsfeed/screens/newsfeed_screen.dart';
@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const WorkerTaskScreen(),
+                builder: (_) => const WorkerTaskTimelineScreen(),
               ),
             );
           },
@@ -251,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const ManagerTaskDashboard(),
+                builder: (_) => const ManagerTaskBoardScreen(),
               ),
             );
           },

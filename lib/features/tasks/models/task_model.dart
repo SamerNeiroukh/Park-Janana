@@ -14,8 +14,10 @@ class TaskModel {
   final List<String> attachments;
   final List<Map<String, dynamic>> comments;
   final Timestamp createdAt;
+  final Timestamp? updatedAt;
+  final List<Map<String, dynamic>> activityLog;
 
-  /// New structure to track per-worker progress with dates and status
+  /// Per-worker progress with dates and status
   final Map<String, Map<String, dynamic>> workerProgress;
 
   TaskModel({
@@ -32,6 +34,8 @@ class TaskModel {
     required this.comments,
     required this.createdAt,
     required this.workerProgress,
+    this.updatedAt,
+    this.activityLog = const [],
   });
 
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
@@ -50,6 +54,8 @@ class TaskModel {
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
       createdAt: data['createdAt'],
       workerProgress: _parseWorkerProgress(data['workerProgress']),
+      updatedAt: data['updatedAt'] as Timestamp?,
+      activityLog: List<Map<String, dynamic>>.from(data['activityLog'] ?? []),
     );
   }
 
@@ -68,6 +74,8 @@ class TaskModel {
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
       createdAt: data['createdAt'],
       workerProgress: _parseWorkerProgress(data['workerProgress']),
+      updatedAt: data['updatedAt'] as Timestamp?,
+      activityLog: List<Map<String, dynamic>>.from(data['activityLog'] ?? []),
     );
   }
 
@@ -85,6 +93,8 @@ class TaskModel {
       'comments': comments,
       'createdAt': createdAt,
       'workerProgress': workerProgress,
+      'updatedAt': updatedAt ?? Timestamp.now(),
+      'activityLog': activityLog,
     };
   }
 
@@ -98,7 +108,37 @@ class TaskModel {
     return {};
   }
 
-  // Create a copy of TaskModel with some fields updated
+  // Helpers
+  bool get isOverdue =>
+      status != 'done' && dueDate.toDate().isBefore(DateTime.now());
+
+  bool get isDueToday {
+    final now = DateTime.now();
+    final due = dueDate.toDate();
+    return due.year == now.year &&
+        due.month == now.month &&
+        due.day == now.day;
+  }
+
+  bool get isUpcoming =>
+      status != 'done' && dueDate.toDate().isAfter(DateTime.now()) && !isDueToday;
+
+  double get completionRatio {
+    if (workerProgress.isEmpty) return 0;
+    final done = workerProgress.values
+        .where((p) => p['status'] == 'done')
+        .length;
+    return done / workerProgress.length;
+  }
+
+  int get completedWorkerCount =>
+      workerProgress.values.where((p) => p['status'] == 'done').length;
+
+  int get totalWorkerCount => workerProgress.length;
+
+  String workerStatusFor(String userId) =>
+      workerProgress[userId]?['status'] as String? ?? 'pending';
+
   TaskModel copyWith({
     String? id,
     String? title,
@@ -113,6 +153,8 @@ class TaskModel {
     List<Map<String, dynamic>>? comments,
     Timestamp? createdAt,
     Map<String, Map<String, dynamic>>? workerProgress,
+    Timestamp? updatedAt,
+    List<Map<String, dynamic>>? activityLog,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -128,12 +170,14 @@ class TaskModel {
       comments: comments ?? this.comments,
       createdAt: createdAt ?? this.createdAt,
       workerProgress: workerProgress ?? this.workerProgress,
+      updatedAt: updatedAt ?? this.updatedAt,
+      activityLog: activityLog ?? this.activityLog,
     );
   }
 
   @override
   String toString() {
-    return 'TaskModel(id: $id, title: $title, description: $description, department: $department, createdBy: $createdBy, assignedTo: $assignedTo, dueDate: $dueDate, priority: $priority, status: $status, attachments: $attachments, comments: ${comments.length} items, createdAt: $createdAt, workerProgress: ${workerProgress.length} workers)';
+    return 'TaskModel(id: $id, title: $title, status: $status, priority: $priority, workers: ${workerProgress.length})';
   }
 
   @override
@@ -173,7 +217,6 @@ class TaskModel {
         workerProgress.hashCode;
   }
 
-  // Helper method to compare List<Map<String, dynamic>>
   static bool _listOfMapsEquals(List<Map<String, dynamic>> a, List<Map<String, dynamic>> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
@@ -182,7 +225,6 @@ class TaskModel {
     return true;
   }
 
-  // Helper method to compare Map<String, Map<String, dynamic>>
   static bool _mapOfMapsEquals(
       Map<String, Map<String, dynamic>> a, Map<String, Map<String, dynamic>> b) {
     if (a.length != b.length) return false;
