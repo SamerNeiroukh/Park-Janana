@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import 'video_player_widget.dart';
@@ -64,29 +64,12 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.post.authorProfilePicture;
-    if (picUrl.isEmpty) {
-      setState(() => _isLoadingProfilePic = false);
-      return;
-    }
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.post.authorProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoadingProfilePic = false;
       });
-      return;
-    }
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoadingProfilePic = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoadingProfilePic = false);
     }
   }
 
@@ -586,33 +569,48 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       padding: const EdgeInsets.only(top: 20),
       child: Column(
         children: [
-          // Media PageView
-          SizedBox(
-            height: 280,
-            child: PageView.builder(
-              controller: _mediaPageController,
-              itemCount: allMedia.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentMediaIndex = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                final media = allMedia[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: GestureDetector(
-                    onTap: () => _openFullScreenMedia(allMedia, index),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: media.isVideo
-                          ? _buildVideoThumbnail(media)
-                          : _buildImage(media),
-                    ),
-                  ),
-                );
-              },
-            ),
+          // Media PageView — height derived from current page's aspect ratio
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final currentMedia = allMedia[_currentMediaIndex];
+              final ar = currentMedia.aspectRatio;
+              double height;
+              if (ar != null && ar > 0) {
+                height = constraints.maxWidth / ar;
+                height = height.clamp(160.0, 400.0);
+              } else {
+                height = 280;
+              }
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                height: height,
+                child: PageView.builder(
+                  controller: _mediaPageController,
+                  itemCount: allMedia.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentMediaIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final media = allMedia[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: GestureDetector(
+                        onTap: () => _openFullScreenMedia(allMedia, index),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: media.isVideo
+                              ? _buildVideoThumbnail(media)
+                              : _buildImage(media),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
           // Page indicator dots (if more than 1 item)
           if (allMedia.length > 1)
@@ -734,14 +732,6 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     );
   }
 
-  Widget _buildVideoPlayer(PostMedia media) {
-    return VideoPlayerWidget(
-      videoUrl: media.url,
-      autoPlay: false,
-      showControls: true,
-    );
-  }
-
   Widget _buildEngagementBar(PostModel post, bool isLiked) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -776,8 +766,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               onTap: () {
                 // Scroll to comments
                 _scrollController.animateTo(
-                  400,
-                  duration: const Duration(milliseconds: 300),
+                  _scrollController.position.maxScrollExtent,
+                  duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOut,
                 );
               },
@@ -1055,8 +1045,9 @@ class _EngagementButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AnimatedScale(
-                scale: isActive ? 1.0 : 1.0,
-                duration: const Duration(milliseconds: 150),
+                scale: isActive ? 1.15 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.elasticOut,
                 child: Icon(icon, size: 22, color: color),
               ),
               const SizedBox(width: 8),
@@ -1104,29 +1095,12 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.comment.userProfilePicture;
-    if (picUrl.isEmpty) {
-      setState(() => _isLoading = false);
-      return;
-    }
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.comment.userProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoading = false;
       });
-      return;
-    }
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -1410,6 +1384,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                           videoUrl: media.url,
                           autoPlay: true,
                           showControls: true,
+                          expectedAspectRatio: media.aspectRatio,
                         )
                       : InteractiveViewer(
                           minScale: 0.5,

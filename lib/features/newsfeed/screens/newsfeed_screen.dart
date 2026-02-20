@@ -36,8 +36,19 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Cache the stream to avoid recreating it on every build
+  // Category filter
+  String _selectedCategory = 'all';
+
+  // Cached stream
   Stream<List<PostModel>>? _postsStream;
+
+  static const List<Map<String, dynamic>> _categories = [
+    {'value': 'all', 'label': 'הכל', 'icon': Icons.all_inbox_rounded},
+    {'value': 'announcement', 'label': 'הודעות', 'icon': Icons.campaign_rounded},
+    {'value': 'update', 'label': 'עדכונים', 'icon': Icons.update_rounded},
+    {'value': 'event', 'label': 'אירועים', 'icon': Icons.event_rounded},
+    {'value': 'general', 'label': 'כללי', 'icon': Icons.article_rounded},
+  ];
 
   @override
   void initState() {
@@ -47,7 +58,30 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   void _initStream() {
-    _postsStream ??= _newsfeedService.getPostsStream(limit: _postLimit);
+    _postsStream = _selectedCategory == 'all'
+        ? _newsfeedService.getPostsStream(limit: _postLimit)
+        : _newsfeedService.getPostsByCategory(_selectedCategory, limit: _postLimit);
+  }
+
+  void _onCategoryChanged(String category) {
+    if (_selectedCategory == category) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedCategory = category;
+      _postLimit = _pageSize;
+      _hasMorePosts = true;
+      _initStream();
+    });
+    // Scroll to top after state update
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -76,7 +110,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     _isLoadingMore = true;
     setState(() {
       _postLimit += _pageSize;
-      _postsStream = _newsfeedService.getPostsStream(limit: _postLimit);
+      _initStream();
     });
   }
 
@@ -348,6 +382,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                     ),
                     _buildHeader(),
                     _buildSearchBar(),
+                    _buildCategoryFilters(),
+                    const SizedBox(height: 8),
                     Expanded(
                       child: _buildFeed(isManager, userId),
                     ),
@@ -374,33 +410,128 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value.trim().toLowerCase();
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'חיפוש פוסט...',
-          prefixIcon: const Icon(Icons.search, color: AppColors.primaryBlue),
-          suffixIcon: _searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear, size: 20),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() => _searchQuery = '');
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) => setState(() => _searchQuery = value.trim().toLowerCase()),
+          decoration: InputDecoration(
+            hintText: 'חיפוש פוסט...',
+            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryBlue),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryFilters() {
+    final colors = [
+      AppColors.primaryBlue,
+      AppColors.salmon,
+      AppColors.primaryBlue,
+      AppColors.success,
+      AppColors.greyMedium,
+    ];
+
+    return SizedBox(
+      height: 42,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: _categories.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final cat = _categories[index];
+            final isSelected = _selectedCategory == cat['value'];
+            final color = colors[index];
+
+            return GestureDetector(
+              onTap: () => _onCategoryChanged(cat['value'] as String),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? color : Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isSelected ? Colors.transparent : color.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.28),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      cat['icon'] as IconData,
+                      size: 15,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      cat['label'] as String,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -464,7 +595,6 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             setState(() {
               _postLimit = _pageSize;
               _hasMorePosts = true;
-              _postsStream = null;
               _initStream();
             });
           });
@@ -491,7 +621,17 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               }).toList();
 
         if (posts.isEmpty) {
-          return _EmptyState(isManager: isManager);
+          final String emptyMsg;
+          if (_searchQuery.isNotEmpty) {
+            emptyMsg = 'לא נמצאו פוסטים התואמים לחיפוש';
+          } else if (_selectedCategory != 'all') {
+            emptyMsg = 'אין פוסטים בקטגוריה זו';
+          } else {
+            emptyMsg = isManager
+                ? 'לחץ על "פוסט חדש" כדי לפרסם את הפוסט הראשון'
+                : 'המנהלים יפרסמו כאן עדכונים בקרוב';
+          }
+          return _EmptyState(isManager: isManager, message: emptyMsg);
         }
 
         return RefreshIndicator(
@@ -605,8 +745,9 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
 class _EmptyState extends StatelessWidget {
   final bool isManager;
+  final String? message;
 
-  const _EmptyState({required this.isManager});
+  const _EmptyState({required this.isManager, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -636,15 +777,19 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            isManager
-                ? 'לחץ על "פוסט חדש" כדי לפרסם את הפוסט הראשון'
-                : 'המנהלים יפרסמו כאן עדכונים בקרוב',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.greyMedium.withOpacity(0.8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              message ??
+                  (isManager
+                      ? 'לחץ על "פוסט חדש" כדי לפרסם את הפוסט הראשון'
+                      : 'המנהלים יפרסמו כאן עדכונים בקרוב'),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.greyMedium.withOpacity(0.8),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

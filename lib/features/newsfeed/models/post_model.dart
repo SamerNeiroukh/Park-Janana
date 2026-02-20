@@ -7,11 +7,13 @@ class PostMedia {
   final String url;
   final String type; // 'image' or 'video'
   final String? thumbnailUrl; // For videos
+  final double? aspectRatio; // width / height — null for legacy posts
 
   const PostMedia({
     required this.url,
     required this.type,
     this.thumbnailUrl,
+    this.aspectRatio,
   });
 
   bool get isVideo => type == 'video';
@@ -22,6 +24,7 @@ class PostMedia {
       url: map['url'] as String? ?? '',
       type: map['type'] as String? ?? 'image',
       thumbnailUrl: map['thumbnailUrl'] as String?,
+      aspectRatio: (map['aspectRatio'] as num?)?.toDouble(),
     );
   }
 
@@ -30,6 +33,7 @@ class PostMedia {
       'url': url,
       'type': type,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+      if (aspectRatio != null) 'aspectRatio': aspectRatio,
     };
   }
 }

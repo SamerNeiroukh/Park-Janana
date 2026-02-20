@@ -50,9 +50,9 @@ class _LikersSheetState extends State<LikersSheet>
     try {
       final List<UserModel> users = [];
 
-      // Fetch users in batches of 10 (Firestore whereIn limit)
-      for (var i = 0; i < widget.likedByUserIds.length; i += 10) {
-        final batch = widget.likedByUserIds.skip(i).take(10).toList();
+      // Fetch users in batches of 30 (Firestore whereIn limit)
+      for (var i = 0; i < widget.likedByUserIds.length; i += 30) {
+        final batch = widget.likedByUserIds.skip(i).take(30).toList();
         final snapshot = await FirebaseFirestore.instance
             .collection(AppConstants.usersCollection)
             .where(FieldPath.documentId, whereIn: batch)
@@ -287,16 +287,10 @@ class _EmptyLikers extends StatelessWidget {
 // ===============================
 // Liker Card
 // ===============================
-class _LikerCard extends StatefulWidget {
+class _LikerCard extends StatelessWidget {
   final UserModel user;
 
   const _LikerCard({required this.user});
-
-  @override
-  State<_LikerCard> createState() => _LikerCardState();
-}
-
-class _LikerCardState extends State<_LikerCard> {
 
   String _getRoleDisplayName(String role) {
     switch (role.toLowerCase()) {
@@ -319,21 +313,35 @@ class _LikerCardState extends State<_LikerCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.greyLight.withOpacity(0.5),
-        ),
+        border: Border.all(color: AppColors.greyLight.withOpacity(0.5)),
       ),
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          _buildAvatar(),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ProfileAvatar(
+              imageUrl: user.profilePicture,
+              radius: 22,
+              backgroundColor: AppColors.greyLight,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.user.fullName,
+                  user.fullName,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
@@ -341,7 +349,7 @@ class _LikerCardState extends State<_LikerCard> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _getRoleDisplayName(widget.user.role),
+                  _getRoleDisplayName(user.role),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.greyMedium.withOpacity(0.7),
@@ -350,32 +358,8 @@ class _LikerCardState extends State<_LikerCard> {
               ],
             ),
           ),
-          Icon(
-            Icons.favorite_rounded,
-            size: 18,
-            color: Colors.red.withOpacity(0.6),
-          ),
+          Icon(Icons.favorite_rounded, size: 18, color: Colors.red.withOpacity(0.6)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ProfileAvatar(
-        imageUrl: widget.user.profilePicture,
-        radius: 22,
-        backgroundColor: AppColors.greyLight,
       ),
     );
   }

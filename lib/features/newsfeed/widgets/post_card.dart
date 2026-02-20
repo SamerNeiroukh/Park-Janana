@@ -1,10 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 
 class PostCard extends StatefulWidget {
@@ -37,73 +35,35 @@ class PostCard extends StatefulWidget {
   State<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+class _PostCardState extends State<PostCard> {
+  // Press animation (replaces the dead AnimationController that was never used)
+  bool _isPressed = false;
+
+  // Like animation
   bool _isLikeAnimating = false;
 
-  // Profile picture resolution
+  // Profile picture (resolved once via shared URL cache)
   String? _resolvedProfileUrl;
   bool _isLoadingProfilePic = true;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
     _resolveProfilePicture();
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.post.authorProfilePicture;
-
-    if (picUrl.isEmpty) {
-      setState(() => _isLoadingProfilePic = false);
-      return;
-    }
-
-    // If it's already a full URL, use it directly
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.post.authorProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoadingProfilePic = false;
       });
-      return;
-    }
-
-    // If it's a Firebase Storage path, get the download URL
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoadingProfilePic = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error resolving author profile picture: $e');
-      if (mounted) {
-        setState(() => _isLoadingProfilePic = false);
-      }
     }
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  String _formatTimestamp(Timestamp timestamp) {
+  String _formatTimestamp(DateTime date) {
     final now = DateTime.now();
-    final date = timestamp.toDate();
     final diff = now.difference(date);
 
     if (diff.inMinutes < 1) return 'עכשיו';
@@ -152,170 +112,89 @@ class _PostCardState extends State<PostCard>
   Widget build(BuildContext context) {
     final isLiked = widget.post.isLikedBy(widget.currentUserId);
     final categoryColor = _categoryColor();
+    final date = widget.post.createdAt.toDate();
 
-    // Card without full-tap interaction - only buttons are interactive
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withOpacity(0.95),
-                  Colors.white.withOpacity(0.85),
+    return AnimatedScale(
+      scale: _isPressed ? 0.97 : 1.0,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Material(
+            color: Colors.white,
+            child: InkWell(
+              onTap: widget.onTap,
+              onHighlightChanged: (highlighted) {
+                setState(() => _isPressed = highlighted);
+              },
+              splashColor: categoryColor.withOpacity(0.04),
+              highlightColor: categoryColor.withOpacity(0.02),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Category accent strip (3px, always visible)
+                  Container(height: 3, color: categoryColor),
+
+                  // Pinned strip (only when pinned)
+                  if (widget.post.isPinned) _buildPinnedStrip(),
+
+                  // Main content
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildHeader(categoryColor, date),
+                        const SizedBox(height: 16),
+
+                        // Title
+                        Text(
+                          widget.post.title,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.3,
+                            height: 1.3,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Content (card InkWell handles tap — no wrapper needed)
+                        _buildContent(),
+
+                        // Media (card InkWell handles tap — no wrapper needed)
+                        if (widget.post.hasMedia) _buildMediaSection(),
+
+                        const SizedBox(height: 16),
+
+                        // Actions (like + comment — have their own InkWell, wins gesture arena)
+                        _buildActions(isLiked),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.5),
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ===== PINNED STRIP =====
-                if (widget.post.isPinned) _buildPinnedStrip(),
-
-                Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ===== HEADER =====
-                      _buildHeader(categoryColor),
-
-                      const SizedBox(height: 16),
-
-                      // ===== TITLE =====
-                      Text(
-                        widget.post.title,
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.3,
-                          height: 1.3,
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // ===== CONTENT (tappable) =====
-                      GestureDetector(
-                        onTap: widget.onTap,
-                        behavior: HitTestBehavior.opaque,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                // Check if text will be truncated
-                                final textSpan = TextSpan(
-                                  text: widget.post.content,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    height: 1.6,
-                                    color: AppColors.textSecondary
-                                        .withOpacity(0.9),
-                                  ),
-                                );
-                                final textPainter = TextPainter(
-                                  text: textSpan,
-                                  maxLines: 4,
-                                  textDirection: TextDirection.rtl,
-                                );
-                                textPainter.layout(
-                                    maxWidth: constraints.maxWidth);
-                                final isOverflowing =
-                                    textPainter.didExceedMaxLines;
-
-                                return Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text(
-                                      widget.post.content,
-                                      textAlign: TextAlign.right,
-                                      maxLines: 4,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        height: 1.6,
-                                        color: AppColors.textSecondary
-                                            .withOpacity(0.9),
-                                      ),
-                                    ),
-                                    if (isOverflowing)
-                                      const Padding(
-                                        padding: EdgeInsets.only(top: 8),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Icon(
-                                              Icons.arrow_back_ios_rounded,
-                                              size: 12,
-                                              color: AppColors.primaryBlue,
-                                            ),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              'קרא עוד',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColors.primaryBlue,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // ===== MEDIA =====
-                      if (widget.post.hasMedia)
-                        GestureDetector(
-                          onTap: widget.onTap,
-                          behavior: HitTestBehavior.opaque,
-                          child: _buildMediaSection(),
-                        ),
-
-                      const SizedBox(height: 16),
-
-                      // ===== ACTIONS =====
-                      _buildActions(isLiked),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
@@ -329,8 +208,8 @@ class _PostCardState extends State<PostCard>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.secondaryYellow.withOpacity(0.3),
-            AppColors.deepOrange.withOpacity(0.15),
+            AppColors.secondaryYellow.withOpacity(0.25),
+            AppColors.deepOrange.withOpacity(0.1),
           ],
         ),
       ),
@@ -340,18 +219,14 @@ class _PostCardState extends State<PostCard>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.deepOrange.withOpacity(0.15),
+              color: AppColors.deepOrange.withOpacity(0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               textDirection: TextDirection.rtl,
               children: [
-                Icon(
-                  Icons.push_pin_rounded,
-                  size: 14,
-                  color: AppColors.deepOrange,
-                ),
+                Icon(Icons.push_pin_rounded, size: 13, color: AppColors.deepOrange),
                 SizedBox(width: 4),
                 Text(
                   'פוסט נעוץ',
@@ -369,75 +244,79 @@ class _PostCardState extends State<PostCard>
     );
   }
 
-  Widget _buildHeader(Color categoryColor) {
+  Widget _buildHeader(Color categoryColor, DateTime date) {
     return Row(
       textDirection: TextDirection.rtl,
       children: [
-        _buildAvatar(),
+        _buildAvatar(categoryColor),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Text(
-                  widget.post.authorName,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.post.authorName,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                _CategoryBadge(
-                  label: widget.post.categoryDisplayName,
-                  color: categoryColor,
-                  icon: _categoryIcon(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                Text(
-                  _formatTimestamp(widget.post.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.greyMedium.withOpacity(0.8),
+                  const SizedBox(width: 8),
+                  _CategoryBadge(
+                    label: widget.post.categoryDisplayName,
+                    color: categoryColor,
+                    icon: _categoryIcon(),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.access_time_rounded,
-                  size: 12,
-                  color: AppColors.greyMedium.withOpacity(0.7),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Text(
+                    _formatTimestamp(date),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.greyMedium.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 12,
+                    color: AppColors.greyMedium.withOpacity(0.6),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        const Spacer(),
         if (widget.isManager || widget.post.authorId == widget.currentUserId)
           _buildOptionsMenu(),
       ],
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(Color categoryColor) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.2),
-            AppColors.primaryBlue.withOpacity(0.1),
+            categoryColor.withOpacity(0.25),
+            categoryColor.withOpacity(0.1),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.2),
+            color: categoryColor.withOpacity(0.15),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -455,7 +334,7 @@ class _PostCardState extends State<PostCard>
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  color: categoryColor.withOpacity(0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -463,10 +342,10 @@ class _PostCardState extends State<PostCard>
                     widget.post.authorName.isNotEmpty
                         ? widget.post.authorName[0].toUpperCase()
                         : '?',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryBlue,
+                      color: categoryColor,
                     ),
                   )
                 : null),
@@ -477,7 +356,7 @@ class _PostCardState extends State<PostCard>
   Widget _buildOptionsMenu() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.greyLight.withOpacity(0.5),
+        color: AppColors.greyLight.withOpacity(0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: PopupMenuButton<String>(
@@ -520,8 +399,7 @@ class _PostCardState extends State<PostCard>
             child: Row(
               textDirection: TextDirection.rtl,
               children: [
-                Icon(Icons.delete_outline_rounded,
-                    size: 18, color: Colors.red),
+                Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
                 SizedBox(width: 10),
                 Text(
                   'מחק פוסט',
@@ -538,20 +416,101 @@ class _PostCardState extends State<PostCard>
     );
   }
 
+  Widget _buildContent() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textSpan = TextSpan(
+          text: widget.post.content,
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.6,
+            color: AppColors.textSecondary.withOpacity(0.9),
+          ),
+        );
+        final textPainter = TextPainter(
+          text: textSpan,
+          maxLines: 4,
+          textDirection: TextDirection.rtl,
+        );
+        textPainter.layout(maxWidth: constraints.maxWidth);
+        final isOverflowing = textPainter.didExceedMaxLines;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.post.content,
+              textAlign: TextAlign.right,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: AppColors.textSecondary.withOpacity(0.9),
+              ),
+            ),
+            if (isOverflowing)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'קרא עוד',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryBlue.withOpacity(0.9),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 16,
+                      color: AppColors.primaryBlue.withOpacity(0.9),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildMediaSection() {
     final allMedia = widget.post.allMedia;
     if (allMedia.isEmpty) return const SizedBox.shrink();
 
-    // Single media item - show full width
+    // Single media item — full width, height driven by stored aspect ratio
     if (allMedia.length == 1) {
+      final media = allMedia.first;
       return Padding(
         padding: const EdgeInsets.only(top: 14),
-        child: _buildMediaItem(allMedia.first, height: 200),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final ar = media.aspectRatio;
+            double height;
+            if (ar != null && ar > 0) {
+              height = constraints.maxWidth / ar;
+              // Keep cards reasonable — cap between 120 and 320px
+              height = height.clamp(120.0, 320.0);
+            } else {
+              height = 200;
+            }
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                height: height,
+                child: _buildMediaItem(media),
+              ),
+            );
+          },
+        ),
       );
     }
 
-    // Multiple media items - show grid with "+X more" overlay
-    final displayCount = allMedia.length > 4 ? 4 : allMedia.length;
+    // Multiple items — 2:1 grid with "+X more" overlay
     final remainingCount = allMedia.length - 4;
 
     return Padding(
@@ -562,52 +521,48 @@ class _PostCardState extends State<PostCard>
           height: 200,
           child: Row(
             children: [
-              // Left side - first image (larger)
+              // Left side — first image (larger)
               Expanded(
                 flex: 2,
                 child: _buildMediaItem(allMedia[0], height: 200),
               ),
               const SizedBox(width: 4),
-              // Right side - grid of remaining images
-              if (allMedia.length > 1)
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
+              // Right side — stacked smaller images
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Expanded(child: _buildMediaItem(allMedia[1])),
+                    if (allMedia.length > 2) ...[
+                      const SizedBox(height: 4),
                       Expanded(
-                        child: _buildMediaItem(allMedia[1]),
-                      ),
-                      if (allMedia.length > 2) ...[
-                        const SizedBox(height: 4),
-                        Expanded(
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              _buildMediaItem(
-                                allMedia.length > 3 ? allMedia[3] : allMedia[2],
-                              ),
-                              // Show "+X more" overlay on last visible item
-                              if (remainingCount > 0)
-                                Container(
-                                  color: Colors.black54,
-                                  child: Center(
-                                    child: Text(
-                                      '+$remainingCount',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            _buildMediaItem(
+                              allMedia.length > 3 ? allMedia[3] : allMedia[2],
+                            ),
+                            if (remainingCount > 0)
+                              Container(
+                                color: Colors.black54,
+                                child: Center(
+                                  child: Text(
+                                    '+$remainingCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
-                      ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -626,7 +581,6 @@ class _PostCardState extends State<PostCard>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Video thumbnail or placeholder
             if (media.thumbnailUrl != null)
               CachedNetworkImage(
                 imageUrl: media.thumbnailUrl!,
@@ -634,13 +588,8 @@ class _PostCardState extends State<PostCard>
               )
             else
               const Center(
-                child: Icon(
-                  Icons.videocam_rounded,
-                  color: Colors.white54,
-                  size: 40,
-                ),
+                child: Icon(Icons.videocam_rounded, color: Colors.white54, size: 40),
               ),
-            // Play button overlay
             Center(
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -648,11 +597,7 @@ class _PostCardState extends State<PostCard>
                   color: Colors.black54,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 32,
-                ),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
               ),
             ),
           ],
@@ -660,39 +605,28 @@ class _PostCardState extends State<PostCard>
       );
     }
 
-    // Image
     return CachedNetworkImage(
       imageUrl: media.url,
       fit: BoxFit.cover,
       height: height,
       placeholder: (_, __) => Container(
         height: height,
-        decoration: BoxDecoration(
-          color: AppColors.greyLight.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(8),
-        ),
+        color: AppColors.greyLight.withOpacity(0.5),
         child: Center(
           child: SizedBox(
             width: 24,
             height: 24,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.primaryBlue.withOpacity(0.5),
+              color: AppColors.primaryBlue.withOpacity(0.4),
             ),
           ),
         ),
       ),
       errorWidget: (_, __, ___) => Container(
         height: height,
-        decoration: BoxDecoration(
-          color: AppColors.greyLight.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(
-          Icons.broken_image_rounded,
-          color: AppColors.greyMedium,
-          size: 40,
-        ),
+        color: AppColors.greyLight.withOpacity(0.5),
+        child: const Icon(Icons.broken_image_rounded, color: AppColors.greyMedium, size: 40),
       ),
     );
   }
@@ -701,7 +635,7 @@ class _PostCardState extends State<PostCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.greyLight.withOpacity(0.3),
+        color: AppColors.greyLight.withOpacity(0.35),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -718,11 +652,7 @@ class _PostCardState extends State<PostCard>
               widget.onShowLikers?.call();
             },
           ),
-          Container(
-            width: 1,
-            height: 24,
-            color: AppColors.greyMedium.withOpacity(0.3),
-          ),
+          Container(width: 1, height: 24, color: AppColors.greyMedium.withOpacity(0.25)),
           _ActionButton(
             icon: Icons.chat_bubble_outline_rounded,
             label: '${widget.post.commentsCount}',
@@ -758,16 +688,10 @@ class _CategoryBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.1),
-          ],
+          colors: [color.withOpacity(0.18), color.withOpacity(0.08)],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.25), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -810,18 +734,14 @@ class _ActionButton extends StatelessWidget {
         child: Row(
           textDirection: TextDirection.rtl,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: AppColors.greyDark.withOpacity(0.7),
-            ),
+            Icon(icon, size: 20, color: AppColors.greyDark.withOpacity(0.65)),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.greyDark.withOpacity(0.8),
+                color: AppColors.greyDark.withOpacity(0.75),
               ),
             ),
           ],
@@ -852,7 +772,6 @@ class _LikeButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       textDirection: TextDirection.rtl,
       children: [
-        // Like/Unlike button (heart icon)
         InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
@@ -862,17 +781,13 @@ class _LikeButton extends StatelessWidget {
               scale: isAnimating ? 1.3 : 1.0,
               duration: const Duration(milliseconds: 150),
               child: Icon(
-                isLiked
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_border_rounded,
+                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                 size: 22,
-                color:
-                    isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.7),
+                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.65),
               ),
             ),
           ),
         ),
-        // Likes count (tappable to show likers)
         InkWell(
           onTap: onShowLikers,
           borderRadius: BorderRadius.circular(8),
@@ -883,8 +798,7 @@ class _LikeButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color:
-                    isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.8),
+                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.75),
               ),
             ),
           ),
