@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:park_janana/core/constants/app_colors.dart';
-import 'package:park_janana/core/constants/app_dimensions.dart';
-import 'package:park_janana/core/constants/app_durations.dart';
 import 'package:park_janana/features/reports/screens/attendance_summary_report.dart';
 import 'package:park_janana/features/reports/screens/task_summary_report.dart';
 import 'package:park_janana/features/reports/screens/worker_shift_report.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
+import 'package:park_janana/features/tasks/theme/task_theme.dart';
 
-class WorkerReportsScreen extends StatelessWidget {
+class WorkerReportsScreen extends StatefulWidget {
   final String userId;
   final String userName;
   final String profileUrl;
@@ -20,97 +18,108 @@ class WorkerReportsScreen extends StatelessWidget {
   });
 
   @override
+  State<WorkerReportsScreen> createState() => _WorkerReportsScreenState();
+}
+
+class _WorkerReportsScreenState extends State<WorkerReportsScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const UserHeader(),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: TaskTheme.background,
+        body: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Text(
-                'הדוחות שלי',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.right,
-              ),
+            const Directionality(
+              textDirection: TextDirection.ltr,
+              child: UserHeader(),
             ),
-            const Divider(thickness: 1),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                padding: const EdgeInsets.all(20),
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                childAspectRatio: 1,
-                children: [
-                  _ReportCard(
-                    icon: Icons.access_time,
-                    label: 'דו״ח נוכחות',
-                    onTap: () {
-                      Navigator.push(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('הדוחות שלי', style: TaskTheme.heading1),
+                    const SizedBox(height: 4),
+                    Text(
+                      'צפייה בנתוני נוכחות, משימות ומשמרות',
+                      style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildReportCard(
+                      index: 0,
+                      icon: Icons.access_time_rounded,
+                      title: 'דו״ח נוכחות',
+                      description: 'שעות עבודה, ימי נוכחות וסיכום חודשי',
+                      gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AttendanceSummaryScreen(
-                            userId: userId,
-                            userName: userName,
-                            profileUrl: profileUrl,
+                          builder: (_) => AttendanceSummaryScreen(
+                            userId: widget.userId,
+                            userName: widget.userName,
+                            profileUrl: widget.profileUrl,
                           ),
                         ),
-                      );
-                    },
-                    gradient: const LinearGradient(
-                      colors: [AppColors.lightBlue, AppColors.deepBlue],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
+                      ),
                     ),
-                  ),
-                  _ReportCard(
-                    icon: Icons.task_alt_rounded,
-                    label: 'דו״ח משימות',
-                    onTap: () {
-                      Navigator.push(
+                    const SizedBox(height: 14),
+                    _buildReportCard(
+                      index: 1,
+                      icon: Icons.task_alt_rounded,
+                      title: 'דו״ח משימות',
+                      description: 'סטטוס משימות, התקדמות ואחוזי ביצוע',
+                      gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TaskSummaryReport(
-                            userId: userId,
-                            userName: userName,
-                            profileUrl: profileUrl,
+                          builder: (_) => TaskSummaryReport(
+                            userId: widget.userId,
+                            userName: widget.userName,
+                            profileUrl: widget.profileUrl,
                           ),
                         ),
-                      );
-                    },
-                    gradient: const LinearGradient(
-                      colors: [AppColors.redLight, AppColors.redDark],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
+                      ),
                     ),
-                  ),
-                  _ReportCard(
-                    icon: Icons.schedule_rounded,
-                    label: 'דו״ח משמרות',
-                    onTap: () {
-                      Navigator.push(
+                    const SizedBox(height: 14),
+                    _buildReportCard(
+                      index: 2,
+                      icon: Icons.schedule_rounded,
+                      title: 'דו״ח משמרות',
+                      description: 'היסטוריית משמרות, אישורים והחלטות',
+                      gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => WorkerShiftReport(
-                            uid: userId,
-                            fullName: userName,
-                            profilePicture: profileUrl,
+                          builder: (_) => WorkerShiftReport(
+                            uid: widget.userId,
+                            fullName: widget.userName,
+                            profilePicture: widget.profileUrl,
                           ),
                         ),
-                      );
-                    },
-                    gradient: const LinearGradient(
-                      colors: [AppColors.greenMedium, AppColors.darkGreen],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -118,89 +127,166 @@ class WorkerReportsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildReportCard({
+    required int index,
+    required IconData icon,
+    required String title,
+    required String description,
+    required List<Color> gradientColors,
+    required VoidCallback onTap,
+  }) {
+    final animation = CurvedAnimation(
+      parent: _animController,
+      curve: Interval(
+        index * 0.15,
+        0.6 + index * 0.15,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
+    return FadeTransition(
+      opacity: animation,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.15),
+          end: Offset.zero,
+        ).animate(animation),
+        child: _ReportCardTile(
+          icon: icon,
+          title: title,
+          description: description,
+          gradientColors: gradientColors,
+          onTap: onTap,
+        ),
+      ),
+    );
+  }
 }
 
-class _ReportCard extends StatefulWidget {
+class _ReportCardTile extends StatefulWidget {
   final IconData icon;
-  final String label;
+  final String title;
+  final String description;
+  final List<Color> gradientColors;
   final VoidCallback onTap;
-  final Gradient gradient;
 
-  const _ReportCard({
+  const _ReportCardTile({
     required this.icon,
-    required this.label,
+    required this.title,
+    required this.description,
+    required this.gradientColors,
     required this.onTap,
-    required this.gradient,
   });
 
   @override
-  State<_ReportCard> createState() => _ReportCardState();
+  State<_ReportCardTile> createState() => _ReportCardTileState();
 }
 
-class _ReportCardState extends State<_ReportCard>
+class _ReportCardTileState extends State<_ReportCardTile>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late AnimationController _scaleController;
   late Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: AppDurations.instant,
+    _scaleController = AnimationController(
       vsync: this,
-      lowerBound: 0.95,
-      upperBound: 1.0,
-    )..forward();
-    _scaleAnim = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.97).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _scaleController.dispose();
     super.dispose();
   }
-
-  void _handleTapDown(_) => _controller.reverse();
-  void _handleTapUp(_) => _controller.forward();
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: () => _controller.forward(),
+      onTapDown: (_) => _scaleController.forward(),
+      onTapUp: (_) {
+        _scaleController.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _scaleController.reverse(),
       child: ScaleTransition(
         scale: _scaleAnim,
         child: Container(
           decoration: BoxDecoration(
-            gradient: widget.gradient,
-            borderRadius: AppDimensions.borderRadiusXXL,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+            color: TaskTheme.surface,
+            borderRadius: BorderRadius.circular(TaskTheme.radiusL),
+            boxShadow: TaskTheme.cardShadow,
+            border: Border(
+              right: BorderSide(
+                color: widget.gradientColors[0],
+                width: 4,
               ),
-            ],
+            ),
           ),
-          padding: AppDimensions.paddingAllXL,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(widget.icon,
-                  size: AppDimensions.iconLarge, color: Colors.white),
-              const SizedBox(height: AppDimensions.spacingM),
-              Text(
-                widget.label,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                // Icon circle
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: widget.gradientColors,
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.gradientColors[0].withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(widget.icon, color: Colors.white, size: 26),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                const SizedBox(width: 16),
+                // Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title, style: TaskTheme.heading3),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.description,
+                        style: TaskTheme.caption,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: TaskTheme.background,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: TaskTheme.textSecondary,
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

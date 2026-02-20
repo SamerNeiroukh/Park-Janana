@@ -35,7 +35,7 @@ dependencies:
   cached_network_image: ^3.3.1
   slide_to_act: ^2.0.1
   shimmer: ^3.0.0
-  fl_chart: ^0.71.0  # Compatible with Dart SDK 3.5.4
+  fl_chart: ^0.69.0  # Last version compatible with Flutter 3.24
   pdf: ^3.10.1
   printing: ^5.10.2
   bidi: ^2.0.0
