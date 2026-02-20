@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 
@@ -505,37 +505,12 @@ class _CommentCardState extends State<_CommentCard> {
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.comment.userProfilePicture;
-
-    if (picUrl.isEmpty) {
-      setState(() => _isLoadingImage = false);
-      return;
-    }
-
-    // If it's already a full URL (starts with http), use it directly
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.comment.userProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoadingImage = false;
       });
-      return;
-    }
-
-    // If it's a Firebase Storage path, get the download URL
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoadingImage = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error resolving profile picture: $e');
-      if (mounted) {
-        setState(() => _isLoadingImage = false);
-      }
     }
   }
 

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
@@ -38,11 +40,15 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   String _selectedCategory = 'general';
   bool _isSubmitting = false;
   String _uploadStatus = '';
+  double _uploadProgress = 0.0;
 
   // Media handling
   final List<File> _selectedMedia = [];
   final ImagePicker _imagePicker = ImagePicker();
   static const int _maxMediaCount = 10;
+
+  // Local thumbnail paths for selected videos (filePath → thumbPath or null if failed)
+  final Map<String, String?> _videoThumbnails = {};
 
   final List<Map<String, dynamic>> _categories = const [
     {
@@ -81,7 +87,36 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     _contentController.dispose();
     _titleFocus.dispose();
     _contentFocus.dispose();
+    // Delete any locally-generated preview thumbnails
+    for (final path in _videoThumbnails.values) {
+      if (path != null) {
+        try { File(path).deleteSync(); } catch (_) {}
+      }
+    }
     super.dispose();
+  }
+
+  Future<void> _generateVideoPreviewThumbnail(File videoFile) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final thumbPath =
+          '${tempDir.path}/preview_${videoFile.path.hashCode}.jpg';
+      final thumb = await VideoThumbnail.thumbnailFile(
+        video: videoFile.path,
+        thumbnailPath: thumbPath,
+        imageFormat: ImageFormat.JPEG,
+        maxHeight: 200,
+        quality: 70,
+      );
+      if (mounted) {
+        setState(() => _videoThumbnails[videoFile.path] = thumb);
+      }
+    } catch (e) {
+      debugPrint('Preview thumbnail error: $e');
+      if (mounted) {
+        setState(() => _videoThumbnails[videoFile.path] = null);
+      }
+    }
   }
 
   // ===============================
@@ -123,10 +158,44 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     );
 
     if (video != null) {
-      setState(() {
-        _selectedMedia.add(File(video.path));
-      });
+      final file = File(video.path);
+      setState(() => _selectedMedia.add(file));
+      _generateVideoPreviewThumbnail(file);
+      // Warn if the file might be in an incompatible HDR format (e.g. iPhone .mov)
+      final ext = video.path.split('.').last.toLowerCase();
+      if (ext == 'mov') {
+        _showInfoSnackbar(
+          'סרטוני .MOV מאייפון עשויים להיות בפורמט Dolby Vision שלא '
+          'נתמך בחלק מהמכשירים. מומלץ להשתמש ב-MP4.',
+        );
+      }
     }
+  }
+
+  void _showInfoSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Text(
+                message,
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.info_outline_rounded, color: Colors.white, size: 18),
+          ],
+        ),
+        backgroundColor: const Color(0xFF0F5398),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 5),
+      ),
+    );
   }
 
   Future<void> _takePhoto() async {
@@ -284,6 +353,89 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     return ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'mpeg', 'mpg', 'm4v'].contains(ext);
   }
 
+  Widget _buildVideoPreview(File file) {
+    final bool isGenerating = !_videoThumbnails.containsKey(file.path);
+    final String? thumbPath = _videoThumbnails[file.path];
+
+    if (isGenerating) {
+      // Thumbnail not ready yet — show pulsing video icon + label
+      return Container(
+        color: const Color(0xFF1E2A3A),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white54,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              'וידאו',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (thumbPath != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.file(File(thumbPath), fit: BoxFit.cover),
+          // Dark gradient overlay at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 30,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+          const Center(
+            child: Icon(
+              Icons.play_circle_filled_rounded,
+              color: Colors.white,
+              size: 28,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Thumbnail generation failed — show static icon
+    return Container(
+      color: const Color(0xFF1E2A3A),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.videocam_rounded, color: Colors.white54, size: 28),
+          SizedBox(height: 4),
+          Text(
+            'וידאו',
+            style: TextStyle(color: Colors.white38, fontSize: 9),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submitPost() async {
     if (!_formKey.currentState!.validate()) {
       HapticFeedback.heavyImpact();
@@ -293,6 +445,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     HapticFeedback.mediumImpact();
     setState(() {
       _isSubmitting = true;
+      _uploadProgress = 0.0;
       _uploadStatus = 'מכין להעלאה...';
     });
 
@@ -302,19 +455,24 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
       // Upload media if any selected
       if (_selectedMedia.isNotEmpty) {
-        setState(() => _uploadStatus = 'מעלה קבצים...');
         uploadedMedia = await _newsfeedService.uploadPostMedia(
           postId: postId,
           files: _selectedMedia,
-          onProgress: (current, total) {
+          onProgress: (progress, status) {
             if (mounted) {
-              setState(() => _uploadStatus = 'מעלה $current מתוך $total...');
+              setState(() {
+                _uploadProgress = progress;
+                _uploadStatus = status;
+              });
             }
           },
         );
       }
 
-      setState(() => _uploadStatus = 'מפרסם פוסט...');
+      setState(() {
+        _uploadProgress = 1.0;
+        _uploadStatus = 'מפרסם פוסט...';
+      });
 
       final post = PostModel(
         id: postId,
@@ -343,6 +501,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       if (mounted) {
         setState(() {
           _isSubmitting = false;
+          _uploadProgress = 0.0;
           _uploadStatus = '';
         });
       }
@@ -392,63 +551,66 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-        backgroundColor: Colors.transparent,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.white.withOpacity(0.98),
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+          backgroundColor: Colors.transparent,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.white.withOpacity(0.98),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryBlue.withOpacity(0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, 15),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
               ],
             ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryBlue.withOpacity(0.15),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildCategorySection(),
-                        const SizedBox(height: 28),
-                        _buildTitleField(),
-                        const SizedBox(height: 18),
-                        _buildContentField(),
-                        const SizedBox(height: 20),
-                        _buildMediaSection(),
-                        const SizedBox(height: 28),
-                        _buildSubmitButton(),
-                      ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildCategorySection(),
+                          const SizedBox(height: 28),
+                          _buildTitleField(),
+                          const SizedBox(height: 18),
+                          _buildContentField(),
+                          const SizedBox(height: 20),
+                          _buildMediaSection(),
+                          const SizedBox(height: 28),
+                          _buildSubmitButton(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -516,14 +678,18 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           ),
           const Spacer(),
           Material(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withOpacity(_isSubmitting ? 0.1 : 0.2),
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
-              onTap: () => Navigator.pop(context),
+              onTap: _isSubmitting ? null : () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(12),
-              child: const Padding(
-                padding: EdgeInsets.all(8),
-                child: Icon(Icons.close_rounded, color: Colors.white, size: 22),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.close_rounded,
+                  color: Colors.white.withOpacity(_isSubmitting ? 0.4 : 1.0),
+                  size: 22,
+                ),
               ),
             ),
           ),
@@ -768,16 +934,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(11),
                           child: isVideo
-                              ? Container(
-                                  color: AppColors.greyDark,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.videocam_rounded,
-                                      color: Colors.white,
-                                      size: 32,
-                                    ),
-                                  ),
-                                )
+                              ? _buildVideoPreview(file)
                               : Image.file(
                                   file,
                                   fit: BoxFit.cover,
@@ -936,6 +1093,69 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   }
 
   Widget _buildSubmitButton() {
+    if (_isSubmitting) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.primaryBlue.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primaryBlue.withOpacity(0.25),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _uploadStatus.isEmpty ? 'מכין...' : _uploadStatus,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
+                      color: AppColors.primaryBlue,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${(_uploadProgress * 100).toInt()}%',
+                  style: const TextStyle(
+                    color: AppColors.primaryBlue,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: _uploadProgress,
+                minHeight: 6,
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -953,51 +1173,27 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: _isSubmitting ? null : _submitPost,
+          onTap: _submitPost,
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(
-              child: _isSubmitting
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        ),
-                        if (_uploadStatus.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            _uploadStatus,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ],
-                    )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      textDirection: TextDirection.rtl,
-                      children: [
-                        Text(
-                          'פרסם פוסט',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(Icons.send_rounded, color: Colors.white, size: 22),
-                      ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                textDirection: TextDirection.rtl,
+                children: [
+                  Text(
+                    'פרסם פוסט',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                ],
+              ),
             ),
           ),
         ),

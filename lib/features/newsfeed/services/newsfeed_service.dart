@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -29,12 +30,20 @@ class NewsfeedService {
   }
 
   Stream<List<PostModel>> getPostsByCategory(String category, {int? limit}) {
+    // No orderBy here — composite index (category + isPinned + createdAt) not
+    // guaranteed to exist. We fetch the category slice and sort client-side;
+    // category post counts are small enough that this is fine.
     Query<Map<String, dynamic>> query = _postsRef
-        .where('category', isEqualTo: category)
-        .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true);
+        .where('category', isEqualTo: category);
     if (limit != null) query = query.limit(limit);
-    return query.snapshots().map(_mapSnapshotToPosts);
+    return query.snapshots().map((snap) {
+      final posts = _mapSnapshotToPosts(snap);
+      posts.sort((a, b) {
+        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+        return b.createdAt.compareTo(a.createdAt);
+      });
+      return posts;
+    });
   }
 
   // ===============================
@@ -133,53 +142,86 @@ class NewsfeedService {
   Future<List<PostMedia>> uploadPostMedia({
     required String postId,
     required List<File> files,
-    Function(int current, int total)? onProgress,
+    void Function(double progress, String status)? onProgress,
   }) async {
     final List<PostMedia> uploadedMedia = [];
+    final int total = files.length;
 
-    for (int i = 0; i < files.length; i++) {
+    for (int i = 0; i < total; i++) {
       final file = files[i];
       final isVideo = _isVideoFile(file.path);
-      final extension = file.path.split('.').last.toLowerCase();
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$i.$extension';
-      final contentType = _getContentType(extension, isVideo);
+      final double fileBase = i / total;
+      final double fileSlice = 1.0 / total;
 
-      debugPrint('Uploading file ${i + 1}/${files.length}: $fileName (isVideo: $isVideo, contentType: $contentType)');
-
-      final ref = _storage.ref('posts/$postId/$fileName');
+      // Reports progress in [0,1] range for the whole batch
+      void reportProgress(double localFraction, String status) {
+        onProgress?.call(
+          (fileBase + localFraction * fileSlice).clamp(0.0, 1.0),
+          status,
+        );
+      }
 
       try {
+        double? aspectRatio;
+
+        if (isVideo) {
+          reportProgress(0.0, 'מעלה סרטון ${i + 1}/$total...');
+        } else {
+          aspectRatio = await _readImageAspectRatio(file);
+          reportProgress(0.0, 'מעלה תמונה ${i + 1}/$total...');
+        }
+
+        final extension = file.path.split('.').last.toLowerCase();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_$i.$extension';
+        final contentType = _getContentType(extension, isVideo);
+        final ref = _storage.ref('posts/$postId/$fileName');
+
+        // Upload with real byte-level progress via snapshotEvents
         final uploadTask = ref.putFile(
           file,
           SettableMetadata(contentType: contentType),
         );
 
-        // Wait for upload to complete
-        await uploadTask;
-        debugPrint('Upload complete for: $fileName');
+        await for (final snapshot in uploadTask.snapshotEvents) {
+          final state = snapshot.state;
+          if (state == TaskState.running || state == TaskState.paused) {
+            final byteRatio = snapshot.totalBytes > 0
+                ? snapshot.bytesTransferred / snapshot.totalBytes
+                : 0.0;
+            // Upload phase occupies 0–85% of the file's slice
+            reportProgress(byteRatio * 0.85, 'מעלה ${i + 1}/$total...');
+          } else if (state == TaskState.error) {
+            throw Exception('Upload failed for file ${i + 1}');
+          } else if (state == TaskState.success) {
+            break;
+          }
+        }
 
         final url = await ref.getDownloadURL();
-        debugPrint('Got download URL: $url');
 
-        // Generate and upload thumbnail for videos
+        // Thumbnail generation for videos (85–100% of slice)
         String? thumbnailUrl;
         if (isVideo) {
-          thumbnailUrl = await _generateAndUploadThumbnail(
+          reportProgress(0.85, 'מייצר תמונה מקדימה...');
+          final result = await _generateAndUploadThumbnail(
             videoFile: file,
             postId: postId,
             index: i,
           );
+          thumbnailUrl = result.url;
+          aspectRatio = result.aspectRatio;
         }
+
+        reportProgress(1.0, i + 1 == total ? 'מפרסם פוסט...' : 'קובץ ${i + 1} הועלה');
 
         uploadedMedia.add(PostMedia(
           url: url,
           type: isVideo ? 'video' : 'image',
           thumbnailUrl: thumbnailUrl,
+          aspectRatio: aspectRatio,
         ));
-
-        onProgress?.call(i + 1, files.length);
       } catch (e) {
-        debugPrint('Error uploading $fileName: $e');
+        debugPrint('Error uploading file ${i + 1}: $e');
         rethrow;
       }
     }
@@ -187,7 +229,24 @@ class NewsfeedService {
     return uploadedMedia;
   }
 
-  Future<String?> _generateAndUploadThumbnail({
+  /// Reads width/height from a local image file and returns width/height.
+  Future<double?> _readImageAspectRatio(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final img = frame.image;
+      final ratio = img.height > 0 ? img.width / img.height : null;
+      img.dispose();
+      codec.dispose();
+      return ratio;
+    } catch (e) {
+      debugPrint('Failed to read image dimensions: $e');
+      return null;
+    }
+  }
+
+  Future<({String? url, double? aspectRatio})> _generateAndUploadThumbnail({
     required File videoFile,
     required String postId,
     required int index,
@@ -195,11 +254,9 @@ class NewsfeedService {
     try {
       debugPrint('Generating thumbnail for video...');
 
-      // Get temp directory to store thumbnail
       final tempDir = await getTemporaryDirectory();
       final thumbnailPath = '${tempDir.path}/thumb_${postId}_$index.jpg';
 
-      // Generate thumbnail from video
       final thumbnail = await VideoThumbnail.thumbnailFile(
         video: videoFile.path,
         thumbnailPath: thumbnailPath,
@@ -210,32 +267,41 @@ class NewsfeedService {
 
       if (thumbnail == null) {
         debugPrint('Failed to generate thumbnail');
-        return null;
+        return (url: null, aspectRatio: null);
       }
 
       debugPrint('Thumbnail generated: $thumbnail');
 
-      // Upload thumbnail to Firebase Storage
       final thumbFile = File(thumbnail);
-      final thumbRef = _storage.ref('posts/$postId/thumb_$index.jpg');
 
+      // Read dimensions from thumbnail BEFORE deleting it
+      double? aspectRatio;
+      try {
+        final bytes = await thumbFile.readAsBytes();
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final img = frame.image;
+        if (img.height > 0) aspectRatio = img.width / img.height;
+        img.dispose();
+        codec.dispose();
+      } catch (e) {
+        debugPrint('Failed to read thumbnail dimensions: $e');
+      }
+
+      final thumbRef = _storage.ref('posts/$postId/thumb_$index.jpg');
       await thumbRef.putFile(
         thumbFile,
         SettableMetadata(contentType: 'image/jpeg'),
       );
-
       final thumbUrl = await thumbRef.getDownloadURL();
       debugPrint('Thumbnail uploaded: $thumbUrl');
 
-      // Clean up temp file
-      try {
-        await thumbFile.delete();
-      } catch (_) {}
+      try { await thumbFile.delete(); } catch (_) {}
 
-      return thumbUrl;
+      return (url: thumbUrl, aspectRatio: aspectRatio);
     } catch (e) {
       debugPrint('Error generating thumbnail: $e');
-      return null;
+      return (url: null, aspectRatio: null);
     }
   }
 
