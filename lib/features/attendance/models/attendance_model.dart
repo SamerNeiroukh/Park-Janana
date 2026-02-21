@@ -73,13 +73,17 @@ class AttendanceModel {
     required this.sessions,
   });
 
+  // Only count sessions where the worker actually clocked out
+  List<AttendanceRecord> get _completedSessions =>
+      sessions.where((r) => r.clockIn != r.clockOut).toList();
+
   int get daysWorked {
-    final uniqueDays = sessions.map((r) => r.clockIn.day).toSet();
+    final uniqueDays = _completedSessions.map((r) => r.clockIn.day).toSet();
     return uniqueDays.length;
   }
 
   double get totalHoursWorked {
-    return sessions.fold(0.0, (sum, r) => sum + r.hoursWorked);
+    return _completedSessions.fold(0.0, (total, r) => total + r.hoursWorked);
   }
 
   Map<String, dynamic> toMap() {

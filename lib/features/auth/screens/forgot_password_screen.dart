@@ -18,6 +18,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   bool _isSending = false;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
   Future<void> _sendPasswordResetEmail() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {

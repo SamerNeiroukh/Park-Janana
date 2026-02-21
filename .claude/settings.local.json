@@ -24,7 +24,17 @@
       "Bash(echo:*)",
       "Bash(firebase firestore:rules:get:*)",
       "Bash(firebase:*)",
-      "Bash(firebase help:*)"
+      "Bash(firebase help:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(./gradlew :package_info_plus:compileDebugKotlin:*)",
+      "Bash(jar -tf:*)",
+      "Bash(./gradlew :app:compileDebugJavaWithJavac:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(xargs:*)",
+      "Bash(./gradlew:*)",
+      "Bash(tee:*)"
     ]
   }
 }

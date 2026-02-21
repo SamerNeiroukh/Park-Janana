@@ -17,6 +17,7 @@ class WorkersHoursReport extends StatefulWidget {
 class _WorkersHoursReportState extends State<WorkersHoursReport> {
   late DateTime _selectedMonth;
   bool _isLoading = true;
+  bool _isExporting = false;
   List<AttendanceModel> _records = [];
 
   @override
@@ -46,12 +47,17 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
   }
 
   Future<void> _exportPdf() async {
-    if (_records.isEmpty) return;
-    await PdfExportService.exportWorkersHoursPdf(
-      context: context,
-      records: _records,
-      month: _selectedMonth,
-    );
+    if (_records.isEmpty || _isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await PdfExportService.exportWorkersHoursPdf(
+        context: context,
+        records: _records,
+        month: _selectedMonth,
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   @override
@@ -457,24 +463,30 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             borderRadius: BorderRadius.circular(TaskTheme.radiusM),
             child: InkWell(
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-              onTap: _exportPdf,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.picture_as_pdf_rounded,
-                        color: Colors.white, size: 20),
-                    SizedBox(width: 8),
-                    Text(
-                      'ייצוא PDF',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white),
-                    ),
-                  ],
-                ),
+              onTap: _isExporting ? null : _exportPdf,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: _isExporting
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2.5))
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.picture_as_pdf_rounded,
+                              color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'ייצוא PDF',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),

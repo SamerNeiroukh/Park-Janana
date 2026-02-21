@@ -35,6 +35,12 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   bool _isNavigating = false; // ✅ prevent multiple FAB presses
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AppAuthProvider>();
     final currentUid = authProvider.uid;

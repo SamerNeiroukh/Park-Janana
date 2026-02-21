@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/main.dart' show navigatorKey;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Background message handler - must be top-level function
 @pragma('vm:entry-point')
@@ -145,6 +146,12 @@ class NotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
+    await _persistNotification(
+      title: notification.title ?? 'Park Janana',
+      body: notification.body ?? '',
+      type: message.data['type'] as String? ?? 'general',
+    );
+
     // Show local notification with JSON payload for deep linking
     await _showLocalNotification(
       title: notification.title ?? 'Park Janana',
@@ -156,7 +163,35 @@ class NotificationService {
   /// Handle when user taps notification to open app
   void _handleNotificationOpen(RemoteMessage message) {
     debugPrint('App opened from notification: ${message.data}');
+    _persistNotification(
+      title: message.notification?.title ?? 'Park Janana',
+      body: message.notification?.body ?? '',
+      type: message.data['type'] as String? ?? 'general',
+    );
     _navigateFromNotification(message.data);
+  }
+
+  /// Persist a notification entry to SharedPreferences (capped at 50)
+  Future<void> _persistNotification({
+    required String title,
+    required String body,
+    required String type,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList('notification_history') ?? [];
+      final entry = json.encode({
+        'title': title,
+        'body': body,
+        'type': type,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+      raw.insert(0, entry);
+      if (raw.length > 50) raw.removeRange(50, raw.length);
+      await prefs.setStringList('notification_history', raw);
+    } catch (e) {
+      debugPrint('Error persisting notification: $e');
+    }
   }
 
   /// Check if app was opened from a notification when terminated
