@@ -19,6 +19,9 @@ import 'package:park_janana/core/widgets/custom_card.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/home/providers/app_state_provider.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
+import 'package:park_janana/core/widgets/network_banner.dart';
+import 'package:park_janana/features/notifications/screens/notification_history_screen.dart';
+import 'package:park_janana/features/settings/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -82,7 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
         showLogoutButton: true,
         onProfileTap: () => _navigateToProfile(currentUser.uid),
       ),
-      body: SingleChildScrollView(
+      body: Column(
+        children: [
+          const NetworkBanner(),
+          Expanded(child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 20),
         child: Column(
           children: [
@@ -117,6 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      )),
+        ],
       ),
     );
   }
@@ -196,6 +204,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   userName: userName,
                   profileUrl: profileUrl,
                 ),
+              ),
+            );
+          },
+        ),
+        // 6. Notifications
+        ActionButton(
+          title: 'התראות',
+          icon: Icons.notifications_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationHistoryScreen(),
+              ),
+            );
+          },
+        ),
+        // 7. Settings
+        ActionButton(
+          title: 'הגדרות',
+          icon: Icons.settings_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
               ),
             );
           },
@@ -287,6 +321,32 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        // 7. Notifications
+        ActionButton(
+          title: 'התראות',
+          icon: Icons.notifications_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationHistoryScreen(),
+              ),
+            );
+          },
+        ),
+        // 8. Settings
+        ActionButton(
+          title: 'הגדרות',
+          icon: Icons.settings_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ),
+            );
+          },
+        ),
       ]);
     }
 
@@ -325,6 +385,30 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'דו"חות עסקיים',
           icon: Icons.bar_chart_rounded,
           onTap: () {},
+        ),
+        ActionButton(
+          title: 'התראות',
+          icon: Icons.notifications_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationHistoryScreen(),
+              ),
+            );
+          },
+        ),
+        ActionButton(
+          title: 'הגדרות',
+          icon: Icons.settings_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ),
+            );
+          },
         ),
       ]);
     }

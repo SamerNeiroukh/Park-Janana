@@ -18,6 +18,7 @@ class TaskDistributionReport extends StatefulWidget {
 class _TaskDistributionReportState extends State<TaskDistributionReport> {
   late DateTime _selectedMonth;
   bool _isLoading = true;
+  bool _isExporting = false;
   List<WorkerTaskStat> _stats = [];
 
   @override
@@ -119,12 +120,17 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
   }
 
   Future<void> _exportPdf() async {
-    if (_stats.isEmpty) return;
-    await PdfExportService.exportTaskDistributionPdf(
-      context: context,
-      stats: _stats,
-      month: _selectedMonth,
-    );
+    if (_stats.isEmpty || _isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await PdfExportService.exportTaskDistributionPdf(
+        context: context,
+        stats: _stats,
+        month: _selectedMonth,
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   @override
@@ -563,24 +569,30 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
             borderRadius: BorderRadius.circular(TaskTheme.radiusM),
             child: InkWell(
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-              onTap: _exportPdf,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.picture_as_pdf_rounded,
-                        color: Colors.white, size: 20),
-                    SizedBox(width: 8),
-                    Text(
-                      'ייצוא PDF',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white),
-                    ),
-                  ],
-                ),
+              onTap: _isExporting ? null : _exportPdf,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: _isExporting
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2.5))
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.picture_as_pdf_rounded,
+                              color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'ייצוא PDF',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),

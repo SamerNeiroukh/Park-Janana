@@ -32,6 +32,12 @@ class _UsersScreenState extends State<UsersScreen> {
   static final Map<String, List<UserModel>> _userCache = {};
 
   @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     fetchAllUsers();

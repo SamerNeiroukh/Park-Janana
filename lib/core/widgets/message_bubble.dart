@@ -37,6 +37,12 @@ class _MessageBubbleState extends State<MessageBubble> {
   String? profilePictureUrl;
 
   @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _messageController.text = widget.message;
@@ -163,15 +169,31 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   void _updateMessage() async {
-    await _shiftService.updateMessage(
-      widget.shiftId,
-      widget.timestamp,
-      _messageController.text,
-    );
-    setState(() => _isEditing = false);
+    try {
+      await _shiftService.updateMessage(
+        widget.shiftId,
+        widget.timestamp,
+        _messageController.text,
+      );
+      if (mounted) setState(() => _isEditing = false);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('שגיאה בעדכון ההודעה')),
+        );
+      }
+    }
   }
 
   void _deleteMessage() async {
-    await _shiftService.deleteMessage(widget.shiftId, widget.timestamp);
+    try {
+      await _shiftService.deleteMessage(widget.shiftId, widget.timestamp);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('שגיאה במחיקת ההודעה')),
+        );
+      }
+    }
   }
 }

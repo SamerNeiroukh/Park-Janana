@@ -39,6 +39,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   bool _isSubmitting = false;
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _loadAllUsers().then((_) {

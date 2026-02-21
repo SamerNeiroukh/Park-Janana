@@ -53,10 +53,14 @@ dependencies:
     sdk: flutter
   flutter_animate: ^4.5.2
   video_player: ^2.8.1
-  chewie: ^1.7.1
+  chewie: ^1.10.0
+  wakelock_plus: ^1.4.0
+  package_info_plus: ^9.0.0
   video_thumbnail: ^0.5.3
 
-  intl: any
+  intl: ^0.19.0
+  connectivity_plus: ^6.0.0
+  url_launcher: ^6.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

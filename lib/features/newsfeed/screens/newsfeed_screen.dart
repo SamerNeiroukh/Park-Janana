@@ -115,7 +115,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   bool _isManager(String? role) {
-    return role == 'manager' || role == 'admin';
+    return role == 'manager' || role == 'owner';
   }
 
   void _showCreatePostDialog(BuildContext context) {

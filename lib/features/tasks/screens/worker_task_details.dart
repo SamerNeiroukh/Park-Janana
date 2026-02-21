@@ -33,6 +33,12 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   String? get _currentUid => context.read<AppAuthProvider>().uid;
 
   @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     task = widget.task;

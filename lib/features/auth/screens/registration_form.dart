@@ -37,6 +37,17 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final RegExp _idRegex = RegExp(r'^\d{9}$');
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _phoneNumberController.dispose();
+    _idNumberController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   Future<void> _registerUser() async {
     if (_isLoading) return;
 
