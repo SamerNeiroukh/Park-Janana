@@ -20,7 +20,11 @@
       "Bash(for branch in \"38-profile-picture-does-not-update-on-home-screen-after-change\" \"9-upgrade-firebase-to-latest-major-migrate-app-check-to-play-integrity-android\" \"MousaUpdatingTheProject\" \"copilot/fix-11\" \"copilot/fix-19\" \"fix/manager-shifts-ui-ux\")",
       "Bash(do echo \"=== $branch ===\")",
       "Bash(done)",
-      "Bash(xargs git branch:*)"
+      "Bash(xargs git branch:*)",
+      "Bash(echo:*)",
+      "Bash(firebase firestore:rules:get:*)",
+      "Bash(firebase:*)",
+      "Bash(firebase help:*)"
     ]
   }
 }

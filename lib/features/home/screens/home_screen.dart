@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
+import 'package:park_janana/features/reports/screens/manager_reports_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/home/widgets/user_card.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
@@ -277,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => WorkerReportsScreen(
+                builder: (context) => ManagerReportsScreen(
                   userId: uid,
                   userName: userName,
                   profileUrl: profileUrl,
