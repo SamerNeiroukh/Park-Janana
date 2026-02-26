@@ -290,12 +290,14 @@ class WorkerService {
     }
   }
 
+  /// Returns all approved users who can be assigned to a shift:
+  /// both workers and managers.
   Future<List<UserModel>> fetchAllWorkers() async {
     try {
       final QuerySnapshot snapshot = await _firestore
           .collection(AppConstants.usersCollection)
-          .where('role', isEqualTo: 'worker')
-          .where('approved', isEqualTo: true) // ✅ Only approved workers
+          .where('role', whereIn: ['worker', 'manager'])
+          .where('approved', isEqualTo: true)
           .get();
 
       return snapshot.docs

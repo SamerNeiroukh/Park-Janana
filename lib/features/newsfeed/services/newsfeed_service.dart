@@ -75,8 +75,14 @@ class NewsfeedService {
   }
 
   Future<void> deletePost(String postId) async {
-    await deletePostMedia(postId);
+    debugPrint('[DELETE] NewsfeedService.deletePost: deleting Firestore doc $postId');
+    // Delete the Firestore document first so the post disappears from the UI
+    // immediately. Media cleanup runs in the background and does not block.
     await _postsRef.doc(postId).delete();
+    debugPrint('[DELETE] NewsfeedService.deletePost: Firestore doc deleted successfully');
+    deletePostMedia(postId).catchError((Object e) {
+      debugPrint('[DELETE] NewsfeedService: background media cleanup error: $e');
+    });
   }
 
   Future<void> togglePin(String postId, bool isPinned) async {

@@ -369,7 +369,10 @@ class _PostCardState extends State<PostCard> {
         elevation: 8,
         onSelected: (value) {
           HapticFeedback.selectionClick();
-          if (value == 'delete') widget.onDelete?.call();
+          if (value == 'delete') {
+            debugPrint('[DELETE] PostCard onSelected: delete tapped, onDelete=${widget.onDelete != null ? "set" : "null"}');
+            widget.onDelete?.call();
+          }
           if (value == 'pin') widget.onPin?.call();
         },
         itemBuilder: (_) => [

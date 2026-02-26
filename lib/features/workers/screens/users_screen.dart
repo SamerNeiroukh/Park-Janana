@@ -29,7 +29,9 @@ class _UsersScreenState extends State<UsersScreen> {
 
   final Set<String> _inProgressWorkerIds = {};
   final Set<String> _selectedDraftIds = {};
-  static final Map<String, List<UserModel>> _userCache = {};
+  // Cache is intentionally NOT static-persisted across app sessions.
+  // Cleared on every new instance so role changes are always reflected.
+  final Map<String, List<UserModel>> _userCache = {};
 
   @override
   void dispose() {

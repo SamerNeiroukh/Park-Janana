@@ -169,7 +169,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         currentUserProfilePicture: currentUser?.profilePicture ?? '',
         isManager: isManager,
         onLike: () => _handleLike(post, userId),
-        onDelete: () => _handleDelete(post),
+        onDelete: () => _deletePostDirectly(post),
         onPin: () => _handlePin(post),
         onShowLikers: () => _showLikersSheet(context, post),
       ),
@@ -202,15 +202,37 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   Future<void> _handleDelete(PostModel post) async {
+    debugPrint('[DELETE] PostCard path: _handleDelete called for post ${post.id}');
     HapticFeedback.mediumImpact();
     final confirm = await _showDeleteDialog();
+    debugPrint('[DELETE] PostCard path: dialog returned confirm=$confirm');
     if (confirm != true) return;
 
     try {
+      debugPrint('[DELETE] PostCard path: calling deletePost');
       await _newsfeedService.deletePost(post.id);
+      debugPrint('[DELETE] PostCard path: deletePost done. mounted=$mounted');
       if (!mounted) return;
       _showSuccessSnackbar('הפוסט נמחק בהצלחה');
     } catch (e) {
+      debugPrint('[DELETE] PostCard path ERROR: $e');
+      if (!mounted) return;
+      _showErrorSnackbar('שגיאה במחיקת הפוסט: $e');
+    }
+  }
+
+  /// Called by PostDetailSheet after it has already shown its own
+  /// confirmation dialog — so we just delete directly with no extra dialog.
+  Future<void> _deletePostDirectly(PostModel post) async {
+    debugPrint('[DELETE] Step 5: _deletePostDirectly called for post ${post.id}');
+    try {
+      debugPrint('[DELETE] Step 6: calling newsfeedService.deletePost');
+      await _newsfeedService.deletePost(post.id);
+      debugPrint('[DELETE] Step 7: deletePost completed. mounted=$mounted');
+      if (!mounted) return;
+      _showSuccessSnackbar('הפוסט נמחק בהצלחה');
+    } catch (e) {
+      debugPrint('[DELETE] ERROR in _deletePostDirectly: $e');
       if (!mounted) return;
       _showErrorSnackbar('שגיאה במחיקת הפוסט: $e');
     }
@@ -231,7 +253,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   Future<bool?> _showDeleteDialog() {
     return showDialog<bool>(
       context: context,
-      builder: (_) => Directionality(
+      builder: (dialogContext) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -259,11 +281,11 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('ביטול'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(dialogContext, true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,

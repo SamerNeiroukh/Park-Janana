@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,6 +21,7 @@ class ClockInOutWidget extends StatefulWidget {
 
 class _ClockInOutWidgetState extends State<ClockInOutWidget>
     with TickerProviderStateMixin {
+  // ── Business logic fields (ALL UNCHANGED) ──────────────────────────────
   final ClockService _clockService = ClockService();
   AttendanceRecord? _ongoingSession;
   bool _loading = true;
@@ -46,6 +47,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     "תשמור על חיוך – זה מדבק 😄",
   ];
   int _quoteIndex = 0;
+
+  // ── Lifecycle (UNCHANGED) ──────────────────────────────────────────────
 
   @override
   void initState() {
@@ -84,13 +87,11 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     super.dispose();
   }
 
+  // ── Timer helpers (UNCHANGED) ───────────────────────────────────────────
+
   void _startLiveClock() {
     _clockTimer = Timer.periodic(const Duration(seconds: 60), (_) {
-      if (mounted) {
-        setState(() {
-          _now = DateTime.now();
-        });
-      }
+      if (mounted) setState(() => _now = DateTime.now());
     });
   }
 
@@ -112,11 +113,11 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
 
   void _startQuoteTimer() {
     _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      setState(() {
-        _quoteIndex = (_quoteIndex + 1) % _quotes.length;
-      });
+      setState(() => _quoteIndex = (_quoteIndex + 1) % _quotes.length);
     });
   }
+
+  // ── Data fetching (UNCHANGED) ───────────────────────────────────────────
 
   Future<void> _fetchSession() async {
     try {
@@ -127,9 +128,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         _loading = false;
         _now = DateTime.now();
       });
-      if (_ongoingSession != null) {
-        _startElapsedTimer();
-      }
+      if (_ongoingSession != null) _startElapsedTimer();
     } catch (e) {
       debugPrint('Error fetching session: $e');
       if (mounted) {
@@ -140,6 +139,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       }
     }
   }
+
+  // ── Action handler (UNCHANGED) ─────────────────────────────────────────
 
   Future<void> _handleAction() async {
     final userName =
@@ -153,7 +154,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         context: context,
         barrierDismissible: false,
         barrierLabel: 'Location Warning',
-        barrierColor: Colors.black54.withOpacity(0.6), // dimmed background
+        barrierColor: Colors.black54.withOpacity(0.6),
         transitionDuration: AppDurations.shimmer,
         pageBuilder: (context, animation, secondaryAnimation) {
           return Center(
@@ -177,7 +178,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Location Icon with glow
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -202,8 +202,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                       ),
                     ),
                     const SizedBox(height: 22),
-
-                    // Bold Title
                     const Text(
                       'אינך נמצא בגבולות הפארק',
                       textAlign: TextAlign.center,
@@ -214,8 +212,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                       ),
                     ),
                     const SizedBox(height: 12),
-
-                    // Normal text description
                     Text(
                       'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת',
                       textAlign: TextAlign.center,
@@ -227,12 +223,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // Buttons row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Cancel button (displays "No" in Hebrew)
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.grey[300],
@@ -240,28 +233,20 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 28, vertical: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
+                                borderRadius: BorderRadius.circular(30)),
                             elevation: 0,
                             minimumSize: const Size(100, 48),
                           ),
                           onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text(
-                            'לא',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
-                          ),
+                          child: const Text('לא',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16)),
                         ),
-
-                        // Confirm button (displays "Yes" in Hebrew)
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
+                                borderRadius: BorderRadius.circular(30)),
                             elevation: 0,
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
@@ -304,10 +289,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           final curvedValue = Curves.easeInOut.transform(animation.value);
           return Opacity(
             opacity: curvedValue,
-            child: Transform.scale(
-              scale: curvedValue,
-              child: child,
-            ),
+            child: Transform.scale(scale: curvedValue, child: child),
           );
         },
       );
@@ -348,12 +330,14 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+                const Icon(Icons.error_outline_rounded,
+                    color: Colors.white, size: 20),
               ],
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             margin: const EdgeInsets.all(16),
           ),
         );
@@ -362,159 +346,179 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     _key.currentState?.reset();
   }
 
+  // ══════════════════════════════════════════════════════════════════════
+  // UI – redesigned pill ↔ card
+  // ══════════════════════════════════════════════════════════════════════
+
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: 30),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
+    if (_loading) return _buildLoadingCard();
 
     final isClockedIn = _ongoingSession != null;
+    return _buildExpandedCard(isClockedIn);
+  }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0, left: 16, right: 16),
-      child: AnimatedBuilder(
-        animation: _cardPulseController,
-        builder: (context, child) {
-          final scale = 1 - _cardPulseController.value;
-          return Transform.scale(scale: scale, child: child);
-        },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: Container(
-            height: AppDimensions.cardHeightL,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isClockedIn
-                    ? [const Color(0xFFFF6A6A), const Color(0xFFFFB88C)]
-                    : [
-                        const Color.fromARGB(255, 79, 88, 254),
-                        const Color(0xFF00f2fe)
-                      ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: _buildContent(isClockedIn),
+  // ── Loading card ────────────────────────────────────────────────────────
+
+  Widget _buildLoadingCard() {
+    return Container(
+      height: 110,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4F58FE), Color(0xFF00f2fe)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: Colors.white,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent(bool isClockedIn) {
+  // ── Expanded card ──────────────────────────────────────────────────────
+
+  Widget _buildExpandedCard(bool isClockedIn) {
     final iconColor = isClockedIn ? Colors.deepOrange : Colors.teal;
     final icon = isClockedIn ? Icons.task_alt : Icons.access_time;
     final label = isClockedIn ? 'החלק כדי לצאת' : 'החלק כדי להתחיל';
-
     final clockInTime =
         isClockedIn ? DateFormat.Hm().format(_ongoingSession!.clockIn) : '';
     final nowTime = DateFormat.Hm().format(_now);
-
     final subLabel = isClockedIn
-        ? ' נכנסת ב־$clockInTime  •  עכשיו $nowTime'
+        ? 'נכנסת ב־$clockInTime  •  עכשיו $nowTime'
         : 'אתה כרגע לא מחובר';
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: [
-              if (isClockedIn)
-                _buildLiveCounter()
-              else
-                _buildMotivationalQuote(),
-              const SizedBox(height: 6),
-              AnimatedSwitcher(
-                duration: AppDurations.cardExpand,
-                child: Text(
-                  subLabel,
-                  key: ValueKey(subLabel),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+    return AnimatedBuilder(
+      animation: _cardPulseController,
+      builder: (_, child) =>
+          Transform.scale(scale: 1 - _cardPulseController.value, child: child),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isClockedIn
+                  ? [const Color(0xFFFF6A6A), const Color(0xFFFFB88C)]
+                  : [
+                      const Color.fromARGB(255, 79, 88, 254),
+                      const Color(0xFF00f2fe),
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
               ),
             ],
           ),
-          AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          iconColor.withOpacity(_pulseController.value * 0.3),
-                      blurRadius: 18 + (_pulseController.value * 8),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Counter or quote ────────────────────────────────
+                if (isClockedIn) _buildLiveCounter() else _buildMotivationalQuote(),
+                const SizedBox(height: 6),
+
+                AnimatedSwitcher(
+                  duration: AppDurations.cardExpand,
+                  child: Text(
+                    subLabel,
+                    key: ValueKey(subLabel),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
-                ),
-                child: child,
-              );
-            },
-            child: SlideAction(
-              key: _key,
-              height: AppDimensions.buttonHeightL,
-              borderRadius: AppDimensions.radiusXL,
-              elevation: 0,
-              outerColor: Colors.transparent,
-              innerColor: Colors.white,
-              sliderButtonIcon: RotationTransition(
-                turns: _ongoingSession == null
-                    ? _clockRotateController
-                    : const AlwaysStoppedAnimation(0),
-                child: Icon(icon, size: 26, color: iconColor),
-              ),
-              text: '',
-              onSubmit: () async => await _handleAction(),
-              child: Shimmer.fromColors(
-                baseColor: iconColor,
-                highlightColor: Colors.white.withOpacity(0.8),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: iconColor,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ),
+                const SizedBox(height: 14),
+
+                // ── Slide action ────────────────────────────────────
+                AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (_, child) => Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: iconColor
+                              .withOpacity(_pulseController.value * 0.3),
+                          blurRadius: 18 + (_pulseController.value * 8),
+                        ),
+                      ],
+                    ),
+                    child: child,
+                  ),
+                  child: SlideAction(
+                    key: _key,
+                    height: AppDimensions.buttonHeightL,
+                    borderRadius: AppDimensions.radiusXL,
+                    elevation: 0,
+                    outerColor: Colors.transparent,
+                    innerColor: Colors.white,
+                    sliderButtonIcon: RotationTransition(
+                      turns: _ongoingSession == null
+                          ? _clockRotateController
+                          : const AlwaysStoppedAnimation(0),
+                      child: Icon(icon, size: 26, color: iconColor),
+                    ),
+                    text: '',
+                    onSubmit: () async => await _handleAction(),
+                    child: Shimmer.fromColors(
+                      baseColor: iconColor,
+                      highlightColor: Colors.white.withOpacity(0.8),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: iconColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildLiveCounter() {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final h = twoDigits(_elapsed.inHours);
-    final m = twoDigits(_elapsed.inMinutes.remainder(60));
-    final s = twoDigits(_elapsed.inSeconds.remainder(60));
+  // ── Sub-widgets (UNCHANGED logic) ─────────────────────────────────────
 
+  Widget _buildLiveCounter() {
+    String two(int n) => n.toString().padLeft(2, '0');
     return Text(
-      '$h:$m:$s',
+      '${two(_elapsed.inHours)}:${two(_elapsed.inMinutes.remainder(60))}:${two(_elapsed.inSeconds.remainder(60))}',
       style: const TextStyle(
         color: Colors.white,
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: FontWeight.bold,
+        letterSpacing: 1,
       ),
     );
   }

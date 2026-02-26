@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' hide TextDirection;
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+
+// ── Navigation targets (ALL UNCHANGED) ───────────────────────────────────
 import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
 import 'package:park_janana/features/reports/screens/manager_reports_screen.dart';
-import 'package:park_janana/features/home/widgets/user_header.dart';
-import 'package:park_janana/features/home/widgets/user_card.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
 import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 import 'package:park_janana/features/shifts/screens/manager_shifts_screen.dart';
@@ -15,62 +15,87 @@ import 'package:park_janana/features/tasks/screens/manager_task_board_screen.dar
 import 'package:park_janana/features/workers/screens/manage_workers_screen.dart';
 import 'package:park_janana/features/attendance/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/features/newsfeed/screens/newsfeed_screen.dart';
-import 'package:park_janana/core/widgets/custom_card.dart';
-import 'package:park_janana/features/home/providers/user_provider.dart';
-import 'package:park_janana/features/home/providers/app_state_provider.dart';
-import 'package:park_janana/features/auth/providers/auth_provider.dart';
-import 'package:park_janana/core/widgets/network_banner.dart';
 import 'package:park_janana/features/notifications/screens/notification_history_screen.dart';
 import 'package:park_janana/features/settings/screens/settings_screen.dart';
+
+// ── Providers (ALL UNCHANGED) ─────────────────────────────────────────────
+import 'package:park_janana/features/home/providers/user_provider.dart';
+import 'package:park_janana/features/home/providers/app_state_provider.dart';
+import 'package:park_janana/features/home/providers/home_badge_provider.dart';
+import 'package:park_janana/features/auth/providers/auth_provider.dart';
+
+// ── Core widgets ──────────────────────────────────────────────────────────
+import 'package:park_janana/core/widgets/network_banner.dart';
+
+// ── Home UI components ────────────────────────────────────────────────────
+import 'package:park_janana/features/home/widgets/home_top_bar.dart';
+import 'package:park_janana/features/home/widgets/glass_hero_card.dart';
+import 'package:park_janana/features/home/widgets/latest_post_card.dart';
+
+// ── Design tokens ─────────────────────────────────────────────────────────
+const _kBg = Color(0xFFF0F2FC);
+const _kPrimary = Color(0xFF4F46E5);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeCtrl;
+  late final Animation<double> _fadeAnim;
+  bool _badgeInitialized = false;
+
   @override
   void initState() {
     super.initState();
-    // Load data from providers on initialization
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 480),
+    );
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = context.read<UserProvider>();
-      final appStateProvider = context.read<AppStateProvider>();
-
-      // Load user data and work stats
-      userProvider.loadCurrentUser();
-      userProvider.loadWorkStats();
-
-      // Load app-wide data
-      appStateProvider.loadWeather();
-      appStateProvider.loadRolesData();
+      context.read<UserProvider>().loadCurrentUser();
+      context.read<UserProvider>().loadWorkStats();
+      context.read<AppStateProvider>().loadWeather();
+      context.read<AppStateProvider>().loadRolesData();
+      _fadeCtrl.forward();
     });
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
   }
 
   void _navigateToProfile(String uid) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => PersonalAreaScreen(uid: uid),
-      ),
+      MaterialPageRoute(builder: (_) => PersonalAreaScreen(uid: uid)),
     );
   }
 
+  // ── Build ─────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    // Watch providers for automatic updates
     final userProvider = context.watch<UserProvider>();
     final appStateProvider = context.watch<AppStateProvider>();
     final authProvider = context.watch<AppAuthProvider>();
+    final badgeProvider = context.watch<HomeBadgeProvider>();
 
     final currentUser = authProvider.user;
 
-    // Show loading while user is null (logging out) or data is being fetched
-    if (currentUser == null || userProvider.isLoading || userProvider.currentUser == null) {
+    if (currentUser == null ||
+        userProvider.isLoading ||
+        userProvider.currentUser == null) {
       return const Scaffold(
-        appBar: UserHeader(showLogoutButton: true),
+        backgroundColor: _kBg,
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -80,354 +105,510 @@ class _HomeScreenState extends State<HomeScreen> {
         userProvider.workStats ?? {'hoursWorked': 0.0, 'daysWorked': 0.0};
     final weatherData = appStateProvider.weatherData;
 
+    // Wire badge provider once
+    if (!_badgeInitialized) {
+      _badgeInitialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        badgeProvider.init(userId: currentUser.uid, userRole: userData.role);
+      });
+    }
+
+    final shiftsBadge = badgeProvider.getBadgeCount('shifts');
+    final tasksBadge = badgeProvider.getBadgeCount('tasks');
+    final newsfeedBadge = badgeProvider.getBadgeCount('newsfeed');
+    final totalBadge = shiftsBadge + tasksBadge + newsfeedBadge;
+
+    final dept = userData.licensedDepartments.isNotEmpty
+        ? userData.licensedDepartments.first
+        : '';
+
     return Scaffold(
-      appBar: UserHeader(
-        showLogoutButton: true,
-        onProfileTap: () => _navigateToProfile(currentUser.uid),
-      ),
-      body: Column(
-        children: [
-          const NetworkBanner(),
-          Expanded(child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 20),
+      backgroundColor: _kBg,
+      body: SafeArea(
         child: Column(
           children: [
-            UserCard(
-              userName: userData.fullName,
-              profilePictureUrl: userData.profilePicture,
-              currentDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-              daysWorked: (workStats['daysWorked'] as double).toInt(),
-              hoursWorked: workStats['hoursWorked'] as double,
-              weatherDescription: weatherData?['description'],
-              temperature: weatherData?['temperature']?.toString(),
-              weatherIcon: weatherData?['icon'],
-              onProfileUpdated: () {
-                // Refresh user data after profile update
-                context.read<UserProvider>().refresh();
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ActionButtonGridPager(
-                buttons: _buildActionButtons(
-                  userData.role,
-                  currentUser.uid,
-                  userData.fullName,
-                  userData.profilePicture,
-                ),
+            const NetworkBanner(),
+            Expanded(
+              child: Stack(
+                children: [
+                  // ── Decorative background blobs ──────────────────────
+                  Positioned(
+                    top: -50,
+                    right: -70,
+                    child: Container(
+                      width: 260,
+                      height: 260,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            const Color(0xFF6D28D9).withOpacity(0.10),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 80,
+                    left: -60,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            const Color(0xFF4F46E5).withOpacity(0.06),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ── Scrollable content ───────────────────────────────
+                  FadeTransition(
+                    opacity: _fadeAnim,
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 220),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // ── 1. TOP BAR (logo centred, RTL) ────────
+                          HomeTopBar(
+                            profilePictureUrl: userData.profilePicture,
+                            notificationBadgeCount: totalBadge,
+                            onProfileTap: () =>
+                                _navigateToProfile(currentUser.uid),
+                            onNotificationTap: () {
+                              // Clear all section badges when opening notifications
+                              badgeProvider.markSectionVisited('shifts');
+                              badgeProvider.markSectionVisited('tasks');
+                              badgeProvider.markSectionVisited('newsfeed');
+                              badgeProvider.markSectionVisited('schedule');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const NotificationHistoryScreen()),
+                              );
+                            },
+                            onSettingsTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const SettingsScreen()),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // ── 2. GLASS HERO CARD ────────────────────
+                          GlassHeroCard(
+                            userName: userData.fullName,
+                            daysWorked: (workStats['daysWorked'] as double)
+                                .toInt(),
+                            hoursWorked:
+                                workStats['hoursWorked'] as double,
+                            weatherDescription: weatherData?['description'],
+                            temperature:
+                                weatherData?['temperature']?.toString(),
+                            department: dept.isNotEmpty ? dept : null,
+                            roleIcon: _roleIcon(userData.role),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // ── 3. HORIZONTAL ACTION STRIP (RTL) ──────
+                          _HorizontalActionStrip(
+                            items: _buildStripItems(
+                              userData.role,
+                              currentUser.uid,
+                              userData.fullName,
+                              userData.profilePicture,
+                              badgeProvider,
+                              appStateProvider,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // ── 4. LATEST POST CARD ───────────────────
+                          LatestPostCard(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const NewsfeedScreen()),
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Floating clock capsule ───────────────────────────
+                  const Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: ClockInOutWidget(),
+                  ),
+                ],
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: ClockInOutWidget(),
             ),
           ],
         ),
-      )),
-        ],
       ),
     );
   }
 
-  List<ActionButton> _buildActionButtons(
+  // ── Role icon derivation ───────────────────────────────────────────────
+
+  IconData _roleIcon(String role) {
+    switch (role) {
+      case 'worker':
+        return Icons.badge_rounded;
+      case 'manager':
+        return Icons.supervisor_account_rounded;
+      default:
+        return Icons.business_rounded;
+    }
+  }
+
+  // ── Strip items: primary CTA first, no notifications/settings ─────────
+
+  List<_StripItem> _buildStripItems(
     String role,
     String uid,
     String userName,
     String profileUrl,
+    HomeBadgeProvider badgeProvider,
+    AppStateProvider appStateProvider,
   ) {
-    final List<ActionButton> buttons = [];
+    final items = <_StripItem>[];
 
     if (role == 'worker') {
-      buttons.addAll([
-        // 1. Weekly Schedule
-        ActionButton(
-          title: 'סידור עבודה',
+      items.addAll([
+        // Primary CTA (first = rightmost in RTL strip)
+        _StripItem(
+          icon: Icons.schedule_rounded,
+          label: 'משמרות',
+          badge: badgeProvider.getBadgeCount('shifts'),
+          color: _kPrimary,
+          onTap: () {
+            badgeProvider.markSectionVisited('shifts');
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const ShiftsScreen()));
+          },
+        ),
+        _StripItem(
           icon: Icons.calendar_view_week_rounded,
+          label: 'סידור עבודה',
+          badge: badgeProvider.getBadgeCount('schedule'),
+          color: const Color(0xFF6366F1),
           onTap: () {
+            badgeProvider.markSectionVisited('schedule');
             Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const MyWeeklyScheduleScreen(),
-              ),
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const MyWeeklyScheduleScreen()));
           },
         ),
-        // 2. Newsfeed
-        ActionButton(
-          title: 'לוח מודעות',
-          icon: Icons.newspaper_rounded,
-          onTap: () {
-            Navigator.push(
+        _StripItem(
+          icon: Icons.task_alt_rounded,
+          label: 'משימות',
+          badge: badgeProvider.getBadgeCount('tasks'),
+          color: const Color(0xFF8B5CF6),
+          onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const NewsfeedScreen(),
-              ),
-            );
-          },
+                  builder: (_) => const WorkerTaskTimelineScreen())),
         ),
-        // 3. My Shifts
-        ActionButton(
-          title: 'המשמרות שלי',
-          icon: Icons.schedule_outlined,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ShiftsScreen(),
-              ),
-            );
-          },
-        ),
-        // 4. My Tasks
-        ActionButton(
-          title: 'המשימות שלי',
-          icon: Icons.check_circle_outline_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const WorkerTaskTimelineScreen(),
-              ),
-            );
-          },
-        ),
-        // 5. Reports
-        ActionButton(
-          title: 'הדו"חות שלי',
-          icon: Icons.stacked_bar_chart_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WorkerReportsScreen(
-                  userId: uid,
-                  userName: userName,
-                  profileUrl: profileUrl,
-                ),
-              ),
-            );
-          },
-        ),
-        // 6. Notifications
-        ActionButton(
-          title: 'התראות',
-          icon: Icons.notifications_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const NotificationHistoryScreen(),
-              ),
-            );
-          },
-        ),
-        // 7. Settings
-        ActionButton(
-          title: 'הגדרות',
-          icon: Icons.settings_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SettingsScreen(),
-              ),
-            );
-          },
-        ),
-      ]);
-    }
-
-    if (role == 'manager') {
-      buttons.addAll([
-        // 1. Weekly Schedule
-        ActionButton(
-          title: 'סידור שבועי',
-          icon: Icons.calendar_view_week_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ManagerWeeklyScheduleScreen(),
-              ),
-            );
-          },
-        ),
-        // 2. Newsfeed
-        ActionButton(
-          title: 'לוח מודעות',
-          icon: Icons.newspaper_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const NewsfeedScreen(),
-              ),
-            );
-          },
-        ),
-        // 3. Manage Shifts
-        ActionButton(
-          title: 'ניהול משמרות',
-          icon: Icons.manage_history_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ManagerShiftsScreen(),
-              ),
-            );
-          },
-        ),
-        // 4. Manage Tasks
-        ActionButton(
-          title: 'ניהול משימות',
-          icon: Icons.assignment_turned_in_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ManagerTaskBoardScreen(),
-              ),
-            );
-          },
-        ),
-        // 5. Manage Workers
-        ActionButton(
-          title: 'ניהול עובדים',
-          icon: Icons.group,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ManageWorkersScreen(),
-              ),
-            );
-          },
-        ),
-        // 6. Reports
-        ActionButton(
-          title: 'הדו"חות שלי',
-          icon: Icons.stacked_bar_chart_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ManagerReportsScreen(
-                  userId: uid,
-                  userName: userName,
-                  profileUrl: profileUrl,
-                ),
-              ),
-            );
-          },
-        ),
-        // 7. Notifications
-        ActionButton(
-          title: 'התראות',
-          icon: Icons.notifications_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const NotificationHistoryScreen(),
-              ),
-            );
-          },
-        ),
-        // 8. Settings
-        ActionButton(
-          title: 'הגדרות',
-          icon: Icons.settings_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SettingsScreen(),
-              ),
-            );
-          },
-        ),
-      ]);
-    }
-
-    if (role == 'owner') {
-      buttons.addAll([
-        // Owners get newsfeed + business reports
-        ActionButton(
-          title: 'לוח מודעות',
-          icon: Icons.newspaper_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const NewsfeedScreen(),
-              ),
-            );
-          },
-        ),
-        ActionButton(
-          title: 'הדו"חות שלי',
-          icon: Icons.stacked_bar_chart_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WorkerReportsScreen(
-                  userId: uid,
-                  userName: userName,
-                  profileUrl: profileUrl,
-                ),
-              ),
-            );
-          },
-        ),
-        ActionButton(
-          title: 'דו"חות עסקיים',
+        _StripItem(
           icon: Icons.bar_chart_rounded,
+          label: 'דוחות',
+          color: const Color(0xFF22C55E),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => WorkerReportsScreen(
+                      userId: uid,
+                      userName: userName,
+                      profileUrl: profileUrl))),
+        ),
+        _StripItem(
+          icon: Icons.newspaper_rounded,
+          label: 'לוח מודעות',
+          badge: badgeProvider.getBadgeCount('newsfeed'),
+          color: const Color(0xFFF59E0B),
+          onTap: () {
+            badgeProvider.markSectionVisited('newsfeed');
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const NewsfeedScreen()));
+          },
+        ),
+      ]);
+    } else if (role == 'manager') {
+      items.addAll([
+        // Primary CTA
+        _StripItem(
+          icon: Icons.manage_history_rounded,
+          label: 'משמרות',
+          badge: badgeProvider.getBadgeCount('shifts'),
+          color: _kPrimary,
+          onTap: () {
+            badgeProvider.markSectionVisited('shifts');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ManagerShiftsScreen()));
+          },
+        ),
+        _StripItem(
+          icon: Icons.calendar_view_week_rounded,
+          label: 'סידור שבועי',
+          badge: badgeProvider.getBadgeCount('schedule'),
+          color: const Color(0xFF6366F1),
+          onTap: () {
+            badgeProvider.markSectionVisited('schedule');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ManagerWeeklyScheduleScreen()));
+          },
+        ),
+        _StripItem(
+          icon: Icons.assignment_rounded,
+          label: 'משימות',
+          badge: badgeProvider.getBadgeCount('tasks'),
+          color: const Color(0xFF8B5CF6),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const ManagerTaskBoardScreen())),
+        ),
+        _StripItem(
+          icon: Icons.group_rounded,
+          label: 'ניהול עובדים',
+          color: const Color(0xFF0EA5E9),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const ManageWorkersScreen())),
+        ),
+        _StripItem(
+          icon: Icons.stacked_bar_chart_rounded,
+          label: 'דוחות',
+          color: const Color(0xFF22C55E),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => ManagerReportsScreen(
+                      userId: uid,
+                      userName: userName,
+                      profileUrl: profileUrl))),
+        ),
+        _StripItem(
+          icon: Icons.newspaper_rounded,
+          label: 'לוח מודעות',
+          badge: badgeProvider.getBadgeCount('newsfeed'),
+          color: const Color(0xFFF59E0B),
+          onTap: () {
+            badgeProvider.markSectionVisited('newsfeed');
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const NewsfeedScreen()));
+          },
+        ),
+      ]);
+    } else {
+      // owner
+      items.addAll([
+        // Primary CTA
+        _StripItem(
+          icon: Icons.newspaper_rounded,
+          label: 'לוח מודעות',
+          badge: badgeProvider.getBadgeCount('newsfeed'),
+          color: _kPrimary,
+          onTap: () {
+            badgeProvider.markSectionVisited('newsfeed');
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const NewsfeedScreen()));
+          },
+        ),
+        _StripItem(
+          icon: Icons.bar_chart_rounded,
+          label: 'דו"חות עסקיים',
+          color: const Color(0xFF22C55E),
           onTap: () {},
         ),
-        ActionButton(
-          title: 'התראות',
-          icon: Icons.notifications_rounded,
-          onTap: () {
-            Navigator.push(
+        _StripItem(
+          icon: Icons.stacked_bar_chart_rounded,
+          label: 'דו"חות אישיים',
+          color: const Color(0xFFF59E0B),
+          onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const NotificationHistoryScreen(),
-              ),
-            );
-          },
-        ),
-        ActionButton(
-          title: 'הגדרות',
-          icon: Icons.settings_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SettingsScreen(),
-              ),
-            );
-          },
+                  builder: (_) => WorkerReportsScreen(
+                      userId: uid,
+                      userName: userName,
+                      profileUrl: profileUrl))),
         ),
       ]);
     }
 
-    // Add role-specific operations from roles.json
-    final appStateProvider = context.read<AppStateProvider>();
-    final roleOperations = appStateProvider.getOperationsForRole(role);
-    if (roleOperations.isNotEmpty) {
-      buttons.addAll(
-        roleOperations.map<ActionButton>((operation) {
-          return ActionButton(
-            title: operation['title'],
-            icon: IconData(operation['icon'], fontFamily: 'MaterialIcons'),
-            onTap: () {},
-          );
-        }).toList(),
-      );
+    // Dynamic role operations from roles.json (preserved)
+    for (final op in appStateProvider.getOperationsForRole(role)) {
+      items.add(_StripItem(
+        icon: IconData(op['icon'] as int, fontFamily: 'MaterialIcons'),
+        label: op['title'] as String,
+        color: _kPrimary,
+        onTap: () {},
+      ));
     }
 
-    return buttons;
+    return items;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  PRIVATE WIDGETS
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── Strip item data model ─────────────────────────────────────────────────
+
+class _StripItem {
+  final IconData icon;
+  final String label;
+  final int badge;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _StripItem({
+    required this.icon,
+    required this.label,
+    this.badge = 0,
+    required this.color,
+    required this.onTap,
+  });
+}
+
+// ── Action grid — 3 columns, RTL ─────────────────────────────────────────
+
+class _HorizontalActionStrip extends StatelessWidget {
+  final List<_StripItem> items;
+
+  const _HorizontalActionStrip({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      // RTL: first item is top-right
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 0.95,
+          ),
+          itemCount: items.length,
+          itemBuilder: (_, i) => _StripPill(item: items[i]),
+        ),
+      ),
+    )
+        .animate()
+        .fadeIn(duration: 380.ms, delay: 100.ms, curve: Curves.easeOut)
+        .slideY(
+            begin: 0.05,
+            end: 0,
+            duration: 380.ms,
+            delay: 100.ms,
+            curve: Curves.easeOut);
+  }
+}
+
+// ── Strip pill button ─────────────────────────────────────────────────────
+
+class _StripPill extends StatefulWidget {
+  final _StripItem item;
+
+  const _StripPill({required this.item});
+
+  @override
+  State<_StripPill> createState() => _StripPillState();
+}
+
+class _StripPillState extends State<_StripPill> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.item.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.93 : 1.0,
+        duration: const Duration(milliseconds: 110),
+        curve: Curves.easeOut,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Circular gradient icon
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    widget.item.color,
+                    widget.item.color.withOpacity(0.70),
+                  ],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.item.color.withOpacity(0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                widget.item.icon,
+                size: 24,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Label below
+            Text(
+              widget.item.label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF374151),
+                height: 1.25,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
