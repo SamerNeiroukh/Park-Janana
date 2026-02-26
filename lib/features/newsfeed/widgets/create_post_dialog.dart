@@ -39,6 +39,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
   String _selectedCategory = 'general';
   bool _isSubmitting = false;
+  bool _isPickingMedia = false;
   String _uploadStatus = '';
   double _uploadProgress = 0.0;
 
@@ -124,51 +125,66 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   // ===============================
 
   Future<void> _pickImages() async {
+    if (_isPickingMedia) return;
     if (_selectedMedia.length >= _maxMediaCount) {
       _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
       return;
     }
 
-    final remaining = _maxMediaCount - _selectedMedia.length;
-    final images = await _imagePicker.pickMultiImage(
-      imageQuality: 80,
-      limit: remaining,
-    );
+    setState(() => _isPickingMedia = true);
+    try {
+      final remaining = _maxMediaCount - _selectedMedia.length;
+      final images = await _imagePicker.pickMultiImage(
+        imageQuality: 80,
+        limit: remaining,
+      );
 
-    if (images.isNotEmpty) {
-      setState(() {
-        for (final image in images) {
-          if (_selectedMedia.length < _maxMediaCount) {
-            _selectedMedia.add(File(image.path));
+      if (images.isNotEmpty && mounted) {
+        setState(() {
+          for (final image in images) {
+            if (_selectedMedia.length < _maxMediaCount) {
+              _selectedMedia.add(File(image.path));
+            }
           }
-        }
-      });
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking images: $e');
+    } finally {
+      if (mounted) setState(() => _isPickingMedia = false);
     }
   }
 
   Future<void> _pickVideo() async {
+    if (_isPickingMedia) return;
     if (_selectedMedia.length >= _maxMediaCount) {
       _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
       return;
     }
 
-    final video = await _imagePicker.pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(minutes: 5),
-    );
+    setState(() => _isPickingMedia = true);
+    try {
+      final video = await _imagePicker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
 
-    if (video != null) {
-      final file = File(video.path);
-      setState(() => _selectedMedia.add(file));
-      _generateVideoPreviewThumbnail(file);
-      // Warn if the file might be in an incompatible HDR format (e.g. iPhone .mov)
-      final ext = video.path.split('.').last.toLowerCase();
-      if (ext == 'mov') {
-        _showInfoSnackbar(
-          'סרטוני .MOV מאייפון עשויים להיות בפורמט Dolby Vision שלא '
-          'נתמך בחלק מהמכשירים. מומלץ להשתמש ב-MP4.',
-        );
+      if (video != null && mounted) {
+        final file = File(video.path);
+        setState(() => _selectedMedia.add(file));
+        _generateVideoPreviewThumbnail(file);
+        final ext = video.path.split('.').last.toLowerCase();
+        if (ext == 'mov') {
+          _showInfoSnackbar(
+            'סרטוני .MOV מאייפון עשויים להיות בפורמט Dolby Vision שלא '
+            'נתמך בחלק מהמכשירים. מומלץ להשתמש ב-MP4.',
+          );
+        }
       }
+    } catch (e) {
+      debugPrint('Error picking video: $e');
+    } finally {
+      if (mounted) setState(() => _isPickingMedia = false);
     }
   }
 
@@ -199,20 +215,26 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   }
 
   Future<void> _takePhoto() async {
+    if (_isPickingMedia) return;
     if (_selectedMedia.length >= _maxMediaCount) {
       _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
       return;
     }
 
-    final photo = await _imagePicker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-    );
+    setState(() => _isPickingMedia = true);
+    try {
+      final photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
 
-    if (photo != null) {
-      setState(() {
-        _selectedMedia.add(File(photo.path));
-      });
+      if (photo != null && mounted) {
+        setState(() => _selectedMedia.add(File(photo.path)));
+      }
+    } catch (e) {
+      debugPrint('Error taking photo: $e');
+    } finally {
+      if (mounted) setState(() => _isPickingMedia = false);
     }
   }
 
@@ -492,11 +514,13 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       await _newsfeedService.createPost(post);
 
       if (!mounted) return;
-      Navigator.of(context).pop(true);
+      // Show snackbar BEFORE popping so the context is still valid
       _showSuccessSnackbar();
+      Navigator.of(context).pop(true);
     } catch (e) {
+      debugPrint('Create post error: $e');
       if (!mounted) return;
-      _showErrorSnackbar('שגיאה בפרסום הפוסט');
+      _showErrorSnackbar('שגיאה בפרסום הפוסט: $e');
     } finally {
       if (mounted) {
         setState(() {

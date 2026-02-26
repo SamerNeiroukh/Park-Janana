@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/config/departments.dart';
@@ -21,14 +22,33 @@ class ManagerWeeklyScheduleScreen extends StatefulWidget {
 }
 
 class _ManagerWeeklyScheduleScreenState
-    extends State<ManagerWeeklyScheduleScreen> {
+    extends State<ManagerWeeklyScheduleScreen>
+    with SingleTickerProviderStateMixin {
   final ShiftService _shiftService = ShiftService();
   final WorkerService _workerService = WorkerService();
   final ScrollController _scrollController = ScrollController();
 
+  late final TabController _tabController;
+  int _tabIndex = 0;
+  String? _currentUid;
+
   DateTime _weekStart = DateTimeUtils.startOfWeek(DateTime.now());
   String? _selectedDepartment;
   bool _hasAutoScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() {
+        if (_tabController.indexIsChanging) return;
+        setState(() {
+          _tabIndex = _tabController.index;
+          _hasAutoScrolled = false;
+        });
+      });
+    _currentUid = FirebaseAuth.instance.currentUser?.uid;
+  }
 
   void _prevWeek() {
     setState(() {
@@ -46,6 +66,7 @@ class _ManagerWeeklyScheduleScreenState
 
   @override
   void dispose() {
+    _tabController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -99,6 +120,50 @@ class _ManagerWeeklyScheduleScreenState
     }
   }
 
+  Widget _buildTabBar() {
+    const labels = ['כל המשמרות', 'המשמרות שלי'];
+    const colors = [AppColors.primaryBlue, Color(0xFF8B5CF6)];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+      child: Row(
+        children: List.generate(labels.length, (i) {
+          final isSelected = _tabIndex == i;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => _tabController.animateTo(i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: EdgeInsets.only(right: i == 1 ? 8 : 0),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? colors[i].withOpacity(0.12)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? colors[i] : Colors.grey.shade300,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Text(
+                  labels[i],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? colors[i] : Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,105 +178,122 @@ class _ManagerWeeklyScheduleScreenState
               onPrev: _prevWeek,
               onNext: _nextWeek,
             ),
-            _DepartmentFilter(
-              selected: _selectedDepartment,
-              onChanged: (dept) {
-                setState(() => _selectedDepartment = dept);
-              },
-            ),
-            const SizedBox(height: 4),
-            Expanded(
-              child: StreamBuilder<List<ShiftModel>>(
-                key: ValueKey(_weekStart),
-                stream: _shiftService.getShiftsForWeek(_weekStart),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting &&
-                      !snapshot.hasData) {
-                    return const ShimmerLoading(
-                      itemCount: 4,
-                      cardHeight: 140,
-                      cardBorderRadius: 18,
-                      padding: EdgeInsets.fromLTRB(24, 12, 24, 32),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    return _ErrorState(
-                      onRetry: () => (context as Element).markNeedsBuild(),
-                    );
-                  }
-
-                  final filtered = _filterShifts(snapshot.data ?? []);
-                  final grouped = _groupByDay(filtered);
-                  final dates = grouped.keys.toList()..sort();
-
-                  // Sort shifts within each day by start time
-                  for (final date in dates) {
-                    grouped[date]!
-                        .sort((a, b) => a.startTime.compareTo(b.startTime));
-                  }
-
-                  // Collect all unique worker IDs for batch fetch
-                  final allWorkerIds = filtered
-                      .expand((s) => s.assignedWorkers)
-                      .toSet()
-                      .toList();
-
-                  return FutureBuilder<List<UserModel>>(
-                    future: allWorkerIds.isEmpty
-                        ? Future.value([])
-                        : _workerService.getUsersByIds(allWorkerIds),
-                    builder: (context, workerSnapshot) {
-                      final workerMap = <String, UserModel>{};
-                      if (workerSnapshot.hasData) {
-                        for (final w in workerSnapshot.data!) {
-                          workerMap[w.uid] = w;
-                        }
-                      }
-
-                      // Auto-scroll to today
-                      if (!_hasAutoScrolled && workerSnapshot.hasData) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _autoScrollToToday(dates);
-                          _hasAutoScrolled = true;
-                        });
-                      }
-
-                      return RefreshIndicator(
-                        onRefresh: () async {
-                          await Future.delayed(
-                              const Duration(milliseconds: 500));
-                        },
-                        color: AppColors.primaryBlue,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-                          itemCount: dates.length,
-                          itemBuilder: (context, index) {
-                            final date = dates[index];
-                            return _AnimatedDay(
-                              index: index,
-                              child: _DaySection(
-                                date: date,
-                                shifts: grouped[date]!,
-                                workerMap: workerMap,
-                                workersLoading: !workerSnapshot.hasData,
-                                onShiftTap: (shift) =>
-                                    _showShiftDetails(shift, date, workerMap),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  );
+            _buildTabBar(),
+            if (_tabIndex == 0) ...[
+              _DepartmentFilter(
+                selected: _selectedDepartment,
+                onChanged: (dept) {
+                  setState(() => _selectedDepartment = dept);
                 },
+              ),
+              const SizedBox(height: 4),
+            ],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  // ── Tab 0: All shifts ──────────────────────────────
+                  _buildAllShiftsContent(),
+                  // ── Tab 1: My shifts ───────────────────────────────
+                  _currentUid != null
+                      ? _MyShiftsTab(
+                          key: ValueKey('my_shifts_$_weekStart'),
+                          weekStart: _weekStart,
+                          shiftService: _shiftService,
+                          workerService: _workerService,
+                          uid: _currentUid!,
+                        )
+                      : const Center(child: CircularProgressIndicator()),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAllShiftsContent() {
+    return StreamBuilder<List<ShiftModel>>(
+      key: ValueKey(_weekStart),
+      stream: _shiftService.getShiftsForWeek(_weekStart),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const ShimmerLoading(
+            itemCount: 4,
+            cardHeight: 140,
+            cardBorderRadius: 18,
+            padding: EdgeInsets.fromLTRB(24, 12, 24, 32),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return _ErrorState(
+            onRetry: () => (context as Element).markNeedsBuild(),
+          );
+        }
+
+        final filtered = _filterShifts(snapshot.data ?? []);
+        final grouped = _groupByDay(filtered);
+        final dates = grouped.keys.toList()..sort();
+
+        for (final date in dates) {
+          grouped[date]!.sort((a, b) => a.startTime.compareTo(b.startTime));
+        }
+
+        final allWorkerIds =
+            filtered.expand((s) => s.assignedWorkers).toSet().toList();
+
+        return FutureBuilder<List<UserModel>>(
+          future: allWorkerIds.isEmpty
+              ? Future.value([])
+              : _workerService.getUsersByIds(allWorkerIds),
+          builder: (context, workerSnapshot) {
+            final workerMap = <String, UserModel>{};
+            if (workerSnapshot.hasData) {
+              for (final w in workerSnapshot.data!) {
+                workerMap[w.uid] = w;
+              }
+            }
+
+            if (!_hasAutoScrolled && workerSnapshot.hasData) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _autoScrollToToday(dates);
+                _hasAutoScrolled = true;
+              });
+            }
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                await Future.delayed(const Duration(milliseconds: 500));
+              },
+              color: AppColors.primaryBlue,
+              child: ListView.builder(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+                itemCount: dates.length,
+                itemBuilder: (context, index) {
+                  final date = dates[index];
+                  return _AnimatedDay(
+                    index: index,
+                    child: _DaySection(
+                      date: date,
+                      shifts: grouped[date]!,
+                      workerMap: workerMap,
+                      workersLoading: !workerSnapshot.hasData,
+                      onShiftTap: (shift) =>
+                          _showShiftDetails(shift, date, workerMap),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -1167,6 +1249,201 @@ class _ShiftDetailSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// MY SHIFTS TAB  (manager's own assigned shifts)
+// ─────────────────────────────────────────────
+
+class _MyShiftsTab extends StatefulWidget {
+  final DateTime weekStart;
+  final ShiftService shiftService;
+  final WorkerService workerService;
+  final String uid;
+
+  const _MyShiftsTab({
+    super.key,
+    required this.weekStart,
+    required this.shiftService,
+    required this.workerService,
+    required this.uid,
+  });
+
+  @override
+  State<_MyShiftsTab> createState() => _MyShiftsTabState();
+}
+
+class _MyShiftsTabState extends State<_MyShiftsTab> {
+  final ScrollController _scrollController = ScrollController();
+  bool _hasAutoScrolled = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Groups only days that have at least one shift (no empty-day rows).
+  Map<DateTime, List<ShiftModel>> _groupByDay(List<ShiftModel> shifts) {
+    final grouped = <DateTime, List<ShiftModel>>{};
+    for (final shift in shifts) {
+      final d = shift.parsedDate;
+      final key = DateTime(d.year, d.month, d.day);
+      grouped.putIfAbsent(key, () => []).add(shift);
+    }
+    return grouped;
+  }
+
+  void _autoScrollToToday(List<DateTime> dates) {
+    if (!_scrollController.hasClients) return;
+    final now = DateTime.now();
+    final todayIndex = dates.indexWhere(
+        (d) => d.year == now.year && d.month == now.month && d.day == now.day);
+    if (todayIndex > 0) {
+      final offset = (todayIndex * 170.0)
+          .clamp(0.0, _scrollController.position.maxScrollExtent);
+      _scrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
+  void _showShiftDetails(
+      BuildContext context, ShiftModel shift, DateTime date,
+      Map<String, UserModel> workerMap) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: _ShiftDetailSheet(
+          shift: shift,
+          date: date,
+          workerMap: workerMap,
+          shiftService: widget.shiftService,
+          workerService: widget.workerService,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<ShiftModel>>(
+      key: ValueKey(widget.weekStart),
+      stream: widget.shiftService.getShiftsForWeek(widget.weekStart),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const ShimmerLoading(
+            itemCount: 3,
+            cardHeight: 140,
+            cardBorderRadius: 18,
+            padding: EdgeInsets.fromLTRB(24, 12, 24, 32),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return _ErrorState(
+            onRetry: () => (context as Element).markNeedsBuild(),
+          );
+        }
+
+        // Filter to only shifts this manager is assigned to
+        final myShifts = (snapshot.data ?? [])
+            .where((s) =>
+                s.status != 'cancelled' && s.isUserAssigned(widget.uid))
+            .toList();
+
+        if (myShifts.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.event_busy_outlined,
+                    size: 64, color: Colors.grey.shade300),
+                const SizedBox(height: 12),
+                Text(
+                  'אין משמרות השבוע',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'לא שובצת למשמרות בשבוע זה',
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final grouped = _groupByDay(myShifts);
+        final dates = grouped.keys.toList()..sort();
+
+        for (final date in dates) {
+          grouped[date]!.sort((a, b) => a.startTime.compareTo(b.startTime));
+        }
+
+        final allWorkerIds =
+            myShifts.expand((s) => s.assignedWorkers).toSet().toList();
+
+        return FutureBuilder<List<UserModel>>(
+          future: allWorkerIds.isEmpty
+              ? Future.value([])
+              : widget.workerService.getUsersByIds(allWorkerIds),
+          builder: (context, workerSnapshot) {
+            final workerMap = <String, UserModel>{};
+            if (workerSnapshot.hasData) {
+              for (final w in workerSnapshot.data!) {
+                workerMap[w.uid] = w;
+              }
+            }
+
+            if (!_hasAutoScrolled && workerSnapshot.hasData) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _autoScrollToToday(dates);
+                _hasAutoScrolled = true;
+              });
+            }
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                await Future.delayed(const Duration(milliseconds: 500));
+              },
+              color: const Color(0xFF8B5CF6),
+              child: ListView.builder(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+                itemCount: dates.length,
+                itemBuilder: (context, index) {
+                  final date = dates[index];
+                  return _AnimatedDay(
+                    index: index,
+                    child: _DaySection(
+                      date: date,
+                      shifts: grouped[date]!,
+                      workerMap: workerMap,
+                      workersLoading: !workerSnapshot.hasData,
+                      onShiftTap: (shift) => _showShiftDetails(
+                          context, shift, date, workerMap),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

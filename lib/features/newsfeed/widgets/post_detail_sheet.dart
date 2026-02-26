@@ -499,8 +499,64 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       onSelected: (value) {
         HapticFeedback.selectionClick();
         if (value == 'delete') {
-          widget.onDelete?.call();
-          Navigator.pop(context);
+          debugPrint('[DELETE] Step 1: delete tapped in PostDetailSheet');
+          // Show confirmation from *inside* the sheet so there is no
+          // Navigator race between closing the sheet and opening the dialog.
+          final navigator = Navigator.of(context);
+          debugPrint('[DELETE] Step 2: showing dialog from sheet context');
+          showDialog<bool>(
+            context: context,
+            builder: (ctx) => Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Text('מחיקת פוסט',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.delete_outline_rounded,
+                          color: Colors.red),
+                    ),
+                  ],
+                ),
+                content: const Text(
+                  'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
+                  textAlign: TextAlign.right,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('ביטול'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('מחק'),
+                  ),
+                ],
+              ),
+            ),
+          ).then((confirmed) {
+            debugPrint('[DELETE] Step 3: dialog closed, confirmed=$confirmed');
+            if (!(confirmed ?? false)) return;
+            debugPrint('[DELETE] Step 4: confirmed — popping sheet and calling onDelete');
+            navigator.pop(); // close the sheet
+            widget.onDelete?.call(); // trigger the actual delete
+          });
         }
         if (value == 'pin') widget.onPin?.call();
       },
