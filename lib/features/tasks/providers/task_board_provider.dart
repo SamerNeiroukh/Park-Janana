@@ -108,6 +108,25 @@ class TaskBoardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Returns true when at least one worker on [task] is awaiting review.
+  bool hasPendingReview(TaskModel task) {
+    return task.workerProgress.values
+        .any((p) => (p['status'] as String?) == 'pending_review');
+  }
+
+  /// Returns the IDs of workers whose status is [pending_review] for [task].
+  List<String> pendingReviewWorkers(TaskModel task) {
+    return task.workerProgress.entries
+        .where((e) => (e.value['status'] as String?) == 'pending_review')
+        .map((e) => e.key)
+        .toList();
+  }
+
+  Future<void> approveWorker(
+      String taskId, String workerId, String managerId) async {
+    await _taskService.approveWorkerTask(taskId, workerId, managerId);
+  }
+
   Future<void> deleteTask(String taskId) async {
     await _taskService.deleteTask(taskId);
   }

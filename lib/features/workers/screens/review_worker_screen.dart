@@ -12,8 +12,14 @@ import 'package:park_janana/core/constants/app_constants.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
+  /// Role of the currently logged-in manager ('manager' | 'owner')
+  final String currentUserRole;
 
-  const ReviewWorkerScreen({super.key, required this.userData});
+  const ReviewWorkerScreen({
+    super.key,
+    required this.userData,
+    this.currentUserRole = 'manager',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +31,10 @@ class ReviewWorkerScreen extends StatelessWidget {
     final String id = data['idNumber'] ?? '';
     final String uid = data['uid'] ?? '';
     final String role = data['role'] ?? '';
+
+    // Managers cannot modify other managers — only owners can.
+    final bool canManage =
+        currentUserRole == 'owner' || role != 'manager';
 
     final worker = UserModel(
       uid: uid,
@@ -100,31 +110,49 @@ class ReviewWorkerScreen extends StatelessWidget {
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🛠 ניהול משא", [
-                      _buildFullWidthButton(
-                        context,
-                        label: "ניהול הרשאות ותפקיד",
-                        icon: Icons.security_rounded,
-                        color: AppColors.primary,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditWorkerLicensesScreen(
-                                uid: uid,
-                                fullName: fullName,
+                      if (canManage) ...[
+                        _buildFullWidthButton(
+                          context,
+                          label: "ניהול הרשאות ותפקיד",
+                          icon: Icons.security_rounded,
+                          color: AppColors.primary,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditWorkerLicensesScreen(
+                                  uid: uid,
+                                  fullName: fullName,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppDimensions.spacingL),
-                      _buildFullWidthButton(
-                        context,
-                        label: "מחק עובד",
-                        icon: Icons.delete_forever,
-                        color: AppColors.redLight,
-                        onPressed: () => _deleteWorker(context, uid),
-                      ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: AppDimensions.spacingL),
+                        _buildFullWidthButton(
+                          context,
+                          label: "בטל אישור עובד",
+                          icon: Icons.person_off_rounded,
+                          color: AppColors.redLight,
+                          onPressed: () => _unapproveWorker(context, uid),
+                        ),
+                      ] else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.lock_outline_rounded,
+                                  size: 16, color: Colors.grey.shade400),
+                              const SizedBox(width: 8),
+                              Text(
+                                'אין הרשאה לניהול מנהלים אחרים',
+                                style: TextStyle(
+                                    color: Colors.grey.shade500, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
                     ]),
                     const SizedBox(height: AppDimensions.spacingHuge),
                   ],
@@ -295,29 +323,32 @@ class ReviewWorkerScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  Future<void> _deleteWorker(BuildContext context, String uid) async {
+  Future<void> _unapproveWorker(BuildContext context, String uid) async {
     final bool confirm = await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("מחיקת עובד"),
-        content: const Text("האם אתה בטוח שברצונך למחוק את העובד הזה?"),
+        title: const Text("ביטול אישור עובד"),
+        content: const Text("העובד יועבר חזרה לרשימת הממתינים לאישור. הפעולה ניתנת לביטול."),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: const Text("ביטול")),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text("מחק", style: TextStyle(color: Colors.red))),
+              child: const Text("אשר", style: TextStyle(color: Colors.orange))),
         ],
       ),
     );
 
     if (confirm) {
-      await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
+      await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .update({'approved': false});
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("העובד נמחק בהצלחה")),
+          const SnackBar(content: Text("אישור העובד בוטל")),
         );
       }
     }

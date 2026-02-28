@@ -18,15 +18,23 @@ class LocationUtils {
       }
     }
 
-    final Position position = await Geolocator.getCurrentPosition();
+    try {
+      final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+        timeLimit: const Duration(seconds: 8),
+      );
 
-    final double distance = Geolocator.distanceBetween(
-      parkLatitude,
-      parkLongitude,
-      position.latitude,
-      position.longitude,
-    );
+      final double distance = Geolocator.distanceBetween(
+        parkLatitude,
+        parkLongitude,
+        position.latitude,
+        position.longitude,
+      );
 
-    return distance <= allowedRadiusMeters;
+      return distance <= allowedRadiusMeters;
+    } catch (_) {
+      // Timeout, unavailable GPS, or any other location error → treat as outside park
+      return false;
+    }
   }
 }

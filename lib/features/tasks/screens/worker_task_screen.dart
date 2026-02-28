@@ -264,16 +264,14 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (workerStatus != 'done')
-                  LiveCountdownTimer(dueDate: task.dueDate.toDate()),
-                if (workerStatus != 'done')
-                  _buildActionButtons(task, workerStatus, uid),
-              ],
-            )
+            const SizedBox(height: 10),
+            if (workerStatus != 'done') ...[
+              LiveCountdownTimer(dueDate: task.dueDate.toDate()),
+              const SizedBox(height: 10),
+              const Divider(height: 1),
+              const SizedBox(height: 10),
+              _buildActionButton(task, workerStatus, uid),
+            ]
           ],
         ),
       ),
@@ -304,32 +302,68 @@ class _WorkerTaskScreenState extends State<WorkerTaskScreen> {
     );
   }
 
-  Widget _buildActionButtons(TaskModel task, String currentStatus, String uid) {
-    return Row(
-      children: [
-        if (currentStatus == 'pending')
-          ElevatedButton(
-            onPressed: () => _updateStatus(task, 'in_progress', uid),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text("התחל"),
+  Widget _buildActionButton(TaskModel task, String currentStatus, String uid) {
+    final bool isPending = currentStatus == 'pending';
+    final Color fromColor =
+        isPending ? const Color(0xFF6366F1) : const Color(0xFF059669);
+    final Color toColor =
+        isPending ? const Color(0xFF818CF8) : const Color(0xFF34D399);
+    final IconData icon =
+        isPending ? Icons.play_arrow_rounded : Icons.check_circle_rounded;
+    final String label = isPending ? 'התחל משימה' : 'סיים משימה';
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [fromColor, toColor],
+          begin: Alignment.centerRight,
+          end: Alignment.centerLeft,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: fromColor.withOpacity(0.38),
+            blurRadius: 14,
+            spreadRadius: 0,
+            offset: const Offset(0, 5),
           ),
-        if (currentStatus == 'in_progress')
-          ElevatedButton(
-            onPressed: () => _updateStatus(task, 'done', uid),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          splashColor: Colors.white.withOpacity(0.15),
+          onTap: () => _updateStatus(task, isPending ? 'in_progress' : 'done', uid),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.22),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 16, color: Colors.white),
+                ),
+                const SizedBox(width: 9),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
             ),
-            child: const Text("סיום"),
           ),
-      ],
+        ),
+      ),
     );
   }
 

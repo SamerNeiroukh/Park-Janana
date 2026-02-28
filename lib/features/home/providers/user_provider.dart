@@ -48,10 +48,18 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+      final docRef = FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .doc(uid)
-          .get();
+          .doc(uid);
+
+      // Try local Firestore cache first — instant and works offline.
+      // Falls back to server (with timeout) only on a cache miss.
+      DocumentSnapshot userDoc;
+      try {
+        userDoc = await docRef.get(const GetOptions(source: Source.cache));
+      } catch (_) {
+        userDoc = await docRef.get().timeout(const Duration(seconds: 8));
+      }
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;

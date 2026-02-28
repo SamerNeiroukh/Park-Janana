@@ -195,11 +195,7 @@ class _Timeline extends StatelessWidget {
             .where((s) => s.isUserAssigned(userId) && s.status != 'cancelled')
             .toList();
 
-        if (shifts.isEmpty) {
-          return const _EmptyState();
-        }
-
-        // Group and sort shifts (before build, not during)
+        // Group into all 7 days of the week (even days with no shifts).
         final grouped = _groupShiftsByDate(shifts);
         final dates = grouped.keys.toList()..sort();
 
@@ -245,6 +241,12 @@ class _Timeline extends StatelessWidget {
 
   Map<DateTime, List<ShiftModel>> _groupShiftsByDate(List<ShiftModel> shifts) {
     final Map<DateTime, List<ShiftModel>> grouped = {};
+    // Always initialise all 7 days of the current week so the user sees
+    // the full week structure even on days without shifts.
+    for (int i = 0; i < 7; i++) {
+      final day = weekStart.add(Duration(days: i));
+      grouped[DateTime(day.year, day.month, day.day)] = [];
+    }
     for (final shift in shifts) {
       final d = shift.parsedDate;
       final key = DateTime(d.year, d.month, d.day);
@@ -426,16 +428,28 @@ class _DayTimeline extends StatelessWidget {
               const SizedBox(width: 16),
               // Shifts column
               Expanded(
-                child: Column(
-                  children: shifts
-                      .map((s) => _ShiftPill(
-                            shift: s,
-                            isPast: isPast,
-                            dayColor: accentColor,
-                            onTap: () => _showShiftDetails(context, s),
-                          ))
-                      .toList(),
-                ),
+                child: shifts.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'אין משמרות',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade400,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: shifts
+                            .map((s) => _ShiftPill(
+                                  shift: s,
+                                  isPast: isPast,
+                                  dayColor: accentColor,
+                                  onTap: () => _showShiftDetails(context, s),
+                                ))
+                            .toList(),
+                      ),
               ),
             ],
           ),
@@ -833,46 +847,6 @@ class _LoadingState extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_available_rounded,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'אין משמרות השבוע',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'נסה לבדוק שבוע אחר',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

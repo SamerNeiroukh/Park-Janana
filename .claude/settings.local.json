@@ -34,7 +34,9 @@
       "Bash(./gradlew clean:*)",
       "Bash(xargs:*)",
       "Bash(./gradlew:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Read(//c/Users/Samer Neiroukh/.claude/projects/c--dev-park-janana/**)",
+      "Read(//c/Users/Samer Neiroukh/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_functions-6.0.1/lib/**)"
     ]
   }
 }

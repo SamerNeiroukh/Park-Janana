@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/workers/screens/review_worker_screen.dart';
 import 'package:park_janana/features/workers/screens/approve_worker_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -107,7 +109,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .where('role', isEqualTo: 'worker')
+          .where('role', whereIn: ['worker', 'manager'])
           .where('approved', isEqualTo: false)
           .snapshots(),
       builder: (context, snapshot) {
@@ -157,10 +159,18 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                 child: InkWell(
                   borderRadius: AppDimensions.borderRadiusXL,
                   onTap: () {
+                    final currentRole = context
+                            .read<UserProvider>()
+                            .currentUser
+                            ?.role ??
+                        'manager';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ApproveWorkerScreen(userData: user),
+                        builder: (_) => ApproveWorkerScreen(
+                          userData: user,
+                          currentUserRole: currentRole,
+                        ),
                       ),
                     );
                   },
@@ -215,7 +225,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .where('role', isEqualTo: 'worker')
+          .where('role', whereIn: ['worker', 'manager'])
           .where('approved', isEqualTo: true)
           .snapshots(),
       builder: (context, snapshot) {
@@ -253,6 +263,8 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
 
             final fullName = data['fullName'] ?? '---';
             final phone = data['phoneNumber'] ?? '---';
+            final role = data['role'] as String? ?? 'worker';
+            final isManager = role == 'manager';
 
             return Directionality(
               textDirection: TextDirection.rtl,
@@ -265,10 +277,18 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                 child: InkWell(
                   borderRadius: AppDimensions.borderRadiusXL,
                   onTap: () {
+                    final currentRole = context
+                            .read<UserProvider>()
+                            .currentUser
+                            ?.role ??
+                        'manager';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ReviewWorkerScreen(userData: user),
+                        builder: (_) => ReviewWorkerScreen(
+                          userData: user,
+                          currentUserRole: currentRole,
+                        ),
                       ),
                     );
                   },
@@ -283,26 +303,51 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                           backgroundColor: Colors.grey.shade300,
                         ),
                         const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              fullName,
-                              style: AppTheme.bodyText.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.black,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    fullName,
+                                    style: AppTheme.bodyText.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  if (isManager) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Text(
+                                        'מנהל',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              phone,
-                              style: AppTheme.bodyText.copyWith(
-                                fontSize: 14,
-                                color: Colors.grey.shade700,
+                              const SizedBox(height: 4),
+                              Text(
+                                phone,
+                                style: AppTheme.bodyText.copyWith(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),

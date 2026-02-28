@@ -1,10 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:park_janana/features/auth/providers/auth_provider.dart';
 
 const _kAppVersion = '1.0.0';
 
@@ -35,11 +40,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _toggleNotifications(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notifications_enabled', enabled);
+
+    final messaging = FirebaseMessaging.instance;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
     if (enabled) {
-      await FirebaseMessaging.instance.requestPermission();
+      final settings = await messaging.requestPermission();
+      final authorized = settings.authorizationStatus ==
+              AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+      if (authorized && uid != null) {
+        final token = await messaging.getToken();
+        if (token != null) {
+          await FirebaseFirestore.instance
+              .collection(AppConstants.usersCollection)
+              .doc(uid)
+              .update({'fcmTokens': FieldValue.arrayUnion([token])});
+        }
+      }
     } else {
-      await FirebaseMessaging.instance.deleteToken();
+      // Capture token before deleting it
+      final token = await messaging.getToken();
+      await messaging.deleteToken();
+      if (token != null && uid != null) {
+        await FirebaseFirestore.instance
+            .collection(AppConstants.usersCollection)
+            .doc(uid)
+            .update({'fcmTokens': FieldValue.arrayRemove([token])});
+      }
     }
+
     if (mounted) setState(() => _notificationsEnabled = enabled);
   }
 
@@ -50,6 +80,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => const _ChangePasswordSheet(),
     );
+  }
+
+  Future<void> _signOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('התנתקות'),
+          content: const Text('האם אתה בטוח שברצונך להתנתק?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ביטול'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text(
+                'התנתק',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      // Delete FCM token so device stops receiving push notifications
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (_) {}
+
+    if (!mounted) return;
+    context.read<UserProvider>().clearUser();
+    await context.read<AppAuthProvider>().signOut();
   }
 
   Future<void> _openPrivacyPolicy() async {
@@ -141,6 +209,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onTap: null,
                   ),
+                  const SizedBox(height: 20),
+                  _sectionHeader('חשבון'),
+                  _tile(
+                    icon: Icons.logout_rounded,
+                    iconColor: Colors.red.shade600,
+                    title: 'התנתקות',
+                    titleColor: Colors.red.shade700,
+                    onTap: _signOut,
+                  ),
                 ],
               ),
             ),
@@ -166,6 +243,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
     required Color iconColor,
     required String title,
+    Color? titleColor,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
@@ -186,10 +264,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           child: Icon(icon, color: iconColor, size: 20),
         ),
-        title: Text(title, style: TaskTheme.body),
+        title: Text(title,
+            style: TaskTheme.body.copyWith(color: titleColor)),
         trailing: trailing ??
             (onTap != null
-                ? const Icon(Icons.chevron_left_rounded,
+                ? const Icon(Icons.chevron_right_rounded,
                     color: TaskTheme.textTertiary)
                 : null),
         onTap: onTap,

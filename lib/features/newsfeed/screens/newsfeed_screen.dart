@@ -210,7 +210,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
     try {
       debugPrint('[DELETE] PostCard path: calling deletePost');
-      await _newsfeedService.deletePost(post.id);
+      await _newsfeedService.deletePost(post);
       debugPrint('[DELETE] PostCard path: deletePost done. mounted=$mounted');
       if (!mounted) return;
       _showSuccessSnackbar('הפוסט נמחק בהצלחה');
@@ -227,7 +227,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     debugPrint('[DELETE] Step 5: _deletePostDirectly called for post ${post.id}');
     try {
       debugPrint('[DELETE] Step 6: calling newsfeedService.deletePost');
-      await _newsfeedService.deletePost(post.id);
+      await _newsfeedService.deletePost(post);
       debugPrint('[DELETE] Step 7: deletePost completed. mounted=$mounted');
       if (!mounted) return;
       _showSuccessSnackbar('הפוסט נמחק בהצלחה');

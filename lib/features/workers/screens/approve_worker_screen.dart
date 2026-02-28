@@ -8,8 +8,13 @@ import 'package:park_janana/core/constants/app_constants.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
+  final String currentUserRole;
 
-  const ApproveWorkerScreen({super.key, required this.userData});
+  const ApproveWorkerScreen({
+    super.key,
+    required this.userData,
+    this.currentUserRole = 'manager',
+  });
 
   Future<void> _approveWorker(BuildContext context) async {
     final String uid = userData['uid'];
@@ -17,6 +22,7 @@ class ApproveWorkerScreen extends StatelessWidget {
       'approved': true,
     });
 
+    if (!context.mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('העובד אושר בהצלחה')),
@@ -24,12 +30,11 @@ class ApproveWorkerScreen extends StatelessWidget {
   }
 
   Future<void> _rejectWorker(BuildContext context) async {
-    final String uid = userData['uid'];
-    await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
-
+    // Do not permanently delete — the worker remains as pending (approved: false)
+    // and can be approved later. Simply close this screen.
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('העובד נמחק מהמערכת')),
+      const SnackBar(content: Text('הבקשה נדחתה. העובד נשאר בהמתנה.')),
     );
   }
 
@@ -221,13 +226,13 @@ class ApproveWorkerScreen extends StatelessWidget {
         const SizedBox(height: AppDimensions.spacingL),
         _buildFullWidthButton(
           context,
-          label: "דחה ומחק",
+          label: "דחה בקשה",
           icon: Icons.cancel_outlined,
           color: AppColors.error,
           onPressed: () => _showConfirmationDialog(
             context: context,
-            title: "דחיית עובד",
-            content: "האם אתה בטוח שברצונך לדחות ולמחוק את העובד הזה?",
+            title: "דחיית בקשה",
+            content: "העובד ישאר בהמתנה ויוכל להגיש בקשה שוב. האם לדחות?",
             onConfirm: () => _rejectWorker(context),
           ),
         ),

@@ -8,6 +8,7 @@
 
 const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
@@ -463,4 +464,35 @@ exports.shiftReminder = onSchedule("every 15 minutes", async (event) => {
       console.log(`Sent shift reminder for shift ${shiftId}`);
     }
   }
+});
+
+/**
+ * Callable: Delete a post by ID.
+ * Managers and owners can delete any post; authors can delete their own.
+ * Uses Admin SDK to bypass Firestore security rules.
+ */
+exports.deletePost = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Must be authenticated");
+
+  const { postId } = request.data;
+  if (!postId) throw new HttpsError("invalid-argument", "postId is required");
+
+  const postDoc = await db.collection("posts").doc(postId).get();
+  if (!postDoc.exists) throw new HttpsError("not-found", "Post not found");
+
+  const authorId = postDoc.data().authorId;
+
+  // Check role – managers and owners can delete any post
+  const userDoc = await db.collection("users").doc(uid).get();
+  const role = userDoc.exists ? userDoc.data().role : null;
+  const canDelete = uid === authorId || role === "manager" || role === "owner";
+
+  if (!canDelete) {
+    throw new HttpsError("permission-denied", "Not authorized to delete this post");
+  }
+
+  await db.collection("posts").doc(postId).delete();
+  console.log(`Post ${postId} deleted by ${uid} (role: ${role})`);
+  return { success: true };
 });

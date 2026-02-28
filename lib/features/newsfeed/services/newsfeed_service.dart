@@ -74,15 +74,29 @@ class NewsfeedService {
     });
   }
 
-  Future<void> deletePost(String postId) async {
-    debugPrint('[DELETE] NewsfeedService.deletePost: deleting Firestore doc $postId');
-    // Delete the Firestore document first so the post disappears from the UI
-    // immediately. Media cleanup runs in the background and does not block.
-    await _postsRef.doc(postId).delete();
-    debugPrint('[DELETE] NewsfeedService.deletePost: Firestore doc deleted successfully');
-    deletePostMedia(postId).catchError((Object e) {
+  Future<void> deletePost(PostModel post) async {
+    await _postsRef.doc(post.id).delete();
+    // Delete Storage files in the background — does not block the UI.
+    _deleteMediaFiles(post).catchError((Object e) {
       debugPrint('[DELETE] NewsfeedService: background media cleanup error: $e');
     });
+  }
+
+  Future<void> _deleteMediaFiles(PostModel post) async {
+    final urls = <String>[
+      for (final m in post.media) ...[
+        m.url,
+        if (m.thumbnailUrl != null) m.thumbnailUrl!,
+      ],
+      if (post.imageUrl != null && post.imageUrl!.isNotEmpty) post.imageUrl!,
+    ];
+    for (final url in urls) {
+      try {
+        await _storage.refFromURL(url).delete();
+      } catch (e) {
+        debugPrint('[DELETE] Failed to delete file $url: $e');
+      }
+    }
   }
 
   Future<void> togglePin(String postId, bool isPinned) async {
@@ -356,18 +370,6 @@ class NewsfeedService {
   bool _isVideoFile(String path) {
     final extension = path.split('.').last.toLowerCase();
     return ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'mpeg', 'mpg', 'm4v'].contains(extension);
-  }
-
-  Future<void> deletePostMedia(String postId) async {
-    try {
-      final ref = _storage.ref('posts/$postId');
-      final result = await ref.listAll();
-      for (final item in result.items) {
-        await item.delete();
-      }
-    } catch (e) {
-      debugPrint('Error deleting media for post $postId: $e');
-    }
   }
 
   // ===============================

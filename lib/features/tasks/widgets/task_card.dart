@@ -13,6 +13,8 @@ class TaskCard extends StatefulWidget {
   final VoidCallback? onTap;
   final bool compact;
   final String? currentUserId;
+  /// Optional widget rendered at the bottom of the card (inside, below a divider).
+  final Widget? actionWidget;
 
   const TaskCard({
     super.key,
@@ -21,6 +23,7 @@ class TaskCard extends StatefulWidget {
     this.onTap,
     this.compact = false,
     this.currentUserId,
+    this.actionWidget,
   });
 
   @override
@@ -188,6 +191,14 @@ class _TaskCardState extends State<TaskCard>
                     TaskDeadlineText(dueDate: task.dueDate.toDate()),
                   ],
                 ),
+
+                // Optional action widget (e.g. quick-start/finish button)
+                if (widget.actionWidget != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(height: 1),
+                  const SizedBox(height: 10),
+                  widget.actionWidget!,
+                ],
               ],
             ),
           ),
