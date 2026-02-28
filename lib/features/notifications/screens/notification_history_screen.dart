@@ -82,13 +82,15 @@ class _NotificationHistoryScreenState
 
     // Load previous visit timestamp, then immediately save "now" so items
     // shown this visit won't be highlighted as new next time.
+    // Key is user-specific so different users on the same device each keep
+    // their own "last visited" state.
+    final userKey = '${_kPrefsKey}_$_uid';
     final prefs = await SharedPreferences.getInstance();
-    final prevMs = prefs.getInt(_kPrefsKey);
+    final prevMs = prefs.getInt(userKey);
     if (prevMs != null) {
       _lastVisited = DateTime.fromMillisecondsSinceEpoch(prevMs);
     }
-    await prefs.setInt(
-        _kPrefsKey, DateTime.now().millisecondsSinceEpoch);
+    await prefs.setInt(userKey, DateTime.now().millisecondsSinceEpoch);
 
     await _fetchBatch();
   }
@@ -182,9 +184,13 @@ class _NotificationHistoryScreenState
 
         for (final doc in tasksSnap.docs) {
           final data = doc.data();
-          final ts = data['createdAt'] as Timestamp?;
-          if (ts == null) continue;
-          final date = ts.toDate();
+          final createdTs = data['createdAt'] as Timestamp?;
+          if (createdTs == null) continue;
+          // Use updatedAt when available so that newly assigned/updated
+          // tasks correctly surface as "new" even if their createdAt is old.
+          final updatedTs = data['updatedAt'] as Timestamp?;
+          final effective = updatedTs ?? createdTs;
+          final date = effective.toDate();
           if (date.isBefore(thirtyDaysAgo)) continue;
           newItems.add(_ActivityItem(
             type: 'task',

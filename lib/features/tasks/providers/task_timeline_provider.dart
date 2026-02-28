@@ -15,23 +15,26 @@ class TaskTimelineProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  // pending_review is treated as active (worker is waiting for manager approval)
+  bool _isActive(TaskModel t) => _workerStatus(t) != 'done';
+
   List<TaskModel> get overdueTasks {
     return _allTasks
-        .where((t) => _workerStatus(t) != 'done' && _isPastDue(t))
+        .where((t) => _isActive(t) && _isPastDue(t))
         .toList()
       ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
 
   List<TaskModel> get todayTasks {
     return _allTasks
-        .where((t) => _workerStatus(t) != 'done' && t.isDueToday && !_isPastDue(t))
+        .where((t) => _isActive(t) && t.isDueToday && !_isPastDue(t))
         .toList()
       ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
 
   List<TaskModel> get upcomingTasks {
     return _allTasks
-        .where((t) => _workerStatus(t) != 'done' && t.isUpcoming)
+        .where((t) => _isActive(t) && t.isUpcoming)
         .toList()
       ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }

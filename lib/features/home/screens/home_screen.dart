@@ -13,7 +13,6 @@ import 'package:park_janana/features/shifts/screens/my_weekly_schedule_screen.da
 import 'package:park_janana/features/tasks/screens/worker_task_timeline_screen.dart';
 import 'package:park_janana/features/tasks/screens/manager_task_board_screen.dart';
 import 'package:park_janana/features/workers/screens/manage_workers_screen.dart';
-import 'package:park_janana/features/attendance/widgets/clock_in_out_widget.dart';
 import 'package:park_janana/features/newsfeed/screens/newsfeed_screen.dart';
 import 'package:park_janana/features/notifications/screens/notification_history_screen.dart';
 import 'package:park_janana/features/settings/screens/settings_screen.dart';
@@ -24,8 +23,6 @@ import 'package:park_janana/features/home/providers/app_state_provider.dart';
 import 'package:park_janana/features/home/providers/home_badge_provider.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 
-// ── Core widgets ──────────────────────────────────────────────────────────
-import 'package:park_janana/core/widgets/network_banner.dart';
 
 // ── Home UI components ────────────────────────────────────────────────────
 import 'package:park_janana/features/home/widgets/home_top_bar.dart';
@@ -91,12 +88,70 @@ class _HomeScreenState extends State<HomeScreen>
 
     final currentUser = authProvider.user;
 
-    if (currentUser == null ||
-        userProvider.isLoading ||
-        userProvider.currentUser == null) {
+    // Still loading
+    if (currentUser == null || userProvider.isLoading) {
       return const Scaffold(
         backgroundColor: _kBg,
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Load finished but user data unavailable (offline + no Firestore cache)
+    if (userProvider.currentUser == null) {
+      return Scaffold(
+        backgroundColor: _kBg,
+        body: Center(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 64,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'אין חיבור לאינטרנט',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'לא ניתן לטעון את הנתונים.\nבדוק את החיבור ונסה שוב.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+                  FilledButton.icon(
+                    onPressed: () {
+                      context.read<UserProvider>().loadCurrentUser();
+                      context.read<UserProvider>().loadWorkStats();
+                    },
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('נסה שוב'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _kPrimary,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -127,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen>
       body: SafeArea(
         child: Column(
           children: [
-            const NetworkBanner(),
             Expanded(
               child: Stack(
                 children: [
@@ -172,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen>
                     opacity: _fadeAnim,
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 220),
+                      padding: const EdgeInsets.only(bottom: 32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -204,23 +258,24 @@ class _HomeScreenState extends State<HomeScreen>
 
                           const SizedBox(height: 12),
 
-                          // ── 2. GLASS HERO CARD ────────────────────
+                          // ── 2. GLASS HERO CARD (clock built-in) ──
                           GlassHeroCard(
                             userName: userData.fullName,
-                            daysWorked: (workStats['daysWorked'] as double)
-                                .toInt(),
-                            hoursWorked:
-                                workStats['hoursWorked'] as double,
+                            daysWorked:
+                                (workStats['daysWorked'] as double).toInt(),
+                            hoursWorked: workStats['hoursWorked'] as double,
                             weatherDescription: weatherData?['description'],
                             temperature:
                                 weatherData?['temperature']?.toString(),
                             department: dept.isNotEmpty ? dept : null,
                             roleIcon: _roleIcon(userData.role),
+                            onClockComplete: () =>
+                                context.read<UserProvider>().loadWorkStats(),
                           ),
 
                           const SizedBox(height: 16),
 
-                          // ── 3. HORIZONTAL ACTION STRIP (RTL) ──────
+                          // ── 3. HORIZONTAL ACTION STRIP ────────────
                           _HorizontalActionStrip(
                             items: _buildStripItems(
                               userData.role,
@@ -234,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen>
 
                           const SizedBox(height: 16),
 
-                          // ── 4. LATEST POST CARD ───────────────────
+                          // ── 5. LATEST POST CARD ───────────────────
                           LatestPostCard(
                             onTap: () => Navigator.push(
                               context,
@@ -247,14 +302,6 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                       ),
                     ),
-                  ),
-
-                  // ── Floating clock capsule ───────────────────────────
-                  const Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 16,
-                    child: ClockInOutWidget(),
                   ),
                 ],
               ),
@@ -361,10 +408,8 @@ class _HomeScreenState extends State<HomeScreen>
           color: _kPrimary,
           onTap: () {
             badgeProvider.markSectionVisited('shifts');
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const ManagerShiftsScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
           },
         ),
         _StripItem(
@@ -394,10 +439,8 @@ class _HomeScreenState extends State<HomeScreen>
           icon: Icons.group_rounded,
           label: 'ניהול עובדים',
           color: const Color(0xFF0EA5E9),
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => const ManageWorkersScreen())),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const ManageWorkersScreen())),
         ),
         _StripItem(
           icon: Icons.stacked_bar_chart_rounded,

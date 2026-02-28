@@ -276,62 +276,101 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
     final uid = context.read<AppAuthProvider>().uid ?? '';
     final workerStatus = task.workerStatusFor(uid);
 
-    return Column(
-      children: [
-        TaskCard(
-          task: task,
-          currentUserId: uid,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TaskDetailsScreen(task: task),
+    Widget? actionWidget;
+    if (workerStatus == 'pending_review') {
+      actionWidget = _buildPendingReviewBanner();
+    } else if (workerStatus != 'done') {
+      actionWidget = _buildQuickAction(task, workerStatus, provider);
+    }
+
+    return TaskCard(
+      task: task,
+      currentUserId: uid,
+      actionWidget: actionWidget,
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => TaskDetailsScreen(task: task)),
+      ),
+    );
+  }
+
+  Widget _buildPendingReviewBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF59E0B).withOpacity(0.12),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.hourglass_top_rounded,
+              size: 18, color: Color(0xFFF59E0B)),
+          SizedBox(width: 8),
+          Text(
+            'ממתין לאישור מנהל',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFB45309),
             ),
           ),
-        ),
-        // Quick action button for non-done tasks
-        if (workerStatus != 'done')
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: _buildQuickAction(task, workerStatus, provider),
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildQuickAction(
       TaskModel task, String workerStatus, TaskTimelineProvider provider) {
     final isStart = workerStatus == 'pending';
-    final color = isStart ? TaskTheme.inProgress : TaskTheme.done;
-    final label = isStart ? 'להתחיל לעבוד' : 'סיימתי את המשימה';
-    final icon = isStart
-        ? Icons.rocket_launch_rounded
-        : Icons.check_circle_rounded;
-    final nextStatus = isStart ? 'in_progress' : 'done';
+    final Color fromColor =
+        isStart ? const Color(0xFF6366F1) : const Color(0xFFF59E0B);
+    final Color toColor =
+        isStart ? const Color(0xFF818CF8) : const Color(0xFFFBBF24);
+    final String label = isStart ? 'התחל לעבוד' : 'שלח לאישור מנהל';
+    final IconData icon =
+        isStart ? Icons.rocket_launch_rounded : Icons.send_rounded;
+    final String nextStatus = isStart ? 'in_progress' : 'pending_review';
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.85)],
+          colors: [fromColor, toColor],
           begin: Alignment.centerRight,
           end: Alignment.centerLeft,
         ),
-        boxShadow: TaskTheme.buttonShadow(color),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+        boxShadow: [
+          BoxShadow(
+            color: fromColor.withOpacity(0.38),
+            blurRadius: 14,
+            spreadRadius: 0,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+          splashColor: Colors.white.withOpacity(0.15),
           onTap: () => provider.updateStatus(task.id, nextStatus),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 13),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 20, color: Colors.white),
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.22),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 17, color: Colors.white),
+                ),
                 const SizedBox(width: 10),
                 Text(
                   label,
@@ -339,7 +378,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
-                    letterSpacing: 0.2,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],

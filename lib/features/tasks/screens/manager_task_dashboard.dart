@@ -355,6 +355,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            // Status + time
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -367,24 +368,6 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                     color: AppColors.primary,
                   ),
                 ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => EditTaskScreen(task: task)),
-                      );
-                    } else if (value == 'delete') {
-                      _confirmDeleteTask(task);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'edit', child: Text("✏️ ערוך")),
-                    const PopupMenuItem(
-                        value: 'delete', child: Text("🗑️ מחק")),
-                  ],
-                )
               ],
             ),
             const SizedBox(height: 10),
@@ -403,6 +386,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 12),
+            // Avatars + date
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -425,7 +409,33 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       color: Colors.black87),
                 ),
               ],
-            )
+            ),
+            const SizedBox(height: 10),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            // Action buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _buildCardAction(
+                  label: "ערוך",
+                  icon: Icons.edit_outlined,
+                  color: AppColors.primary,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => EditTaskScreen(task: task)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildCardAction(
+                  label: "מחק",
+                  icon: Icons.delete_outline_rounded,
+                  color: Colors.red.shade600,
+                  onPressed: () => _confirmDeleteTask(task),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -452,6 +462,28 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
       backgroundColor: color.withOpacity(0.15),
       label: Text(label,
           style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildCardAction({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: TextButton.styleFrom(
+        backgroundColor: color.withOpacity(0.09),
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: Size.zero,
+      ),
     );
   }
 

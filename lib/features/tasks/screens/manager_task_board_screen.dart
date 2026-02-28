@@ -405,34 +405,109 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final task = tasks[index];
-        return Dismissible(
-          key: ValueKey(task.id),
-          direction: DismissDirection.startToEnd,
-          confirmDismiss: (_) => _confirmDelete(task),
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: TaskTheme.overdue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(TaskTheme.radiusL),
-            ),
-            child: const Icon(Icons.delete_outline_rounded,
-                color: TaskTheme.overdue, size: 24),
-          ),
-          child: TaskCard(
-            task: task,
-            assignedWorkers: provider.workersForTask(task),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TaskDetailsScreen(task: task),
+        final hasPendingReview = provider.hasPendingReview(task);
+        return Column(
+          children: [
+            Dismissible(
+              key: ValueKey(task.id),
+              direction: DismissDirection.startToEnd,
+              confirmDismiss: (_) => _confirmDelete(task),
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: TaskTheme.overdue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(TaskTheme.radiusL),
+                ),
+                child: const Icon(Icons.delete_outline_rounded,
+                    color: TaskTheme.overdue, size: 24),
+              ),
+              child: TaskCard(
+                task: task,
+                assignedWorkers: provider.workersForTask(task),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TaskDetailsScreen(task: task),
+                  ),
+                ),
               ),
             ),
-          ),
+            if (hasPendingReview)
+              _buildApprovalStrip(task, provider),
+          ],
         );
       },
     );
+  }
+
+  Widget _buildApprovalStrip(TaskModel task, TaskBoardProvider provider) {
+    final workers = provider.pendingReviewWorkers(task);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF59E0B).withOpacity(0.10),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.hourglass_top_rounded,
+              size: 16, color: Color(0xFFB45309)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '${workers.length} עובד${workers.length == 1 ? '' : 'ים'} ממתינ${workers.length == 1 ? '' : 'ים'} לאישור',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFB45309),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => _approveAllPendingReview(task, workers, provider),
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFF59E0B),
+              foregroundColor: Colors.white,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              textStyle: const TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+            child: const Text('אשר הכל'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _approveAllPendingReview(
+    TaskModel task,
+    List<String> workerIds,
+    TaskBoardProvider provider,
+  ) async {
+    if (_uid == null) return;
+    for (final workerId in workerIds) {
+      await provider.approveWorker(task.id, workerId, _uid!);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('המשימה אושרה בהצלחה'),
+          backgroundColor: TaskTheme.done,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    }
   }
 
   Future<bool> _confirmDelete(TaskModel task) async {
@@ -674,67 +749,79 @@ class _MyTasksTabState extends State<_MyTasksTab> {
       TaskModel task, TaskTimelineProvider provider, bool showActions) {
     final workerStatus = task.workerStatusFor(widget.uid);
 
-    return Column(
-      children: [
-        TaskCard(
-          task: task,
-          currentUserId: widget.uid,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TaskDetailsScreen(task: task),
-            ),
-          ),
-        ),
-        if (showActions && workerStatus != 'done')
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: _buildQuickAction(task, workerStatus, provider),
-            ),
-          ),
-      ],
+    // Show action button on every non-done task, regardless of section.
+    final Widget? actionWidget =
+        workerStatus != 'done' ? _buildCompactAction(task, workerStatus, provider) : null;
+
+    return TaskCard(
+      task: task,
+      currentUserId: widget.uid,
+      actionWidget: actionWidget,
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => TaskDetailsScreen(task: task)),
+      ),
     );
   }
 
-  Widget _buildQuickAction(
+  /// Full-width gradient action button inside the task card.
+  Widget _buildCompactAction(
       TaskModel task, String workerStatus, TaskTimelineProvider provider) {
     final isStart = workerStatus == 'pending';
-    final color = isStart ? TaskTheme.inProgress : TaskTheme.done;
-    final label = isStart ? 'להתחיל לעבוד' : 'סיימתי את המשימה';
-    final icon =
-        isStart ? Icons.rocket_launch_rounded : Icons.check_circle_rounded;
-    final nextStatus = isStart ? 'in_progress' : 'done';
+    final Color fromColor =
+        isStart ? const Color(0xFF6366F1) : const Color(0xFF059669);
+    final Color toColor =
+        isStart ? const Color(0xFF818CF8) : const Color(0xFF34D399);
+    final String label = isStart ? 'התחל משימה' : 'סיים משימה';
+    final IconData icon =
+        isStart ? Icons.play_arrow_rounded : Icons.check_circle_rounded;
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.85)],
+          colors: [fromColor, toColor],
           begin: Alignment.centerRight,
           end: Alignment.centerLeft,
         ),
-        boxShadow: TaskTheme.buttonShadow(color),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+        boxShadow: [
+          BoxShadow(
+            color: fromColor.withOpacity(0.38),
+            blurRadius: 14,
+            spreadRadius: 0,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-          onTap: () => provider.updateStatus(task.id, nextStatus),
+          splashColor: Colors.white.withOpacity(0.15),
+          onTap: () => provider.updateStatus(
+              task.id, isStart ? 'in_progress' : 'done'),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 13),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 20, color: Colors.white),
-                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.22),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 16, color: Colors.white),
+                ),
+                const SizedBox(width: 9),
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],

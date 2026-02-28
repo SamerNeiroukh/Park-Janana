@@ -1,9 +1,15 @@
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 
-/// Displays a slim banner at the top when the device has no internet connection.
-/// Automatically hides when connectivity is restored.
+/// Global network status banner.
+///
+/// Uses a real DNS lookup to detect internet access (not just whether a
+/// network interface is present — connectivity_plus reports "connected"
+/// on Android emulators even with no real internet).
+///
+/// Slides in from the top when offline, flashes green for 2.5 s on reconnect.
+/// Place once in MaterialApp.builder to cover all screens.
 class NetworkBanner extends StatefulWidget {
   const NetworkBanner({super.key});
 
@@ -13,57 +19,149 @@ class NetworkBanner extends StatefulWidget {
 
 class _NetworkBannerState extends State<NetworkBanner>
     with SingleTickerProviderStateMixin {
-  late final StreamSubscription<List<ConnectivityResult>> _sub;
-  bool _isOffline = false;
+  late final AnimationController _ctrl;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+
+  // null = banner hidden, false = showing offline, true = showing reconnected
+  bool? _bannerState;
+  bool _lastKnownOffline = false;
+  bool _checking = false;
+
+  Timer? _hideTimer;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    // Check current state immediately
-    Connectivity().checkConnectivity().then(_handleResult);
-    // Then listen for changes
-    _sub = Connectivity()
-        .onConnectivityChanged
-        .listen(_handleResult);
+
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _slide = Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+    _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+
+    // Check immediately on startup, then every 8 s
+    _checkAndUpdate();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 8),
+      (_) => _checkAndUpdate(),
+    );
   }
 
-  void _handleResult(List<ConnectivityResult> results) {
-    final offline = results.isEmpty ||
-        (results.length == 1 && results.first == ConnectivityResult.none);
-    if (mounted && offline != _isOffline) {
-      setState(() => _isOffline = offline);
+  /// Performs an actual DNS lookup to verify internet reachability.
+  Future<bool> _hasInternet() async {
+    try {
+      final result = await InternetAddress.lookup('firestore.googleapis.com')
+          .timeout(const Duration(seconds: 3));
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _checkAndUpdate() async {
+    if (_checking || !mounted) return;
+    _checking = true;
+
+    try {
+      final online = await _hasInternet();
+      if (!mounted) return;
+
+      final nowOffline = !online;
+
+      if (nowOffline && !_lastKnownOffline) {
+        // Transition: online → offline
+        _lastKnownOffline = true;
+        _hideTimer?.cancel();
+        setState(() => _bannerState = false);
+        _ctrl.forward();
+      } else if (!nowOffline && _lastKnownOffline) {
+        // Transition: offline → online
+        _lastKnownOffline = false;
+        _hideTimer?.cancel();
+        setState(() => _bannerState = true);
+        _hideTimer = Timer(const Duration(milliseconds: 2500), () {
+          if (!mounted) return;
+          _ctrl.reverse().then((_) {
+            if (mounted) setState(() => _bannerState = null);
+          });
+        });
+      }
+    } finally {
+      _checking = false;
     }
   }
 
   @override
   void dispose() {
-    _sub.cancel();
+    _hideTimer?.cancel();
+    _pollTimer?.cancel();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isOffline) return const SizedBox.shrink();
+    if (_bannerState == null) return const SizedBox.shrink();
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: double.infinity,
-      color: const Color(0xFFDC2626), // red-600
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.wifi_off_rounded, color: Colors.white, size: 16),
-          SizedBox(width: 6),
-          Text(
-            'אין חיבור לאינטרנט',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+    final topPad = MediaQuery.of(context).padding.top;
+    final isOffline = _bannerState == false;
+
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isOffline
+                ? const Color(0xFFB91C1C)
+                : const Color(0xFF15803D),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-        ],
+          padding: EdgeInsets.fromLTRB(16, topPad + 10, 16, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
+                color: Colors.white,
+                size: 17,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isOffline ? 'אין חיבור לאינטרנט' : 'החיבור לאינטרנט שוחזר ✓',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+              ),
+              if (isOffline) ...[
+                const SizedBox(width: 8),
+                Text(
+                  'פועל במצב לא מקוון',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.75),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    height: 1,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,19 +1,32 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' hide TextDirection;
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:slide_to_act/slide_to_act.dart';
-import 'package:shimmer/shimmer.dart';
 
 import 'package:park_janana/core/constants/app_colors.dart';
-import 'package:park_janana/core/constants/app_dimensions.dart';
-import 'package:park_janana/core/constants/app_durations.dart';
 import '../models/attendance_model.dart';
-import 'package:park_janana/features/attendance/services/clock_service.dart';
+import '../services/clock_service.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
 
+// ── Color tokens (on the hero-card gradient background) ──────────────────────
+const _kSecondHandIdle = Color(0xFFFBBF24); // amber
+const _kSecondHandActive = Color(0xFF4ADE80); // green
+const _kRingClockIn = Color(0xFF4ADE80); // green arc = clocking in
+const _kRingClockOut = Color(0xFFF87171); // red  arc = clocking out
+const _kClockSize = 96.0; // clock face diameter
+const _kRingSize = 118.0; // outer ring diameter
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ClockInOutWidget
+// ═════════════════════════════════════════════════════════════════════════════
+
 class ClockInOutWidget extends StatefulWidget {
-  const ClockInOutWidget({super.key});
+  /// Called after a successful clock-in or clock-out so the parent can
+  /// refresh any dependent state (e.g. work-stats in UserProvider).
+  final VoidCallback? onClockComplete;
+
+  const ClockInOutWidget({super.key, this.onClockComplete});
 
   @override
   State<ClockInOutWidget> createState() => _ClockInOutWidgetState();
@@ -21,76 +34,82 @@ class ClockInOutWidget extends StatefulWidget {
 
 class _ClockInOutWidgetState extends State<ClockInOutWidget>
     with TickerProviderStateMixin {
-  // ── Business logic fields (ALL UNCHANGED) ──────────────────────────────
+  // ── Business logic ────────────────────────────────────────────────────────
   final ClockService _clockService = ClockService();
   AttendanceRecord? _ongoingSession;
   bool _loading = true;
-  bool _justSubmitted = false;
+  bool _actionInProgress = false;
 
-  final GlobalKey<SlideActionState> _key = GlobalKey();
-  Timer? _clockTimer;
+  // ── Timers ────────────────────────────────────────────────────────────────
+  Timer? _secondTimer;
   Timer? _elapsedTimer;
   Timer? _quoteTimer;
-
   DateTime _now = DateTime.now();
   Duration _elapsed = Duration.zero;
 
-  late AnimationController _pulseController;
-  late AnimationController _cardPulseController;
-  late AnimationController _clockRotateController;
-
-  final List<String> _quotes = [
-    "! היום זו הזדמנות חדשה להצטיין",
-    "! תן את המיטב שלך בפארק היום",
-    "אתה חלק חשוב בצוות שלנו 💪",
-    "כל משמרת היא הזדמנות להשפיע ✨",
-    "תשמור על חיוך – זה מדבק 😄",
+  // ── Quotes (idle state) ───────────────────────────────────────────────────
+  static const List<String> _quotes = [
+    '! היום זו הזדמנות חדשה להצטיין',
+    '! תן את המיטב שלך בפארק היום',
+    'אתה חלק חשוב בצוות שלנו 💪',
+    'כל משמרת היא הזדמנות להשפיע ✨',
+    'תשמור על חיוך – זה מדבק 😄',
   ];
   int _quoteIndex = 0;
 
-  // ── Lifecycle (UNCHANGED) ──────────────────────────────────────────────
+  // ── Animation controllers ─────────────────────────────────────────────────
+  late final AnimationController _ringCtrl;   // long-press ring fill 0→1
+  late final AnimationController _burstCtrl;  // success micro-burst
+  late final AnimationController _breatheCtrl; // idle clock glow
+
+  bool _actionFired = false;
+  bool _haptic25 = false;
+  bool _haptic50 = false;
+  bool _haptic75 = false;
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
 
-    _pulseController = AnimationController(
+    _ringCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )
+      ..addListener(_onRingTick)
+      ..addStatusListener(_onRingStatus);
+
+    _burstCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+
+    _breatheCtrl = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    _cardPulseController = AnimationController(
-      vsync: this,
-      duration: AppDurations.cardExpand,
-      lowerBound: 0.0,
-      upperBound: 0.04,
-    );
-
-    _clockRotateController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat();
-
+    _startSecondTimer();
     _startQuoteTimer();
     _fetchSession();
-    _startLiveClock();
   }
 
   @override
   void dispose() {
-    _clockTimer?.cancel();
+    _secondTimer?.cancel();
     _elapsedTimer?.cancel();
     _quoteTimer?.cancel();
-    _pulseController.dispose();
-    _cardPulseController.dispose();
-    _clockRotateController.dispose();
+    _ringCtrl.dispose();
+    _burstCtrl.dispose();
+    _breatheCtrl.dispose();
     super.dispose();
   }
 
-  // ── Timer helpers (UNCHANGED) ───────────────────────────────────────────
+  // ── Timers ────────────────────────────────────────────────────────────────
 
-  void _startLiveClock() {
-    _clockTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+  void _startSecondTimer() {
+    _secondTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _now = DateTime.now());
     });
   }
@@ -101,9 +120,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       _elapsed = DateTime.now().difference(_ongoingSession!.clockIn);
       _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (mounted && _ongoingSession != null) {
-          setState(() {
-            _elapsed = DateTime.now().difference(_ongoingSession!.clockIn);
-          });
+          setState(
+              () => _elapsed = DateTime.now().difference(_ongoingSession!.clockIn));
         } else {
           _elapsedTimer?.cancel();
         }
@@ -113,11 +131,53 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
 
   void _startQuoteTimer() {
     _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      setState(() => _quoteIndex = (_quoteIndex + 1) % _quotes.length);
+      if (mounted) setState(() => _quoteIndex = (_quoteIndex + 1) % _quotes.length);
     });
   }
 
-  // ── Data fetching (UNCHANGED) ───────────────────────────────────────────
+  // ── Long-press ring callbacks ─────────────────────────────────────────────
+
+  void _onRingTick() {
+    final v = _ringCtrl.value;
+    if (!_haptic25 && v >= 0.25) {
+      _haptic25 = true;
+      HapticFeedback.selectionClick();
+    }
+    if (!_haptic50 && v >= 0.50) {
+      _haptic50 = true;
+      HapticFeedback.selectionClick();
+    }
+    if (!_haptic75 && v >= 0.75) {
+      _haptic75 = true;
+      HapticFeedback.selectionClick();
+    }
+    // setState driven by AnimationBuilder — no extra call needed here
+  }
+
+  void _onRingStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && !_actionFired) {
+      _actionFired = true;
+      HapticFeedback.heavyImpact();
+      _burstCtrl.forward(from: 0).then((_) => _burstCtrl.reverse());
+      _handleAction();
+    }
+  }
+
+  void _onLongPressStart(LongPressStartDetails _) {
+    if (_actionInProgress || _loading) return;
+    _actionFired = false;
+    _haptic25 = _haptic50 = _haptic75 = false;
+    HapticFeedback.lightImpact();
+    _ringCtrl.forward(from: 0);
+  }
+
+  void _onLongPressEnd(LongPressEndDetails _) {
+    if (!_actionFired) {
+      _ringCtrl.animateBack(0, curve: Curves.easeOut);
+    }
+  }
+
+  // ── Data fetching (UNCHANGED) ─────────────────────────────────────────────
 
   Future<void> _fetchSession() async {
     try {
@@ -131,174 +191,29 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       if (_ongoingSession != null) _startElapsedTimer();
     } catch (e) {
       debugPrint('Error fetching session: $e');
-      if (mounted) {
-        setState(() {
-          _ongoingSession = null;
-          _loading = false;
-        });
-      }
+      if (mounted) setState(() { _ongoingSession = null; _loading = false; });
     }
   }
 
-  // ── Action handler (UNCHANGED) ─────────────────────────────────────────
+  // ── Action handler (UNCHANGED logic) ─────────────────────────────────────
 
   Future<void> _handleAction() async {
-    final userName =
-        FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
+    if (_actionInProgress) return;
 
+    final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
     final insidePark = await LocationUtils.isInsidePark();
     final isClockingIn = _ongoingSession == null;
 
-    if (!insidePark) {
-      final confirm = await showGeneralDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        barrierLabel: 'Location Warning',
-        barrierColor: Colors.black54.withOpacity(0.6),
-        transitionDuration: AppDurations.shimmer,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return Center(
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.85,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [AppColors.salmon, AppColors.darkRed],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.4),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: const Icon(
-                        Icons.location_off_rounded,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    const Text(
-                      'אינך נמצא בגבולות הפארק',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        height: 1.4,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            foregroundColor: Colors.black87,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 28, vertical: 14),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            elevation: 0,
-                            minimumSize: const Size(100, 48),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('לא',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 16)),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            elevation: 0,
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            minimumSize: const Size(100, 48),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppColors.darkRed, AppColors.salmon],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: Container(
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 14),
-                              child: const Text(
-                                'כן',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          final curvedValue = Curves.easeInOut.transform(animation.value);
-          return Opacity(
-            opacity: curvedValue,
-            child: Transform.scale(scale: curvedValue, child: child),
-          );
-        },
-      );
-
+    if (!insidePark && mounted) {
+      final confirm = await _showLocationWarning(isClockingIn);
       if (confirm != true) {
-        _key.currentState?.reset();
+        if (mounted) _ringCtrl.animateBack(0, curve: Curves.easeOut);
         return;
       }
     }
+
+    if (!mounted) return;
+    setState(() => _actionInProgress = true);
 
     try {
       if (_ongoingSession == null) {
@@ -306,236 +221,551 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       } else {
         await _clockService.clockOut();
       }
-
-      setState(() => _justSubmitted = true);
-      _cardPulseController.forward(from: 0).then((_) {
-        _cardPulseController.reverse().then((_) {
-          setState(() => _justSubmitted = false);
-        });
-      });
-
       await _fetchSession();
+      widget.onClockComplete?.call();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: Text(
-                    'שגיאה בדיווח נוכחות: $e',
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Flexible(
+                child: Text('שגיאה בדיווח נוכחות: $e',
                     style: const TextStyle(fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.error_outline_rounded,
-                    color: Colors.white, size: 20),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
-      }
-    }
-    _key.currentState?.reset();
-  }
-
-  // ══════════════════════════════════════════════════════════════════════
-  // UI – redesigned pill ↔ card
-  // ══════════════════════════════════════════════════════════════════════
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) return _buildLoadingCard();
-
-    final isClockedIn = _ongoingSession != null;
-    return _buildExpandedCard(isClockedIn);
-  }
-
-  // ── Loading card ────────────────────────────────────────────────────────
-
-  Widget _buildLoadingCard() {
-    return Container(
-      height: 110,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4F58FE), Color(0xFF00f2fe)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Expanded card ──────────────────────────────────────────────────────
-
-  Widget _buildExpandedCard(bool isClockedIn) {
-    final iconColor = isClockedIn ? Colors.deepOrange : Colors.teal;
-    final icon = isClockedIn ? Icons.task_alt : Icons.access_time;
-    final label = isClockedIn ? 'החלק כדי לצאת' : 'החלק כדי להתחיל';
-    final clockInTime =
-        isClockedIn ? DateFormat.Hm().format(_ongoingSession!.clockIn) : '';
-    final nowTime = DateFormat.Hm().format(_now);
-    final subLabel = isClockedIn
-        ? 'נכנסת ב־$clockInTime  •  עכשיו $nowTime'
-        : 'אתה כרגע לא מחובר';
-
-    return AnimatedBuilder(
-      animation: _cardPulseController,
-      builder: (_, child) =>
-          Transform.scale(scale: 1 - _cardPulseController.value, child: child),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isClockedIn
-                  ? [const Color(0xFFFF6A6A), const Color(0xFFFFB88C)]
-                  : [
-                      const Color.fromARGB(255, 79, 88, 254),
-                      const Color(0xFF00f2fe),
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 28,
-                offset: const Offset(0, 14),
+                    textAlign: TextAlign.right),
               ),
+              const SizedBox(width: 8),
+              const Icon(Icons.error_outline_rounded,
+                  color: Colors.white, size: 20),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _actionInProgress = false);
+        _ringCtrl.animateBack(0, curve: Curves.easeOut);
+        _actionFired = false;
+      }
+    }
+  }
+
+  // ── Location warning (UNCHANGED) ─────────────────────────────────────────
+
+  Future<bool?> _showLocationWarning(bool isClockingIn) {
+    return showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: 'Location',
+      barrierColor: Colors.black54.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (ctx, _, __) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(ctx).size.width * 0.85,
+            padding:
+                const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10))
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── Counter or quote ────────────────────────────────
-                if (isClockedIn) _buildLiveCounter() else _buildMotivationalQuote(),
-                const SizedBox(height: 6),
-
-                AnimatedSwitcher(
-                  duration: AppDurations.cardExpand,
-                  child: Text(
-                    subLabel,
-                    key: ValueKey(subLabel),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                        colors: [AppColors.salmon, AppColors.darkRed],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.red.withOpacity(0.4),
+                          blurRadius: 20,
+                          spreadRadius: 2)
+                    ],
                   ),
+                  padding: const EdgeInsets.all(16),
+                  child: const Icon(Icons.location_off_rounded,
+                      size: 48, color: Colors.white),
                 ),
-                const SizedBox(height: 14),
-
-                // ── Slide action ────────────────────────────────────
-                AnimatedBuilder(
-                  animation: _pulseController,
-                  builder: (_, child) => Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: iconColor
-                              .withOpacity(_pulseController.value * 0.3),
-                          blurRadius: 18 + (_pulseController.value * 8),
+                const SizedBox(height: 22),
+                const Text('אינך נמצא בגבולות הפארק',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.black87)),
+                const SizedBox(height: 12),
+                Text(
+                    'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        height: 1.4,
+                        color: Colors.black54)),
+                const SizedBox(height: 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          foregroundColor: Colors.black87,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          elevation: 0,
+                          minimumSize: const Size(100, 48)),
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: const Text('לא',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 16)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          elevation: 0,
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          minimumSize: const Size(100, 48)),
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [AppColors.darkRed, AppColors.salmon],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight),
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                      ],
-                    ),
-                    child: child,
-                  ),
-                  child: SlideAction(
-                    key: _key,
-                    height: AppDimensions.buttonHeightL,
-                    borderRadius: AppDimensions.radiusXL,
-                    elevation: 0,
-                    outerColor: Colors.transparent,
-                    innerColor: Colors.white,
-                    sliderButtonIcon: RotationTransition(
-                      turns: _ongoingSession == null
-                          ? _clockRotateController
-                          : const AlwaysStoppedAnimation(0),
-                      child: Icon(icon, size: 26, color: iconColor),
-                    ),
-                    text: '',
-                    onSubmit: () async => await _handleAction(),
-                    child: Shimmer.fromColors(
-                      baseColor: iconColor,
-                      highlightColor: Colors.white.withOpacity(0.8),
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: iconColor,
+                        child: Container(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 14),
+                          child: const Text('כן',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
       ),
+      transitionBuilder: (_, anim, __, child) {
+        final v = Curves.easeInOut.transform(anim.value);
+        return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
+      },
     );
   }
 
-  // ── Sub-widgets (UNCHANGED logic) ─────────────────────────────────────
+  // ── Build ─────────────────────────────────────────────────────────────────
 
-  Widget _buildLiveCounter() {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return Text(
-      '${two(_elapsed.inHours)}:${two(_elapsed.inMinutes.remainder(60))}:${two(_elapsed.inSeconds.remainder(60))}',
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1,
-      ),
-    );
-  }
-
-  Widget _buildMotivationalQuote() {
-    return AnimatedSwitcher(
-      duration: AppDurations.slow,
-      child: Text(
-        _quotes[_quoteIndex],
-        key: ValueKey(_quoteIndex),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const SizedBox(
+        height: 140,
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+                strokeWidth: 2, color: Colors.white54),
+          ),
         ),
-        textAlign: TextAlign.center,
+      );
+    }
+
+    final isClockedIn = _ongoingSession != null;
+    final ringColor = isClockedIn ? _kRingClockOut : _kRingClockIn;
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Analog clock + long-press ring ──────────────────────────────
+          GestureDetector(
+            onLongPressStart: _onLongPressStart,
+            onLongPressEnd: _onLongPressEnd,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_ringCtrl, _burstCtrl, _breatheCtrl]),
+              builder: (_, __) {
+                // Breathing scale (idle only) + burst scale (on success)
+                final burst = sin(_burstCtrl.value * pi) * 0.10;
+                final breathe = isClockedIn
+                    ? 0.0
+                    : _breatheCtrl.value * 0.025;
+                final scale = 1.0 + burst + breathe;
+
+                return Transform.scale(
+                  scale: scale,
+                  child: SizedBox(
+                    width: _kRingSize,
+                    height: _kRingSize,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Long-press ring (outermost)
+                        CustomPaint(
+                          size: const Size(_kRingSize, _kRingSize),
+                          painter: _LongPressRingPainter(
+                            progress: _ringCtrl.value,
+                            color: ringColor,
+                          ),
+                        ),
+
+                        // Analog clock face
+                        CustomPaint(
+                          size: const Size(_kClockSize, _kClockSize),
+                          painter: _AnalogClockPainter(
+                            now: _now,
+                            isClockedIn: isClockedIn,
+                          ),
+                        ),
+
+                        // Loading spinner overlay
+                        if (_actionInProgress)
+                          SizedBox(
+                            width: _kClockSize,
+                            height: _kClockSize,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── Elapsed time OR motivational quote ──────────────────────────
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 450),
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                        begin: const Offset(0, 0.3), end: Offset.zero)
+                    .animate(anim),
+                child: child,
+              ),
+            ),
+            child: isClockedIn
+                ? _ActiveClockInfo(
+                    key: const ValueKey('elapsed'),
+                    elapsed: _elapsed,
+                    clockInTime: _ongoingSession!.clockIn,
+                  )
+                : _QuoteText(
+                    key: ValueKey(_quoteIndex),
+                    text: _quotes[_quoteIndex]),
+          ),
+
+          const SizedBox(height: 5),
+
+          // ── Instruction label ──────────────────────────────────────────
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              isClockedIn ? 'לחיצה ארוכה לסיום משמרת' : 'לחיצה ארוכה להתחיל משמרת',
+              key: ValueKey(isClockedIn),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withOpacity(0.60),
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+
+        ],
       ),
     );
   }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  Active clock info widget (when clocked in) — elapsed + clock-in time
+// ═════════════════════════════════════════════════════════════════════════════
+
+class _ActiveClockInfo extends StatelessWidget {
+  final Duration elapsed;
+  final DateTime clockInTime;
+
+  const _ActiveClockInfo({
+    super.key,
+    required this.elapsed,
+    required this.clockInTime,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    final elapsedStr =
+        '${two(elapsed.inHours)}:${two(elapsed.inMinutes.remainder(60))}:${two(elapsed.inSeconds.remainder(60))}';
+    final sinceStr = 'מאז ${two(clockInTime.hour)}:${two(clockInTime.minute)}';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          elapsedStr,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: _kSecondHandActive,
+            letterSpacing: 3.0,
+            height: 1,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          sinceStr,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.55),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  Quote text widget (when idle)
+// ═════════════════════════════════════════════════════════════════════════════
+
+class _QuoteText extends StatelessWidget {
+  final String text;
+  const _QuoteText({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: Colors.white.withOpacity(0.65),
+        height: 1.4,
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  Analog clock CustomPainter
+// ═════════════════════════════════════════════════════════════════════════════
+
+class _AnalogClockPainter extends CustomPainter {
+  final DateTime now;
+  final bool isClockedIn;
+
+  const _AnalogClockPainter({required this.now, required this.isClockedIn});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    // ── Clock face (frosted glass) ───────────────────────────────────────
+    canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..color = Colors.white.withOpacity(0.13)
+          ..style = PaintingStyle.fill);
+
+    // Inner glow ring for active state
+    if (isClockedIn) {
+      canvas.drawCircle(
+          c,
+          r - 1,
+          Paint()
+            ..color = _kSecondHandActive.withOpacity(0.18)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 9
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+    }
+
+    // Face border
+    canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..color = Colors.white.withOpacity(0.30)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5);
+
+    // ── Tick marks (60 positions) ────────────────────────────────────────
+    for (int i = 0; i < 60; i++) {
+      final angle = i * pi / 30 - pi / 2;
+      final isHourMark = i % 5 == 0;
+      final tickLen = isHourMark ? 7.0 : 3.5;
+      final tickW = isHourMark ? 2.2 : 1.0;
+      final opacity = isHourMark ? 0.90 : 0.35;
+
+      _drawLine(
+        canvas,
+        Offset(c.dx + (r - 3) * cos(angle), c.dy + (r - 3) * sin(angle)),
+        Offset(c.dx + (r - 3 - tickLen) * cos(angle),
+            c.dy + (r - 3 - tickLen) * sin(angle)),
+        Colors.white.withOpacity(opacity),
+        tickW,
+      );
+    }
+
+    // ── Hour hand ────────────────────────────────────────────────────────
+    final hAngle =
+        (now.hour % 12 + now.minute / 60) * pi / 6 - pi / 2;
+    _drawHand(canvas, c, hAngle, r * 0.44, 3.2, Colors.white);
+
+    // ── Minute hand ──────────────────────────────────────────────────────
+    final mAngle = (now.minute + now.second / 60) * pi / 30 - pi / 2;
+    _drawHand(canvas, c, mAngle, r * 0.63, 2.0, Colors.white);
+
+    // ── Second hand + tail ───────────────────────────────────────────────
+    final sAngle = now.second * pi / 30 - pi / 2;
+    final secColor =
+        isClockedIn ? _kSecondHandActive : _kSecondHandIdle;
+    _drawHand(canvas, c, sAngle, r * 0.72, 1.2, secColor); // body
+    _drawHand(canvas, c, sAngle + pi, r * 0.18, 1.2, secColor); // tail
+
+    // ── Center dots ──────────────────────────────────────────────────────
+    canvas.drawCircle(
+        c, 5.0, Paint()..color = Colors.white); // white cap
+    canvas.drawCircle(
+        c, 2.8, Paint()..color = secColor); // colored center
+  }
+
+  void _drawHand(Canvas canvas, Offset center, double angle, double length,
+      double width, Color color) {
+    _drawLine(
+      canvas,
+      center,
+      Offset(center.dx + length * cos(angle), center.dy + length * sin(angle)),
+      color,
+      width,
+    );
+  }
+
+  void _drawLine(Canvas canvas, Offset a, Offset b, Color color, double width) {
+    canvas.drawLine(
+        a,
+        b,
+        Paint()
+          ..color = color
+          ..strokeWidth = width
+          ..strokeCap = StrokeCap.round);
+  }
+
+  @override
+  bool shouldRepaint(_AnalogClockPainter old) =>
+      old.now.second != now.second ||
+      old.now.minute != now.minute ||
+      old.isClockedIn != isClockedIn;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  Long-press ring CustomPainter
+// ═════════════════════════════════════════════════════════════════════════════
+
+class _LongPressRingPainter extends CustomPainter {
+  final double progress; // 0.0 → 1.0
+  final Color color;
+
+  const _LongPressRingPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2 - 5;
+
+    // Track (subtle ghost ring always visible as hint)
+    canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..color = Colors.white.withOpacity(0.10)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4);
+
+    if (progress <= 0) return;
+
+    // Glow layer (blurred, slightly larger)
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      -pi / 2,
+      2 * pi * progress,
+      false,
+      Paint()
+        ..color = color.withOpacity(0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 10
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+
+    // Crisp arc
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      -pi / 2,
+      2 * pi * progress,
+      false,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Leading dot (bright tip of the arc)
+    if (progress > 0.01) {
+      final tipAngle = -pi / 2 + 2 * pi * progress;
+      final tip = Offset(c.dx + r * cos(tipAngle), c.dy + r * sin(tipAngle));
+      canvas.drawCircle(tip, 4, Paint()..color = Colors.white);
+      canvas.drawCircle(
+          tip,
+          6,
+          Paint()
+            ..color = color.withOpacity(0.50)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LongPressRingPainter old) =>
+      old.progress != progress || old.color != color;
 }

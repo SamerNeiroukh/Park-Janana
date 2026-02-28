@@ -14,6 +14,7 @@ import 'features/auth/screens/welcome_screen.dart';
 import 'core/constants/app_theme.dart';
 import 'core/widgets/error_state_widget.dart';
 import 'core/services/notification_service.dart';
+import 'core/widgets/network_banner.dart';
 import 'features/home/providers/user_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/home/providers/app_state_provider.dart';
@@ -128,7 +129,17 @@ class _MyAppState extends State<MyApp> {
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.ltr,
-          child: child!,
+          child: Stack(
+            children: [
+              child!,
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: NetworkBanner(),
+              ),
+            ],
+          ),
         );
       },
       home: _showSplashScreen

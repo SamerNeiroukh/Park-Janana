@@ -28,6 +28,7 @@ dependencies:
   firebase_storage: ^13.0.1
   cloud_firestore: ^6.0.1
   firebase_messaging: ^16.0.1
+  cloud_functions: ^6.0.1
   flutter_local_notifications: ^18.0.1
   image_picker: ^1.1.2
   google_fonts: ^6.1.0
