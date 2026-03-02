@@ -6,16 +6,27 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/features/shifts/models/shift_model.dart';
+import 'package:park_janana/features/shifts/screens/manager_weekly_schedule_screen.dart';
+import 'package:park_janana/features/shifts/screens/shift_details_screen.dart';
+import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
+import 'package:park_janana/features/shifts/services/shift_service.dart';
+import 'package:park_janana/features/tasks/models/task_model.dart';
+import 'package:park_janana/features/tasks/screens/manager_task_board_screen.dart';
+import 'package:park_janana/features/tasks/screens/task_details_screen.dart';
+import 'package:park_janana/features/tasks/screens/worker_task_timeline_screen.dart';
+import 'package:park_janana/features/newsfeed/screens/newsfeed_screen.dart';
+import 'package:park_janana/features/workers/screens/manage_workers_screen.dart';
+import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/main.dart' show navigatorKey;
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Background message handler - must be top-level function
+/// Background message handler — must be a top-level function.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('Handling background message: ${message.messageId}');
 }
 
-/// Service for handling push notifications via Firebase Cloud Messaging
+/// Singleton service for FCM push notifications + deep link routing.
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -28,7 +39,10 @@ class NotificationService {
 
   bool _isInitialized = false;
 
-  /// Android notification channel for high importance notifications
+  /// Holds FCM data from a terminated-state launch until HomeScreen is ready.
+  /// Static so it survives the singleton lifetime.
+  static Map<String, dynamic>? _pendingNavigationData;
+
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'park_janana_notifications',
     'Park Janana Notifications',
@@ -38,73 +52,43 @@ class NotificationService {
     enableVibration: true,
   );
 
-  /// Initialize the notification service
+  // ── Initialisation ──────────────────────────────────────────────────────
+
   Future<void> initialize() async {
     if (_isInitialized) return;
-
-    // Request permission
     await _requestPermission();
-
-    // Initialize local notifications
     await _initializeLocalNotifications();
-
-    // Set up message handlers
     _setupMessageHandlers();
-
-    // Get and save FCM token
     await _saveTokenToFirestore();
-
-    // Listen for token refresh
     _messaging.onTokenRefresh.listen(_updateTokenInFirestore);
-
     _isInitialized = true;
     debugPrint('NotificationService initialized');
   }
 
-  /// Request notification permissions
   Future<bool> _requestPermission() async {
     final settings = await _messaging.requestPermission(
       alert: true,
-      announcement: false,
       badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
       sound: true,
     );
-
     final isAuthorized =
         settings.authorizationStatus == AuthorizationStatus.authorized ||
             settings.authorizationStatus == AuthorizationStatus.provisional;
-
     debugPrint('Notification permission: ${settings.authorizationStatus}');
     return isAuthorized;
   }
 
-  /// Initialize local notifications plugin
   Future<void> _initializeLocalNotifications() async {
-    // Android settings
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    // iOS settings
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-
     await _localNotifications.initialize(
-      initSettings,
+      const InitializationSettings(android: androidSettings, iOS: iosSettings),
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
-
-    // Create Android notification channel
     if (Platform.isAndroid) {
       await _localNotifications
           .resolvePlatformSpecificImplementation<
@@ -113,9 +97,55 @@ class NotificationService {
     }
   }
 
-  /// Handle notification tap
+  // ── Message handlers ────────────────────────────────────────────────────
+
+  void _setupMessageHandlers() {
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationOpen);
+    _checkInitialMessage();
+  }
+
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    debugPrint('Foreground message: ${message.notification?.title}');
+    final notification = message.notification;
+    if (notification == null) return;
+    await _showLocalNotification(
+      title: notification.title ?? 'Park Janana',
+      body: notification.body ?? '',
+      payload: json.encode(message.data),
+    );
+  }
+
+  void _handleNotificationOpen(RemoteMessage message) {
+    debugPrint('App opened from notification: ${message.data}');
+    _navigateFromNotification(message.data);
+  }
+
+  Future<void> _checkInitialMessage() async {
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint('App opened from terminated state — navigation deferred until HomeScreen mounts');
+      // Do NOT navigate here — the navigator doesn't exist yet (called before runApp)
+      // and the 6-second splash screen is still showing. Store for HomeScreen to consume.
+      _pendingNavigationData = Map<String, dynamic>.from(initialMessage.data);
+    }
+  }
+
+  /// Called by HomeScreen after it fully mounts and auth is confirmed.
+  /// Consumes any terminated-state notification and navigates to the correct screen.
+  void consumePendingNavigation() {
+    final data = _pendingNavigationData;
+    if (data == null) return;
+    _pendingNavigationData = null;
+    debugPrint('Consuming pending terminated-state notification');
+    // Brief delay so HomeScreen finishes its first render before we push on top.
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _navigateFromNotification(data);
+    });
+  }
+
   void _onNotificationTapped(NotificationResponse response) {
-    debugPrint('Notification tapped: ${response.payload}');
+    debugPrint('Local notification tapped: ${response.payload}');
     if (response.payload != null && response.payload!.isNotEmpty) {
       try {
         final data = Map<String, dynamic>.from(json.decode(response.payload!));
@@ -127,116 +157,180 @@ class NotificationService {
     }
   }
 
-  /// Set up FCM message handlers
-  void _setupMessageHandlers() {
-    // Handle foreground messages
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+  // ── Deep link navigation ────────────────────────────────────────────────
 
-    // Handle when app is opened from notification
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationOpen);
-
-    // Check if app was opened from a terminated state via notification
-    _checkInitialMessage();
-  }
-
-  /// Handle messages when app is in foreground
-  Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    debugPrint('Foreground message received: ${message.notification?.title}');
-
-    final notification = message.notification;
-    if (notification == null) return;
-
-    await _persistNotification(
-      title: notification.title ?? 'Park Janana',
-      body: notification.body ?? '',
-      type: message.data['type'] as String? ?? 'general',
-    );
-
-    // Show local notification with JSON payload for deep linking
-    await _showLocalNotification(
-      title: notification.title ?? 'Park Janana',
-      body: notification.body ?? '',
-      payload: json.encode(message.data),
-    );
-  }
-
-  /// Handle when user taps notification to open app
-  void _handleNotificationOpen(RemoteMessage message) {
-    debugPrint('App opened from notification: ${message.data}');
-    _persistNotification(
-      title: message.notification?.title ?? 'Park Janana',
-      body: message.notification?.body ?? '',
-      type: message.data['type'] as String? ?? 'general',
-    );
-    _navigateFromNotification(message.data);
-  }
-
-  /// Persist a notification entry to SharedPreferences (capped at 50)
-  Future<void> _persistNotification({
-    required String title,
-    required String body,
-    required String type,
-  }) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getStringList('notification_history') ?? [];
-      final entry = json.encode({
-        'title': title,
-        'body': body,
-        'type': type,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
-      raw.insert(0, entry);
-      if (raw.length > 50) raw.removeRange(50, raw.length);
-      await prefs.setStringList('notification_history', raw);
-    } catch (e) {
-      debugPrint('Error persisting notification: $e');
-    }
-  }
-
-  /// Check if app was opened from a notification when terminated
-  Future<void> _checkInitialMessage() async {
-    final initialMessage = await _messaging.getInitialMessage();
-    if (initialMessage != null) {
-      debugPrint('App opened from terminated state: ${initialMessage.data}');
-      // Delay to ensure navigator is ready after app launch
-      await Future.delayed(const Duration(milliseconds: 500));
-      _navigateFromNotification(initialMessage.data);
-    }
-  }
-
-  /// Navigate based on notification data
+  /// Route to the correct screen based on notification type.
+  /// Payload may use `entityId` (new format) or legacy `shiftId`/`taskId` keys.
   void _navigateFromNotification(Map<String, dynamic> data) {
     final navigator = navigatorKey.currentState;
     if (navigator == null) return;
 
-    final type = data['type'] as String?;
-    debugPrint('Navigating from notification type: $type');
+    // ── Security: reject if this notification was not meant for the current user.
+    // Prevents a logged-out user's stale notification from being tapped by a
+    // different user who logs in on the same device.
+    final recipientId = data['recipientId'] as String?;
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    if (recipientId != null && recipientId.isNotEmpty) {
+      if (currentUid == null || currentUid != recipientId) {
+        debugPrint(
+          'Notification rejected — intended for $recipientId, '
+          'current user is $currentUid',
+        );
+        return;
+      }
+    }
 
-    // All notification types currently lead to home screen
-    // where the user can see the relevant shift/task updates.
-    // Specific screen routing can be added here per type.
+    final type = data['type'] as String?;
+    final entityId = ((data['entityId'] as String?)?.isNotEmpty ?? false)
+        ? data['entityId'] as String
+        : (data['shiftId'] as String?) ??
+          (data['taskId'] as String?) ??
+          (data['userId'] as String?);
+
+    debugPrint('Deep link: type=$type, entityId=$entityId');
+
+    // Always ensure /home is the base of the stack
+    navigator.pushNamedAndRemoveUntil('/home', (route) => false);
+
     switch (type) {
-      case 'shift_update':
       case 'shift_assigned':
+      case 'shift_update':
       case 'shift_removed':
       case 'shift_cancelled':
+      case 'shift_rejected':
+        if (entityId != null) _pushShiftDetails(navigator, entityId);
       case 'shift_message':
-        navigator.pushNamedAndRemoveUntil('/home', (route) => false);
-        break;
+        if (entityId != null) _pushShiftDetails(navigator, entityId, initialTab: 2);
+      case 'task_assigned':
+      case 'task_approved':
+        if (entityId != null) _pushTaskDetails(navigator, entityId);
+      case 'task_review_requested':
+        if (entityId != null) _pushManagerBoardHighlight(navigator, entityId);
+      case 'task_comment':
+        if (entityId != null) _pushTaskDetails(navigator, entityId, initialTab: 1, withBase: false);
+      case 'post_comment':
+        if (entityId != null) _pushPostDetail(navigator, entityId);
+      case 'new_user_pending':
+        _pushManageWorkers(navigator);
       default:
-        _navigateToHome();
+        // worker_approved / worker_rejected / unknown — stay on home
+        break;
     }
   }
 
-  /// Navigate to home screen
-  void _navigateToHome() {
-    final navigator = navigatorKey.currentState;
-    if (navigator == null) return;
-    navigator.pushNamedAndRemoveUntil('/home', (route) => false);
+  /// Returns the current user's role from Firestore.
+  /// Defaults to 'worker' on any error or missing field — the safest role.
+  Future<String> _fetchCurrentRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return 'worker';
+    try {
+      final doc = await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .get();
+      return doc.data()?['role'] as String? ?? 'worker';
+    } catch (_) {
+      return 'worker';
+    }
   }
 
-  /// Show a local notification
+  Future<void> _pushShiftDetails(NavigatorState nav, String shiftId, {int initialTab = 0}) async {
+    try {
+      final role = await _fetchCurrentRole();
+      final doc = await _firestore
+          .collection(AppConstants.shiftsCollection)
+          .doc(shiftId)
+          .get();
+      if (!doc.exists || doc.data() == null) return;
+      final shift = ShiftModel.fromMap(doc.id, doc.data()!);
+
+      if (role == 'worker') {
+        // Worker: open My Shifts screen jumping to the shift's date,
+        // with the ShiftDetailsPopup auto-opened.
+        nav.push(MaterialPageRoute(
+          builder: (_) => ShiftsScreen(initialShift: shift),
+        ));
+      } else {
+        // Manager/owner/admin: weekly overview with shift details stacked on
+        // top. Back-press from ShiftDetailsScreen returns to the overview.
+        nav.push(MaterialPageRoute(
+          builder: (_) => const ManagerWeeklyScheduleScreen(),
+        ));
+        nav.push(MaterialPageRoute(
+          builder: (_) => ShiftDetailsScreen(
+            shift: shift,
+            shiftService: ShiftService(),
+            workerService: WorkerService(),
+            initialTab: initialTab,
+          ),
+        ));
+      }
+    } catch (e) {
+      debugPrint('_pushShiftDetails error: $e');
+    }
+  }
+
+  Future<void> _pushTaskDetails(NavigatorState nav, String taskId,
+      {int initialTab = 0, bool withBase = true}) async {
+    try {
+      final role = await _fetchCurrentRole();
+      final doc = await _firestore
+          .collection(AppConstants.tasksCollection)
+          .doc(taskId)
+          .get();
+      if (!doc.exists || doc.data() == null) return;
+      final task = TaskModel.fromMap(doc.id, doc.data()!);
+
+      if (withBase) {
+        if (role == 'worker') {
+          nav.push(MaterialPageRoute(
+            builder: (_) => const WorkerTaskTimelineScreen(),
+          ));
+        } else {
+          nav.push(MaterialPageRoute(
+            builder: (_) => const ManagerTaskBoardScreen(initialTab: 1),
+          ));
+        }
+      }
+      nav.push(MaterialPageRoute(
+        builder: (_) => TaskDetailsScreen(task: task, initialTab: initialTab),
+      ));
+    } catch (e) {
+      debugPrint('_pushTaskDetails error: $e');
+    }
+  }
+
+  void _pushPostDetail(NavigatorState nav, String postId) {
+    nav.push(MaterialPageRoute(
+      builder: (_) => NewsfeedScreen(initialPostId: postId),
+    ));
+  }
+
+  void _pushManagerBoardHighlight(NavigatorState nav, String taskId) {
+    nav.push(MaterialPageRoute(
+      builder: (_) => ManagerTaskBoardScreen(
+        initialTab: 0,
+        highlightTaskId: taskId,
+      ),
+    ));
+  }
+
+  Future<void> _pushManageWorkers(NavigatorState nav) async {
+    final role = await _fetchCurrentRole();
+    if (role != 'manager' && role != 'owner' && role != 'admin') {
+      debugPrint('ManageWorkers blocked — role=$role is not authorized');
+      return;
+    }
+    nav.push(MaterialPageRoute(builder: (_) => const ManageWorkersScreen()));
+  }
+
+  void _navigateToHome() {
+    navigatorKey.currentState
+        ?.pushNamedAndRemoveUntil('/home', (route) => false);
+  }
+
+  // ── Local notification display ──────────────────────────────────────────
+
   Future<void> _showLocalNotification({
     required String title,
     required String body,
@@ -252,289 +346,97 @@ class NotificationService {
       enableVibration: true,
       icon: '@mipmap/ic_launcher',
     );
-
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
     await _localNotifications.show(
       DateTime.now().millisecondsSinceEpoch ~/ 1000,
       title,
       body,
-      details,
+      const NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: payload,
     );
   }
 
-  /// Get the current FCM token
-  Future<String?> getToken() async {
-    return await _messaging.getToken();
-  }
+  // ── FCM token management ────────────────────────────────────────────────
 
-  /// Save FCM token to Firestore for the current user
+  Future<String?> getToken() async => _messaging.getToken();
+
   Future<void> _saveTokenToFirestore() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     final token = await getToken();
     if (token == null) return;
-
     await _updateTokenInFirestore(token);
   }
 
-  /// Update token in Firestore
   Future<void> _updateTokenInFirestore(String token) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     try {
-      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .update({
         'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
-      debugPrint('FCM token saved to Firestore');
+      debugPrint('FCM token saved');
     } catch (e) {
       debugPrint('Error saving FCM token: $e');
     }
   }
 
-  /// Save FCM token after user login (public method)
   Future<void> saveTokenAfterLogin() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      debugPrint('saveTokenAfterLogin: No user logged in');
-      return;
-    }
-
+    if (user == null) return;
     final token = await getToken();
-    if (token == null) {
-      debugPrint('saveTokenAfterLogin: No FCM token available');
-      return;
-    }
-
+    if (token == null) return;
     try {
-      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .update({
         'fcmTokens': FieldValue.arrayUnion([token]),
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
-      debugPrint('FCM token saved after login for user: ${user.uid}');
+      debugPrint('FCM token saved after login');
     } catch (e) {
       debugPrint('Error saving FCM token after login: $e');
     }
   }
 
-  /// Remove token from Firestore (call on logout)
   Future<void> removeTokenOnLogout() async {
+    // Clear all OS-level notifications so the next user on this device
+    // cannot tap notifications that were intended for the previous user.
+    await _localNotifications.cancelAll();
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     final token = await getToken();
     if (token == null) return;
-
     try {
-      await _firestore.collection(AppConstants.usersCollection).doc(user.uid).update({
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .update({
         'fcmTokens': FieldValue.arrayRemove([token]),
       });
-      debugPrint('FCM token removed from Firestore');
+      debugPrint('FCM token removed on logout');
     } catch (e) {
       debugPrint('Error removing FCM token: $e');
     }
   }
 
-  /// Subscribe to a topic (e.g., department-specific notifications)
   Future<void> subscribeToTopic(String topic) async {
     await _messaging.subscribeToTopic(topic);
     debugPrint('Subscribed to topic: $topic');
   }
 
-  /// Unsubscribe from a topic
   Future<void> unsubscribeFromTopic(String topic) async {
     await _messaging.unsubscribeFromTopic(topic);
     debugPrint('Unsubscribed from topic: $topic');
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // SHIFT NOTIFICATIONS
-  // ═══════════════════════════════════════════════════════════
-
-  /// Send notification about shift updates to affected workers
-  /// Creates a notification request in Firestore to be processed by Cloud Functions
-  Future<void> notifyShiftUpdate({
-    required String shiftId,
-    required List<String> workerIds,
-    required String shiftDate,
-    required String department,
-    required List<String> changes,
-  }) async {
-    if (workerIds.isEmpty) return;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      // Create notification request for Cloud Function to process
-      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
-        'type': 'shift_update',
-        'shiftId': shiftId,
-        'recipientIds': workerIds,
-        'title': 'עדכון משמרת - $department',
-        'body': 'המשמרת ב-$shiftDate עודכנה: ${changes.join(', ')}',
-        'data': {
-          'type': 'shift_update',
-          'shiftId': shiftId,
-          'changes': changes,
-        },
-        'createdBy': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'processed': false,
-      });
-
-      debugPrint('Shift update notification request created for ${workerIds.length} workers');
-    } catch (e) {
-      debugPrint('Error creating shift update notification: $e');
-    }
-  }
-
-  /// Send notification when a worker is assigned to a shift
-  Future<void> notifyWorkerAssigned({
-    required String workerId,
-    required String shiftId,
-    required String shiftDate,
-    required String department,
-    required String startTime,
-    required String endTime,
-  }) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
-        'type': 'shift_assigned',
-        'shiftId': shiftId,
-        'recipientIds': [workerId],
-        'title': 'שובצת למשמרת!',
-        'body': '$department - $shiftDate, $startTime-$endTime',
-        'data': {
-          'type': 'shift_assigned',
-          'shiftId': shiftId,
-        },
-        'createdBy': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'processed': false,
-      });
-
-      debugPrint('Worker assigned notification request created');
-    } catch (e) {
-      debugPrint('Error creating worker assigned notification: $e');
-    }
-  }
-
-  /// Send notification when a worker is removed from a shift
-  Future<void> notifyWorkerRemoved({
-    required String workerId,
-    required String shiftId,
-    required String shiftDate,
-    required String department,
-  }) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
-        'type': 'shift_removed',
-        'shiftId': shiftId,
-        'recipientIds': [workerId],
-        'title': 'הוסרת ממשמרת',
-        'body': '$department - $shiftDate',
-        'data': {
-          'type': 'shift_removed',
-          'shiftId': shiftId,
-        },
-        'createdBy': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'processed': false,
-      });
-
-      debugPrint('Worker removed notification request created');
-    } catch (e) {
-      debugPrint('Error creating worker removed notification: $e');
-    }
-  }
-
-  /// Send notification when a shift is cancelled
-  Future<void> notifyShiftCancelled({
-    required String shiftId,
-    required List<String> workerIds,
-    required String shiftDate,
-    required String department,
-    String? reason,
-  }) async {
-    if (workerIds.isEmpty) return;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
-        'type': 'shift_cancelled',
-        'shiftId': shiftId,
-        'recipientIds': workerIds,
-        'title': 'משמרת בוטלה',
-        'body': '$department - $shiftDate${reason != null ? '\nסיבה: $reason' : ''}',
-        'data': {
-          'type': 'shift_cancelled',
-          'shiftId': shiftId,
-          'reason': reason,
-        },
-        'createdBy': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'processed': false,
-      });
-
-      debugPrint('Shift cancelled notification request created for ${workerIds.length} workers');
-    } catch (e) {
-      debugPrint('Error creating shift cancelled notification: $e');
-    }
-  }
-
-  /// Send notification for new message in shift
-  Future<void> notifyNewShiftMessage({
-    required String shiftId,
-    required List<String> workerIds,
-    required String department,
-    required String senderName,
-  }) async {
-    if (workerIds.isEmpty) return;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      await _firestore.collection(AppConstants.notificationRequestsCollection).add({
-        'type': 'shift_message',
-        'shiftId': shiftId,
-        'recipientIds': workerIds,
-        'title': 'הודעה חדשה - $department',
-        'body': 'הודעה חדשה מ-$senderName',
-        'data': {
-          'type': 'shift_message',
-          'shiftId': shiftId,
-        },
-        'createdBy': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'processed': false,
-      });
-
-      debugPrint('Shift message notification request created');
-    } catch (e) {
-      debugPrint('Error creating shift message notification: $e');
-    }
   }
 }
