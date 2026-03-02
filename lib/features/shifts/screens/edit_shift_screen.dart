@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
-import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -247,7 +246,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final affectedWorkers = await widget.shiftService.updateShiftDetails(
+      await widget.shiftService.updateShiftDetails(
         shiftId: widget.shift.id,
         date: _selectedDate != _originalDate
             ? DateFormat('dd/MM/yyyy').format(_selectedDate)
@@ -265,21 +264,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         status: _status != _originalStatus ? _status : null,
       );
 
-      // Send notifications to affected workers (non-blocking)
-      if (affectedWorkers.isNotEmpty) {
-        try {
-          final changes = _getChangeSummary();
-          await NotificationService().notifyShiftUpdate(
-            shiftId: widget.shift.id,
-            workerIds: affectedWorkers,
-            shiftDate: DateFormat('dd/MM/yyyy').format(_selectedDate),
-            department: _selectedDepartment,
-            changes: changes,
-          );
-        } catch (e) {
-          debugPrint('Notification error (non-blocking): $e');
-        }
-      }
+      // Notifications are sent automatically by the onShiftWritten Cloud Function.
 
       if (mounted) {
         Navigator.pop(context, true);

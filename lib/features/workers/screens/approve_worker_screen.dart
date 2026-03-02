@@ -30,11 +30,17 @@ class ApproveWorkerScreen extends StatelessWidget {
   }
 
   Future<void> _rejectWorker(BuildContext context) async {
-    // Do not permanently delete — the worker remains as pending (approved: false)
-    // and can be approved later. Simply close this screen.
+    final String uid = userData['uid'];
+    // Write rejectedAt so the Cloud Function can notify the worker.
+    await FirebaseFirestore.instance
+        .collection(AppConstants.usersCollection)
+        .doc(uid)
+        .update({'rejectedAt': FieldValue.serverTimestamp()});
+
+    if (!context.mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('הבקשה נדחתה. העובד נשאר בהמתנה.')),
+      const SnackBar(content: Text('הבקשה נדחתה. העובד קיבל הודעה.')),
     );
   }
 

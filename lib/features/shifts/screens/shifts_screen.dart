@@ -13,8 +13,9 @@ import 'package:park_janana/core/widgets/shimmer_loading.dart';
 
 class ShiftsScreen extends StatefulWidget {
   final DateTime? initialDate;
+  final ShiftModel? initialShift;
 
-  const ShiftsScreen({super.key, this.initialDate});
+  const ShiftsScreen({super.key, this.initialDate, this.initialShift});
 
   @override
   State<ShiftsScreen> createState() => _ShiftsScreenState();
@@ -29,9 +30,47 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
   @override
   void initState() {
     super.initState();
-    final target = widget.initialDate ?? DateTime.now();
+    final target = widget.initialShift?.parsedDate ?? widget.initialDate ?? DateTime.now();
     _currentWeekStart = target.subtract(Duration(days: target.weekday % 7));
     _selectedDay = target;
+
+    if (widget.initialShift != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final shift = widget.initialShift!;
+        final departmentColor = _departmentColorFor(shift.department);
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: ShiftDetailsPopup(
+              shift: shift,
+              shiftService: _shiftService,
+              departmentColor: departmentColor,
+            ),
+          ),
+        );
+      });
+    }
+  }
+
+  Color _departmentColorFor(String department) {
+    switch (department) {
+      case 'פיינטבול':
+        return const Color(0xFFE53935);
+      case 'פארק חבלים':
+        return const Color(0xFF43A047);
+      case 'קרטינג':
+        return const Color(0xFFFF9800);
+      case 'פארק מים':
+        return const Color(0xFF1E88E5);
+      case 'גמבורי':
+        return const Color(0xFF8E24AA);
+      default:
+        return AppColors.primary;
+    }
   }
 
   @override

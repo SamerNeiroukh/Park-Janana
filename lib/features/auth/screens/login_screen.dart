@@ -7,6 +7,7 @@ import 'package:park_janana/features/home/screens/home_screen.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/auth/screens/forgot_password_screen.dart';
+import 'package:park_janana/core/services/biometric_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,18 +20,108 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final BiometricService _biometricService = BiometricService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _biometricAvailable = false;
+  bool _biometricLoginEnabled = false;
 
   String? _emailError;
   String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometric();
+  }
+
+  Future<void> _checkBiometric() async {
+    final available = await _biometricService.isAvailable();
+    final enabled = await _biometricService.isBiometricLoginEnabled();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricLoginEnabled = enabled;
+      });
+    }
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    setState(() => _isLoading = true);
+    try {
+      final authenticated = await _biometricService.authenticate();
+      if (!authenticated) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('אימות ביומטרי נכשל. אנא נסה שוב.'),
+          backgroundColor: Colors.red,
+        ));
+        return;
+      }
+
+      final creds = await _biometricService.getCredentials();
+      if (creds == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('לא נמצאו פרטי כניסה שמורים. אנא כנס עם אימייל וסיסמה.'),
+          backgroundColor: Colors.orange,
+        ));
+        setState(() => _biometricLoginEnabled = false);
+        return;
+      }
+
+      await _authService.signIn(creds.email, creds.password);
+      if (!mounted) return;
+      _navigateToHomeScreen();
+    } on CustomException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        backgroundColor: Colors.red,
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('שגיאה: $e'),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _offerBiometricSetup(String email, String password) async {
+    if (!mounted) return;
+    final enable = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('כניסה ביומטרית'),
+        content: const Text(
+          'האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('לא'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('כן'),
+          ),
+        ],
+      ),
+    );
+    if (enable == true) {
+      await _biometricService.saveCredentials(email, password);
+    }
   }
 
   Future<void> _login() async {
@@ -55,6 +146,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Use AuthService to sign in - it handles approval check automatically
       await _authService.signIn(email, password);
+
+      // Offer to enable biometric login on first successful sign-in
+      if (_biometricAvailable && !_biometricLoginEnabled) {
+        await _offerBiometricSetup(email, password);
+      }
 
       // AppAuthProvider's listener will automatically update auth state
       if (!mounted) return;
@@ -421,6 +517,53 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                         ),
                       ),
+
+                      // Biometric login button — shown only when device supports it
+                      // and user has previously opted in
+                      if (_biometricAvailable && _biometricLoginEnabled) ...[
+                        const SizedBox(height: AppDimensions.spacingXL),
+                        Row(
+                          children: [
+                            const Expanded(child: Divider()),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppDimensions.paddingM),
+                              child: Text(
+                                'או',
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: AppDimensions.fontM,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider()),
+                          ],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingXL),
+                        SizedBox(
+                          width: double.infinity,
+                          height: AppDimensions.buttonHeightL,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppDimensions.borderRadiusXL,
+                              ),
+                            ),
+                            onPressed: _isLoading ? null : _loginWithBiometrics,
+                            icon: const Icon(Icons.fingerprint,
+                                color: AppColors.primary),
+                            label: const Text(
+                              'כניסה ביומטרית',
+                              style: TextStyle(
+                                fontSize: AppDimensions.fontXXL,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(height: AppDimensions.spacingXXXL),
 

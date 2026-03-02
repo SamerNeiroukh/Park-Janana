@@ -17,8 +17,9 @@ import 'edit_task_screen.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
+  final int initialTab;
 
-  const TaskDetailsScreen({super.key, required this.task});
+  const TaskDetailsScreen({super.key, required this.task, this.initialTab = 0});
 
   @override
   State<TaskDetailsScreen> createState() => _TaskDetailsScreenState();
@@ -46,7 +47,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   void initState() {
     super.initState();
     _task = widget.task;
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTab);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });

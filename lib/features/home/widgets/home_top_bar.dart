@@ -1,7 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/main.dart' show navigatorKey;
 
@@ -140,7 +144,7 @@ class HomeTopBar extends StatelessWidget {
 
             // Notification bell with optional badge
             _NotificationBell(
-              count: notificationBadgeCount,
+              notificationBadgeCount: notificationBadgeCount,
               onTap: onNotificationTap,
             ),
 
@@ -202,49 +206,69 @@ class HomeTopBar extends StatelessWidget {
 // ── Private sub-widget: notification bell ─────────────────────────────────
 
 class _NotificationBell extends StatelessWidget {
-  final int count;
+  // notificationBadgeCount kept for API compatibility but ignored —
+  // the real unread count is streamed from Firestore below.
+  final int notificationBadgeCount;
   final VoidCallback onTap;
 
-  const _NotificationBell({required this.count, required this.onTap});
+  const _NotificationBell({
+    required this.notificationBadgeCount,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        IconButton(
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: Color(0xFF374151),
-            size: 24,
-          ),
-          tooltip: 'התראות',
-          onPressed: onTap,
-        ),
-        if (count > 0)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              width: 17,
-              height: 17,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEF4444),
-                shape: BoxShape.circle,
+    final uid = context.read<AppAuthProvider>().uid;
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: uid == null
+          ? const Stream.empty()
+          : FirebaseFirestore.instance
+              .collection(AppConstants.usersCollection)
+              .doc(uid)
+              .collection('notifications')
+              .where('isRead', isEqualTo: false)
+              .snapshots(),
+      builder: (context, snap) {
+        final count = snap.data?.docs.length ?? 0;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: Color(0xFF374151),
+                size: 24,
               ),
-              child: Center(
-                child: Text(
-                  count > 9 ? '9+' : '$count',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
+              tooltip: 'התראות',
+              onPressed: onTap,
+            ),
+            if (count > 0)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 17,
+                  height: 17,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEF4444),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

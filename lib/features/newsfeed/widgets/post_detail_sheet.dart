@@ -19,6 +19,7 @@ class PostDetailSheet extends StatefulWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
   final VoidCallback? onShowLikers;
+  final bool openComments;
 
   const PostDetailSheet({
     super.key,
@@ -31,6 +32,7 @@ class PostDetailSheet extends StatefulWidget {
     this.onDelete,
     this.onPin,
     this.onShowLikers,
+    this.openComments = false,
   });
 
   @override
@@ -61,6 +63,20 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         .map((doc) => doc.exists ? PostModel.fromFirestore(doc) : null);
 
     _resolveProfilePicture();
+
+    if (widget.openComments) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 350), () {
+          if (mounted && _scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      });
+    }
   }
 
   Future<void> _resolveProfilePicture() async {

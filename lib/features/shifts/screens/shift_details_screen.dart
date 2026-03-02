@@ -4,7 +4,6 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
-import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
@@ -17,12 +16,14 @@ class ShiftDetailsScreen extends StatefulWidget {
   final ShiftModel shift;
   final ShiftService shiftService;
   final WorkerService workerService;
+  final int initialTab;
 
   const ShiftDetailsScreen({
     super.key,
     required this.shift,
     required this.shiftService,
     required this.workerService,
+    this.initialTab = 0,
   });
 
   @override
@@ -64,7 +65,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: widget.initialTab);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() => _selectedTab = _tabController.index);
@@ -148,71 +149,34 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     setState(() => _isSaving = true);
 
     try {
-      final List<String> affectedWorkers = [];
-      final List<String> changeDescriptions = [];
-
       // Process approvals
       for (final workerId in _pendingApprovals) {
         await widget.shiftService.approveWorker(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingApprovals.isNotEmpty) {
-        changeDescriptions.add('${_pendingApprovals.length} עובדים אושרו');
       }
 
       // Process rejections
       for (final workerId in _pendingRejections) {
         await widget.shiftService.rejectWorker(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingRejections.isNotEmpty) {
-        changeDescriptions.add('${_pendingRejections.length} בקשות נדחו');
       }
 
       // Process removals
       for (final workerId in _pendingRemovals) {
         await widget.shiftService.removeWorker(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingRemovals.isNotEmpty) {
-        changeDescriptions.add('${_pendingRemovals.length} עובדים הוסרו');
       }
 
       // Process undos (move back to requested)
       for (final workerId in _pendingUndos) {
         await widget.workerService
             .moveWorkerBackToRequested(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingUndos.isNotEmpty) {
-        changeDescriptions
-            .add('${_pendingUndos.length} עובדים הוחזרו לרשימת הממתינים');
       }
 
       // Process additions
       for (final workerId in _pendingAdditions) {
         await widget.workerService
             .assignWorkerToShift(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingAdditions.isNotEmpty) {
-        changeDescriptions.add('${_pendingAdditions.length} עובדים נוספו');
       }
 
-      // Send notifications (if notification service is available)
-      if (affectedWorkers.isNotEmpty) {
-        try {
-          await NotificationService().notifyShiftUpdate(
-            shiftId: currentShift.id,
-            workerIds: affectedWorkers.toSet().toList(),
-            shiftDate: currentShift.date,
-            department: currentShift.department,
-            changes: changeDescriptions,
-          );
-        } catch (e) {
-          debugPrint('Notification error (non-blocking): $e');
-        }
-      }
+      // Notifications are sent automatically by the onShiftWritten Cloud Function.
 
       // Clear pending changes
       setState(() {

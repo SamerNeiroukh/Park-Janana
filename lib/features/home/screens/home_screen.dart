@@ -25,6 +25,7 @@ import 'package:park_janana/features/auth/providers/auth_provider.dart';
 
 
 // ── Home UI components ────────────────────────────────────────────────────
+import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/home/widgets/home_top_bar.dart';
 import 'package:park_janana/features/home/widgets/glass_hero_card.dart';
 import 'package:park_janana/features/home/widgets/latest_post_card.dart';
@@ -61,6 +62,9 @@ class _HomeScreenState extends State<HomeScreen>
       context.read<AppStateProvider>().loadWeather();
       context.read<AppStateProvider>().loadRolesData();
       _fadeCtrl.forward();
+      // Navigate to the correct screen if the app was launched by tapping
+      // a notification while it was fully terminated (not just backgrounded).
+      NotificationService().consumePendingNavigation();
     });
   }
 

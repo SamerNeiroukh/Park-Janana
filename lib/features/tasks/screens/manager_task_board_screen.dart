@@ -11,7 +11,9 @@ import 'task_details_screen.dart';
 import 'create_task_flow_screen.dart';
 
 class ManagerTaskBoardScreen extends StatefulWidget {
-  const ManagerTaskBoardScreen({super.key});
+  final int initialTab;
+  final String? highlightTaskId;
+  const ManagerTaskBoardScreen({super.key, this.initialTab = 0, this.highlightTaskId});
 
   @override
   State<ManagerTaskBoardScreen> createState() => _ManagerTaskBoardScreenState();
@@ -27,6 +29,8 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   int _tabIndex = 0;
   bool _isNavigating = false;
   String? _uid;
+  final GlobalKey _highlightedCardKey = GlobalKey();
+  bool _scrolledToHighlight = false;
 
   @override
   void initState() {
@@ -34,11 +38,12 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
     _provider = TaskBoardProvider();
     _uid = context.read<AppAuthProvider>().uid;
     if (_uid != null) _provider.init(_uid!);
-    _tabController = TabController(length: 2, vsync: this)
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTab)
       ..addListener(() {
         if (_tabController.indexIsChanging) return;
         setState(() => _tabIndex = _tabController.index);
       });
+    _tabIndex = widget.initialTab;
   }
 
   @override
@@ -353,6 +358,13 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           );
         }
 
+        if (widget.highlightTaskId != null && !_scrolledToHighlight) {
+          _scrolledToHighlight = true;
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _scrollToHighlight(provider),
+          );
+        }
+
         final columns = [
           provider.pendingTasks,
           provider.inProgressTasks,
@@ -369,6 +381,40 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
         );
       },
     );
+  }
+
+  void _scrollToHighlight(TaskBoardProvider provider) {
+    if (!mounted || widget.highlightTaskId == null) return;
+    final columns = [
+      provider.pendingTasks,
+      provider.inProgressTasks,
+      provider.doneTasks,
+    ];
+    for (int pageIdx = 0; pageIdx < columns.length; pageIdx++) {
+      final found = columns[pageIdx].any((t) => t.id == widget.highlightTaskId);
+      if (found) {
+        if (_currentPage != pageIdx) {
+          _pageController.animateToPage(
+            pageIdx,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+          );
+        }
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (!mounted) return;
+          final ctx = _highlightedCardKey.currentContext;
+          if (ctx != null) {
+            Scrollable.ensureVisible(
+              ctx,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              alignment: 0.3,
+            );
+          }
+        });
+        break;
+      }
+    }
   }
 
   Widget _buildColumn(List<TaskModel> tasks, TaskBoardProvider provider) {
@@ -406,36 +452,41 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
       itemBuilder: (context, index) {
         final task = tasks[index];
         final hasPendingReview = provider.hasPendingReview(task);
-        return Column(
-          children: [
-            Dismissible(
-              key: ValueKey(task.id),
-              direction: DismissDirection.startToEnd,
-              confirmDismiss: (_) => _confirmDelete(task),
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: TaskTheme.overdue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(TaskTheme.radiusL),
-                ),
-                child: const Icon(Icons.delete_outline_rounded,
-                    color: TaskTheme.overdue, size: 24),
-              ),
-              child: TaskCard(
-                task: task,
-                assignedWorkers: provider.workersForTask(task),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TaskDetailsScreen(task: task),
-                  ),
-                ),
+        final isHighlighted =
+            widget.highlightTaskId != null && task.id == widget.highlightTaskId;
+
+        final card = Dismissible(
+          key: ValueKey(task.id),
+          direction: DismissDirection.startToEnd,
+          confirmDismiss: (_) => _confirmDelete(task),
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: TaskTheme.overdue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(TaskTheme.radiusL),
+            ),
+            child: const Icon(Icons.delete_outline_rounded,
+                color: TaskTheme.overdue, size: 24),
+          ),
+          child: TaskCard(
+            task: task,
+            assignedWorkers: provider.workersForTask(task),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TaskDetailsScreen(task: task),
               ),
             ),
-            if (hasPendingReview)
-              _buildApprovalStrip(task, provider),
+          ),
+        );
+
+        return Column(
+          key: isHighlighted ? _highlightedCardKey : null,
+          children: [
+            if (isHighlighted) _HighlightWrapper(child: card) else card,
+            if (hasPendingReview) _buildApprovalStrip(task, provider),
           ],
         );
       },
@@ -540,6 +591,32 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
       return true;
     }
     return false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Highlight wrapper — amber pulse that fades out over 2 s after mount
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _HighlightWrapper extends StatelessWidget {
+  final Widget child;
+  const _HighlightWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 1.0, end: 0.0),
+      duration: const Duration(milliseconds: 2000),
+      curve: Curves.easeOut,
+      builder: (context, t, child) => Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF59E0B).withOpacity(0.22 * t),
+          borderRadius: BorderRadius.circular(TaskTheme.radiusL + 2),
+        ),
+        child: child,
+      ),
+      child: child,
+    );
   }
 }
 

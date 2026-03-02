@@ -9,7 +9,11 @@ import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 
 class MyWeeklyScheduleScreen extends StatefulWidget {
-  const MyWeeklyScheduleScreen({super.key});
+  /// When provided (e.g. tapped from a notification), the screen jumps to
+  /// the week containing this shift and auto-opens its details bottom sheet.
+  final ShiftModel? initialShift;
+
+  const MyWeeklyScheduleScreen({super.key, this.initialShift});
 
   @override
   State<MyWeeklyScheduleScreen> createState() => _MyWeeklyScheduleScreenState();
@@ -19,8 +23,37 @@ class _MyWeeklyScheduleScreenState extends State<MyWeeklyScheduleScreen> {
   final ShiftService _shiftService = ShiftService();
   final ScrollController _scrollController = ScrollController();
 
-  DateTime _weekStart = DateTimeUtils.startOfWeek(DateTime.now());
+  late DateTime _weekStart;
   bool _hasAutoScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialShift;
+    if (initial != null) {
+      // Jump to the week that contains the assigned shift.
+      _weekStart = DateTimeUtils.startOfWeek(initial.parsedDate);
+      // After the screen finishes its first render, pop open the shift sheet.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final d = initial.parsedDate;
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (_) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: _ShiftDetailsSheet(
+              shift: initial,
+              date: DateTime(d.year, d.month, d.day),
+            ),
+          ),
+        );
+      });
+    } else {
+      _weekStart = DateTimeUtils.startOfWeek(DateTime.now());
+    }
+  }
 
   void _prevWeek() {
     setState(() {

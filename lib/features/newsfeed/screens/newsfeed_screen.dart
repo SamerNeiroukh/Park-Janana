@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -14,7 +16,8 @@ import '../widgets/post_detail_sheet.dart';
 import '../widgets/likers_sheet.dart';
 
 class NewsfeedScreen extends StatefulWidget {
-  const NewsfeedScreen({super.key});
+  final String? initialPostId;
+  const NewsfeedScreen({super.key, this.initialPostId});
 
   @override
   State<NewsfeedScreen> createState() => _NewsfeedScreenState();
@@ -55,6 +58,25 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     super.initState();
     _scrollController.addListener(_onScroll);
     _initStream();
+    if (widget.initialPostId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _openInitialPost());
+    }
+  }
+
+  Future<void> _openInitialPost() async {
+    if (!mounted || widget.initialPostId == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection(AppConstants.postsCollection)
+          .doc(widget.initialPostId)
+          .get();
+      if (!doc.exists || !mounted) return;
+      final post = PostModel.fromFirestore(doc);
+      final uid = context.read<AppAuthProvider>().uid ?? '';
+      _showPostDetailSheet(context, post, uid, openComments: true);
+    } catch (e) {
+      debugPrint('_openInitialPost error: $e');
+    }
   }
 
   void _initStream() {
@@ -151,7 +173,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     );
   }
 
-  void _showPostDetailSheet(BuildContext context, PostModel post, String userId) {
+  void _showPostDetailSheet(BuildContext context, PostModel post, String userId,
+      {bool openComments = false}) {
     HapticFeedback.selectionClick();
     final authProvider = context.read<AppAuthProvider>();
     final userProvider = context.read<UserProvider>();
@@ -168,6 +191,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         currentUserName: currentUser?.fullName ?? 'משתמש',
         currentUserProfilePicture: currentUser?.profilePicture ?? '',
         isManager: isManager,
+        openComments: openComments,
         onLike: () => _handleLike(post, userId),
         onDelete: () => _deletePostDirectly(post),
         onPin: () => _handlePin(post),
