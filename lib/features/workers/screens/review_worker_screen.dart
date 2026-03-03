@@ -65,7 +65,6 @@ class ReviewWorkerScreen extends StatelessWidget {
                     _buildSoftCard("🧾 פרטי העובד", [
                       _buildInfoRow(Icons.email_rounded, "אימייל", email),
                       _buildInfoRow(Icons.phone, "טלפון", phone),
-                      _buildInfoRow(Icons.credit_card, "תעודת זהות", id),
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🧭 פעולות מנהל", [

@@ -114,7 +114,14 @@ class AuthService {
       final bool isApproved = data['approved'] ?? false;
 
       if (!isApproved) {
-        await _auth.signOut(); // Sign out immediately
+        // Distinguish rejected workers from those still awaiting approval.
+        // For rejected accounts we keep the auth session alive so the user
+        // can call reApply() (which needs an authenticated write to Firestore)
+        // before we sign them out.
+        if (data['rejected'] == true) {
+          throw CustomException('ACCOUNT_REJECTED:$uid');
+        }
+        await _auth.signOut();
         throw CustomException('החשבון שלך עדיין לא אושר על ידי ההנהלה.');
       }
 
@@ -263,6 +270,19 @@ class AuthService {
     // ✅ Update Cached Role
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userRole', role);
+  }
+
+  // 🟢 Re-apply for approval after rejection
+  // Must be called while the user is still authenticated (before signOut).
+  Future<void> reApply(String uid) async {
+    try {
+      await _firebaseService.updateUser(uid, {'rejected': false});
+    } catch (e) {
+      throw CustomException('שגיאה בשליחת הבקשה מחדש.');
+    } finally {
+      // Always sign out — user still needs manager approval before accessing the app.
+      await _auth.signOut();
+    }
   }
 
   // 🟢 Send Password Reset Email

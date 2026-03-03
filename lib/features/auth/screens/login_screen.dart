@@ -160,6 +160,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Parse the error message to set appropriate field errors
       final errorMsg = e.message;
+
+      // Rejected account — show dedicated dialog with re-apply option
+      if (errorMsg.startsWith('ACCOUNT_REJECTED:')) {
+        final uid = errorMsg.substring('ACCOUNT_REJECTED:'.length);
+        _showRejectedDialog(uid);
+        return;
+      }
+
       setState(() {
         if (errorMsg.contains('האימייל לא נמצא במערכת') ||
             errorMsg.contains('כתובת האימייל לא תקינה')) {
@@ -188,6 +196,65 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void _showRejectedDialog(String uid) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('הבקשה נדחתה'),
+          content: const Text(
+            'בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                // User is still authenticated — sign them out on cancel.
+                await _authService.signOut();
+              },
+              child: const Text('ביטול'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await _reApply(uid);
+              },
+              child: const Text(
+                'שלח בקשה מחדש',
+                style: TextStyle(color: AppColors.textWhite),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _reApply(String uid) async {
+    setState(() => _isLoading = true);
+    try {
+      await _authService.reApply(uid);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('הבקשה נשלחה מחדש. ההנהלה תעדכן אותך בהחלטה.'),
+        backgroundColor: Colors.green,
+      ));
+    } on CustomException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

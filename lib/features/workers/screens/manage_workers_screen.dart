@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
@@ -28,12 +29,77 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.trim().toLowerCase();
       });
     });
+    _resolveInitialTab();
+  }
+
+  Future<void> _callWorker(
+      BuildContext context, String name, String phone) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.phone_rounded, color: Colors.green),
+              SizedBox(width: 8),
+              Text('שיחה יוצאת'),
+            ],
+          ),
+          content: Text('להתקשר אל $name?\n$phone'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('ביטול'),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.phone_rounded, size: 16,
+                  color: Colors.white),
+              label: const Text('התקשר',
+                  style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final uri = Uri(scheme: 'tel', path: phone);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('לא ניתן לחייג אל $phone')),
+      );
+    }
+  }
+
+  /// Switches to the "new workers" tab if there are any pending (non-rejected)
+  /// registration requests. Otherwise stays on the "active workers" tab.
+  Future<void> _resolveInitialTab() async {
+    final snap = await FirebaseFirestore.instance
+        .collection(AppConstants.usersCollection)
+        .where('role', whereIn: ['worker', 'manager'])
+        .where('approved', isEqualTo: false)
+        .get();
+    if (!mounted) return;
+    final hasPending = snap.docs.any(
+      (doc) => doc.data()['rejected'] != true,
+    );
+    if (hasPending) {
+      _tabController.animateTo(0);
+    }
   }
 
   @override
@@ -121,7 +187,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           return const Center(child: Text("אין עובדים שממתינים לאישור"));
         }
 
-        final allWorkers = snapshot.data!.docs;
+        final allWorkers = snapshot.data!.docs
+            .where((doc) => (doc.data() as Map<String, dynamic>)['rejected'] != true)
+            .toList();
         final newWorkers = _searchQuery.isEmpty
             ? allWorkers
             : allWorkers.where((doc) {
@@ -185,26 +253,36 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                           backgroundColor: Colors.grey.shade300,
                         ),
                         const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              fullName,
-                              style: AppTheme.bodyText.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.black,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                fullName,
+                                style: AppTheme.bodyText.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              phone,
-                              style: AppTheme.bodyText.copyWith(
-                                fontSize: 14,
-                                color: Colors.grey.shade700,
+                              const SizedBox(height: 4),
+                              Text(
+                                phone,
+                                style: AppTheme.bodyText.copyWith(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.phone_rounded,
+                              color: Colors.green),
+                          tooltip: 'התקשר',
+                          onPressed: phone.isNotEmpty
+                              ? () => _callWorker(context, fullName, phone)
+                              : null,
                         ),
                       ],
                     ),
@@ -348,6 +426,14 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                               ),
                             ],
                           ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.phone_rounded,
+                              color: Colors.green),
+                          tooltip: 'התקשר',
+                          onPressed: phone.isNotEmpty
+                              ? () => _callWorker(context, fullName, phone)
+                              : null,
                         ),
                       ],
                     ),

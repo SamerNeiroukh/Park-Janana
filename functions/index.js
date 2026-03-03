@@ -235,7 +235,60 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
     );
   }
 
-  // ── 4. New shift message ───────────────────────────────────────────────
+  // ── 4. Shift status changed (cancelled / reactivated / completed) ──────
+  const prevStatus = before.status || "active";
+  const nowStatus = after.status || "active";
+
+  if (prevStatus !== nowStatus) {
+    const assignedWorkers = after.assignedWorkers || [];
+    const requestedWorkers = after.requestedWorkers || [];
+    const cancelReason = after.cancelReason || "";
+
+    if (nowStatus === "cancelled") {
+      // Shift was cancelled — notify all assigned AND requested workers
+      const bodyText = cancelReason
+        ? `המשמרת ב${department} בתאריך ${shiftDate} בוטלה: ${cancelReason}`
+        : `המשמרת ב${department} בתאריך ${shiftDate} בוטלה`;
+
+      const workersToNotify = [...new Set([...assignedWorkers, ...requestedWorkers])];
+      for (const uid of workersToNotify) {
+        await notifyUser(
+          uid,
+          {
+            title: "משמרת בוטלה ❌",
+            body: bodyText,
+          },
+          { type: "shift_cancelled", entityId: shiftId, entityType: "shift", shiftId }
+        );
+      }
+    } else if (nowStatus === "active") {
+      // Shift was reactivated (from cancelled or completed) — notify assigned workers
+      for (const uid of assignedWorkers) {
+        await notifyUser(
+          uid,
+          {
+            title: "עדכון משמרת 🔄",
+            body: `המשמרת ב${department} בתאריך ${shiftDate} הופעלה מחדש`,
+          },
+          { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
+        );
+      }
+    } else if (nowStatus === "completed") {
+      // Shift was marked as completed — notify all assigned workers
+      for (const uid of assignedWorkers) {
+        await notifyUser(
+          uid,
+          {
+            title: "משמרת הושלמה ✅",
+            body: `המשמרת ב${department} בתאריך ${shiftDate} סומנה כהושלמה`,
+          },
+          { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
+        );
+      }
+    }
+  }
+
+  // ── 5. New shift message ───────────────────────────────────────────────
   const prevMessages = before.messages || [];
   const nowMessages = after.messages || [];
   if (nowMessages.length > prevMessages.length) {
