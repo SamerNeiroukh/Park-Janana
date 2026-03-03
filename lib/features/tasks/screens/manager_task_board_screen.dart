@@ -473,6 +473,9 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           child: TaskCard(
             task: task,
             assignedWorkers: provider.workersForTask(task),
+            actionWidget: hasPendingReview
+                ? _buildApproveButton(task, provider)
+                : null,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
@@ -486,54 +489,28 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           key: isHighlighted ? _highlightedCardKey : null,
           children: [
             if (isHighlighted) _HighlightWrapper(child: card) else card,
-            if (hasPendingReview) _buildApprovalStrip(task, provider),
           ],
         );
       },
     );
   }
 
-  Widget _buildApprovalStrip(TaskModel task, TaskBoardProvider provider) {
+  Widget _buildApproveButton(TaskModel task, TaskBoardProvider provider) {
     final workers = provider.pendingReviewWorkers(task);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF59E0B).withOpacity(0.10),
-        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.hourglass_top_rounded,
-              size: 16, color: Color(0xFFB45309)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '${workers.length} עובד${workers.length == 1 ? '' : 'ים'} ממתינ${workers.length == 1 ? '' : 'ים'} לאישור',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFB45309),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => _approveAllPendingReview(task, workers, provider),
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFFF59E0B),
-              foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              textStyle: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w700),
-            ),
-            child: const Text('אשר הכל'),
-          ),
-        ],
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () => _approveAllPendingReview(task, workers, provider),
+        style: TextButton.styleFrom(
+          backgroundColor: TaskTheme.done,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(TaskTheme.radiusM)),
+          textStyle:
+              const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+        child: const Text('אשר'),
       ),
     );
   }

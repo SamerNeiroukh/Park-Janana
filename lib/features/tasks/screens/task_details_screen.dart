@@ -590,10 +590,13 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     final uid = _currentUid ?? '';
     final workerStatus = _task.workerStatusFor(uid);
     final isOnDiscussionTab = _tabController.index == 1;
-    final showWorkerAction = _isWorker && workerStatus != 'done';
+    final showWorkerAction =
+        _isWorker && workerStatus != 'done' && workerStatus != 'pending_review';
+    final showPendingReviewBanner =
+        _isWorker && workerStatus == 'pending_review';
 
     // Nothing to show if not on discussion tab and no worker action needed
-    if (!isOnDiscussionTab && !showWorkerAction) {
+    if (!isOnDiscussionTab && !showWorkerAction && !showPendingReviewBanner) {
       return const SizedBox.shrink();
     }
 
@@ -609,6 +612,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (showPendingReviewBanner) ...[
+              _buildPendingReviewBanner(),
+              if (isOnDiscussionTab) const SizedBox(height: 12),
+            ],
             if (showWorkerAction) ...[
               _buildWorkerActionButton(workerStatus),
               if (isOnDiscussionTab) const SizedBox(height: 12),
@@ -676,10 +683,37 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     );
   }
 
+  Widget _buildPendingReviewBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF59E0B).withOpacity(0.12),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.hourglass_top_rounded, size: 18, color: Color(0xFFF59E0B)),
+          SizedBox(width: 8),
+          Text(
+            'ממתין לאישור מנהל',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFB45309),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWorkerActionButton(String workerStatus) {
     final isStart = workerStatus == 'pending';
-    final color = isStart ? TaskTheme.inProgress : TaskTheme.done;
-    final nextStatus = isStart ? 'in_progress' : 'done';
+    final color = isStart ? TaskTheme.inProgress : const Color(0xFFF59E0B);
+    final nextStatus = isStart ? 'in_progress' : 'pending_review';
 
     return Container(
       width: double.infinity,
@@ -703,13 +737,13 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  isStart ? Icons.rocket_launch_rounded : Icons.check_circle_rounded,
+                  isStart ? Icons.rocket_launch_rounded : Icons.send_rounded,
                   color: Colors.white,
                   size: 22,
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  isStart ? 'להתחיל לעבוד' : 'סיימתי את המשימה',
+                  isStart ? 'להתחיל לעבוד' : 'שלח לאישור מנהל',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

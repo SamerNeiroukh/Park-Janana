@@ -264,7 +264,7 @@ class _NotificationHistoryScreenState
               if (_isTappable(item.type))
                 const Padding(
                   padding: EdgeInsets.only(top: 4),
-                  child: Icon(Icons.chevron_left_rounded,
+                  child: Icon(Icons.chevron_right_rounded,
                       size: 18, color: TaskTheme.textTertiary),
                 ),
             ],

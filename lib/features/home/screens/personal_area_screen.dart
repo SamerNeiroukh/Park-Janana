@@ -535,12 +535,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             value: user.email,
           ),
           _InfoRow(
-            icon: Icons.badge_outlined,
-            iconColor: const Color(0xFF0EA5E9),
-            label: 'תעודת זהות',
-            value: user.idNumber,
-          ),
-          _InfoRow(
             icon: Icons.phone_outlined,
             iconColor: const Color(0xFF10B981),
             label: 'מספר טלפון',

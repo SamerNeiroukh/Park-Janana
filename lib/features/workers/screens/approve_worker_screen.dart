@@ -31,11 +31,15 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Future<void> _rejectWorker(BuildContext context) async {
     final String uid = userData['uid'];
-    // Write rejectedAt so the Cloud Function can notify the worker.
+    // Write rejectedAt (triggers Cloud Function notification) + rejected:true
+    // so the pending workers query can filter this user out client-side.
     await FirebaseFirestore.instance
         .collection(AppConstants.usersCollection)
         .doc(uid)
-        .update({'rejectedAt': FieldValue.serverTimestamp()});
+        .update({
+      'rejectedAt': FieldValue.serverTimestamp(),
+      'rejected': true,
+    });
 
     if (!context.mounted) return;
     Navigator.pop(context);
@@ -79,7 +83,6 @@ class ApproveWorkerScreen extends StatelessWidget {
     final String fullName = data['fullName'] ?? '';
     final String email = data['email'] ?? '';
     final String phone = data['phoneNumber'] ?? '';
-    final String id = data['idNumber'] ?? '';
     final String profilePictureUrl = data['profile_picture'] ?? '';
 
     return Scaffold(
@@ -105,7 +108,6 @@ class ApproveWorkerScreen extends StatelessWidget {
                     _buildInfoCard("🧾 פרטי העובד", [
                       _buildInfoRow("דוא\"ל", email),
                       _buildInfoRow("טלפון", phone),
-                      _buildInfoRow("ת.ז", id),
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildActionButtons(context),
