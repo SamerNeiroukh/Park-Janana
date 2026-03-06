@@ -15,8 +15,12 @@ class UserProvider extends ChangeNotifier {
   String? _error;
   StreamSubscription<User?>? _authSubscription;
 
-  // Cache for user data to avoid redundant fetches
+  // Cache for user data to avoid redundant fetches.
+  // A TTL ensures that role/profile changes made by managers are picked up
+  // within a reasonable window without requiring a full logout/login cycle.
   final Map<String, UserModel> _userCache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheTtl = Duration(minutes: 5);
 
   UserProvider() {
     // Auto-clear whenever the user signs out or the session expires,
@@ -44,10 +48,15 @@ class UserProvider extends ChangeNotifier {
     await loadUser(uid);
   }
 
+  bool _isCacheValid(String uid) {
+    final ts = _cacheTimestamps[uid];
+    return ts != null && DateTime.now().difference(ts) < _cacheTtl;
+  }
+
   /// Load specific user by UID
   Future<void> loadUser(String uid) async {
-    // Check cache first
-    if (_userCache.containsKey(uid)) {
+    // Check cache first (with TTL so role changes propagate within 5 minutes)
+    if (_userCache.containsKey(uid) && _isCacheValid(uid)) {
       _currentUser = _userCache[uid];
       notifyListeners();
       return;
@@ -68,6 +77,7 @@ class UserProvider extends ChangeNotifier {
         final userData = userDoc.data() as Map<String, dynamic>;
         _currentUser = UserModel.fromMap(userData);
         _userCache[uid] = _currentUser!;
+        _cacheTimestamps[uid] = DateTime.now();
       } else {
         _error = 'User not found';
       }
@@ -140,6 +150,7 @@ class UserProvider extends ChangeNotifier {
     _currentUser = null;
     _workStats = null;
     _userCache.clear();
+    _cacheTimestamps.clear();
     _error = null;
     notifyListeners();
   }
@@ -163,7 +174,7 @@ class UserProvider extends ChangeNotifier {
 
   /// Get cached user by UID (for other screens needing user data)
   Future<UserModel?> getUserById(String uid) async {
-    if (_userCache.containsKey(uid)) {
+    if (_userCache.containsKey(uid) && _isCacheValid(uid)) {
       return _userCache[uid];
     }
 
@@ -177,6 +188,7 @@ class UserProvider extends ChangeNotifier {
         final userData = userDoc.data() as Map<String, dynamic>;
         final user = UserModel.fromMap(userData);
         _userCache[uid] = user;
+        _cacheTimestamps[uid] = DateTime.now();
         return user;
       }
     } catch (e) {

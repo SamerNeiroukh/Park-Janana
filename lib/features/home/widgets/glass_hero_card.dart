@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/services/notification_service.dart';
@@ -188,7 +187,9 @@ class _GlassHeroCardState extends State<GlassHeroCard>
     setState(() { _busy = true; _checkingLocation = true; });
 
     try {
-      final name       = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
+      // Use the Firestore fullName passed as widget.userName — Firebase Auth
+      // displayName is never set during registration and would always be null.
+      final name = widget.userName.isNotEmpty ? widget.userName : 'Unknown';
       final insidePark = await LocationUtils.isInsidePark();
       if (mounted) setState(() => _checkingLocation = false);
       final clockingIn = _session == null;

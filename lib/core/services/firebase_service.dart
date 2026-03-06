@@ -61,46 +61,36 @@ class FirebaseService {
     }
   }
 
-  // 🔒 Check if email already exists
+  // 🔒 Check if email already exists.
+  // Errors are intentionally not caught — a Firestore failure must NOT be
+  // silently treated as "not taken", which would allow duplicate registrations.
   Future<bool> isEmailTaken(String email) async {
-    try {
-      final query = await _firestore
-          .collection(AppConstants.usersCollection)
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
-      return query.docs.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
+    final query = await _firestore
+        .collection(AppConstants.usersCollection)
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .get();
+    return query.docs.isNotEmpty;
   }
 
-  // 🔒 Check if phone number already exists
+  // 🔒 Check if phone number already exists.
   Future<bool> isPhoneNumberTaken(String phoneNumber) async {
-    try {
-      final query = await _firestore
-          .collection(AppConstants.usersCollection)
-          .where('phoneNumber', isEqualTo: phoneNumber)
-          .limit(1)
-          .get();
-      return query.docs.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
+    final query = await _firestore
+        .collection(AppConstants.usersCollection)
+        .where('phoneNumber', isEqualTo: phoneNumber)
+        .limit(1)
+        .get();
+    return query.docs.isNotEmpty;
   }
 
-  // 🔒 Check if ID number already exists
+  // 🔒 Check if ID number already exists.
   Future<bool> isIdNumberTaken(String idNumber) async {
-    try {
-      final query = await _firestore
-          .collection(AppConstants.usersCollection)
-          .where('idNumber', isEqualTo: idNumber)
-          .limit(1)
-          .get();
-      return query.docs.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
+    final query = await _firestore
+        .collection(AppConstants.usersCollection)
+        .where('idNumber', isEqualTo: idNumber)
+        .limit(1)
+        .get();
+    return query.docs.isNotEmpty;
   }
 
   // 🔒 Validate user uniqueness (email, phone, ID)
