@@ -1,6 +1,6 @@
 /**
  * Firebase Cloud Functions for Park Janana
- * Event-driven notifications only — no scheduled functions.
+ * Event-driven notifications only.
  *
  * Triggers:
  *  - onShiftWritten       shifts/{shiftId}   assigned / removed / rejected / message
@@ -10,10 +10,12 @@
  *  - onUserUpdated        users/{userId}      worker approved / rejected
  *  - onPostWritten        posts/{postId}      new comment → notify post author
  *  - deletePost           callable            delete post (manager/owner/author)
+ *  - pruneAllNotifications scheduled          daily cleanup of notifications older than 30 days
  */
 
 const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
@@ -28,25 +30,20 @@ const messaging = getMessaging();
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Fetch FCM tokens for a user.
+ * Fetch FCM tokens AND full name for a user in a single Firestore read.
+ * Replaces the old separate getUserTokens() + getUserName() helpers which
+ * caused two reads of the same document per notification.
  * @param {string} userId
- * @returns {Promise<string[]>}
+ * @returns {Promise<{ tokens: string[], fullName: string }>}
  */
-async function getUserTokens(userId) {
+async function getUserData(userId) {
   const doc = await db.collection("users").doc(userId).get();
-  if (!doc.exists) return [];
-  return doc.data().fcmTokens || [];
-}
-
-/**
- * Fetch the full name of a user.
- * @param {string} userId
- * @returns {Promise<string>}
- */
-async function getUserName(userId) {
-  const doc = await db.collection("users").doc(userId).get();
-  if (!doc.exists) return "משתמש";
-  return doc.data().fullName || "משתמש";
+  if (!doc.exists) return { tokens: [], fullName: "משתמש" };
+  const data = doc.data();
+  return {
+    tokens: data.fcmTokens || [],
+    fullName: data.fullName || "משתמש",
+  };
 }
 
 /**
@@ -103,7 +100,9 @@ async function sendNotification(tokens, notification, data = {}, userId = null) 
 
 /**
  * Write a notification document to users/{userId}/notifications.
- * This powers the in-app notification centre.
+ * NOTE: pruning is intentionally NOT called here — it runs on a daily
+ * schedule (pruneAllNotifications) to avoid an extra Firestore read on
+ * every notification write.
  * @param {string} userId
  * @param {{ type: string, title: string, body: string, entityId?: string, entityType?: string }} opts
  */
@@ -119,34 +118,8 @@ async function createUserNotification(userId, { type, title, body, entityId = ""
         isRead: false,
         createdAt: FieldValue.serverTimestamp(),
       });
-    // Fire-and-forget: keep notification history under 30 days to prevent unbounded growth.
-    pruneOldNotifications(userId).catch(console.error);
   } catch (err) {
     console.error(`createUserNotification error for ${userId}:`, err);
-  }
-}
-
-/**
- * Delete notification documents older than 30 days (up to 50 at a time).
- * Called fire-and-forget after every createUserNotification write.
- * @param {string} userId
- */
-async function pruneOldNotifications(userId) {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 30);
-  try {
-    const snap = await db.collection("users").doc(userId)
-      .collection("notifications")
-      .where("createdAt", "<", cutoff)
-      .limit(50)
-      .get();
-    if (snap.empty) return;
-    const batch = db.batch();
-    snap.docs.forEach((doc) => batch.delete(doc.ref));
-    await batch.commit();
-    console.log(`Pruned ${snap.size} old notification(s) for ${userId}`);
-  } catch (err) {
-    console.error(`pruneOldNotifications error for ${userId}:`, err);
   }
 }
 
@@ -155,9 +128,14 @@ async function pruneOldNotifications(userId) {
  * @param {string} userId
  * @param {{ title: string, body: string }} notification
  * @param {{ type: string, entityId?: string, entityType?: string, [key: string]: any }} data
+ * @param {{ tokens?: string[] }} [preloaded] - optional pre-fetched tokens to avoid
+ *        an extra Firestore read (pass when the caller already has the user doc).
  */
-async function notifyUser(userId, notification, data) {
-  const tokens = await getUserTokens(userId);
+async function notifyUser(userId, notification, data, preloaded = {}) {
+  const tokens = preloaded.tokens !== undefined
+    ? preloaded.tokens
+    : (await getUserData(userId)).tokens;
+
   if (tokens.length > 0) {
     // Always embed recipientId so the Flutter app can verify the correct user
     // is logged in before navigating — prevents cross-user notification exploits.
@@ -173,7 +151,7 @@ async function notifyUser(userId, notification, data) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// SHIFT TRIGGER  (replaces onShiftUpdated + onShiftMessageAdded)
+// SHIFT TRIGGER
 // ════════════════════════════════════════════════════════════════════════════
 
 exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => {
@@ -190,33 +168,41 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
   const nowAssigned = after.assignedWorkers || [];
   const newlyAssigned = nowAssigned.filter((uid) => !prevAssigned.includes(uid));
 
-  for (const uid of newlyAssigned) {
+  if (newlyAssigned.length > 0) {
     const startTime = after.startTime || "";
     const endTime = after.endTime || "";
-    await notifyUser(
-      uid,
-      {
-        title: "שובצת למשמרת! 🎉",
-        body: `בתאריך ${shiftDate} בשעה ${startTime}–${endTime}`,
-      },
-      { type: "shift_assigned", entityId: shiftId, entityType: "shift", shiftId }
+    await Promise.all(
+      newlyAssigned.map((uid) =>
+        notifyUser(
+          uid,
+          {
+            title: "שובצת למשמרת! 🎉",
+            body: `בתאריך ${shiftDate} בשעה ${startTime}–${endTime}`,
+          },
+          { type: "shift_assigned", entityId: shiftId, entityType: "shift", shiftId }
+        )
+      )
     );
   }
 
-  // ── 2. Removed workers (was in assigned, now is not, and not rejected) ─
+  // ── 2. Removed workers ─────────────────────────────────────────────────
   const nowRejectedIds = (after.rejectedWorkerData || []).map((w) => w.userId);
   const removedWorkers = prevAssigned.filter(
     (uid) => !nowAssigned.includes(uid) && !nowRejectedIds.includes(uid)
   );
 
-  for (const uid of removedWorkers) {
-    await notifyUser(
-      uid,
-      {
-        title: "הוסרת ממשמרת",
-        body: `הוסרת מהמשמרת ב${department} בתאריך ${shiftDate}`,
-      },
-      { type: "shift_removed", entityId: shiftId, entityType: "shift", shiftId }
+  if (removedWorkers.length > 0) {
+    await Promise.all(
+      removedWorkers.map((uid) =>
+        notifyUser(
+          uid,
+          {
+            title: "הוסרת ממשמרת",
+            body: `הוסרת מהמשמרת ב${department} בתאריך ${shiftDate}`,
+          },
+          { type: "shift_removed", entityId: shiftId, entityType: "shift", shiftId }
+        )
+      )
     );
   }
 
@@ -224,18 +210,22 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
   const prevRejected = (before.rejectedWorkerData || []).map((w) => w.userId);
   const newlyRejected = nowRejectedIds.filter((uid) => uid && !prevRejected.includes(uid));
 
-  for (const uid of newlyRejected) {
-    await notifyUser(
-      uid,
-      {
-        title: "עדכון משמרת",
-        body: `הבקשה שלך למשמרת ב${department} בתאריך ${shiftDate} לא אושרה`,
-      },
-      { type: "shift_rejected", entityId: shiftId, entityType: "shift", shiftId }
+  if (newlyRejected.length > 0) {
+    await Promise.all(
+      newlyRejected.map((uid) =>
+        notifyUser(
+          uid,
+          {
+            title: "עדכון משמרת",
+            body: `הבקשה שלך למשמרת ב${department} בתאריך ${shiftDate} לא אושרה`,
+          },
+          { type: "shift_rejected", entityId: shiftId, entityType: "shift", shiftId }
+        )
+      )
     );
   }
 
-  // ── 4. Shift status changed (cancelled / reactivated / completed) ──────
+  // ── 4. Shift status changed ────────────────────────────────────────────
   const prevStatus = before.status || "active";
   const nowStatus = after.status || "active";
 
@@ -245,46 +235,46 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
     const cancelReason = after.cancelReason || "";
 
     if (nowStatus === "cancelled") {
-      // Shift was cancelled — notify all assigned AND requested workers
       const bodyText = cancelReason
         ? `המשמרת ב${department} בתאריך ${shiftDate} בוטלה: ${cancelReason}`
         : `המשמרת ב${department} בתאריך ${shiftDate} בוטלה`;
 
       const workersToNotify = [...new Set([...assignedWorkers, ...requestedWorkers])];
-      for (const uid of workersToNotify) {
-        await notifyUser(
-          uid,
-          {
-            title: "משמרת בוטלה ❌",
-            body: bodyText,
-          },
-          { type: "shift_cancelled", entityId: shiftId, entityType: "shift", shiftId }
-        );
-      }
+      await Promise.all(
+        workersToNotify.map((uid) =>
+          notifyUser(
+            uid,
+            { title: "משמרת בוטלה ❌", body: bodyText },
+            { type: "shift_cancelled", entityId: shiftId, entityType: "shift", shiftId }
+          )
+        )
+      );
     } else if (nowStatus === "active") {
-      // Shift was reactivated (from cancelled or completed) — notify assigned workers
-      for (const uid of assignedWorkers) {
-        await notifyUser(
-          uid,
-          {
-            title: "עדכון משמרת 🔄",
-            body: `המשמרת ב${department} בתאריך ${shiftDate} הופעלה מחדש`,
-          },
-          { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
-        );
-      }
+      await Promise.all(
+        assignedWorkers.map((uid) =>
+          notifyUser(
+            uid,
+            {
+              title: "עדכון משמרת 🔄",
+              body: `המשמרת ב${department} בתאריך ${shiftDate} הופעלה מחדש`,
+            },
+            { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
+          )
+        )
+      );
     } else if (nowStatus === "completed") {
-      // Shift was marked as completed — notify all assigned workers
-      for (const uid of assignedWorkers) {
-        await notifyUser(
-          uid,
-          {
-            title: "משמרת הושלמה ✅",
-            body: `המשמרת ב${department} בתאריך ${shiftDate} סומנה כהושלמה`,
-          },
-          { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
-        );
-      }
+      await Promise.all(
+        assignedWorkers.map((uid) =>
+          notifyUser(
+            uid,
+            {
+              title: "משמרת הושלמה ✅",
+              body: `המשמרת ב${department} בתאריך ${shiftDate} סומנה כהושלמה`,
+            },
+            { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
+          )
+        )
+      );
     }
   }
 
@@ -295,22 +285,25 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
     const newMsg = nowMessages[nowMessages.length - 1];
     if (newMsg) {
       const senderId = newMsg.senderId || "";
-      // Always fetch name from Firestore — never trust the client-supplied senderName field.
-      const senderName = senderId ? await getUserName(senderId) : "מנהל";
+      // Single getUserData call — gets both name and tokens if needed.
+      // Never trust the client-supplied senderName field.
+      const senderName = senderId ? (await getUserData(senderId)).fullName : "מנהל";
       const msgText = newMsg.message || newMsg.text || "";
       const preview = msgText.length > 100 ? msgText.substring(0, 100) + "…" : msgText;
 
-      for (const uid of nowAssigned) {
-        if (uid === senderId) continue;
-        await notifyUser(
-          uid,
-          {
-            title: `${senderName} שלח הודעת משמרת 💬`,
-            body: preview,
-          },
-          { type: "shift_message", entityId: shiftId, entityType: "shift", shiftId }
-        );
-      }
+      const recipients = nowAssigned.filter((uid) => uid !== senderId);
+      await Promise.all(
+        recipients.map((uid) =>
+          notifyUser(
+            uid,
+            {
+              title: `${senderName} שלח הודעת משמרת 💬`,
+              body: preview,
+            },
+            { type: "shift_message", entityId: shiftId, entityType: "shift", shiftId }
+          )
+        )
+      );
     }
   }
 });
@@ -327,20 +320,22 @@ exports.onTaskCreated = onDocumentCreated("tasks/{taskId}", async (event) => {
   const taskTitle = data.title || "משימה חדשה";
   const assignedTo = data.assignedTo || [];
 
-  for (const uid of assignedTo) {
-    await notifyUser(
-      uid,
-      {
-        title: "משימה חדשה! 📋",
-        body: `קיבלת משימה חדשה: ${taskTitle}`,
-      },
-      { type: "task_assigned", entityId: taskId, entityType: "task", taskId }
-    );
-  }
+  await Promise.all(
+    assignedTo.map((uid) =>
+      notifyUser(
+        uid,
+        {
+          title: "משימה חדשה! 📋",
+          body: `קיבלת משימה חדשה: ${taskTitle}`,
+        },
+        { type: "task_assigned", entityId: taskId, entityType: "task", taskId }
+      )
+    )
+  );
 });
 
 // ════════════════════════════════════════════════════════════════════════════
-// TASK TRIGGER — updated  (replaces onTaskUpdated + onTaskCommentAdded)
+// TASK TRIGGER — updated
 // ════════════════════════════════════════════════════════════════════════════
 
 exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
@@ -352,19 +347,24 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
   const taskTitle = after.title || "משימה";
   const creatorId = after.createdBy || "";
 
+  // Collect all notification promises and fire them together at the end
+  const notifications = [];
+
   // ── 1. Newly assigned workers ──────────────────────────────────────────
   const prevAssigned = before.assignedTo || [];
   const nowAssigned = after.assignedTo || [];
   const newlyAssigned = nowAssigned.filter((uid) => !prevAssigned.includes(uid));
 
   for (const uid of newlyAssigned) {
-    await notifyUser(
-      uid,
-      {
-        title: "משימה חדשה! 📋",
-        body: `קיבלת משימה חדשה: ${taskTitle}`,
-      },
-      { type: "task_assigned", entityId: taskId, entityType: "task", taskId }
+    notifications.push(
+      notifyUser(
+        uid,
+        {
+          title: "משימה חדשה! 📋",
+          body: `קיבלת משימה חדשה: ${taskTitle}`,
+        },
+        { type: "task_assigned", entityId: taskId, entityType: "task", taskId }
+      )
     );
   }
 
@@ -375,8 +375,8 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
     const newComment = nowComments[nowComments.length - 1];
     if (newComment) {
       const commenterId = newComment.userId || newComment.by || "";
-      // Always fetch name from Firestore — never trust the client-supplied userName field.
-      const commenterName = commenterId ? await getUserName(commenterId) : "משתמש";
+      // Single read for commenter name — never trust client-supplied userName.
+      const commenterName = commenterId ? (await getUserData(commenterId)).fullName : "משתמש";
       const commentText = newComment.text || newComment.message || "";
       const preview = commentText.length > 80 ? commentText.substring(0, 80) + "…" : commentText;
 
@@ -385,13 +385,15 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
 
       for (const uid of recipients) {
         if (!uid) continue;
-        await notifyUser(
-          uid,
-          {
-            title: `${commenterName} הגיב על "${taskTitle}" 💬`,
-            body: preview,
-          },
-          { type: "task_comment", entityId: taskId, entityType: "task", taskId }
+        notifications.push(
+          notifyUser(
+            uid,
+            {
+              title: `${commenterName} הגיב על "${taskTitle}" 💬`,
+              body: preview,
+            },
+            { type: "task_comment", entityId: taskId, entityType: "task", taskId }
+          )
         );
       }
     }
@@ -409,31 +411,35 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
     if (prevStatus === nowStatus) continue;
     if (!creatorId || uid === creatorId) continue;
 
-    // Worker submitted for manager review
     if (nowStatus === "pending_review") {
-      const workerName = await getUserName(uid);
-      await notifyUser(
-        creatorId,
-        {
-          title: "משימה ממתינה לאישור 🔔",
-          body: `${workerName} סיים את "${taskTitle}" וממתין לאישורך`,
-        },
-        { type: "task_review_requested", entityId: taskId, entityType: "task", taskId }
+      const workerName = (await getUserData(uid)).fullName;
+      notifications.push(
+        notifyUser(
+          creatorId,
+          {
+            title: "משימה ממתינה לאישור 🔔",
+            body: `${workerName} סיים את "${taskTitle}" וממתין לאישורך`,
+          },
+          { type: "task_review_requested", entityId: taskId, entityType: "task", taskId }
+        )
       );
     }
 
-    // Manager approved the worker (done + approvedBy set)
     if (nowStatus === "done" && nowEntry.approvedBy && !prevEntry.approvedBy) {
-      await notifyUser(
-        uid,
-        {
-          title: "המשימה אושרה! ✅",
-          body: `"${taskTitle}" אושרה על ידי המנהל`,
-        },
-        { type: "task_approved", entityId: taskId, entityType: "task", taskId }
+      notifications.push(
+        notifyUser(
+          uid,
+          {
+            title: "המשימה אושרה! ✅",
+            body: `"${taskTitle}" אושרה על ידי המנהל`,
+          },
+          { type: "task_approved", entityId: taskId, entityType: "task", taskId }
+        )
       );
     }
   }
+
+  await Promise.all(notifications);
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -452,28 +458,23 @@ exports.onNewUserPending = onDocumentCreated("users/{userId}", async (event) => 
     .where("approved", "==", true)
     .get();
 
-  for (const mgr of managersSnap.docs) {
-    const tokens = mgr.data().fcmTokens || [];
-    const mgrId = mgr.id;
-    if (tokens.length > 0) {
-      await sendNotification(
-        tokens,
+  // Notify all managers in parallel, passing their pre-fetched tokens to
+  // avoid one extra user doc read per manager inside notifyUser.
+  await Promise.all(
+    managersSnap.docs.map((mgr) => {
+      const mgrId = mgr.id;
+      const tokens = mgr.data().fcmTokens || [];
+      return notifyUser(
+        mgrId,
         {
           title: "בקשת הרשמה חדשה 👤",
           body: `${newUserName} נרשם למערכת וממתין לאישור`,
         },
-        { type: "new_user_pending", entityId: newUserId, entityType: "user", userId: newUserId, recipientId: mgrId },
-        mgrId
+        { type: "new_user_pending", entityId: newUserId, entityType: "user", userId: newUserId },
+        { tokens }
       );
-    }
-    await createUserNotification(mgrId, {
-      type: "new_user_pending",
-      title: "בקשת הרשמה חדשה 👤",
-      body: `${newUserName} נרשם למערכת וממתין לאישור`,
-      entityId: newUserId,
-      entityType: "user",
-    });
-  }
+    })
+  );
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -521,13 +522,15 @@ exports.onPostWritten = onDocumentUpdated("posts/{postId}", async (event) => {
   const after = event.data.after.data();
   if (!before || !after) return;
 
-  const postId = event.params.postId;
-  const authorId = after.authorId || "";
-  if (!authorId) return;
-
+  // Early exit: only process when a comment was actually added.
+  // This prevents unnecessary function work on likes / reactions / pin changes.
   const prevComments = before.comments || [];
   const nowComments = after.comments || [];
   if (nowComments.length <= prevComments.length) return;
+
+  const postId = event.params.postId;
+  const authorId = after.authorId || "";
+  if (!authorId) return;
 
   const newComment = nowComments[nowComments.length - 1];
   if (!newComment) return;
@@ -535,8 +538,8 @@ exports.onPostWritten = onDocumentUpdated("posts/{postId}", async (event) => {
   const commenterId = newComment.userId || "";
   if (commenterId === authorId) return; // Author commented on own post
 
-  // Always fetch name from Firestore — never trust the client-supplied userName field.
-  const commenterName = commenterId ? await getUserName(commenterId) : "משתמש";
+  // Single getUserData call — never trust the client-supplied userName field.
+  const commenterName = commenterId ? (await getUserData(commenterId)).fullName : "משתמש";
   const commentText = newComment.content || newComment.text || "";
   const preview = commentText.length > 80 ? commentText.substring(0, 80) + "…" : commentText;
   const postTitle = after.title || "הפוסט שלך";
@@ -578,3 +581,61 @@ exports.deletePost = onCall(async (request) => {
   console.log(`Post ${postId} deleted by ${uid} (role: ${role})`);
   return { success: true };
 });
+
+// ════════════════════════════════════════════════════════════════════════════
+// SCHEDULED — daily cleanup of notifications older than 30 days
+//
+// Runs once per day at 03:00 AM Asia/Jerusalem.
+// Moved here from the per-notification createUserNotification path to avoid
+// an extra Firestore read (prune query) on every notification write.
+// ════════════════════════════════════════════════════════════════════════════
+
+exports.pruneAllNotifications = onSchedule(
+  { schedule: "0 3 * * *", timeZone: "Asia/Jerusalem" },
+  async () => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+
+    // Fetch only user IDs (no field data needed)
+    const usersSnap = await db.collection("users").select().get();
+    console.log(`pruneAllNotifications: checking ${usersSnap.size} users`);
+
+    let totalPruned = 0;
+
+    await Promise.all(
+      usersSnap.docs.map(async (userDoc) => {
+        const userId = userDoc.id;
+        try {
+          const snap = await db
+            .collection("users")
+            .doc(userId)
+            .collection("notifications")
+            .where("createdAt", "<", cutoff)
+            .limit(500)
+            .get();
+
+          if (snap.empty) return;
+
+          // Delete in batches of 50 to stay well under Firestore limits
+          const chunks = [];
+          for (let i = 0; i < snap.docs.length; i += 50) {
+            chunks.push(snap.docs.slice(i, i + 50));
+          }
+          await Promise.all(
+            chunks.map((chunk) => {
+              const batch = db.batch();
+              chunk.forEach((doc) => batch.delete(doc.ref));
+              return batch.commit();
+            })
+          );
+          totalPruned += snap.size;
+          console.log(`Pruned ${snap.size} notification(s) for ${userId}`);
+        } catch (err) {
+          console.error(`pruneAllNotifications error for ${userId}:`, err);
+        }
+      })
+    );
+
+    console.log(`pruneAllNotifications complete: ${totalPruned} total deleted`);
+  }
+);

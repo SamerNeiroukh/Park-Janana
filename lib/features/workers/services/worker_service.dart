@@ -6,6 +6,10 @@ import 'package:park_janana/core/utils/custom_exception.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
 class WorkerService {
+  static final WorkerService _instance = WorkerService._internal();
+  factory WorkerService() => _instance;
+  WorkerService._internal();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, UserModel> _workerCache = {};
   static const Duration _cacheTtl = Duration(minutes: 10);

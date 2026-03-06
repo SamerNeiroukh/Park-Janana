@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -415,7 +416,17 @@ class NotificationService {
   }
 
   /// Saves [token] to Firestore, deduplicating and keeping at most 5 tokens.
+  /// Skips the transaction entirely if this token was already saved on this
+  /// device — FCM tokens rotate infrequently, so this eliminates a Firestore
+  /// read+write on every app launch for users whose token hasn't changed.
   Future<void> _saveTokenCapped(String uid, String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedToken = prefs.getString('fcm_last_token_$uid');
+    if (cachedToken == token) {
+      debugPrint('FCM token unchanged — skipping Firestore update');
+      return;
+    }
+
     final docRef =
         _firestore.collection(AppConstants.usersCollection).doc(uid);
     await _firestore.runTransaction((transaction) async {
@@ -430,6 +441,9 @@ class NotificationService {
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
     });
+
+    // Cache the token so future app launches skip this transaction.
+    await prefs.setString('fcm_last_token_$uid', token);
   }
 
   Future<void> removeTokenOnLogout() async {
@@ -448,6 +462,9 @@ class NotificationService {
           .update({
         'fcmTokens': FieldValue.arrayRemove([token]),
       });
+      // Clear locally-cached token so the next login forces a fresh Firestore save.
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('fcm_last_token_${user.uid}');
       debugPrint('FCM token removed on logout');
     } catch (e) {
       debugPrint('Error removing FCM token: $e');
