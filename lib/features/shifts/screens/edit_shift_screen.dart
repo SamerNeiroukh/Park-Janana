@@ -5,6 +5,7 @@ import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class EditShiftScreen extends StatefulWidget {
   final ShiftModel shift;
@@ -360,39 +361,15 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
   Future<bool> _onWillPop() async {
     if (!_hasChanges) return true;
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.warningOrange),
-              SizedBox(width: 12),
-              Text('שינויים לא שמורים'),
-            ],
-          ),
-          content: const Text('יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text('המשך לערוך', style: TextStyle(color: Colors.grey.shade600)),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('צא ללא שמירה', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
+    final result = await showAppDialog(
+      context,
+      title: 'שינויים לא שמורים',
+      message: 'יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
+      confirmText: 'צא ללא שמירה',
+      cancelText: 'המשך לערוך',
+      icon: Icons.warning_amber_rounded,
+      iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
+      isDestructive: true,
     );
 
     return result ?? false;

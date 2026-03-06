@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/clock_service.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
@@ -68,8 +69,9 @@ class _GlassHeroCardState extends State<GlassHeroCard>
   // ── Attendance state ───────────────────────────────────────────────────────
   final ClockService _clockService = ClockService();
   AttendanceRecord? _session;
-  bool _loading = true;
-  bool _busy    = false;
+  bool _loading          = true;
+  bool _busy             = false;
+  bool _checkingLocation = false;
 
   // ── Timers ────────────────────────────────────────────────────────────────
   Timer? _clockTimer;
@@ -183,24 +185,38 @@ class _GlassHeroCardState extends State<GlassHeroCard>
 
   Future<void> _handleAction() async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() { _busy = true; _checkingLocation = true; });
 
     try {
       final name       = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
       final insidePark = await LocationUtils.isInsidePark();
+      if (mounted) setState(() => _checkingLocation = false);
       final clockingIn = _session == null;
 
-      if (!insidePark && mounted) {
-        final ok = await _showLocationWarning(clockingIn);
+      // Location gate:
+      //   null  → GPS unavailable/denied — warn user, let them decide
+      //   false → confirmed outside park — warn user, let them decide
+      //   true  → inside park — proceed silently
+      if (insidePark != true && mounted) {
+        final ok = await _showLocationWarning(clockingIn, gpsUnavailable: insidePark == null);
         if (ok != true) return;
       }
 
       if (!mounted) return;
 
-      if (_session == null) {
+      if (clockingIn) {
         await _clockService.clockIn(name);
       } else {
         await _clockService.clockOut();
+      }
+
+      // Schedule / cancel reminders in the background — never block clock-in.
+      if (clockingIn) {
+        NotificationService().scheduleClockOutReminders(DateTime.now())
+            .catchError((e) => debugPrint('Reminder scheduling failed: $e'));
+      } else {
+        NotificationService().cancelClockOutReminders()
+            .catchError((e) => debugPrint('Reminder cancel failed: $e'));
       }
       await _fetchSession();
       widget.onClockComplete?.call();
@@ -216,14 +232,19 @@ class _GlassHeroCardState extends State<GlassHeroCard>
       }
     } finally {
       if (mounted) {
-        setState(() => _busy = false);
+        setState(() { _busy = false; _checkingLocation = false; });
         _ringCtrl.animateBack(0, curve: Curves.easeOut);
         _fired = false;
       }
     }
   }
 
-  Future<bool?> _showLocationWarning(bool clockingIn) {
+  Future<bool?> _showLocationWarning(bool clockingIn, {bool gpsUnavailable = false}) {
+    final title = gpsUnavailable ? 'לא ניתן לאמת מיקום' : 'אינך נמצא בגבולות הפארק';
+    final body  = gpsUnavailable
+        ? 'שירות המיקום אינו זמין או שהרשאות GPS לא אושרו. האם ברצונך להמשיך בכל זאת?'
+        : 'אתה מנסה ${clockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?';
+
     return showGeneralDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -251,13 +272,13 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 20, spreadRadius: 2)],
                   ),
                   padding: const EdgeInsets.all(16),
-                  child: const Icon(Icons.location_off_rounded, size: 48, color: Colors.white),
+                  child: Icon(gpsUnavailable ? Icons.gps_off_rounded : Icons.location_off_rounded, size: 48, color: Colors.white),
                 ),
                 const SizedBox(height: 22),
-                const Text('אינך נמצא בגבולות הפארק', textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black87)),
+                Text(title, textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black87)),
                 const SizedBox(height: 12),
-                Text('אתה מנסה ${clockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת',
+                Text(body,
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400, height: 1.4, color: Colors.black54)),
                 const SizedBox(height: 28),
@@ -503,16 +524,21 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                             child: child,
                           ),
                         ),
-                        child: active
-                            ? _ActiveInfo(
-                                key: const ValueKey('active'),
-                                elapsed: _elapsed,
-                                clockInTime: _session!.clockIn,
+                        child: _checkingLocation
+                            ? const _QuoteText(
+                                key: ValueKey('loc'),
+                                text: '...מחפש מיקום',
                               )
-                            : _QuoteText(
-                                key: ValueKey(_quoteIdx),
-                                text: _kQuotes[_quoteIdx],
-                              ),
+                            : active
+                                ? _ActiveInfo(
+                                    key: const ValueKey('active'),
+                                    elapsed: _elapsed,
+                                    clockInTime: _session!.clockIn,
+                                  )
+                                : _QuoteText(
+                                    key: ValueKey(_quoteIdx),
+                                    text: _kQuotes[_quoteIdx],
+                                  ),
                       ),
                     ),
 
@@ -522,15 +548,40 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     Center(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
-                        child: Text(
-                          active ? 'לחיצה ארוכה לסיום משמרת' : 'לחיצה ארוכה להתחיל משמרת',
+                        child: AnimatedBuilder(
                           key: ValueKey(active),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w500,
-                            color: Colors.white.withOpacity(0.50),
-                            letterSpacing: 0.3,
-                          ),
+                          animation: _breatheCtrl,
+                          builder: (_, __) {
+                            // Pulse opacity on hint text when idle to draw attention
+                            final opacity = active
+                                ? 0.70
+                                : 0.55 + _breatheCtrl.value * 0.35;
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  active
+                                      ? Icons.touch_app_rounded
+                                      : Icons.touch_app_rounded,
+                                  size: 14,
+                                  color: Colors.white.withOpacity(opacity),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  active
+                                      ? 'לחיצה ארוכה לסיום משמרת'
+                                      : 'לחיצה ארוכה להתחיל משמרת',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white.withOpacity(opacity),
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -543,6 +594,18 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     const SizedBox(height: 18),
 
                     // ── 7. Stats strip ─────────────────────────────────────
+                    Center(
+                      child: Text(
+                        'החודש',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.45),
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(child: _Stat(

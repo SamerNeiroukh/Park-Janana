@@ -30,6 +30,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
   bool isLoading = true;
   AttendanceModel? attendanceData;
 
+  // Date range mode
+  bool _isRangeMode = false;
+  DateTimeRange? _dateRange;
+
   @override
   void initState() {
     super.initState();
@@ -39,10 +43,19 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
 
   Future<void> _loadAttendance() async {
     setState(() => isLoading = true);
-    final data = await AttendanceService.getAttendanceForUserByMonth(
-      widget.userId,
-      selectedMonth,
-    );
+    final AttendanceModel? data;
+    if (_isRangeMode && _dateRange != null) {
+      data = await AttendanceService.getAttendanceForUserByDateRange(
+        widget.userId,
+        _dateRange!.start,
+        _dateRange!.end,
+      );
+    } else {
+      data = await AttendanceService.getAttendanceForUserByMonth(
+        widget.userId,
+        selectedMonth,
+      );
+    }
     if (mounted) {
       setState(() {
         attendanceData = data;
@@ -53,6 +66,41 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
 
   void _onMonthChanged(DateTime newMonth) {
     setState(() => selectedMonth = newMonth);
+    _loadAttendance();
+  }
+
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2023),
+      lastDate: DateTime.now(),
+      initialDateRange: _dateRange ??
+          DateTimeRange(
+            start: DateTime.now().subtract(const Duration(days: 30)),
+            end: DateTime.now(),
+          ),
+      locale: const Locale('he'),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF3B82F6),
+            onPrimary: Colors.white,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() => _dateRange = picked);
+      _loadAttendance();
+    }
+  }
+
+  void _toggleRangeMode() {
+    setState(() {
+      _isRangeMode = !_isRangeMode;
+      if (!_isRangeMode) _dateRange = null;
+    });
     _loadAttendance();
   }
 
@@ -109,13 +157,93 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                   ),
                   const SizedBox(width: 12),
                   const Text('דו״ח נוכחות', style: TaskTheme.heading2),
+                  const Spacer(),
+                  // Toggle between month picker and custom date range
+                  GestureDetector(
+                    onTap: _toggleRangeMode,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _isRangeMode
+                            ? const Color(0xFF3B82F6)
+                            : const Color(0xFF3B82F6).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.date_range_rounded,
+                            size: 16,
+                            color: _isRangeMode ? Colors.white : const Color(0xFF3B82F6),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'טווח תאריכים',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: _isRangeMode ? Colors.white : const Color(0xFF3B82F6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-            MonthSelector(
-              selectedMonth: selectedMonth,
-              onMonthChanged: _onMonthChanged,
-            ),
+            if (_isRangeMode)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: GestureDetector(
+                  onTap: _pickDateRange,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.4)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today_rounded,
+                            size: 16, color: Color(0xFF3B82F6)),
+                        const SizedBox(width: 8),
+                        Text(
+                          _dateRange == null
+                              ? 'בחר טווח תאריכים'
+                              : '${_dateRange!.start.day}/${_dateRange!.start.month}/${_dateRange!.start.year}  —  ${_dateRange!.end.day}/${_dateRange!.end.month}/${_dateRange!.end.year}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: _dateRange == null
+                                ? Colors.grey.shade500
+                                : const Color(0xFF1E293B),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.edit_calendar_rounded,
+                            size: 16, color: Colors.grey.shade400),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              MonthSelector(
+                selectedMonth: selectedMonth,
+                onMonthChanged: _onMonthChanged,
+              ),
             if (isLoading)
               const Expanded(
                 child: Center(child: CircularProgressIndicator()),

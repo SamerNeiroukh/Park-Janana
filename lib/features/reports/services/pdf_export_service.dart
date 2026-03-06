@@ -1,4 +1,5 @@
 // ✅ Your original imports remain unchanged
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart' as flutter;
 import 'package:intl/intl.dart';
@@ -39,8 +40,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(), filename: 'דו״ח נוכחות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'דו״ח נוכחות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: attendance PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static Future<void> exportTaskReportPdf({
@@ -69,8 +76,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(), filename: 'דו״ח משימות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'דו״ח משימות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: task PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static Future<void> exportShiftReportPdf({
@@ -101,8 +114,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(), filename: 'דו״ח משמרות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'דו״ח משמרות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: shift PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static pw.Widget _buildHeader(String title, String userName, String month,
@@ -419,9 +438,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'שעות עבודה - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'שעות עבודה - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: work hours PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static Future<void> exportTaskDistributionPdf({
@@ -478,9 +502,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'התפלגות משימות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'התפלגות משימות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: task distribution PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static Future<void> exportShiftCoveragePdf({
@@ -536,9 +565,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'כיסוי משמרות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'כיסוי משמרות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: shift coverage PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static pw.Widget _buildGeneralHeader(

@@ -5,6 +5,7 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -54,26 +55,16 @@ class ApproveWorkerScreen extends StatelessWidget {
     required String content,
     required VoidCallback onConfirm,
   }) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title, textDirection: TextDirection.rtl),
-        content: Text(content, textDirection: TextDirection.rtl),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ביטול"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onConfirm();
-            },
-            child: const Text("אישור"),
-          ),
-        ],
-      ),
-    );
+    showAppDialog(
+      context,
+      title: title,
+      message: content,
+      confirmText: 'אישור',
+      icon: Icons.check_circle_outline_rounded,
+      iconGradient: const [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+    ).then((confirmed) {
+      if (confirmed ?? false) onConfirm();
+    });
   }
 
   @override

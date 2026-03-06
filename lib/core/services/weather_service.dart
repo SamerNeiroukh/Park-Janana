@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:park_janana/core/constants/secrets.dart';
 
 class WeatherService {
-  static const String _apiKey = 'd7a80dbfc9032688dbb189a2f7940e7e';
+  static const String _apiKey = AppSecrets.openWeatherApiKey;
   static const String _baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
   static const Duration _cacheDuration = Duration(minutes: 30);
 

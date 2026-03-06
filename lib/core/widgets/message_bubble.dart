@@ -66,13 +66,17 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Future<void> _getSenderData() async {
-    final userDoc = await FirebaseService().getUser(widget.senderId);
-    if (userDoc.exists) {
-      final userData = userDoc.data() as Map<String, dynamic>;
-      senderName = userData['fullName'] ?? "מנהל";
-      profilePictureUrl = userData['profile_picture'];
+    try {
+      final userDoc = await FirebaseService().getUser(widget.senderId);
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        senderName = userData['fullName'] ?? "מנהל";
+        profilePictureUrl = userData['profile_picture'];
+      }
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('MessageBubble: failed to load sender data for ${widget.senderId}: $e');
     }
-    if (mounted) setState(() {});
   }
 
   @override

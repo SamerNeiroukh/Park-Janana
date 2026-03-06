@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/features/tasks/services/task_service.dart';
 
@@ -79,6 +80,7 @@ class TaskTimelineProvider extends ChangeNotifier {
         _allTasks = tasks;
         _isLoading = false;
         notifyListeners();
+        _scheduleDeadlineReminders(tasks);
       },
       onError: (e) {
         debugPrint('TaskTimelineProvider stream error: $e');
@@ -100,6 +102,29 @@ class TaskTimelineProvider extends ChangeNotifier {
   Future<void> updateStatus(String taskId, String newStatus) async {
     if (_userId == null) return;
     await _taskService.updateWorkerStatus(taskId, _userId!, newStatus);
+  }
+
+  /// Schedule a 24-hour-before reminder for every upcoming task that is not
+  /// yet completed. Fires-and-forgets — errors are logged but not surfaced.
+  void _scheduleDeadlineReminders(List<TaskModel> tasks) {
+    final notifService = NotificationService();
+    final now = DateTime.now();
+    for (final task in tasks) {
+      final workerStatus = _workerStatus(task);
+      if (workerStatus == 'done') continue; // already completed — skip
+
+      final due = task.dueDate.toDate();
+      final reminderAt = due.subtract(const Duration(hours: 24));
+      if (!reminderAt.isAfter(now)) continue; // reminder already past — skip
+
+      notifService
+          .scheduleTaskDeadlineReminder(
+            taskId: task.id,
+            taskTitle: task.title,
+            dueDate: due,
+          )
+          .catchError((e) => debugPrint('deadline reminder error: $e'));
+    }
   }
 
   @override

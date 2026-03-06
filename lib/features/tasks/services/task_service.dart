@@ -126,81 +126,84 @@ class TaskService {
   // Update only the specific worker's entry in workerProgress
   Future<void> updateWorkerStatus(String taskId, String userId, String newStatus) async {
     final taskRef = _firestore.collection(_collection).doc(taskId);
-    final snapshot = await taskRef.get();
 
-    if (!snapshot.exists) {
-      debugPrint('Task not found: $taskId');
-      return;
-    }
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(taskRef);
 
-    final data = snapshot.data()!;
-    final now = Timestamp.now();
+      if (!snapshot.exists) {
+        debugPrint('Task not found: $taskId');
+        return;
+      }
 
-    final workerProgress = Map<String, dynamic>.from(data['workerProgress'] ?? {});
+      final data = snapshot.data()!;
+      final now = Timestamp.now();
 
-    final progressEntry = Map<String, dynamic>.from(
-      workerProgress[userId] ?? {
-        'submittedAt': now,
-        'startedAt': null,
-        'endedAt': null,
-        'status': 'pending',
-      },
-    );
+      final workerProgress = Map<String, dynamic>.from(data['workerProgress'] ?? {});
 
-    progressEntry['status'] = newStatus;
-    if (newStatus == 'pending') {
-      progressEntry['submittedAt'] = now;
-    } else if (newStatus == 'in_progress') {
-      progressEntry['startedAt'] = now;
-    } else if (newStatus == 'pending_review') {
-      progressEntry['submittedForReviewAt'] = now;
-    } else if (newStatus == 'done') {
-      progressEntry['endedAt'] = now;
-    }
+      final progressEntry = Map<String, dynamic>.from(
+        workerProgress[userId] ?? {
+          'submittedAt': now,
+          'startedAt': null,
+          'endedAt': null,
+          'status': 'pending',
+        },
+      );
 
-    workerProgress[userId] = progressEntry;
+      progressEntry['status'] = newStatus;
+      if (newStatus == 'pending') {
+        progressEntry['submittedAt'] = now;
+      } else if (newStatus == 'in_progress') {
+        progressEntry['startedAt'] = now;
+      } else if (newStatus == 'pending_review') {
+        progressEntry['submittedForReviewAt'] = now;
+      } else if (newStatus == 'done') {
+        progressEntry['endedAt'] = now;
+      }
 
-    final allStatuses = workerProgress.values
-        .map((entry) => (entry as Map<String, dynamic>)['status'] as String)
-        .toList();
+      workerProgress[userId] = progressEntry;
 
-    String overallStatus;
-    if (allStatuses.every((s) => s == 'done')) {
-      overallStatus = 'done';
-    } else if (allStatuses.any(
-        (s) => s == 'in_progress' || s == 'done' || s == 'pending_review')) {
-      overallStatus = 'in_progress';
-    } else {
-      overallStatus = 'pending';
-    }
+      final allStatuses = workerProgress.values
+          .map((e) => (e is Map ? (e as Map<String, dynamic>)['status'] as String? : null) ?? 'pending')
+          .toList();
 
-    String actionDetails;
-    switch (newStatus) {
-      case 'in_progress':
-        actionDetails = 'עובד התחיל לעבוד על המשימה';
-        break;
-      case 'pending_review':
-        actionDetails = 'עובד שלח את המשימה לאישור מנהל';
-        break;
-      case 'done':
-        actionDetails = 'עובד סיים את המשימה';
-        break;
-      default:
-        actionDetails = 'סטטוס עובד עודכן';
-    }
+      String overallStatus;
+      if (allStatuses.every((s) => s == 'done')) {
+        overallStatus = 'done';
+      } else if (allStatuses.any(
+          (s) => s == 'in_progress' || s == 'done' || s == 'pending_review')) {
+        overallStatus = 'in_progress';
+      } else {
+        overallStatus = 'pending';
+      }
 
-    await taskRef.update({
-      'workerProgress.$userId': progressEntry,
-      'status': overallStatus,
-      'updatedAt': now,
-      'activityLog': FieldValue.arrayUnion([
-        {
-          'action': 'worker_$newStatus',
-          'by': userId,
-          'timestamp': now,
-          'details': actionDetails,
-        }
-      ]),
+      String actionDetails;
+      switch (newStatus) {
+        case 'in_progress':
+          actionDetails = 'עובד התחיל לעבוד על המשימה';
+          break;
+        case 'pending_review':
+          actionDetails = 'עובד שלח את המשימה לאישור מנהל';
+          break;
+        case 'done':
+          actionDetails = 'עובד סיים את המשימה';
+          break;
+        default:
+          actionDetails = 'סטטוס עובד עודכן';
+      }
+
+      transaction.update(taskRef, {
+        'workerProgress.$userId': progressEntry,
+        'status': overallStatus,
+        'updatedAt': now,
+        'activityLog': FieldValue.arrayUnion([
+          {
+            'action': 'worker_$newStatus',
+            'by': userId,
+            'timestamp': now,
+            'details': actionDetails,
+          }
+        ]),
+      });
     });
   }
 
@@ -210,50 +213,53 @@ class TaskService {
   Future<void> approveWorkerTask(
       String taskId, String workerId, String managerId) async {
     final taskRef = _firestore.collection(_collection).doc(taskId);
-    final snapshot = await taskRef.get();
-    if (!snapshot.exists) return;
 
-    final data = snapshot.data()!;
-    final now = Timestamp.now();
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(taskRef);
+      if (!snapshot.exists) return;
 
-    final workerProgress =
-        Map<String, dynamic>.from(data['workerProgress'] ?? {});
-    final progressEntry = Map<String, dynamic>.from(
-        workerProgress[workerId] ?? {'status': 'pending_review'});
+      final data = snapshot.data()!;
+      final now = Timestamp.now();
 
-    progressEntry['status'] = 'done';
-    progressEntry['endedAt'] = now;
-    progressEntry['approvedAt'] = now;
-    progressEntry['approvedBy'] = managerId;
+      final workerProgress =
+          Map<String, dynamic>.from(data['workerProgress'] ?? {});
+      final progressEntry = Map<String, dynamic>.from(
+          workerProgress[workerId] ?? {'status': 'pending_review'});
 
-    workerProgress[workerId] = progressEntry;
+      progressEntry['status'] = 'done';
+      progressEntry['endedAt'] = now;
+      progressEntry['approvedAt'] = now;
+      progressEntry['approvedBy'] = managerId;
 
-    final allStatuses = workerProgress.values
-        .map((e) => (e as Map<String, dynamic>)['status'] as String)
-        .toList();
+      workerProgress[workerId] = progressEntry;
 
-    String overallStatus;
-    if (allStatuses.every((s) => s == 'done')) {
-      overallStatus = 'done';
-    } else if (allStatuses.any(
-        (s) => s == 'in_progress' || s == 'done' || s == 'pending_review')) {
-      overallStatus = 'in_progress';
-    } else {
-      overallStatus = 'pending';
-    }
+      final allStatuses = workerProgress.values
+          .map((e) => (e is Map ? (e as Map<String, dynamic>)['status'] as String? : null) ?? 'pending')
+          .toList();
 
-    await taskRef.update({
-      'workerProgress.$workerId': progressEntry,
-      'status': overallStatus,
-      'updatedAt': now,
-      'activityLog': FieldValue.arrayUnion([
-        {
-          'action': 'worker_approved',
-          'by': managerId,
-          'timestamp': now,
-          'details': 'המנהל אישר את סיום המשימה לעובד',
-        }
-      ]),
+      String overallStatus;
+      if (allStatuses.every((s) => s == 'done')) {
+        overallStatus = 'done';
+      } else if (allStatuses.any(
+          (s) => s == 'in_progress' || s == 'done' || s == 'pending_review')) {
+        overallStatus = 'in_progress';
+      } else {
+        overallStatus = 'pending';
+      }
+
+      transaction.update(taskRef, {
+        'workerProgress.$workerId': progressEntry,
+        'status': overallStatus,
+        'updatedAt': now,
+        'activityLog': FieldValue.arrayUnion([
+          {
+            'action': 'worker_approved',
+            'by': managerId,
+            'timestamp': now,
+            'details': 'המנהל אישר את סיום המשימה לעובד',
+          }
+        ]),
+      });
     });
   }
 

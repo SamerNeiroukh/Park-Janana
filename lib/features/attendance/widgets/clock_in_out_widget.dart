@@ -204,7 +204,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     final insidePark = await LocationUtils.isInsidePark();
     final isClockingIn = _ongoingSession == null;
 
-    if (!insidePark && mounted) {
+    if (insidePark != true && mounted) {
       final confirm = await _showLocationWarning(isClockingIn);
       if (confirm != true) {
         if (mounted) _ringCtrl.animateBack(0, curve: Curves.easeOut);

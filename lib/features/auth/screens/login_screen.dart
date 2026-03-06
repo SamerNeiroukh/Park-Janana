@@ -8,6 +8,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/auth/screens/forgot_password_screen.dart';
 import 'package:park_janana/core/services/biometric_service.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -100,24 +101,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _offerBiometricSetup(String email, String password) async {
     if (!mounted) return;
-    final enable = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('כניסה ביומטרית'),
-        content: const Text(
-          'האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('לא'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('כן'),
-          ),
-        ],
-      ),
+    final enable = await showAppDialog(
+      context,
+      title: 'כניסה ביומטרית',
+      message: 'האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?',
+      confirmText: 'אפשר',
+      cancelText: 'לא, תודה',
+      icon: Icons.fingerprint_rounded,
+      iconGradient: const [Color(0xFF6366F1), Color(0xFF4338CA)],
     );
     if (enable == true) {
       await _biometricService.saveCredentials(email, password);
@@ -200,42 +191,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showRejectedDialog(String uid) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          title: const Text('הבקשה נדחתה'),
-          content: const Text(
-            'בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                // User is still authenticated — sign them out on cancel.
-                await _authService.signOut();
-              },
-              child: const Text('ביטול'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              onPressed: () async {
-                Navigator.pop(ctx);
-                await _reApply(uid);
-              },
-              child: const Text(
-                'שלח בקשה מחדש',
-                style: TextStyle(color: AppColors.textWhite),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    showAppDialog(
+      context,
+      title: 'הבקשה נדחתה',
+      message: 'בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.',
+      confirmText: 'שלח בקשה מחדש',
+      cancelText: 'ביטול',
+      icon: Icons.cancel_outlined,
+      iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
+    ).then((confirmed) async {
+      if (confirmed ?? false) {
+        await _reApply(uid);
+      } else {
+        await _authService.signOut();
+      }
+    });
   }
 
   Future<void> _reApply(String uid) async {

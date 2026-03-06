@@ -8,6 +8,7 @@ import '../providers/task_timeline_provider.dart';
 import '../theme/task_theme.dart';
 import '../widgets/task_card.dart';
 import 'task_details_screen.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'create_task_flow_screen.dart';
 
 class ManagerTaskBoardScreen extends StatefulWidget {
@@ -539,28 +540,13 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   }
 
   Future<bool> _confirmDelete(TaskModel task) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('מחיקת משימה'),
-          content: Text('למחוק את "${task.title}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ביטול'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('מחק',
-                  style: TextStyle(color: TaskTheme.overdue)),
-            ),
-          ],
-        ),
-      ),
+    final result = await showAppDialog(
+      context,
+      title: 'מחיקת משימה',
+      message: 'למחוק את "${task.title}"?',
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
 
     if (result ?? false) {

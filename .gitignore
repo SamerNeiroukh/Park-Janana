@@ -48,3 +48,6 @@ android/app/google-services.json
 android/app/google-services.json
 lib/firebase_options.dart
 firebase.json
+
+# App secrets — never commit real keys
+lib/core/constants/secrets.dart

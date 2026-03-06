@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -56,6 +58,9 @@ class NotificationService {
 
   Future<void> initialize() async {
     if (_isInitialized) return;
+    tz_data.initializeTimeZones();
+    // tz.local is a `late` field — must be set explicitly after initializeTimeZones().
+    tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
     await _requestPermission();
     await _initializeLocalNotifications();
     _setupMessageHandlers();
@@ -165,12 +170,22 @@ class NotificationService {
     final navigator = navigatorKey.currentState;
     if (navigator == null) return;
 
+    final type = data['type'] as String?;
+
     // ── Security: reject if this notification was not meant for the current user.
     // Prevents a logged-out user's stale notification from being tapped by a
     // different user who logs in on the same device.
+    // Clock-out reminders are device-local and carry no recipientId — they fall
+    // through to the default case (no navigation) so the check is skipped for them.
     final recipientId = data['recipientId'] as String?;
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    if (recipientId != null && recipientId.isNotEmpty) {
+    if (type != 'clock_reminder') {
+      if (recipientId == null || recipientId.isEmpty) {
+        debugPrint(
+          'SECURITY: recipientId absent for type=$type — navigation blocked',
+        );
+        return;
+      }
       if (currentUid == null || currentUid != recipientId) {
         debugPrint(
           'Notification rejected — intended for $recipientId, '
@@ -179,8 +194,6 @@ class NotificationService {
         return;
       }
     }
-
-    final type = data['type'] as String?;
     final entityId = ((data['entityId'] as String?)?.isNotEmpty ?? false)
         ? data['entityId'] as String
         : (data['shiftId'] as String?) ??
@@ -306,7 +319,12 @@ class NotificationService {
     ));
   }
 
-  void _pushManagerBoardHighlight(NavigatorState nav, String taskId) {
+  Future<void> _pushManagerBoardHighlight(NavigatorState nav, String taskId) async {
+    final role = await _fetchCurrentRole();
+    if (role != 'manager' && role != 'owner' && role != 'admin') {
+      debugPrint('ManagerBoardHighlight blocked — role=$role is not authorized');
+      return;
+    }
     nav.push(MaterialPageRoute(
       builder: (_) => ManagerTaskBoardScreen(
         initialTab: 0,
@@ -376,13 +394,7 @@ class NotificationService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     try {
-      await _firestore
-          .collection(AppConstants.usersCollection)
-          .doc(user.uid)
-          .update({
-        'fcmTokens': FieldValue.arrayUnion([token]),
-        'lastTokenUpdate': FieldValue.serverTimestamp(),
-      });
+      await _saveTokenCapped(user.uid, token);
       debugPrint('FCM token saved');
     } catch (e) {
       debugPrint('Error saving FCM token: $e');
@@ -395,17 +407,29 @@ class NotificationService {
     final token = await getToken();
     if (token == null) return;
     try {
-      await _firestore
-          .collection(AppConstants.usersCollection)
-          .doc(user.uid)
-          .update({
-        'fcmTokens': FieldValue.arrayUnion([token]),
-        'lastTokenUpdate': FieldValue.serverTimestamp(),
-      });
+      await _saveTokenCapped(user.uid, token);
       debugPrint('FCM token saved after login');
     } catch (e) {
       debugPrint('Error saving FCM token after login: $e');
     }
+  }
+
+  /// Saves [token] to Firestore, deduplicating and keeping at most 5 tokens.
+  Future<void> _saveTokenCapped(String uid, String token) async {
+    final docRef =
+        _firestore.collection(AppConstants.usersCollection).doc(uid);
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      List<dynamic> tokens =
+          List<dynamic>.from(snapshot.data()?['fcmTokens'] ?? []);
+      tokens.remove(token); // dedup — remove stale copy of same token
+      tokens.add(token); // append as most-recent
+      if (tokens.length > 5) tokens = tokens.sublist(tokens.length - 5);
+      transaction.update(docRef, {
+        'fcmTokens': tokens,
+        'lastTokenUpdate': FieldValue.serverTimestamp(),
+      });
+    });
   }
 
   Future<void> removeTokenOnLogout() async {
@@ -438,5 +462,153 @@ class NotificationService {
   Future<void> unsubscribeFromTopic(String topic) async {
     await _messaging.unsubscribeFromTopic(topic);
     debugPrint('Unsubscribed from topic: $topic');
+  }
+
+  // ── Clock-out reminders ─────────────────────────────────────────────────
+
+  /// Unique notification IDs reserved for clock-out reminders.
+  static const int _clockReminder10hId = 9001;
+  static const int _clockReminder12hId = 9002;
+
+  static const AndroidNotificationDetails _reminderAndroid =
+      AndroidNotificationDetails(
+    'clock_reminders',
+    'תזכורות יציאה',
+    channelDescription: 'תזכורות לדווח יציאה ממשמרת',
+    importance: Importance.high,
+    priority: Priority.high,
+    playSound: true,
+    enableVibration: true,
+    icon: '@mipmap/ic_launcher',
+  );
+
+  static const DarwinNotificationDetails _reminderIOS =
+      DarwinNotificationDetails(
+    presentAlert: true,
+    presentBadge: true,
+    presentSound: true,
+  );
+
+  static const NotificationDetails _reminderDetails =
+      NotificationDetails(android: _reminderAndroid, iOS: _reminderIOS);
+
+  /// Schedule local reminders at clockIn + 10 h and clockIn + 12 h.
+  /// Safe to call multiple times — cancels any existing reminders first.
+  Future<void> scheduleClockOutReminders(DateTime clockInTime) async {
+    await cancelClockOutReminders();
+
+    final local = tz.local;
+    final now = tz.TZDateTime.now(local);
+
+    final remind10h = tz.TZDateTime.from(
+      clockInTime.add(const Duration(hours: 10)),
+      local,
+    );
+    final remind12h = tz.TZDateTime.from(
+      clockInTime.add(const Duration(hours: 12)),
+      local,
+    );
+
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    if (remind10h.isAfter(now)) {
+      await _localNotifications.zonedSchedule(
+        _clockReminder10hId,
+        'שכחת לצאת? ⏰',
+        'אתה במשמרת כבר 10 שעות. זכור לדווח יציאה.',
+        remind10h,
+        _reminderDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: '{"type":"clock_reminder","recipientId":"$uid"}',
+      );
+      debugPrint('Clock-out reminder scheduled for 10h: $remind10h');
+    }
+
+    if (remind12h.isAfter(now)) {
+      await _localNotifications.zonedSchedule(
+        _clockReminder12hId,
+        'משמרת ארוכה מאוד! 🚨',
+        'אתה במשמרת כבר 12 שעות. דווח יציאה בהקדם.',
+        remind12h,
+        _reminderDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: '{"type":"clock_reminder","recipientId":"$uid"}',
+      );
+      debugPrint('Clock-out reminder scheduled for 12h: $remind12h');
+    }
+  }
+
+  /// Cancel both clock-out reminders (call on clock-out).
+  Future<void> cancelClockOutReminders() async {
+    await _localNotifications.cancel(_clockReminder10hId);
+    await _localNotifications.cancel(_clockReminder12hId);
+    debugPrint('Clock-out reminders cancelled');
+  }
+
+  // ── Task deadline reminders ─────────────────────────────────────────────
+
+  static const AndroidNotificationDetails _taskReminderAndroid =
+      AndroidNotificationDetails(
+    'task_deadlines',
+    'תזכורות משימות',
+    channelDescription: 'תזכורות 24 שעות לפני מועד הגשת משימה',
+    importance: Importance.high,
+    priority: Priority.high,
+    playSound: true,
+    enableVibration: true,
+    icon: '@mipmap/ic_launcher',
+  );
+
+  static const NotificationDetails _taskReminderDetails = NotificationDetails(
+    android: _taskReminderAndroid,
+    iOS: DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    ),
+  );
+
+  /// Converts a task ID string to a stable positive int notification ID.
+  int _taskNotifId(String taskId) =>
+      taskId.hashCode.abs() % 90000 + 10000; // range 10000–99999
+
+  /// Schedule a local reminder 24 h before [dueDate] for a task.
+  /// Safe to call repeatedly — silently skips if the reminder time is past.
+  Future<void> scheduleTaskDeadlineReminder({
+    required String taskId,
+    required String taskTitle,
+    required DateTime dueDate,
+  }) async {
+    final local = tz.local;
+    final reminderTime = tz.TZDateTime.from(
+      dueDate.subtract(const Duration(hours: 24)),
+      local,
+    );
+    final now = tz.TZDateTime.now(local);
+    if (!reminderTime.isAfter(now)) return; // already past — skip
+
+    final id = _taskNotifId(taskId);
+    await _localNotifications.zonedSchedule(
+      id,
+      'תזכורת משימה ⏰',
+      '$taskTitle — נותרו פחות מ-24 שעות לסיום',
+      reminderTime,
+      _taskReminderDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: '{"type":"task_assigned","entityId":"$taskId","recipientId":"${FirebaseAuth.instance.currentUser?.uid ?? ""}"}',
+    );
+    debugPrint('Task deadline reminder scheduled: $taskTitle @ $reminderTime');
+  }
+
+  /// Cancel the deadline reminder for a specific task.
+  Future<void> cancelTaskDeadlineReminder(String taskId) async {
+    await _localNotifications.cancel(_taskNotifId(taskId));
+    debugPrint('Task deadline reminder cancelled for $taskId');
   }
 }

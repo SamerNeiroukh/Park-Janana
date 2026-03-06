@@ -398,6 +398,10 @@ class _NotificationHistoryScreenState
   }
 
   void _openManagerBoardHighlight(String taskId) {
+    if (!_isManager) {
+      debugPrint('ManagerBoardHighlight blocked — role=$_userRole is not authorized');
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -438,6 +442,7 @@ class _NotificationHistoryScreenState
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   bool _isTappable(String type) {
+    if (type == 'task_review_requested') return _isManager;
     if (type.startsWith('shift_') || type.startsWith('task_')) return true;
     if (type == 'new_user_pending') return _isManager;
     if (type == 'post_comment') return true;

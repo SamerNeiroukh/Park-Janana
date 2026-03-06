@@ -47,12 +47,12 @@ class TaskModel {
       department: data['department'] ?? '',
       createdBy: data['createdBy'] ?? '',
       assignedTo: List<String>.from(data['assignedTo'] ?? []),
-      dueDate: data['dueDate'],
+      dueDate: data['dueDate'] as Timestamp? ?? Timestamp.now(),
       priority: data['priority'] ?? 'low',
       status: data['status'] ?? 'pending',
       attachments: List<String>.from(data['attachments'] ?? []),
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
-      createdAt: data['createdAt'],
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
       workerProgress: _parseWorkerProgress(data['workerProgress']),
       updatedAt: data['updatedAt'] as Timestamp?,
       activityLog: List<Map<String, dynamic>>.from(data['activityLog'] ?? []),
@@ -67,12 +67,12 @@ class TaskModel {
       department: data['department'] ?? '',
       createdBy: data['createdBy'] ?? '',
       assignedTo: List<String>.from(data['assignedTo'] ?? []),
-      dueDate: data['dueDate'],
+      dueDate: data['dueDate'] as Timestamp? ?? Timestamp.now(),
       priority: data['priority'] ?? 'low',
       status: data['status'] ?? 'pending',
       attachments: List<String>.from(data['attachments'] ?? []),
       comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
-      createdAt: data['createdAt'],
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
       workerProgress: _parseWorkerProgress(data['workerProgress']),
       updatedAt: data['updatedAt'] as Timestamp?,
       activityLog: List<Map<String, dynamic>>.from(data['activityLog'] ?? []),
@@ -102,7 +102,7 @@ class TaskModel {
     if (raw is Map<String, dynamic>) {
       return raw.map((key, value) => MapEntry(
         key,
-        Map<String, dynamic>.from(value as Map),
+        value is Map ? Map<String, dynamic>.from(value) : {},
       ));
     }
     return {};

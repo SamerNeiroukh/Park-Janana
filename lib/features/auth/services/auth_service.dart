@@ -59,9 +59,9 @@ class AuthService {
         'approved': false,
       });
 
-      // ✅ Cache user role
+      // ✅ Cache user role (UID-scoped)
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userRole', 'worker');
+      await prefs.setString('userRole_$uid', 'worker');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         throw CustomException('כתובת האימייל כבר קיימת במערכת.');
@@ -125,9 +125,9 @@ class AuthService {
         throw CustomException('החשבון שלך עדיין לא אושר על ידי ההנהלה.');
       }
 
-      // Cache user role
+      // Cache user role — keyed by UID to prevent cross-account leakage
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userRole', data['role'] ?? 'worker');
+      await prefs.setString('userRole_$uid', data['role'] ?? 'worker');
 
       // Save FCM token for push notifications
       await NotificationService().saveTokenAfterLogin();
@@ -152,10 +152,12 @@ class AuthService {
     }
   }
 
-  // 🟢 Fetch user role (Checks Cache First)
+  // 🟢 Fetch user role (Checks UID-scoped cache first)
   Future<String?> fetchUserRole(String uid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? cachedRole = prefs.getString('userRole');
+    // Use UID-scoped key to prevent stale role from a different account
+    final String prefKey = 'userRole_$uid';
+    final String? cachedRole = prefs.getString(prefKey);
 
     if (cachedRole != null && cachedRole.isNotEmpty) {
       return cachedRole; // ✅ Return cached role if available
@@ -168,7 +170,7 @@ class AuthService {
         final data = userDoc.data() as Map<String, dynamic>;
         final role = data['role'] as String?;
 
-        await prefs.setString('userRole', role ?? ''); // ✅ Cache role
+        await prefs.setString(prefKey, role ?? ''); // ✅ Cache role
         return role;
       } else {
         throw CustomException('מסמך המשתמש לא קיים.');
@@ -181,7 +183,8 @@ class AuthService {
   // 🟢 Fetch user profile with default profile picture fallback (Checks Cache First)
   Future<Map<String, dynamic>?> fetchUserProfile(String uid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? cachedProfile = prefs.getString('userProfile');
+    final String prefKey = 'userProfile_$uid';
+    final String? cachedProfile = prefs.getString(prefKey);
 
     if (cachedProfile != null && cachedProfile.isNotEmpty) {
       return Map<String, dynamic>.from(
@@ -212,8 +215,7 @@ class AuthService {
           'role': data['role'] ?? '',
         };
 
-        await prefs.setString(
-            'userProfile', jsonEncode(profileData)); // ✅ Cache profile
+        await prefs.setString(prefKey, jsonEncode(profileData)); // ✅ Cache profile
 
         return profileData;
       } else {
@@ -226,6 +228,8 @@ class AuthService {
 
   // Logout (Clears Cached Data and FCM Token)
   Future<void> signOut() async {
+    // Capture UID before signing out (auth.signOut() clears currentUser)
+    final String? uid = _auth.currentUser?.uid;
     try {
       // Remove FCM token before signing out
       await NotificationService().removeTokenOnLogout();
@@ -234,8 +238,10 @@ class AuthService {
 
       // Clear cached user data on logout
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('userRole');
-      await prefs.remove('userProfile');
+      await prefs.remove('userRole'); // legacy unscoped key
+      if (uid != null) await prefs.remove('userRole_$uid'); // UID-scoped key
+      await prefs.remove('userProfile'); // legacy unscoped key
+      if (uid != null) await prefs.remove('userProfile_$uid'); // UID-scoped key
     } catch (e) {
       throw CustomException('שגיאה בעת התנתקות מהמערכת.');
     }
@@ -248,28 +254,31 @@ class AuthService {
 
     // ✅ Update Cached Profile Picture
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? cachedProfile = prefs.getString('userProfile');
+    final String prefKey = 'userProfile_$uid';
+    final String? cachedProfile = prefs.getString(prefKey);
 
     if (cachedProfile != null) {
       final Map<String, dynamic> profileData = jsonDecode(cachedProfile);
       profileData['profile_picture'] = profilePictureUrl;
-      await prefs.setString('userProfile', jsonEncode(profileData));
+      await prefs.setString(prefKey, jsonEncode(profileData));
     }
   }
 
   // 🟢 Clear User Cache (for profile updates)
   Future<void> clearUserCache() async {
+    final String? uid = _auth.currentUser?.uid;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('userProfile');
+    await prefs.remove('userProfile'); // legacy unscoped key
+    if (uid != null) await prefs.remove('userProfile_$uid'); // UID-scoped key
   }
 
   // 🟢 Assign Role
   Future<void> assignRole(String uid, String role) async {
     await _firebaseService.assignRole(uid, role);
 
-    // ✅ Update Cached Role
+    // ✅ Update UID-scoped cached role
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userRole', role);
+    await prefs.setString('userRole_$uid', role);
   }
 
   // 🟢 Re-apply for approval after rejection

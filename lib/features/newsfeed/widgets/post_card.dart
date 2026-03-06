@@ -10,6 +10,7 @@ class PostCard extends StatefulWidget {
   final String currentUserId;
   final bool isManager;
   final VoidCallback? onLike;
+  final void Function(String key)? onReact;
   final VoidCallback? onComment;
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
@@ -23,6 +24,7 @@ class PostCard extends StatefulWidget {
     required this.currentUserId,
     this.isManager = false,
     this.onLike,
+    this.onReact,
     this.onComment,
     this.onDelete,
     this.onPin,
@@ -645,17 +647,24 @@ class _PostCardState extends State<PostCard> {
         textDirection: TextDirection.rtl,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _LikeButton(
-            isLiked: isLiked,
-            count: widget.post.likesCount,
+          _MergedReactionButton(
+            post: widget.post,
+            currentUserId: widget.currentUserId,
             isAnimating: _isLikeAnimating,
-            onTap: _handleLikeTap,
+            onLike: _handleLikeTap,
+            onReact: (key) {
+              HapticFeedback.lightImpact();
+              widget.onReact?.call(key);
+            },
             onShowLikers: () {
               HapticFeedback.selectionClick();
               widget.onShowLikers?.call();
             },
           ),
-          Container(width: 1, height: 24, color: AppColors.greyMedium.withOpacity(0.25)),
+          Container(
+              width: 1,
+              height: 24,
+              color: AppColors.greyMedium.withOpacity(0.25)),
           _ActionButton(
             icon: Icons.chat_bubble_outline_rounded,
             label: '${widget.post.commentsCount}',
@@ -716,6 +725,225 @@ class _CategoryBadge extends StatelessWidget {
   }
 }
 
+// ── Single merged reaction button: tap = ❤️ like, long-press = emoji picker ─
+class _MergedReactionButton extends StatefulWidget {
+  final PostModel post;
+  final String currentUserId;
+  final bool isAnimating;
+  final VoidCallback? onLike;
+  final void Function(String key)? onReact;
+  final VoidCallback? onShowLikers;
+
+  const _MergedReactionButton({
+    required this.post,
+    required this.currentUserId,
+    this.isAnimating = false,
+    this.onLike,
+    this.onReact,
+    this.onShowLikers,
+  });
+
+  @override
+  State<_MergedReactionButton> createState() => _MergedReactionButtonState();
+}
+
+class _MergedReactionButtonState extends State<_MergedReactionButton> {
+  OverlayEntry? _overlay;
+  final GlobalKey _key = GlobalKey();
+
+  bool get _isLiked => widget.post.isLikedBy(widget.currentUserId);
+  bool get _hasThumbsReaction =>
+      widget.post.hasReacted('thumbs', widget.currentUserId);
+  bool get _hasPartyReaction =>
+      widget.post.hasReacted('party', widget.currentUserId);
+  bool get _hasAnyReaction => _isLiked || _hasThumbsReaction || _hasPartyReaction;
+  int get _totalCount =>
+      widget.post.likesCount +
+      widget.post.reactionCount('thumbs') +
+      widget.post.reactionCount('party');
+
+  String get _displayEmoji {
+    if (_hasPartyReaction) return '🎉';
+    if (_hasThumbsReaction) return '👍';
+    return '❤️';
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _removeOverlay() {
+    _overlay?.remove();
+    _overlay = null;
+  }
+
+  void _showPicker() {
+    HapticFeedback.mediumImpact();
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final pos = box.localToGlobal(Offset.zero);
+    final size = box.size;
+    final screenWidth = MediaQuery.of(context).size.width;
+    const pickerWidth = 160.0;
+    final left = (pos.dx + size.width / 2 - pickerWidth / 2)
+        .clamp(8.0, screenWidth - pickerWidth - 8);
+
+    _overlay = OverlayEntry(
+      builder: (_) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _removeOverlay,
+            ),
+          ),
+          Positioned(
+            left: left,
+            top: pos.dy - 64,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: pickerWidth,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _PickerEmoji(
+                      emoji: '❤️',
+                      isActive: _isLiked,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onLike?.call();
+                      },
+                    ),
+                    _PickerEmoji(
+                      emoji: '👍',
+                      isActive: _hasThumbsReaction,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onReact?.call('thumbs');
+                      },
+                    ),
+                    _PickerEmoji(
+                      emoji: '🎉',
+                      isActive: _hasPartyReaction,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onReact?.call('party');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    Overlay.of(context).insert(_overlay!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      textDirection: TextDirection.rtl,
+      children: [
+        InkWell(
+          key: _key,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            if (_hasThumbsReaction) {
+              widget.onReact?.call('thumbs');
+            } else if (_hasPartyReaction) {
+              widget.onReact?.call('party');
+            } else {
+              widget.onLike?.call();
+            }
+          },
+          onLongPress: _showPicker,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: AnimatedScale(
+              scale: widget.isAnimating ? 1.3 : (_hasAnyReaction ? 1.1 : 1.0),
+              duration: const Duration(milliseconds: 150),
+              child: Text(
+                _displayEmoji,
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+          ),
+        ),
+        InkWell(
+          onTap: widget.onShowLikers,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Text(
+              '$_totalCount',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: _hasAnyReaction
+                    ? AppColors.primaryBlue
+                    : AppColors.greyDark.withOpacity(0.75),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PickerEmoji extends StatelessWidget {
+  final String emoji;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _PickerEmoji({
+    required this.emoji,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.primaryBlue.withOpacity(0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          emoji,
+          style: TextStyle(fontSize: isActive ? 26 : 22),
+        ),
+      ),
+    );
+  }
+}
+
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -754,59 +982,3 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _LikeButton extends StatelessWidget {
-  final bool isLiked;
-  final int count;
-  final bool isAnimating;
-  final VoidCallback? onTap;
-  final VoidCallback? onShowLikers;
-
-  const _LikeButton({
-    required this.isLiked,
-    required this.count,
-    required this.isAnimating,
-    this.onTap,
-    this.onShowLikers,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      textDirection: TextDirection.rtl,
-      children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: AnimatedScale(
-              scale: isAnimating ? 1.3 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: Icon(
-                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                size: 22,
-                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.65),
-              ),
-            ),
-          ),
-        ),
-        InkWell(
-          onTap: onShowLikers,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isLiked ? Colors.red : AppColors.greyDark.withOpacity(0.75),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

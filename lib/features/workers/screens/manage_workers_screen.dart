@@ -12,6 +12,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/shimmer_loading.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class ManageWorkersScreen extends StatefulWidget {
   const ManageWorkersScreen({super.key});
@@ -40,37 +41,13 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
 
   Future<void> _callWorker(
       BuildContext context, String name, String phone) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
-            children: [
-              Icon(Icons.phone_rounded, color: Colors.green),
-              SizedBox(width: 8),
-              Text('שיחה יוצאת'),
-            ],
-          ),
-          content: Text('להתקשר אל $name?\n$phone'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('ביטול'),
-            ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.phone_rounded, size: 16,
-                  color: Colors.white),
-              label: const Text('התקשר',
-                  style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              onPressed: () => Navigator.pop(context, true),
-            ),
-          ],
-        ),
-      ),
+    final confirmed = await showAppDialog(
+      context,
+      title: 'שיחה יוצאת',
+      message: 'להתקשר אל $name?\n$phone',
+      confirmText: 'התקשר',
+      icon: Icons.phone_rounded,
+      iconGradient: const [Color(0xFF4CAF50), Color(0xFF2E7D32)],
     );
 
     if (confirmed != true) return;
@@ -88,17 +65,21 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
   /// Switches to the "new workers" tab if there are any pending (non-rejected)
   /// registration requests. Otherwise stays on the "active workers" tab.
   Future<void> _resolveInitialTab() async {
-    final snap = await FirebaseFirestore.instance
-        .collection(AppConstants.usersCollection)
-        .where('role', whereIn: ['worker', 'manager'])
-        .where('approved', isEqualTo: false)
-        .get();
-    if (!mounted) return;
-    final hasPending = snap.docs.any(
-      (doc) => doc.data()['rejected'] != true,
-    );
-    if (hasPending) {
-      _tabController.animateTo(0);
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .where('role', whereIn: ['worker', 'manager'])
+          .where('approved', isEqualTo: false)
+          .get();
+      if (!mounted) return;
+      final hasPending = snap.docs.any(
+        (doc) => doc.data()['rejected'] != true,
+      );
+      if (hasPending) {
+        _tabController.animateTo(0);
+      }
+    } catch (e) {
+      debugPrint('ManageWorkersScreen: failed to resolve initial tab: $e');
     }
   }
 

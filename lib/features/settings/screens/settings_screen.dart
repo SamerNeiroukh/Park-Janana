@@ -3,13 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/features/auth/screens/welcome_screen.dart';
+import 'package:park_janana/features/home/providers/home_badge_provider.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:park_janana/core/services/biometric_service.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 const _kAppVersion = '1.0.0';
 
@@ -22,11 +26,15 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
+  bool _biometricAvailable = false;
+  bool _biometricEnabled = false;
+  final BiometricService _biometricService = BiometricService();
 
   @override
   void initState() {
     super.initState();
     _loadNotificationPref();
+    _loadBiometricState();
   }
 
   Future<void> _loadNotificationPref() async {
@@ -35,6 +43,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() =>
           _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true);
     }
+  }
+
+  Future<void> _loadBiometricState() async {
+    final available = await _biometricService.isAvailable();
+    final enabled = await _biometricService.isBiometricLoginEnabled();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled = enabled;
+      });
+    }
+  }
+
+  Future<void> _toggleBiometric(bool enable) async {
+    if (enable) {
+      // Ask for current password to securely store credentials
+      final result = await _showBiometricEnableSheet();
+      if (result != true) return; // user cancelled
+    } else {
+      await _biometricService.clearCredentials();
+      if (mounted) setState(() => _biometricEnabled = false);
+    }
+  }
+
+  /// Shows a bottom sheet asking for the current password, then authenticates
+  /// biometrically and saves credentials if both succeed.
+  Future<bool?> _showBiometricEnableSheet() {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _BiometricEnableSheet(
+        biometricService: _biometricService,
+        onEnabled: () {
+          if (mounted) setState(() => _biometricEnabled = true);
+        },
+      ),
+    );
   }
 
   Future<void> _toggleNotifications(bool enabled) async {
@@ -83,29 +129,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _signOut() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('התנתקות'),
-          content: const Text('האם אתה בטוח שברצונך להתנתק?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ביטול'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text(
-                'התנתק',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
-      ),
+    final confirmed = await showAppDialog(
+      context,
+      title: 'התנתקות',
+      message: 'האם אתה בטוח שברצונך להתנתק?',
+      confirmText: 'התנתק',
+      icon: Icons.logout_rounded,
+      isDestructive: true,
     );
 
     if (confirmed != true || !mounted) return;
@@ -116,12 +146,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (_) {}
 
     if (!mounted) return;
+
+    // Clear all user state before signing out to prevent stale data
     context.read<UserProvider>().clearUser();
+    context.read<HomeBadgeProvider>().reset();
     await context.read<AppAuthProvider>().signOut();
+
+    // Navigate to welcome screen — prevents stale HomeScreen state from
+    // being reused if the same device is handed to a different user.
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _openPrivacyPolicy() async {
-    const url = 'https://example.com/privacy'; // Replace with real URL
+    const url = 'https://park-janana.co.il/privacy';
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
@@ -137,7 +178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: TaskTheme.background,
+        backgroundColor: const Color(0xFFF8FAFC),
         body: Column(
           children: [
             const Directionality(
@@ -178,6 +219,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'שינוי סיסמה',
                     onTap: _showChangePasswordSheet,
                   ),
+                  if (_biometricAvailable)
+                    _switchTile(
+                      icon: Icons.fingerprint_rounded,
+                      iconColor: TaskTheme.done,
+                      title: 'כניסה ביומטרית',
+                      subtitle: 'טביעת אצבע / זיהוי פנים',
+                      value: _biometricEnabled,
+                      onChanged: _toggleBiometric,
+                    ),
                   const SizedBox(height: 20),
                   _sectionHeader('התראות'),
                   _switchTile(
@@ -210,7 +260,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: null,
                   ),
                   const SizedBox(height: 20),
-                  _sectionHeader('חשבון'),
+                  _sectionHeader('יציאה'),
                   _tile(
                     icon: Icons.logout_rounded,
                     iconColor: Colors.red.shade600,
@@ -480,6 +530,187 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
                                 )
                               : const Text(
                                   'עדכן סיסמה',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Biometric Enable Sheet
+// ---------------------------------------------------------------------------
+
+class _BiometricEnableSheet extends StatefulWidget {
+  const _BiometricEnableSheet({
+    required this.biometricService,
+    required this.onEnabled,
+  });
+
+  final BiometricService biometricService;
+  final VoidCallback onEnabled;
+
+  @override
+  State<_BiometricEnableSheet> createState() => _BiometricEnableSheetState();
+}
+
+class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  bool _obscure = true;
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final authenticated = await widget.biometricService.authenticate(
+        reason: 'אמת את זהותך כדי להפעיל כניסה ביומטרית',
+      );
+      if (!authenticated) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('האימות הביומטרי נכשל')),
+          );
+        }
+        return;
+      }
+
+      final email = FirebaseAuth.instance.currentUser?.email ?? '';
+      await widget.biometricService.saveCredentials(
+        email,
+        _passwordController.text.trim(),
+      );
+
+      widget.onEnabled();
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('שגיאה בהפעלת הכניסה הביומטרית')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: TaskTheme.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: TaskTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text('הפעלת כניסה ביומטרית', style: TaskTheme.heading2),
+                const SizedBox(height: 8),
+                Text(
+                  'הזן את הסיסמה הנוכחית שלך כדי לאפשר כניסה עם טביעת אצבע / זיהוי פנים.',
+                  style: TaskTheme.caption,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscure,
+                  textDirection: TextDirection.ltr,
+                  decoration: InputDecoration(
+                    labelText: 'סיסמה נוכחית',
+                    border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(TaskTheme.radiusM)),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscure
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined),
+                      onPressed: () => setState(() => _obscure = !_obscure),
+                    ),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'נא להזין סיסמה';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(TaskTheme.radiusM),
+                      gradient: const LinearGradient(
+                        colors: [TaskTheme.primary, Color(0xFF5B8DEF)],
+                        begin: Alignment.centerRight,
+                        end: Alignment.centerLeft,
+                      ),
+                      boxShadow:
+                          TaskTheme.buttonShadow(TaskTheme.primary),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius:
+                          BorderRadius.circular(TaskTheme.radiusM),
+                      child: InkWell(
+                        borderRadius:
+                            BorderRadius.circular(TaskTheme.radiusM),
+                        onTap: _isLoading ? null : _submit,
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 14),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5),
+                                  ),
+                                )
+                              : const Text(
+                                  'הפעל כניסה ביומטרית',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 16,

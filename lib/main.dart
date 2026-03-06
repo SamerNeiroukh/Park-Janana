@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +53,14 @@ void main() async {
 
     // Initialize notification service
     await NotificationService().initialize();
+
+    // Route all Flutter framework errors to Crashlytics
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    // Route async/platform errors that Flutter doesn't catch
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
   } catch (e) {
     debugPrint('Error initializing Firebase: $e');
     firebaseError =
@@ -88,9 +98,11 @@ class _MyAppState extends State<MyApp> {
 
     // Show splash screen for 6 seconds, then check login state
     Future.delayed(const Duration(seconds: 6), () {
-      setState(() {
-        _showSplashScreen = false;
-      });
+      if (mounted) {
+        setState(() {
+          _showSplashScreen = false;
+        });
+      }
     });
   }
 

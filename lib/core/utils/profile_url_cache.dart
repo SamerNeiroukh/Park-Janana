@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 class ProfileUrlCache {
   ProfileUrlCache._();
 
+  static const int _maxCacheSize = 200;
   static final Map<String, String> _cache = {};
 
   /// Resolves a profile picture path/URL to a usable image URL.
@@ -22,6 +23,9 @@ class ProfileUrlCache {
 
     try {
       final url = await FirebaseStorage.instance.ref(path).getDownloadURL();
+      if (_cache.length >= _maxCacheSize) {
+        _cache.remove(_cache.keys.first);
+      }
       _cache[path] = url;
       return url;
     } catch (e) {

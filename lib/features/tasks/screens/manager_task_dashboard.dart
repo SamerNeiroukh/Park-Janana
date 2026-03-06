@@ -7,6 +7,7 @@ import 'task_details_screen.dart';
 import 'package:park_janana/features/tasks/screens/create_task_screen.dart';
 import 'package:park_janana/features/tasks/screens/edit_task_screen.dart';
 import 'package:park_janana/features/tasks/services/task_service.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
@@ -487,26 +488,17 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     );
   }
 
-  void _confirmDeleteTask(TaskModel task) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("אישור מחיקה"),
-        content: Text("האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ביטול"),
-          ),
-          TextButton(
-            onPressed: () async {
-              await _taskService.deleteTask(task.id);
-              if (mounted) Navigator.pop(context);
-            },
-            child: const Text("מחק", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+  Future<void> _confirmDeleteTask(TaskModel task) async {
+    final confirmed = await showAppDialog(
+      context,
+      title: 'אישור מחיקה',
+      message: "האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?",
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
+    if ((confirmed ?? false) && mounted) {
+      await _taskService.deleteTask(task.id);
+    }
   }
 }

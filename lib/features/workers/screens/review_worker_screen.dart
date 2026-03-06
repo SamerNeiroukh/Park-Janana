@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/workers/screens/edit_worker_licenses_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/workers/widgets/shifts_button.dart';
@@ -323,23 +324,16 @@ class ReviewWorkerScreen extends StatelessWidget {
   }
 
   Future<void> _unapproveWorker(BuildContext context, String uid) async {
-    final bool confirm = await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("ביטול אישור עובד"),
-        content: const Text("העובד יועבר חזרה לרשימת הממתינים לאישור. הפעולה ניתנת לביטול."),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text("ביטול")),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text("אשר", style: TextStyle(color: Colors.orange))),
-        ],
-      ),
+    final confirm = await showAppDialog(
+      context,
+      title: 'ביטול אישור עובד',
+      message: 'העובד יועבר חזרה לרשימת הממתינים לאישור. הפעולה ניתנת לביטול.',
+      confirmText: 'אשר',
+      icon: Icons.person_remove_rounded,
+      iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
     );
 
-    if (confirm) {
+    if (confirm ?? false) {
       await FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
           .doc(uid)

@@ -11,6 +11,7 @@ import 'package:park_janana/features/workers/services/worker_service.dart';
 import '../models/task_model.dart';
 import '../services/task_service.dart';
 import '../theme/task_theme.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import '../widgets/task_status_badge.dart';
 import '../widgets/task_priority_indicator.dart';
 import 'edit_task_screen.dart';
@@ -39,7 +40,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
 
   String? get _currentUid => context.read<AppAuthProvider>().uid;
 
-  bool get _isManager => _task.createdBy == _currentUid;
+  bool get _isManager {
+    final role = context.read<AppAuthProvider>().userRole;
+    return role == 'manager' || role == 'owner' || role == 'admin';
+  }
 
   bool get _isWorker => _task.assignedTo.contains(_currentUid ?? '');
 
@@ -490,16 +494,25 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     final comments = _task.comments;
 
     if (comments.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.chat_bubble_outline_rounded,
-                size: 48, color: TaskTheme.textTertiary.withOpacity(0.4)),
-            const SizedBox(height: 12),
-            Text('אין תגובות עדיין',
-                style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary)),
-          ],
+      return LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.chat_bubble_outline_rounded,
+                      size: 48,
+                      color: TaskTheme.textTertiary.withOpacity(0.4)),
+                  const SizedBox(height: 12),
+                  Text('אין תגובות עדיין',
+                      style: TaskTheme.body
+                          .copyWith(color: TaskTheme.textTertiary)),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -790,37 +803,18 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     }
   }
 
-  void _confirmDelete() {
-    showDialog(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('מחיקת משימה'),
-          content: Text('למחוק את "${_task.title}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('ביטול'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _taskService.deleteTask(_task.id);
-                if (ctx.mounted) {
-                  Navigator.pop(ctx);
-                }
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('מחק',
-                  style: TextStyle(color: TaskTheme.overdue)),
-            ),
-          ],
-        ),
-      ),
+  Future<void> _confirmDelete() async {
+    final confirmed = await showAppDialog(
+      context,
+      title: 'מחיקת משימה',
+      message: 'למחוק את "${_task.title}"?',
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
+    if ((confirmed ?? false) && mounted) {
+      await _taskService.deleteTask(_task.id);
+      if (mounted) Navigator.pop(context);
+    }
   }
 }
