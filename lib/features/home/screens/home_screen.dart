@@ -57,10 +57,10 @@ class _HomeScreenState extends State<HomeScreen>
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<UserProvider>().loadCurrentUser();
       context.read<UserProvider>().loadWorkStats();
       context.read<AppStateProvider>().loadWeather();
-      context.read<AppStateProvider>().loadRolesData();
       _fadeCtrl.forward();
       // Navigate to the correct screen if the app was launched by tapping
       // a notification while it was fully terminated (not just backgrounded).
@@ -241,11 +241,6 @@ class _HomeScreenState extends State<HomeScreen>
                             onProfileTap: () =>
                                 _navigateToProfile(currentUser.uid),
                             onNotificationTap: () {
-                              // Clear all section badges when opening notifications
-                              badgeProvider.markSectionVisited('shifts');
-                              badgeProvider.markSectionVisited('tasks');
-                              badgeProvider.markSectionVisited('newsfeed');
-                              badgeProvider.markSectionVisited('schedule');
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -287,7 +282,6 @@ class _HomeScreenState extends State<HomeScreen>
                               userData.fullName,
                               userData.profilePicture,
                               badgeProvider,
-                              appStateProvider,
                             ),
                           ),
 
@@ -337,7 +331,6 @@ class _HomeScreenState extends State<HomeScreen>
     String userName,
     String profileUrl,
     HomeBadgeProvider badgeProvider,
-    AppStateProvider appStateProvider,
   ) {
     final items = <_StripItem>[];
 
@@ -489,7 +482,13 @@ class _HomeScreenState extends State<HomeScreen>
           icon: Icons.bar_chart_rounded,
           label: 'דו"חות עסקיים',
           color: const Color(0xFF22C55E),
-          onTap: () {},
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => ManagerReportsScreen(
+                      userId: uid,
+                      userName: userName,
+                      profileUrl: profileUrl))),
         ),
         _StripItem(
           icon: Icons.stacked_bar_chart_rounded,
@@ -504,16 +503,6 @@ class _HomeScreenState extends State<HomeScreen>
                       profileUrl: profileUrl))),
         ),
       ]);
-    }
-
-    // Dynamic role operations from roles.json (preserved)
-    for (final op in appStateProvider.getOperationsForRole(role)) {
-      items.add(_StripItem(
-        icon: IconData(op['icon'] as int, fontFamily: 'MaterialIcons'),
-        label: op['title'] as String,
-        color: _kPrimary,
-        onTap: () {},
-      ));
     }
 
     return items;
@@ -551,22 +540,36 @@ class _HorizontalActionStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      // RTL: first item is top-right
-      textDirection: TextDirection.rtl,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 0.95,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Directionality(
+          // RTL: first item is top-right
+          textDirection: TextDirection.rtl,
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 0.95,
+            ),
+            itemCount: items.length,
+            itemBuilder: (_, i) => _StripPill(item: items[i]),
           ),
-          itemCount: items.length,
-          itemBuilder: (_, i) => _StripPill(item: items[i]),
         ),
       ),
     )

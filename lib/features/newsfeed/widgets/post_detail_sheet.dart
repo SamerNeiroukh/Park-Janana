@@ -8,6 +8,7 @@ import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import 'video_player_widget.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class PostDetailSheet extends StatefulWidget {
   final PostModel post;
@@ -16,6 +17,7 @@ class PostDetailSheet extends StatefulWidget {
   final String currentUserProfilePicture;
   final bool isManager;
   final VoidCallback? onLike;
+  final void Function(String key)? onReact;
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
   final VoidCallback? onShowLikers;
@@ -29,6 +31,7 @@ class PostDetailSheet extends StatefulWidget {
     required this.currentUserProfilePicture,
     this.isManager = false,
     this.onLike,
+    this.onReact,
     this.onDelete,
     this.onPin,
     this.onShowLikers,
@@ -168,12 +171,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
 
   Future<void> _deleteComment(PostComment comment) async {
     HapticFeedback.mediumImpact();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => const _DeleteConfirmDialog(
-        title: 'מחיקת תגובה',
-        message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
-      ),
+    final confirm = await showAppDialog(
+      context,
+      title: 'מחיקת תגובה',
+      message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
 
     if (confirm != true) return;
@@ -515,63 +519,18 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       onSelected: (value) {
         HapticFeedback.selectionClick();
         if (value == 'delete') {
-          debugPrint('[DELETE] Step 1: delete tapped in PostDetailSheet');
-          // Show confirmation from *inside* the sheet so there is no
-          // Navigator race between closing the sheet and opening the dialog.
           final navigator = Navigator.of(context);
-          debugPrint('[DELETE] Step 2: showing dialog from sheet context');
-          showDialog<bool>(
-            context: context,
-            builder: (ctx) => Directionality(
-              textDirection: TextDirection.rtl,
-              child: AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Text('מחיקת פוסט',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.delete_outline_rounded,
-                          color: Colors.red),
-                    ),
-                  ],
-                ),
-                content: const Text(
-                  'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
-                  textAlign: TextAlign.right,
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('ביטול'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('מחק'),
-                  ),
-                ],
-              ),
-            ),
+          showAppDialog(
+            context,
+            title: 'מחיקת פוסט',
+            message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
+            confirmText: 'מחק',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
           ).then((confirmed) {
-            debugPrint('[DELETE] Step 3: dialog closed, confirmed=$confirmed');
             if (!(confirmed ?? false)) return;
-            debugPrint('[DELETE] Step 4: confirmed — popping sheet and calling onDelete');
             navigator.pop(); // close the sheet
-            widget.onDelete?.call(); // trigger the actual delete
+            widget.onDelete?.call();
           });
         }
         if (value == 'pin') widget.onPin?.call();
@@ -814,15 +773,15 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       child: Row(
         children: [
           Expanded(
-            child: _EngagementButton(
-              icon: isLiked
-                  ? Icons.favorite_rounded
-                  : Icons.favorite_border_rounded,
-              label: '${post.likesCount}',
-              color: isLiked ? const Color(0xFFEF4444) : Colors.grey.shade600,
-              isActive: isLiked,
-              onTap: _handleLikeTap,
-              onLongPress: widget.onShowLikers,
+            child: _MergedDetailReactionButton(
+              post: post,
+              currentUserId: widget.currentUserId,
+              onLike: _handleLikeTap,
+              onReact: (key) {
+                HapticFeedback.lightImpact();
+                widget.onReact?.call(key);
+              },
+              onShowLikers: widget.onShowLikers,
             ),
           ),
           Container(
@@ -836,7 +795,6 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               label: '${post.commentsCount}',
               color: Colors.grey.shade600,
               onTap: () {
-                // Scroll to comments
                 _scrollController.animateTo(
                   _scrollController.position.maxScrollExtent,
                   duration: const Duration(milliseconds: 400),
@@ -1089,17 +1047,13 @@ class _EngagementButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final bool isActive;
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
 
   const _EngagementButton({
     required this.icon,
     required this.label,
     required this.color,
-    this.isActive = false,
     this.onTap,
-    this.onLongPress,
   });
 
   @override
@@ -1108,19 +1062,13 @@ class _EngagementButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedScale(
-                scale: isActive ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.elasticOut,
-                child: Icon(icon, size: 22, color: color),
-              ),
+              Icon(icon, size: 22, color: color),
               const SizedBox(width: 8),
               Text(
                 label,
@@ -1132,6 +1080,220 @@ class _EngagementButton extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Single merged reaction button: tap = ❤️ like, long-press = emoji picker ─
+class _MergedDetailReactionButton extends StatefulWidget {
+  final PostModel post;
+  final String currentUserId;
+  final VoidCallback? onLike;
+  final void Function(String key)? onReact;
+  final VoidCallback? onShowLikers;
+
+  const _MergedDetailReactionButton({
+    required this.post,
+    required this.currentUserId,
+    this.onLike,
+    this.onReact,
+    this.onShowLikers,
+  });
+
+  @override
+  State<_MergedDetailReactionButton> createState() =>
+      _MergedDetailReactionButtonState();
+}
+
+class _MergedDetailReactionButtonState
+    extends State<_MergedDetailReactionButton> {
+  OverlayEntry? _overlay;
+  final GlobalKey _key = GlobalKey();
+
+  bool get _isLiked => widget.post.isLikedBy(widget.currentUserId);
+  bool get _hasThumbsReaction =>
+      widget.post.hasReacted('thumbs', widget.currentUserId);
+  bool get _hasPartyReaction =>
+      widget.post.hasReacted('party', widget.currentUserId);
+  bool get _hasAnyReaction =>
+      _isLiked || _hasThumbsReaction || _hasPartyReaction;
+  int get _totalCount =>
+      widget.post.likesCount +
+      widget.post.reactionCount('thumbs') +
+      widget.post.reactionCount('party');
+
+  String get _displayEmoji {
+    if (_hasPartyReaction) return '🎉';
+    if (_hasThumbsReaction) return '👍';
+    return '❤️';
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _removeOverlay() {
+    _overlay?.remove();
+    _overlay = null;
+  }
+
+  void _showPicker() {
+    HapticFeedback.mediumImpact();
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final pos = box.localToGlobal(Offset.zero);
+    final size = box.size;
+    final screenWidth = MediaQuery.of(context).size.width;
+    const pickerWidth = 160.0;
+    final left = (pos.dx + size.width / 2 - pickerWidth / 2)
+        .clamp(8.0, screenWidth - pickerWidth - 8);
+
+    _overlay = OverlayEntry(
+      builder: (_) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _removeOverlay,
+            ),
+          ),
+          Positioned(
+            left: left,
+            top: pos.dy - 64,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: pickerWidth,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _DetailPickerEmoji(
+                      emoji: '❤️',
+                      isActive: _isLiked,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onLike?.call();
+                      },
+                    ),
+                    _DetailPickerEmoji(
+                      emoji: '👍',
+                      isActive: _hasThumbsReaction,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onReact?.call('thumbs');
+                      },
+                    ),
+                    _DetailPickerEmoji(
+                      emoji: '🎉',
+                      isActive: _hasPartyReaction,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onReact?.call('party');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    Overlay.of(context).insert(_overlay!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: _key,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          if (_hasThumbsReaction) {
+            widget.onReact?.call('thumbs');
+          } else if (_hasPartyReaction) {
+            widget.onReact?.call('party');
+          } else {
+            widget.onLike?.call();
+          }
+        },
+        onLongPress: _showPicker,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: _hasAnyReaction ? 1.2 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.elasticOut,
+                child: Text(_displayEmoji, style: const TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$_totalCount',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: _hasAnyReaction
+                      ? AppColors.primaryBlue
+                      : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailPickerEmoji extends StatelessWidget {
+  final String emoji;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _DetailPickerEmoji({
+    required this.emoji,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.primaryBlue.withOpacity(0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          emoji,
+          style: TextStyle(fontSize: isActive ? 26 : 22),
         ),
       ),
     );
@@ -1348,58 +1510,6 @@ class _SendButton extends StatelessWidget {
   }
 }
 
-class _DeleteConfirmDialog extends StatelessWidget {
-  final String title;
-  final String message;
-
-  const _DeleteConfirmDialog({required this.title, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.delete_outline_rounded,
-                  color: Color(0xFFEF4444), size: 22),
-            ),
-            const SizedBox(width: 12),
-            Text(title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          ],
-        ),
-        content: Text(message,
-            style: TextStyle(color: Colors.grey.shade600, height: 1.5)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('ביטול', style: TextStyle(color: Colors.grey.shade600)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: const Text('מחק'),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _FullScreenMediaViewer extends StatefulWidget {
   final List<PostMedia> mediaList;

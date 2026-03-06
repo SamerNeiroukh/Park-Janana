@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function currentUid() {
+      return request.auth.uid;
+    }
+
+    // Fetch the caller's role from Firestore (cached per request by Firebase).
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(currentUid())).data.role;
+    }
+
+    function isWorker()  { return callerRole() == 'worker';  }
+    function isManager() { return callerRole() == 'manager'; }
+    function isOwner()   { return callerRole() == 'owner';   }
+    function isManagerOrOwner() { return isManager() || isOwner(); }
+
+    // ── users ───────────────────────────────────────────────────────────────
+    // All authenticated users can read any user document (needed for name/photo
+    // display throughout the app). Only the user themselves (or manager/owner)
+    // may write their own document.
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && currentUid() == uid;
+      allow update: if isSignedIn() && (currentUid() == uid || isManagerOrOwner());
+      allow delete: if isSignedIn() && isOwner();
+    }
+
+    // ── shifts ──────────────────────────────────────────────────────────────
+    // All authenticated users can read shifts (workers need to see their own).
+    // Only managers/owners can create, update, or delete shifts.
+    match /shifts/{shiftId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && isManagerOrOwner();
+    }
+
+    // ── posts (newsfeed) ────────────────────────────────────────────────────
+    // All authenticated users can read posts and create new ones.
+    // Reactions (likedBy, reactions, updatedAt): any authenticated user may update.
+    // All other fields (title, content, isPinned, etc.): author or manager/owner only.
+    // Delete: author or manager/owner only.
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.authorId == currentUid() ||
+        isManagerOrOwner() ||
+        // Any signed-in user may update only reaction-related fields
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likedBy', 'reactions', 'updatedAt'])
+      );
+      allow delete: if isSignedIn() &&
+        (resource.data.authorId == currentUid() || isManagerOrOwner());
+    }
+
+    // ── attendance ──────────────────────────────────────────────────────────
+    // Workers can read/write their own attendance records.
+    // Managers/owners can read all attendance records.
+    match /attendance/{recordId} {
+      allow read: if isSignedIn() &&
+        (resource.data.userId == currentUid() || isManagerOrOwner());
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == currentUid();
+      allow update: if isSignedIn() &&
+        (resource.data.userId == currentUid() || isManagerOrOwner());
+      allow delete: if isSignedIn() && isManagerOrOwner();
+    }
+
+    // ── tasks ───────────────────────────────────────────────────────────────
+    // Managers/owners have full access.
+    // Workers can read tasks assigned to them and update their own progress.
+    match /tasks/{taskId} {
+      allow read: if isSignedIn() &&
+        (isManagerOrOwner() || currentUid() in resource.data.assignedTo);
+      allow create: if isSignedIn() && isManagerOrOwner();
+      allow update: if isSignedIn() && (
+        isManagerOrOwner() ||
+        // Workers may only update their own progress entry inside workerProgress
+        (currentUid() in resource.data.assignedTo &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['workerProgress', 'updatedAt', 'status']))
+      );
+      allow delete: if isSignedIn() && isManagerOrOwner();
+    }
+
+    // ── notificationRequests ────────────────────────────────────────────────
+    // Any authenticated user can create a notification request (e.g., clock
+    // reminders). Users can only read their own requests. Managers/owners can
+    // read all.
+    match /notificationRequests/{reqId} {
+      allow read: if isSignedIn() &&
+        (resource.data.recipientId == currentUid() || isManagerOrOwner());
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && isManagerOrOwner();
+    }
+
+  }
+}

@@ -107,18 +107,57 @@ class NewsfeedService {
   }
 
   // ===============================
-  // Likes
+  // Reactions (mutually exclusive)
   // ===============================
 
-  Future<void> likePost(String postId, String userId) async {
-    await _postsRef.doc(postId).update({
-      'likedBy': FieldValue.arrayUnion([userId]),
-    });
-  }
+  /// Sets or clears a reaction for [userId] on [postId].
+  /// A user can hold at most one active reaction per post at a time.
+  ///
+  /// [reactionKey] — one of: 'love' (❤️ → likedBy), 'thumbs' (👍), 'party' (🎉).
+  ///
+  /// Behaviour:
+  ///   • If [reactionKey] is already active for the user → remove it (toggle off).
+  ///   • Otherwise → remove user from every other reaction slot, add to this one.
+  Future<void> setReaction(
+      String postId, String userId, String reactionKey) async {
+    final docRef = _postsRef.doc(postId);
+    await _firestore.runTransaction((txn) async {
+      final doc = await txn.get(docRef);
+      final data = doc.data() ?? {};
 
-  Future<void> unlikePost(String postId, String userId) async {
-    await _postsRef.doc(postId).update({
-      'likedBy': FieldValue.arrayRemove([userId]),
+      final likedBy = List<String>.from(data['likedBy'] as List? ?? []);
+      final reactionsRaw = Map<String, dynamic>.from(
+          (data['reactions'] as Map?)?.cast<String, dynamic>() ?? {});
+      final thumbs = List<String>.from(reactionsRaw['thumbs'] as List? ?? []);
+      final party  = List<String>.from(reactionsRaw['party']  as List? ?? []);
+
+      // Is this the user's currently active reaction?
+      final bool isActive = switch (reactionKey) {
+        'love'   => likedBy.contains(userId),
+        'thumbs' => thumbs.contains(userId),
+        'party'  => party.contains(userId),
+        _        => false,
+      };
+
+      // Remove user from every reaction slot
+      likedBy.remove(userId);
+      thumbs.remove(userId);
+      party.remove(userId);
+
+      // Re-add only if not toggling off
+      if (!isActive) {
+        switch (reactionKey) {
+          case 'love':   likedBy.add(userId); break;
+          case 'thumbs': thumbs.add(userId);  break;
+          case 'party':  party.add(userId);   break;
+        }
+      }
+
+      txn.update(docRef, {
+        'likedBy': likedBy,
+        'reactions': {...reactionsRaw, 'thumbs': thumbs, 'party': party},
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     });
   }
 

@@ -296,13 +296,20 @@ class ShiftService {
 
     if (missingWorkerIds.isNotEmpty) {
       try {
-        for (String workerId in missingWorkerIds) {
-          final userDoc = await _firebaseService.getUser(workerId);
-          if (userDoc.exists && userDoc.data() != null) {
-            final UserModel worker =
-                UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-            _workerCache[workerId] = worker;
-            workers.add(worker);
+        // Batch fetch in chunks of 10 (Firestore whereIn limit)
+        for (int i = 0; i < missingWorkerIds.length; i += 10) {
+          final chunk = missingWorkerIds.sublist(
+              i, i + 10 > missingWorkerIds.length ? missingWorkerIds.length : i + 10);
+          final querySnapshot = await _firestore
+              .collection(AppConstants.usersCollection)
+              .where(FieldPath.documentId, whereIn: chunk)
+              .get();
+          for (final doc in querySnapshot.docs) {
+            if (doc.exists && doc.data().isNotEmpty) {
+              final worker = UserModel.fromMap(doc.data());
+              _workerCache[doc.id] = worker;
+              workers.add(worker);
+            }
           }
         }
       } catch (e) {

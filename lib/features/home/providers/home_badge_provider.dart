@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -10,11 +11,20 @@ class HomeBadgeProvider extends ChangeNotifier {
   final Map<String, int> _badgeCounts = {};
   final Map<String, Timestamp> _lastVisited = {};
   final List<StreamSubscription> _subscriptions = [];
+  StreamSubscription<User?>? _authSubscription;
 
   String? _userId;
   String? _userRole;
   bool _initialized = false;
   bool _initializing = false;
+
+  HomeBadgeProvider() {
+    // Auto-reset whenever the user signs out or the session expires,
+    // regardless of whether the explicit logout button was used.
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) reset();
+    });
+  }
 
   int getBadgeCount(String section) => _badgeCounts[section] ?? 0;
 
@@ -179,8 +189,12 @@ class HomeBadgeProvider extends ChangeNotifier {
 
   /// Manager: any new/updated shift counts for both schedule and shifts badges.
   void _listenToShiftsForManager() {
-    final stream =
-        _firestore.collection(AppConstants.shiftsCollection).snapshots();
+    final cutoff = Timestamp.fromDate(
+        DateTime.now().subtract(const Duration(days: 90)));
+    final stream = _firestore
+        .collection(AppConstants.shiftsCollection)
+        .where('createdAt', isGreaterThan: cutoff)
+        .snapshots();
 
     final sub = stream.listen((snapshot) {
       try {
@@ -263,6 +277,9 @@ class HomeBadgeProvider extends ChangeNotifier {
   /// Mark a section as visited. Resets its badge count to 0.
   Future<void> markSectionVisited(String section) async {
     final now = Timestamp.now();
+    final previousLastVisited = _lastVisited[section];
+    final previousBadgeCount = _badgeCounts[section] ?? 0;
+
     _lastVisited[section] = now;
     _badgeCounts[section] = 0;
     notifyListeners();
@@ -273,7 +290,24 @@ class HomeBadgeProvider extends ChangeNotifier {
       await prefs.setInt(microKey, now.microsecondsSinceEpoch);
     } catch (e) {
       debugPrint('HomeBadgeProvider markVisited error: $e');
+      // Revert local state so the badge isn't permanently cleared if persist failed
+      if (previousLastVisited != null) _lastVisited[section] = previousLastVisited;
+      _badgeCounts[section] = previousBadgeCount;
+      notifyListeners();
     }
+  }
+
+  /// Reset all state — called on logout or session expiry so the next user
+  /// gets a completely clean badge provider.
+  void reset() {
+    _cancelSubscriptions();
+    _badgeCounts.clear();
+    _lastVisited.clear();
+    _userId = null;
+    _userRole = null;
+    _initialized = false;
+    _initializing = false;
+    notifyListeners();
   }
 
   void _cancelSubscriptions() {
@@ -285,6 +319,7 @@ class HomeBadgeProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _cancelSubscriptions();
     super.dispose();
   }

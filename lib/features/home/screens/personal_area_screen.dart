@@ -37,12 +37,16 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   final _storage = FirebaseStorage.instance;
   final _firestore = FirebaseFirestore.instance;
   bool _isUploading = false;
+  Future<UserModel?>? _userFuture;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProvider>().getUserById(widget.uid);
+      if (!mounted) return;
+      setState(() {
+        _userFuture = context.read<UserProvider>().getUserById(widget.uid);
+      });
     });
   }
 
@@ -182,31 +186,120 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   }
 
   void _confirmUpload() {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (ctx) => Directionality(
+      barrierDismissible: true,
+      barrierLabel: 'profile',
+      barrierColor: Colors.black.withOpacity(0.55),
+      transitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (ctx, _, __) => Directionality(
         textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('עדכון תמונת פרופיל'),
-          content: const Text('להגדיר תמונה זו כתמונת הפרופיל שלך?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('ביטול'),
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(ctx).size.width * 0.88,
+              constraints: const BoxConstraints(maxWidth: 360),
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.18),
+                    blurRadius: 36,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.file(
+                            _imageFile!,
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'עדכון תמונת פרופיל',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'להגדיר תמונה זו כתמונת הפרופיל שלך?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+                  IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.black45,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: const RoundedRectangleBorder(),
+                            ),
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('ביטול',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        Container(width: 1, color: const Color(0xFFEEEEEE)),
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: _kPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: const RoundedRectangleBorder(),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              _uploadImage();
+                            },
+                            child: const Text('אישור',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: _kPrimary),
-              onPressed: () {
-                Navigator.pop(ctx);
-                _uploadImage();
-              },
-              child: const Text('אישור'),
-            ),
-          ],
+          ),
         ),
       ),
+      transitionBuilder: (_, anim, __, child) {
+        final clamped = anim.value.clamp(0.0, 1.0);
+        final curve = Curves.easeOutBack.transform(clamped);
+        return Opacity(
+          opacity: clamped,
+          child: Transform.scale(scale: 0.82 + 0.18 * curve, child: child),
+        );
+      },
     );
   }
 
@@ -231,7 +324,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
           if (userData == null) {
             return FutureBuilder<UserModel?>(
-              future: context.read<UserProvider>().getUserById(widget.uid),
+              future: _userFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

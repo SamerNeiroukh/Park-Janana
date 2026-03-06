@@ -7,6 +7,7 @@ import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class CommentsSheet extends StatefulWidget {
   final PostModel post;
@@ -90,10 +91,9 @@ class _CommentsSheetState extends State<CommentsSheet>
         content: text,
       );
 
+      if (!mounted) return;
       _commentController.clear();
       _focusNode.unfocus();
-
-      if (!mounted) return;
       _showSuccessSnackbar('התגובה נוספה');
     } catch (e) {
       if (!mounted) return;
@@ -105,45 +105,13 @@ class _CommentsSheetState extends State<CommentsSheet>
 
   Future<void> _deleteComment(PostComment comment) async {
     HapticFeedback.mediumImpact();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text('מחיקת תגובה', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
-              ),
-            ],
-          ),
-          content: const Text('האם אתה בטוח שברצונך למחוק את התגובה?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('ביטול'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text('מחק'),
-            ),
-          ],
-        ),
-      ),
+    final confirm = await showAppDialog(
+      context,
+      title: 'מחיקת תגובה',
+      message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
 
     if (confirm != true) return;

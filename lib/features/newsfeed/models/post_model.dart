@@ -109,6 +109,9 @@ class PostModel {
   // Engagement
   final List<PostComment> comments;
   final List<String> likedBy;
+  /// Extra emoji reactions beyond ❤️. Keys: 'thumbs' (👍), 'party' (🎉).
+  /// Each value is the list of user-ids who used that reaction.
+  final Map<String, List<String>> reactions;
 
   const PostModel({
     required this.id,
@@ -126,6 +129,7 @@ class PostModel {
     this.updatedAt,
     this.comments = const [],
     this.likedBy = const [],
+    this.reactions = const {},
   });
 
   /// -------------------------------
@@ -159,6 +163,7 @@ class PostModel {
               .toList() ??
           const [],
       likedBy: List<String>.from(data['likedBy'] ?? const []),
+      reactions: _parseReactions(data['reactions']),
     );
   }
 
@@ -181,7 +186,16 @@ class PostModel {
       'updatedAt': updatedAt,
       'comments': comments.map((c) => c.toMap()).toList(),
       'likedBy': likedBy,
+      'reactions': reactions.map((k, v) => MapEntry(k, v)),
     };
+  }
+
+  /// Safely parses the reactions map from Firestore data.
+  static Map<String, List<String>> _parseReactions(dynamic raw) {
+    if (raw is! Map) return const {};
+    return (raw as Map<String, dynamic>).map(
+      (k, v) => MapEntry(k, v is List ? List<String>.from(v) : <String>[]),
+    );
   }
 
   /// -------------------------------
@@ -203,6 +217,7 @@ class PostModel {
     Timestamp? updatedAt,
     List<PostComment>? comments,
     List<String>? likedBy,
+    Map<String, List<String>>? reactions,
   }) {
     return PostModel(
       id: id ?? this.id,
@@ -220,6 +235,7 @@ class PostModel {
       updatedAt: updatedAt ?? this.updatedAt,
       comments: comments ?? this.comments,
       likedBy: likedBy ?? this.likedBy,
+      reactions: reactions ?? this.reactions,
     );
   }
 
@@ -230,6 +246,13 @@ class PostModel {
   int get commentsCount => comments.length;
 
   bool isLikedBy(String userId) => likedBy.contains(userId);
+
+  /// Count of a specific extra reaction ('thumbs' or 'party').
+  int reactionCount(String key) => reactions[key]?.length ?? 0;
+
+  /// Whether [userId] has used the given extra reaction.
+  bool hasReacted(String key, String userId) =>
+      reactions[key]?.contains(userId) ?? false;
 
   /// Check if post has any media (new media array or legacy imageUrl)
   bool get hasMedia => media.isNotEmpty || (imageUrl != null && imageUrl!.isNotEmpty);

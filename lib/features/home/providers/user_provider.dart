@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,9 +13,18 @@ class UserProvider extends ChangeNotifier {
   Map<String, double>? _workStats;
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<User?>? _authSubscription;
 
   // Cache for user data to avoid redundant fetches
   final Map<String, UserModel> _userCache = {};
+
+  UserProvider() {
+    // Auto-clear whenever the user signs out or the session expires,
+    // regardless of whether the explicit logout button was used.
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) clearUser();
+    });
+  }
 
   // Getters
   UserModel? get currentUser => _currentUser;
@@ -52,14 +62,7 @@ class UserProvider extends ChangeNotifier {
           .collection(AppConstants.usersCollection)
           .doc(uid);
 
-      // Try local Firestore cache first — instant and works offline.
-      // Falls back to server (with timeout) only on a cache miss.
-      DocumentSnapshot userDoc;
-      try {
-        userDoc = await docRef.get(const GetOptions(source: Source.cache));
-      } catch (_) {
-        userDoc = await docRef.get().timeout(const Duration(seconds: 8));
-      }
+      final userDoc = await docRef.get().timeout(const Duration(seconds: 8));
 
       if (userDoc.exists && userDoc.data() != null) {
         final userData = userDoc.data() as Map<String, dynamic>;
@@ -139,6 +142,12 @@ class UserProvider extends ChangeNotifier {
     _userCache.clear();
     _error = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   /// Refresh user data (useful after profile updates)

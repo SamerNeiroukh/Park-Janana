@@ -514,8 +514,10 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
         workers.add(_workerCache[workerId]!);
       } else {
         try {
-          final UserModel worker = await widget.shiftService
-              .fetchWorkerDetails([workerId]).then((users) => users.first);
+          final List<UserModel> fetched =
+              await widget.shiftService.fetchWorkerDetails([workerId]);
+          if (fetched.isEmpty) continue;
+          final UserModel worker = fetched.first;
           _workerCache[workerId] = worker;
           workers.add(worker);
         } catch (_) {}

@@ -12,6 +12,7 @@ import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import '../widgets/post_card.dart';
 import '../widgets/create_post_dialog.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import '../widgets/post_detail_sheet.dart';
 import '../widgets/likers_sheet.dart';
 
@@ -193,6 +194,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         isManager: isManager,
         openComments: openComments,
         onLike: () => _handleLike(post, userId),
+        onReact: (key) => _handleReact(post, key, userId),
         onDelete: () => _deletePostDirectly(post),
         onPin: () => _handlePin(post),
         onShowLikers: () => _showLikersSheet(context, post),
@@ -208,17 +210,24 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => LikersSheet(
         likedByUserIds: post.likedBy,
+        reactions: post.reactions,
       ),
     );
   }
 
   Future<void> _handleLike(PostModel post, String userId) async {
     try {
-      if (post.isLikedBy(userId)) {
-        await _newsfeedService.unlikePost(post.id, userId);
-      } else {
-        await _newsfeedService.likePost(post.id, userId);
-      }
+      await _newsfeedService.setReaction(post.id, userId, 'love');
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackbar('שגיאה: $e');
+    }
+  }
+
+  Future<void> _handleReact(
+      PostModel post, String reactionKey, String userId) async {
+    try {
+      await _newsfeedService.setReaction(post.id, userId, reactionKey);
     } catch (e) {
       if (!mounted) return;
       _showErrorSnackbar('שגיאה: $e');
@@ -274,56 +283,14 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     }
   }
 
-  Future<bool?> _showDeleteDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text(
-                'מחיקת פוסט',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-              ),
-            ],
-          ),
-          content: const Text(
-            'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
-            textAlign: TextAlign.right,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('ביטול'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('מחק'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Future<bool?> _showDeleteDialog() => showAppDialog(
+        context,
+        title: 'מחיקת פוסט',
+        message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
+        confirmText: 'מחק',
+        icon: Icons.delete_outline_rounded,
+        isDestructive: true,
+      );
 
   void _showSuccessSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -720,6 +687,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                 isManager: isManager,
                 index: index,
                 onLike: () => _handleLike(post, userId),
+                onReact: (key) => _handleReact(post, key, userId),
                 onComment: () => _showPostDetailSheet(context, post, userId),
                 onDelete: () => _handleDelete(post),
                 onPin: () => _handlePin(post),
