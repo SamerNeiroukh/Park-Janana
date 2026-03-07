@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
@@ -7,6 +8,7 @@ import 'package:park_janana/features/workers/screens/edit_worker_licenses_screen
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/workers/widgets/shifts_button.dart';
 import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
+import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -65,7 +67,14 @@ class ReviewWorkerScreen extends StatelessWidget {
                     const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildSoftCard("🧾 פרטי העובד", [
                       _buildInfoRow(Icons.email_rounded, "אימייל", email),
-                      _buildInfoRow(Icons.phone, "טלפון", phone),
+                      _buildInfoRow(
+                        Icons.phone,
+                        "טלפון",
+                        phone,
+                        onTap: phone.isNotEmpty
+                            ? () => launchUrl(Uri(scheme: 'tel', path: phone))
+                            : null,
+                      ),
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🧭 פעולות מנהל", [
@@ -105,7 +114,16 @@ class ReviewWorkerScreen extends StatelessWidget {
                         icon: Icons.show_chart,
                         label: "הצג ביצועים",
                         color: AppColors.deepOrange,
-                        onTap: () => _snack(context, "הצגת ביצועים - בפיתוח"),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkerReportsScreen(
+                              userId: uid,
+                              userName: fullName,
+                              profileUrl: data['profile_picture'] ?? '',
+                            ),
+                          ),
+                        ),
                       ),
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXL),
@@ -123,6 +141,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                                 builder: (context) => EditWorkerLicensesScreen(
                                   uid: uid,
                                   fullName: fullName,
+                                  currentUserRole: currentUserRole,
                                 ),
                               ),
                             );
@@ -235,27 +254,42 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return IgnorePointer(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.accent),
-            const SizedBox(width: AppDimensions.spacingL),
-            Text("$label:",
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: AppDimensions.fontML)),
-            const SizedBox(width: AppDimensions.spacingM),
-            Expanded(
-              child: Text(value,
-                  style: const TextStyle(fontSize: AppDimensions.fontML),
-                  overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
+  Widget _buildInfoRow(IconData icon, String label, String value,
+      {VoidCallback? onTap}) {
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingS),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.accent),
+          const SizedBox(width: AppDimensions.spacingL),
+          Text("$label:",
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600, fontSize: AppDimensions.fontML)),
+          const SizedBox(width: AppDimensions.spacingM),
+          Expanded(
+            child: Text(value,
+                style: TextStyle(
+                  fontSize: AppDimensions.fontML,
+                  color: onTap != null ? AppColors.primary : null,
+                  decoration:
+                      onTap != null ? TextDecoration.underline : null,
+                ),
+                overflow: TextOverflow.ellipsis),
+          ),
+          if (onTap != null)
+            const Icon(Icons.phone_forwarded_rounded,
+                size: 16, color: AppColors.accent),
+        ],
       ),
     );
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: row,
+      );
+    }
+    return IgnorePointer(child: row);
   }
 
   Widget _buildActionCard({
@@ -317,10 +351,6 @@ class ReviewWorkerScreen extends StatelessWidget {
         onPressed: onPressed,
       ),
     );
-  }
-
-  void _snack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   Future<void> _unapproveWorker(BuildContext context, String uid) async {

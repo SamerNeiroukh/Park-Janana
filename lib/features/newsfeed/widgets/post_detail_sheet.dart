@@ -454,7 +454,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ],
           ),
         ),
-        if (post.authorId == widget.currentUserId)
+        if (post.authorId == widget.currentUserId || widget.isManager)
           _buildOptionsButton(post),
       ],
     );
@@ -866,7 +866,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final comment = post.comments[index];
-            final canDelete = comment.userId == widget.currentUserId;
+            final canDelete = comment.userId == widget.currentUserId || widget.isManager;
             return _ModernCommentCard(
               comment: comment,
               canDelete: canDelete,

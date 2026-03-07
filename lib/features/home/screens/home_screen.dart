@@ -16,6 +16,7 @@ import 'package:park_janana/features/workers/screens/manage_workers_screen.dart'
 import 'package:park_janana/features/newsfeed/screens/newsfeed_screen.dart';
 import 'package:park_janana/features/notifications/screens/notification_history_screen.dart';
 import 'package:park_janana/features/settings/screens/settings_screen.dart';
+import 'package:park_janana/features/home/screens/owner_dashboard_screen.dart';
 
 // ── Providers (ALL UNCHANGED) ─────────────────────────────────────────────
 import 'package:park_janana/features/home/providers/user_provider.dart';
@@ -464,23 +465,57 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ]);
     } else {
-      // owner
+      // owner — full manager access + exclusive dashboard
       items.addAll([
-        // Primary CTA
         _StripItem(
-          icon: Icons.newspaper_rounded,
-          label: 'לוח מודעות',
-          badge: badgeProvider.getBadgeCount('newsfeed'),
+          icon: Icons.dashboard_rounded,
+          label: 'לוח בקרה',
+          color: const Color(0xFF7C3AED),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const OwnerDashboardScreen())),
+        ),
+        _StripItem(
+          icon: Icons.manage_history_rounded,
+          label: 'משמרות',
+          badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
           onTap: () {
-            badgeProvider.markSectionVisited('newsfeed');
+            badgeProvider.markSectionVisited('shifts');
             Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const NewsfeedScreen()));
+                MaterialPageRoute(builder: (_) => const ManagerShiftsScreen()));
           },
         ),
         _StripItem(
-          icon: Icons.bar_chart_rounded,
-          label: 'דו"חות עסקיים',
+          icon: Icons.calendar_view_week_rounded,
+          label: 'סידור שבועי',
+          badge: badgeProvider.getBadgeCount('schedule'),
+          color: const Color(0xFF6366F1),
+          onTap: () {
+            badgeProvider.markSectionVisited('schedule');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ManagerWeeklyScheduleScreen()));
+          },
+        ),
+        _StripItem(
+          icon: Icons.assignment_rounded,
+          label: 'משימות',
+          badge: badgeProvider.getBadgeCount('tasks'),
+          color: const Color(0xFF8B5CF6),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const ManagerTaskBoardScreen())),
+        ),
+        _StripItem(
+          icon: Icons.group_rounded,
+          label: 'ניהול עובדים',
+          color: const Color(0xFF0EA5E9),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const ManageWorkersScreen())),
+        ),
+        _StripItem(
+          icon: Icons.stacked_bar_chart_rounded,
+          label: 'דוחות',
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
               context,
@@ -491,16 +526,15 @@ class _HomeScreenState extends State<HomeScreen>
                       profileUrl: profileUrl))),
         ),
         _StripItem(
-          icon: Icons.stacked_bar_chart_rounded,
-          label: 'דו"חות אישיים',
+          icon: Icons.newspaper_rounded,
+          label: 'לוח מודעות',
+          badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => WorkerReportsScreen(
-                      userId: uid,
-                      userName: userName,
-                      profileUrl: profileUrl))),
+          onTap: () {
+            badgeProvider.markSectionVisited('newsfeed');
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const NewsfeedScreen()));
+          },
         ),
       ]);
     }
