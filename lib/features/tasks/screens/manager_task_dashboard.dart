@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'task_details_screen.dart';
-import 'package:park_janana/features/tasks/screens/create_task_screen.dart';
+import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
 import 'package:park_janana/features/tasks/screens/edit_task_screen.dart';
 import 'package:park_janana/features/tasks/services/task_service.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
@@ -160,7 +160,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
 
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CreateTaskScreen()),
+      MaterialPageRoute(builder: (context) => const CreateTaskFlowScreen()),
     );
 
     if (mounted) {

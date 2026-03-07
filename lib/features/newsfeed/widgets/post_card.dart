@@ -300,7 +300,7 @@ class _PostCardState extends State<PostCard> {
             ],
           ),
         ),
-        if (widget.post.authorId == widget.currentUserId)
+        if (widget.post.authorId == widget.currentUserId || widget.isManager)
           _buildOptionsMenu(),
       ],
     );

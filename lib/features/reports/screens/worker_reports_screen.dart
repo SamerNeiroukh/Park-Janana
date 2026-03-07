@@ -58,7 +58,7 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('הדוחות שלי', style: TaskTheme.heading1),
+                    Text('הדוחות של ${widget.userName}', style: TaskTheme.heading1),
                     const SizedBox(height: 4),
                     Text(
                       'צפייה בנתוני נוכחות, משימות ומשמרות',

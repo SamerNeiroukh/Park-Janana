@@ -175,7 +175,6 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
       stream: FirebaseFirestore.instance
           .collection(AppConstants.shiftsCollection)
           .where('assignedWorkers', arrayContains: widget.uid)
-          .orderBy('date', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -192,59 +191,54 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
         }
 
         final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
         final allShifts = snapshot.data!.docs;
+
+        DateTime? parseDate(dynamic rawDate) {
+          if (rawDate is Timestamp) return rawDate.toDate();
+          if (rawDate is String) {
+            try {
+              return DateFormat('dd/MM/yyyy').parseStrict(rawDate);
+            } catch (_) {}
+          }
+          return null;
+        }
 
         final filtered = allShifts.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
-          final rawDate = data['date'];
-          DateTime? date;
-
-          if (rawDate is Timestamp) {
-            date = rawDate.toDate();
-          } else if (rawDate is String) {
-            try {
-              date = DateFormat('dd/MM/yyyy').parseStrict(rawDate);
-            } catch (_) {
-              return false;
-            }
-          }
-
+          final date = parseDate(data['date']);
           if (date == null) return false;
+          final shiftDay = DateTime(date.year, date.month, date.day);
 
           switch (filter) {
             case 'upcoming':
-              return date.isAfter(now);
+              return !shiftDay.isBefore(today);
             case 'past':
-              return date.isBefore(now);
+              return shiftDay.isBefore(today);
             case 'today':
-              return date.day == now.day &&
-                  date.month == now.month &&
-                  date.year == now.year;
+              return shiftDay == today;
             case 'thisWeek':
-              final weekStart = now.subtract(Duration(days: now.weekday - 1));
+              final weekStart = today.subtract(Duration(days: today.weekday - 1));
               final weekEnd = weekStart.add(const Duration(days: 6));
-              return date
-                      .isAfter(weekStart.subtract(const Duration(days: 1))) &&
-                  date.isBefore(weekEnd.add(const Duration(days: 1)));
+              return !shiftDay.isBefore(weekStart) && !shiftDay.isAfter(weekEnd);
             default:
               return true;
           }
         }).toList();
 
+        // Sort chronologically: upcoming → soonest first; everything else → newest first
+        filtered.sort((a, b) {
+          final da = parseDate((a.data() as Map<String, dynamic>)['date']);
+          final db = parseDate((b.data() as Map<String, dynamic>)['date']);
+          if (da == null || db == null) return 0;
+          return filter == 'upcoming' ? da.compareTo(db) : db.compareTo(da);
+        });
+
         return ListView.builder(
           itemCount: filtered.length,
           itemBuilder: (context, index) {
             final shift = filtered[index].data() as Map<String, dynamic>;
-            final rawDate = shift['date'];
-            DateTime? date;
-
-            if (rawDate is Timestamp) {
-              date = rawDate.toDate();
-            } else if (rawDate is String) {
-              try {
-                date = DateFormat('dd/MM/yyyy').parseStrict(rawDate);
-              } catch (_) {}
-            }
+            final date = parseDate(shift['date']);
 
             final startTime = shift['startTime'] ?? "--";
             final endTime = shift['endTime'] ?? "--";
