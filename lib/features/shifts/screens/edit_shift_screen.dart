@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
-import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class EditShiftScreen extends StatefulWidget {
   final ShiftModel shift;
@@ -247,7 +247,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final affectedWorkers = await widget.shiftService.updateShiftDetails(
+      await widget.shiftService.updateShiftDetails(
         shiftId: widget.shift.id,
         date: _selectedDate != _originalDate
             ? DateFormat('dd/MM/yyyy').format(_selectedDate)
@@ -265,21 +265,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         status: _status != _originalStatus ? _status : null,
       );
 
-      // Send notifications to affected workers (non-blocking)
-      if (affectedWorkers.isNotEmpty) {
-        try {
-          final changes = _getChangeSummary();
-          await NotificationService().notifyShiftUpdate(
-            shiftId: widget.shift.id,
-            workerIds: affectedWorkers,
-            shiftDate: DateFormat('dd/MM/yyyy').format(_selectedDate),
-            department: _selectedDepartment,
-            changes: changes,
-          );
-        } catch (e) {
-          debugPrint('Notification error (non-blocking): $e');
-        }
-      }
+      // Notifications are sent automatically by the onShiftWritten Cloud Function.
 
       if (mounted) {
         Navigator.pop(context, true);
@@ -375,39 +361,15 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
   Future<bool> _onWillPop() async {
     if (!_hasChanges) return true;
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.warningOrange),
-              SizedBox(width: 12),
-              Text('שינויים לא שמורים'),
-            ],
-          ),
-          content: const Text('יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text('המשך לערוך', style: TextStyle(color: Colors.grey.shade600)),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('צא ללא שמירה', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
+    final result = await showAppDialog(
+      context,
+      title: 'שינויים לא שמורים',
+      message: 'יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
+      confirmText: 'צא ללא שמירה',
+      cancelText: 'המשך לערוך',
+      icon: Icons.warning_amber_rounded,
+      iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
+      isDestructive: true,
     );
 
     return result ?? false;
@@ -492,7 +454,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -556,12 +517,12 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
                   title,
@@ -604,7 +565,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               ),
             ),
             child: Row(
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(Icons.calendar_today_rounded,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
@@ -666,7 +626,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.end,
-          textDirection: TextDirection.rtl,
           children: departments.map((dept) {
             final isSelected = dept['name'] == _selectedDepartment;
             final color = dept['color'] as Color;
@@ -698,7 +657,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       dept['icon'] as IconData,
@@ -732,7 +690,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
             const SizedBox(width: 12),
@@ -742,7 +699,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_back, color: Colors.grey.shade500, size: 18),
+              child: Icon(Icons.arrow_forward, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(child: _buildTimeButton('סיום', _endTime, false)),
@@ -785,7 +742,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(Icons.access_time,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
@@ -817,7 +773,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         child: Column(
           children: [
             Row(
-              textDirection: TextDirection.rtl,
               children: [
                 _buildWorkerCountButton(Icons.add, () {
                   setState(() => _maxWorkers++);
@@ -841,7 +796,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      textDirection: TextDirection.rtl,
                       children: [
                         Icon(Icons.people,
                             color: isChanged ? AppColors.warningOrange : _selectedColor,
@@ -878,7 +832,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     border: Border.all(color: Colors.red.withOpacity(0.3)),
                   ),
                   child: Row(
-                    textDirection: TextDirection.rtl,
                     children: [
                       const Icon(Icons.warning, size: 20, color: Colors.red),
                       const SizedBox(width: 8),
@@ -927,7 +880,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.end,
-          textDirection: TextDirection.rtl,
           children: statusOptions.map((status) {
             final isSelected = status['value'] == _status;
             final color = status['color'] as Color;
@@ -959,7 +911,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       status['icon'] as IconData,
@@ -1022,7 +973,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(
                     _hasChanges ? Icons.save : Icons.check,
@@ -1057,7 +1007,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),

@@ -5,11 +5,17 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
+  final String currentUserRole;
 
-  const ApproveWorkerScreen({super.key, required this.userData});
+  const ApproveWorkerScreen({
+    super.key,
+    required this.userData,
+    this.currentUserRole = 'manager',
+  });
 
   Future<void> _approveWorker(BuildContext context) async {
     final String uid = userData['uid'];
@@ -17,6 +23,7 @@ class ApproveWorkerScreen extends StatelessWidget {
       'approved': true,
     });
 
+    if (!context.mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('העובד אושר בהצלחה')),
@@ -25,11 +32,20 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   Future<void> _rejectWorker(BuildContext context) async {
     final String uid = userData['uid'];
-    await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).delete();
+    // Write rejectedAt (triggers Cloud Function notification) + rejected:true
+    // so the pending workers query can filter this user out client-side.
+    await FirebaseFirestore.instance
+        .collection(AppConstants.usersCollection)
+        .doc(uid)
+        .update({
+      'rejectedAt': FieldValue.serverTimestamp(),
+      'rejected': true,
+    });
 
+    if (!context.mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('העובד נמחק מהמערכת')),
+      const SnackBar(content: Text('הבקשה נדחתה. העובד קיבל הודעה.')),
     );
   }
 
@@ -39,26 +55,16 @@ class ApproveWorkerScreen extends StatelessWidget {
     required String content,
     required VoidCallback onConfirm,
   }) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title, textDirection: TextDirection.rtl),
-        content: Text(content, textDirection: TextDirection.rtl),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ביטול"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onConfirm();
-            },
-            child: const Text("אישור"),
-          ),
-        ],
-      ),
-    );
+    showAppDialog(
+      context,
+      title: title,
+      message: content,
+      confirmText: 'אישור',
+      icon: Icons.check_circle_outline_rounded,
+      iconGradient: const [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+    ).then((confirmed) {
+      if (confirmed ?? false) onConfirm();
+    });
   }
 
   @override
@@ -68,7 +74,6 @@ class ApproveWorkerScreen extends StatelessWidget {
     final String fullName = data['fullName'] ?? '';
     final String email = data['email'] ?? '';
     final String phone = data['phoneNumber'] ?? '';
-    final String id = data['idNumber'] ?? '';
     final String profilePictureUrl = data['profile_picture'] ?? '';
 
     return Scaffold(
@@ -94,7 +99,6 @@ class ApproveWorkerScreen extends StatelessWidget {
                     _buildInfoCard("🧾 פרטי העובד", [
                       _buildInfoRow("דוא\"ל", email),
                       _buildInfoRow("טלפון", phone),
-                      _buildInfoRow("ת.ז", id),
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildActionButtons(context),
@@ -221,13 +225,13 @@ class ApproveWorkerScreen extends StatelessWidget {
         const SizedBox(height: AppDimensions.spacingL),
         _buildFullWidthButton(
           context,
-          label: "דחה ומחק",
+          label: "דחה בקשה",
           icon: Icons.cancel_outlined,
           color: AppColors.error,
           onPressed: () => _showConfirmationDialog(
             context: context,
-            title: "דחיית עובד",
-            content: "האם אתה בטוח שברצונך לדחות ולמחוק את העובד הזה?",
+            title: "דחיית בקשה",
+            content: "העובד ישאר בהמתנה ויוכל להגיש בקשה שוב. האם לדחות?",
             onConfirm: () => _rejectWorker(context),
           ),
         ),

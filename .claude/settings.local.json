@@ -16,7 +16,34 @@
       "Bash(python3:*)",
       "Bash(git status:*)",
       "Bash(dart fix:*)",
-      "Bash(flutter build:*)"
+      "Bash(flutter build:*)",
+      "Bash(for branch in \"38-profile-picture-does-not-update-on-home-screen-after-change\" \"9-upgrade-firebase-to-latest-major-migrate-app-check-to-play-integrity-android\" \"MousaUpdatingTheProject\" \"copilot/fix-11\" \"copilot/fix-19\" \"fix/manager-shifts-ui-ux\")",
+      "Bash(do echo \"=== $branch ===\")",
+      "Bash(done)",
+      "Bash(xargs git branch:*)",
+      "Bash(echo:*)",
+      "Bash(firebase firestore:rules:get:*)",
+      "Bash(firebase:*)",
+      "Bash(firebase help:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(./gradlew :package_info_plus:compileDebugKotlin:*)",
+      "Bash(jar -tf:*)",
+      "Bash(./gradlew :app:compileDebugJavaWithJavac:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(xargs:*)",
+      "Bash(./gradlew:*)",
+      "Bash(tee:*)",
+      "Read(//c/Users/Samer Neiroukh/.claude/projects/c--dev-park-janana/**)",
+      "Read(//c/Users/Samer Neiroukh/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_functions-6.0.1/lib/**)",
+      "Bash(keytool -version)",
+      "Bash(keytool -genkeypair -v -storetype JKS -keystore c:/dev/park_janana/android/app/upload-keystore.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 -storepass 'P7n6C2Q7M$^d$2KxPmWw' -keypass 'P7n6C2Q7M$^d$2KxPmWw' -dname \"CN=Park Janana, OU=App, O=Park Janana, L=Israel, ST=Israel, C=IL\")",
+      "Bash(keytool -importkeystore -srckeystore c:/dev/park_janana/android/app/upload-keystore.jks -destkeystore c:/dev/park_janana/android/app/upload-keystore.jks -deststoretype pkcs12 -srcstorepass 'P7n6C2Q7M$^d$2KxPmWw' -deststorepass 'P7n6C2Q7M$^d$2KxPmWw' -noprompt)"
+    ],
+    "additionalDirectories": [
+      "c:\\dev\\park_janana\\android\\app",
+      "c:\\Users\\Samer Neiroukh\\Desktop"
     ]
   }
 }

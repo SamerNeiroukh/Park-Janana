@@ -4,9 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'task_details_screen.dart';
-import 'package:park_janana/features/tasks/screens/create_task_screen.dart';
+import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
 import 'package:park_janana/features/tasks/screens/edit_task_screen.dart';
 import 'package:park_janana/features/tasks/services/task_service.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
@@ -33,6 +34,12 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   String _searchQuery = '';
 
   bool _isNavigating = false; // ✅ prevent multiple FAB presses
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +160,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
 
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CreateTaskScreen()),
+      MaterialPageRoute(builder: (context) => const CreateTaskFlowScreen()),
     );
 
     if (mounted) {
@@ -349,6 +356,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            // Status + time
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -361,24 +369,6 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                     color: AppColors.primary,
                   ),
                 ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => EditTaskScreen(task: task)),
-                      );
-                    } else if (value == 'delete') {
-                      _confirmDeleteTask(task);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'edit', child: Text("✏️ ערוך")),
-                    const PopupMenuItem(
-                        value: 'delete', child: Text("🗑️ מחק")),
-                  ],
-                )
               ],
             ),
             const SizedBox(height: 10),
@@ -397,6 +387,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 12),
+            // Avatars + date
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -419,7 +410,33 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       color: Colors.black87),
                 ),
               ],
-            )
+            ),
+            const SizedBox(height: 10),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            // Action buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _buildCardAction(
+                  label: "ערוך",
+                  icon: Icons.edit_outlined,
+                  color: AppColors.primary,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => EditTaskScreen(task: task)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildCardAction(
+                  label: "מחק",
+                  icon: Icons.delete_outline_rounded,
+                  color: Colors.red.shade600,
+                  onPressed: () => _confirmDeleteTask(task),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -449,26 +466,39 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     );
   }
 
-  void _confirmDeleteTask(TaskModel task) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("אישור מחיקה"),
-        content: Text("האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ביטול"),
-          ),
-          TextButton(
-            onPressed: () async {
-              await _taskService.deleteTask(task.id);
-              if (mounted) Navigator.pop(context);
-            },
-            child: const Text("מחק", style: TextStyle(color: Colors.red)),
-          ),
-        ],
+  Widget _buildCardAction({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: TextButton.styleFrom(
+        backgroundColor: color.withOpacity(0.09),
+        foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: Size.zero,
       ),
     );
+  }
+
+  Future<void> _confirmDeleteTask(TaskModel task) async {
+    final confirmed = await showAppDialog(
+      context,
+      title: 'אישור מחיקה',
+      message: "האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?",
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
+    );
+    if ((confirmed ?? false) && mounted) {
+      await _taskService.deleteTask(task.id);
+    }
   }
 }

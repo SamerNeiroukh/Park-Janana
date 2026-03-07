@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class CommentsSheet extends StatefulWidget {
   final PostModel post;
@@ -90,10 +91,9 @@ class _CommentsSheetState extends State<CommentsSheet>
         content: text,
       );
 
+      if (!mounted) return;
       _commentController.clear();
       _focusNode.unfocus();
-
-      if (!mounted) return;
       _showSuccessSnackbar('התגובה נוספה');
     } catch (e) {
       if (!mounted) return;
@@ -105,45 +105,13 @@ class _CommentsSheetState extends State<CommentsSheet>
 
   Future<void> _deleteComment(PostComment comment) async {
     HapticFeedback.mediumImpact();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text('מחיקת תגובה', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
-              ),
-            ],
-          ),
-          content: const Text('האם אתה בטוח שברצונך למחוק את התגובה?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('ביטול'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text('מחק'),
-            ),
-          ],
-        ),
-      ),
+    final confirm = await showAppDialog(
+      context,
+      title: 'מחיקת תגובה',
+      message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
 
     if (confirm != true) return;
@@ -505,37 +473,12 @@ class _CommentCardState extends State<_CommentCard> {
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.comment.userProfilePicture;
-
-    if (picUrl.isEmpty) {
-      setState(() => _isLoadingImage = false);
-      return;
-    }
-
-    // If it's already a full URL (starts with http), use it directly
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.comment.userProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoadingImage = false;
       });
-      return;
-    }
-
-    // If it's a Firebase Storage path, get the download URL
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoadingImage = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error resolving profile picture: $e');
-      if (mounted) {
-        setState(() => _isLoadingImage = false);
-      }
     }
   }
 

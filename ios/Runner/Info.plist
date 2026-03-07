@@ -52,5 +52,7 @@
 	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>אנו משתמשים ב-Face ID כדי לאמת את זהותך בצורה מאובטחת</string>
 </dict>
 </plist>

@@ -9,12 +9,20 @@ class VideoPlayerWidget extends StatefulWidget {
   final bool looping;
   final bool showControls;
 
+  /// Preferred display aspect ratio (width/height), derived from the upload
+  /// thumbnail. When provided it overrides the value reported by the video
+  /// controller, which on Android can be the raw pixel ratio *before* the
+  /// video's rotation metadata is applied (causing portrait videos to play
+  /// at landscape size).
+  final double? expectedAspectRatio;
+
   const VideoPlayerWidget({
     super.key,
     required this.videoUrl,
     this.autoPlay = false,
     this.looping = false,
     this.showControls = true,
+    this.expectedAspectRatio,
   });
 
   @override
@@ -26,6 +34,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   ChewieController? _chewieController;
   bool _isInitialized = false;
   bool _hasError = false;
+  bool _isFormatError = false; // true when device can't decode the codec
 
   @override
   void initState() {
@@ -41,22 +50,29 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
       await _videoPlayerController.initialize();
 
+      // Prefer the caller-supplied aspect ratio (from the upload thumbnail,
+      // which has correct orientation) over the controller's reported value,
+      // which on Android may be the raw pixel ratio before rotation is applied.
+      final effectiveAspectRatio = (widget.expectedAspectRatio != null &&
+              widget.expectedAspectRatio! > 0)
+          ? widget.expectedAspectRatio!
+          : _videoPlayerController.value.aspectRatio;
+
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
         autoPlay: widget.autoPlay,
         looping: widget.looping,
         showControls: widget.showControls,
-        aspectRatio: _videoPlayerController.value.aspectRatio,
+        aspectRatio: effectiveAspectRatio,
         placeholder: Container(
           color: Colors.black,
           child: const Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
-            ),
+            child: CircularProgressIndicator(color: Colors.white),
           ),
         ),
         errorBuilder: (context, errorMessage) {
-          return _buildErrorWidget();
+          final isFormat = _isFormatCompatibilityError(errorMessage);
+          return _buildErrorWidget(isFormatError: isFormat);
         },
         materialProgressColors: ChewieProgressColors(
           playedColor: AppColors.primaryBlue,
@@ -67,18 +83,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       );
 
       if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
+        setState(() => _isInitialized = true);
       }
     } catch (e) {
       debugPrint('Error initializing video player: $e');
       if (mounted) {
         setState(() {
           _hasError = true;
+          _isFormatError = _isFormatCompatibilityError(e.toString());
         });
       }
     }
+  }
+
+  /// Returns true when the error is a codec/format incompatibility (not a network error).
+  bool _isFormatCompatibilityError(String errorMessage) {
+    final msg = errorMessage.toLowerCase();
+    return msg.contains('no_exceeds_capabilities') ||
+        msg.contains('format_supported') ||
+        msg.contains('dolby-vision') ||
+        msg.contains('dolby_vision') ||
+        msg.contains('exceeds_capabilities') ||
+        msg.contains('codec') && msg.contains('error');
   }
 
   @override
@@ -88,42 +114,75 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.dispose();
   }
 
-  Widget _buildErrorWidget() {
+  Widget _buildErrorWidget({bool isFormatError = false}) {
     return Container(
-      color: AppColors.greyDark,
+      color: const Color(0xFF1A1A2E),
+      padding: const EdgeInsets.all(24),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              color: Colors.white.withOpacity(0.7),
-              size: 48,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isFormatError
+                    ? Colors.orange.withOpacity(0.15)
+                    : Colors.red.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isFormatError
+                    ? Icons.video_settings_rounded
+                    : Icons.broken_image_outlined,
+                color: isFormatError ? Colors.orange : Colors.red.shade300,
+                size: 40,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
-              'לא ניתן להפעיל את הסרטון',
+              isFormatError ? 'פורמט סרטון לא נתמך' : 'שגיאה בטעינת הסרטון',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isFormatError
+                  ? 'הסרטון מקודד בפורמט Dolby Vision / HEVC שלא נתמך\nבמכשיר זה. נסה להעלות סרטון ב-H.264 (MP4 רגיל).'
+                  : 'אירעה שגיאה בהפעלת הסרטון.\nבדוק את החיבור ונסה שוב.',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
+                color: Colors.white.withOpacity(0.65),
+                fontSize: 13,
+                height: 1.5,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  _hasError = false;
-                  _isInitialized = false;
-                });
-                _initializePlayer();
-              },
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('נסה שוב'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                foregroundColor: Colors.white,
+            if (!isFormatError) ...[
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _hasError = false;
+                    _isInitialized = false;
+                    _isFormatError = false;
+                  });
+                  _initializePlayer();
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('נסה שוב'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -137,16 +196,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: Colors.white,
-            ),
+            CircularProgressIndicator(color: Colors.white),
             SizedBox(height: 16),
             Text(
               'טוען סרטון...',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
         ),
@@ -157,26 +211,25 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
-      return _buildErrorWidget();
+      return _buildErrorWidget(isFormatError: _isFormatError);
     }
 
     if (!_isInitialized || _chewieController == null) {
       return _buildLoadingWidget();
     }
 
-    final aspectRatio = _videoPlayerController.value.aspectRatio;
+    // Use the same effective aspect ratio that was passed to ChewieController
+    final ar = _chewieController!.aspectRatio ??
+        _videoPlayerController.value.aspectRatio;
 
-    // Use LayoutBuilder to get available space and fit video properly
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate the best size to fit within constraints while maintaining aspect ratio
         double width = constraints.maxWidth;
-        double height = width / (aspectRatio > 0 ? aspectRatio : 16 / 9);
+        double height = width / (ar > 0 ? ar : 16 / 9);
 
-        // If height exceeds available height, scale down based on height
         if (height > constraints.maxHeight) {
           height = constraints.maxHeight;
-          width = height * (aspectRatio > 0 ? aspectRatio : 16 / 9);
+          width = height * (ar > 0 ? ar : 16 / 9);
         }
 
         return Center(

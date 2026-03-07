@@ -4,11 +4,11 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
-import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/core/widgets/message_bubble.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/workers/screens/users_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'edit_shift_screen.dart';
@@ -17,12 +17,14 @@ class ShiftDetailsScreen extends StatefulWidget {
   final ShiftModel shift;
   final ShiftService shiftService;
   final WorkerService workerService;
+  final int initialTab;
 
   const ShiftDetailsScreen({
     super.key,
     required this.shift,
     required this.shiftService,
     required this.workerService,
+    this.initialTab = 0,
   });
 
   @override
@@ -64,7 +66,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: widget.initialTab);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() => _selectedTab = _tabController.index);
@@ -148,71 +150,34 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     setState(() => _isSaving = true);
 
     try {
-      final List<String> affectedWorkers = [];
-      final List<String> changeDescriptions = [];
-
       // Process approvals
       for (final workerId in _pendingApprovals) {
         await widget.shiftService.approveWorker(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingApprovals.isNotEmpty) {
-        changeDescriptions.add('${_pendingApprovals.length} עובדים אושרו');
       }
 
       // Process rejections
       for (final workerId in _pendingRejections) {
         await widget.shiftService.rejectWorker(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingRejections.isNotEmpty) {
-        changeDescriptions.add('${_pendingRejections.length} בקשות נדחו');
       }
 
       // Process removals
       for (final workerId in _pendingRemovals) {
         await widget.shiftService.removeWorker(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingRemovals.isNotEmpty) {
-        changeDescriptions.add('${_pendingRemovals.length} עובדים הוסרו');
       }
 
       // Process undos (move back to requested)
       for (final workerId in _pendingUndos) {
         await widget.workerService
             .moveWorkerBackToRequested(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingUndos.isNotEmpty) {
-        changeDescriptions
-            .add('${_pendingUndos.length} עובדים הוחזרו לרשימת הממתינים');
       }
 
       // Process additions
       for (final workerId in _pendingAdditions) {
         await widget.workerService
             .assignWorkerToShift(currentShift.id, workerId);
-        affectedWorkers.add(workerId);
-      }
-      if (_pendingAdditions.isNotEmpty) {
-        changeDescriptions.add('${_pendingAdditions.length} עובדים נוספו');
       }
 
-      // Send notifications (if notification service is available)
-      if (affectedWorkers.isNotEmpty) {
-        try {
-          await NotificationService().notifyShiftUpdate(
-            shiftId: currentShift.id,
-            workerIds: affectedWorkers.toSet().toList(),
-            shiftDate: currentShift.date,
-            department: currentShift.department,
-            changes: changeDescriptions,
-          );
-        } catch (e) {
-          debugPrint('Notification error (non-blocking): $e');
-        }
-      }
+      // Notifications are sent automatically by the onShiftWritten Cloud Function.
 
       // Clear pending changes
       setState(() {
@@ -358,44 +323,15 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   Future<bool> _onWillPop() async {
     if (!_hasUnsavedChanges) return true;
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.warningOrange),
-              SizedBox(width: 12),
-              Text('שינויים לא שמורים'),
-            ],
-          ),
-          content: Text(
-            'יש לך $_pendingChangesCount שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text('המשך לערוך',
-                  style: TextStyle(color: Colors.grey.shade600)),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('צא ללא שמירה',
-                  style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
+    final result = await showAppDialog(
+      context,
+      title: 'שינויים לא שמורים',
+      message: 'יש לך $_pendingChangesCount שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
+      confirmText: 'צא ללא שמירה',
+      cancelText: 'המשך לערוך',
+      icon: Icons.warning_amber_rounded,
+      iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
+      isDestructive: true,
     );
 
     return result ?? false;
@@ -523,7 +459,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       color: AppColors.warningOrange.withOpacity(0.1),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           const Icon(Icons.edit_note, size: 20, color: AppColors.warningOrange),
           const SizedBox(width: 8),
@@ -603,7 +538,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      textDirection: TextDirection.rtl,
                       children: [
                         const Icon(Icons.save, color: Colors.white, size: 22),
                         const SizedBox(width: 10),
@@ -650,10 +584,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding:
@@ -664,7 +597,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(departmentIcon, size: 16, color: departmentColor),
                     const SizedBox(width: 6),
@@ -690,7 +622,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    textDirection: TextDirection.rtl,
                     children: [
                       const Icon(Icons.pending_actions,
                           size: 14, color: AppColors.warningOrange),
@@ -760,11 +691,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           ),
           const SizedBox(height: 20),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.calendar_today_rounded,
                       size: 18, color: Colors.grey.shade500),
@@ -781,8 +710,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               ),
               const SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(Icons.access_time_rounded,
                       size: 18, color: Colors.grey.shade500),
@@ -801,7 +728,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           ),
           const SizedBox(height: 24),
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Text(
                 'עובדים',
@@ -1058,7 +984,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       isFull ? Icons.check_circle : Icons.person_add_rounded,
@@ -1219,7 +1144,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             decoration: BoxDecoration(
@@ -1292,7 +1216,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(Icons.schedule, size: 14, color: color),
           const SizedBox(width: 4),
@@ -1477,7 +1400,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             padding: const EdgeInsets.all(8),

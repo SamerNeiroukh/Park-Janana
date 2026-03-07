@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -10,11 +12,13 @@ import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import '../widgets/post_card.dart';
 import '../widgets/create_post_dialog.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import '../widgets/post_detail_sheet.dart';
 import '../widgets/likers_sheet.dart';
 
 class NewsfeedScreen extends StatefulWidget {
-  const NewsfeedScreen({super.key});
+  final String? initialPostId;
+  const NewsfeedScreen({super.key, this.initialPostId});
 
   @override
   State<NewsfeedScreen> createState() => _NewsfeedScreenState();
@@ -36,18 +40,71 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // Cache the stream to avoid recreating it on every build
+  // Category filter
+  String _selectedCategory = 'all';
+
+  // Cached stream
   Stream<List<PostModel>>? _postsStream;
+
+  static const List<Map<String, dynamic>> _categories = [
+    {'value': 'all', 'label': 'הכל', 'icon': Icons.all_inbox_rounded},
+    {'value': 'announcement', 'label': 'הודעות', 'icon': Icons.campaign_rounded},
+    {'value': 'update', 'label': 'עדכונים', 'icon': Icons.update_rounded},
+    {'value': 'event', 'label': 'אירועים', 'icon': Icons.event_rounded},
+    {'value': 'general', 'label': 'כללי', 'icon': Icons.article_rounded},
+  ];
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     _initStream();
+    if (widget.initialPostId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _openInitialPost());
+    }
+  }
+
+  Future<void> _openInitialPost() async {
+    if (!mounted || widget.initialPostId == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection(AppConstants.postsCollection)
+          .doc(widget.initialPostId)
+          .get();
+      if (!doc.exists || !mounted) return;
+      final post = PostModel.fromFirestore(doc);
+      final uid = context.read<AppAuthProvider>().uid ?? '';
+      _showPostDetailSheet(context, post, uid, openComments: true);
+    } catch (e) {
+      debugPrint('_openInitialPost error: $e');
+    }
   }
 
   void _initStream() {
-    _postsStream ??= _newsfeedService.getPostsStream(limit: _postLimit);
+    _postsStream = _selectedCategory == 'all'
+        ? _newsfeedService.getPostsStream(limit: _postLimit)
+        : _newsfeedService.getPostsByCategory(_selectedCategory, limit: _postLimit);
+  }
+
+  void _onCategoryChanged(String category) {
+    if (_selectedCategory == category) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedCategory = category;
+      _postLimit = _pageSize;
+      _hasMorePosts = true;
+      _initStream();
+    });
+    // Scroll to top after state update
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -76,12 +133,12 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     _isLoadingMore = true;
     setState(() {
       _postLimit += _pageSize;
-      _postsStream = _newsfeedService.getPostsStream(limit: _postLimit);
+      _initStream();
     });
   }
 
   bool _isManager(String? role) {
-    return role == 'manager' || role == 'admin';
+    return role == 'manager' || role == 'owner';
   }
 
   void _showCreatePostDialog(BuildContext context) {
@@ -117,7 +174,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     );
   }
 
-  void _showPostDetailSheet(BuildContext context, PostModel post, String userId) {
+  void _showPostDetailSheet(BuildContext context, PostModel post, String userId,
+      {bool openComments = false}) {
     HapticFeedback.selectionClick();
     final authProvider = context.read<AppAuthProvider>();
     final userProvider = context.read<UserProvider>();
@@ -134,8 +192,10 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         currentUserName: currentUser?.fullName ?? 'משתמש',
         currentUserProfilePicture: currentUser?.profilePicture ?? '',
         isManager: isManager,
+        openComments: openComments,
         onLike: () => _handleLike(post, userId),
-        onDelete: () => _handleDelete(post),
+        onReact: (key) => _handleReact(post, key, userId),
+        onDelete: () => _deletePostDirectly(post),
         onPin: () => _handlePin(post),
         onShowLikers: () => _showLikersSheet(context, post),
       ),
@@ -150,17 +210,24 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => LikersSheet(
         likedByUserIds: post.likedBy,
+        reactions: post.reactions,
       ),
     );
   }
 
   Future<void> _handleLike(PostModel post, String userId) async {
     try {
-      if (post.isLikedBy(userId)) {
-        await _newsfeedService.unlikePost(post.id, userId);
-      } else {
-        await _newsfeedService.likePost(post.id, userId);
-      }
+      await _newsfeedService.setReaction(post.id, userId, 'love');
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackbar('שגיאה: $e');
+    }
+  }
+
+  Future<void> _handleReact(
+      PostModel post, String reactionKey, String userId) async {
+    try {
+      await _newsfeedService.setReaction(post.id, userId, reactionKey);
     } catch (e) {
       if (!mounted) return;
       _showErrorSnackbar('שגיאה: $e');
@@ -168,15 +235,37 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   Future<void> _handleDelete(PostModel post) async {
+    debugPrint('[DELETE] PostCard path: _handleDelete called for post ${post.id}');
     HapticFeedback.mediumImpact();
     final confirm = await _showDeleteDialog();
+    debugPrint('[DELETE] PostCard path: dialog returned confirm=$confirm');
     if (confirm != true) return;
 
     try {
-      await _newsfeedService.deletePost(post.id);
+      debugPrint('[DELETE] PostCard path: calling deletePost');
+      await _newsfeedService.deletePost(post);
+      debugPrint('[DELETE] PostCard path: deletePost done. mounted=$mounted');
       if (!mounted) return;
       _showSuccessSnackbar('הפוסט נמחק בהצלחה');
     } catch (e) {
+      debugPrint('[DELETE] PostCard path ERROR: $e');
+      if (!mounted) return;
+      _showErrorSnackbar('שגיאה במחיקת הפוסט: $e');
+    }
+  }
+
+  /// Called by PostDetailSheet after it has already shown its own
+  /// confirmation dialog — so we just delete directly with no extra dialog.
+  Future<void> _deletePostDirectly(PostModel post) async {
+    debugPrint('[DELETE] Step 5: _deletePostDirectly called for post ${post.id}');
+    try {
+      debugPrint('[DELETE] Step 6: calling newsfeedService.deletePost');
+      await _newsfeedService.deletePost(post);
+      debugPrint('[DELETE] Step 7: deletePost completed. mounted=$mounted');
+      if (!mounted) return;
+      _showSuccessSnackbar('הפוסט נמחק בהצלחה');
+    } catch (e) {
+      debugPrint('[DELETE] ERROR in _deletePostDirectly: $e');
       if (!mounted) return;
       _showErrorSnackbar('שגיאה במחיקת הפוסט: $e');
     }
@@ -194,56 +283,14 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     }
   }
 
-  Future<bool?> _showDeleteDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text(
-                'מחיקת פוסט',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-              ),
-            ],
-          ),
-          content: const Text(
-            'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
-            textAlign: TextAlign.right,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('ביטול'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('מחק'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Future<bool?> _showDeleteDialog() => showAppDialog(
+        context,
+        title: 'מחיקת פוסט',
+        message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
+        confirmText: 'מחק',
+        icon: Icons.delete_outline_rounded,
+        isDestructive: true,
+      );
 
   void _showSuccessSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -348,6 +395,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                     ),
                     _buildHeader(),
                     _buildSearchBar(),
+                    _buildCategoryFilters(),
+                    const SizedBox(height: 8),
                     Expanded(
                       child: _buildFeed(isManager, userId),
                     ),
@@ -374,33 +423,128 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value.trim().toLowerCase();
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'חיפוש פוסט...',
-          prefixIcon: const Icon(Icons.search, color: AppColors.primaryBlue),
-          suffixIcon: _searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear, size: 20),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() => _searchQuery = '');
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) => setState(() => _searchQuery = value.trim().toLowerCase()),
+          decoration: InputDecoration(
+            hintText: 'חיפוש פוסט...',
+            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryBlue),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryFilters() {
+    final colors = [
+      AppColors.primaryBlue,
+      AppColors.salmon,
+      AppColors.primaryBlue,
+      AppColors.success,
+      AppColors.greyMedium,
+    ];
+
+    return SizedBox(
+      height: 42,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: _categories.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final cat = _categories[index];
+            final isSelected = _selectedCategory == cat['value'];
+            final color = colors[index];
+
+            return GestureDetector(
+              onTap: () => _onCategoryChanged(cat['value'] as String),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? color : Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isSelected ? Colors.transparent : color.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.28),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      cat['icon'] as IconData,
+                      size: 15,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      cat['label'] as String,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -464,7 +608,6 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             setState(() {
               _postLimit = _pageSize;
               _hasMorePosts = true;
-              _postsStream = null;
               _initStream();
             });
           });
@@ -491,7 +634,17 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               }).toList();
 
         if (posts.isEmpty) {
-          return _EmptyState(isManager: isManager);
+          final String emptyMsg;
+          if (_searchQuery.isNotEmpty) {
+            emptyMsg = 'לא נמצאו פוסטים התואמים לחיפוש';
+          } else if (_selectedCategory != 'all') {
+            emptyMsg = 'אין פוסטים בקטגוריה זו';
+          } else {
+            emptyMsg = isManager
+                ? 'לחץ על "פוסט חדש" כדי לפרסם את הפוסט הראשון'
+                : 'המנהלים יפרסמו כאן עדכונים בקרוב';
+          }
+          return _EmptyState(isManager: isManager, message: emptyMsg);
         }
 
         return RefreshIndicator(
@@ -534,6 +687,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                 isManager: isManager,
                 index: index,
                 onLike: () => _handleLike(post, userId),
+                onReact: (key) => _handleReact(post, key, userId),
                 onComment: () => _showPostDetailSheet(context, post, userId),
                 onDelete: () => _handleDelete(post),
                 onPin: () => _handlePin(post),
@@ -605,8 +759,9 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
 
 class _EmptyState extends StatelessWidget {
   final bool isManager;
+  final String? message;
 
-  const _EmptyState({required this.isManager});
+  const _EmptyState({required this.isManager, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -636,15 +791,19 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            isManager
-                ? 'לחץ על "פוסט חדש" כדי לפרסם את הפוסט הראשון'
-                : 'המנהלים יפרסמו כאן עדכונים בקרוב',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.greyMedium.withOpacity(0.8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              message ??
+                  (isManager
+                      ? 'לחץ על "פוסט חדש" כדי לפרסם את הפוסט הראשון'
+                      : 'המנהלים יפרסמו כאן עדכונים בקרוב'),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.greyMedium.withOpacity(0.8),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

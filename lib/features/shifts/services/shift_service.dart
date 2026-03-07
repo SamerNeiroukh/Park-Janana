@@ -4,23 +4,16 @@ import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
 import 'package:park_janana/core/services/firebase_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ShiftService {
   final FirebaseService _firebaseService = FirebaseService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  final Map<String, UserModel> _workerCache = {};
-  static const Duration _cacheTtl = Duration(minutes: 10);
-  DateTime _cacheTimestamp = DateTime.now();
-
-  void _checkCacheExpiry() {
-    if (DateTime.now().difference(_cacheTimestamp) > _cacheTtl) {
-      _workerCache.clear();
-      _cacheTimestamp = DateTime.now();
-    }
-  }
+  // Delegate worker lookups to the singleton WorkerService so all callers
+  // share one cache instead of each maintaining their own.
+  final WorkerService _workerService = WorkerService();
 
   Stream<List<ShiftModel>> getShiftsForWeek(DateTime startOfWeek) {
     final dates = List.generate(
@@ -63,13 +56,22 @@ class ShiftService {
 
   List<ShiftModel> sortShifts(List<ShiftModel> shifts, String sortOption) {
     if (sortOption == 'תאריך') {
-      shifts.sort((a, b) => DateFormat('dd/MM/yyyy')
-          .parse(a.date)
-          .compareTo(DateFormat('dd/MM/yyyy').parse(b.date)));
+      shifts.sort((a, b) {
+        final dateCmp = DateFormat('dd/MM/yyyy')
+            .parse(a.date)
+            .compareTo(DateFormat('dd/MM/yyyy').parse(b.date));
+        if (dateCmp != 0) return dateCmp;
+        return a.startTime.compareTo(b.startTime); // tiebreaker
+      });
     } else if (sortOption == 'מחלקה') {
-      shifts.sort((a, b) => a.department.compareTo(b.department));
+      shifts.sort((a, b) {
+        final deptCmp = a.department.compareTo(b.department);
+        if (deptCmp != 0) return deptCmp;
+        return a.startTime.compareTo(b.startTime); // tiebreaker
+      });
+    } else {
+      shifts.sort((a, b) => a.startTime.compareTo(b.startTime));
     }
-    shifts.sort((a, b) => a.startTime.compareTo(b.startTime));
     return shifts;
   }
 
@@ -282,35 +284,11 @@ class ShiftService {
   }
 
   Future<List<UserModel>> fetchWorkerDetails(List<String> workerIds) async {
-    _checkCacheExpiry();
-    final List<UserModel> workers = [];
-    final List<String> missingWorkerIds = [];
-
-    for (String workerId in workerIds) {
-      if (_workerCache.containsKey(workerId)) {
-        workers.add(_workerCache[workerId]!);
-      } else {
-        missingWorkerIds.add(workerId);
-      }
+    try {
+      return await _workerService.getUsersByIds(workerIds);
+    } catch (e) {
+      throw CustomException('שגיאה בשליפת נתוני העובדים.');
     }
-
-    if (missingWorkerIds.isNotEmpty) {
-      try {
-        for (String workerId in missingWorkerIds) {
-          final userDoc = await _firebaseService.getUser(workerId);
-          if (userDoc.exists && userDoc.data() != null) {
-            final UserModel worker =
-                UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-            _workerCache[workerId] = worker;
-            workers.add(worker);
-          }
-        }
-      } catch (e) {
-        throw CustomException('שגיאה בשליפת נתוני העובדים.');
-      }
-    }
-
-    return workers;
   }
 
   Future<void> updateMessage(

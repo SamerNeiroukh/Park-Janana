@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import 'video_player_widget.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class PostDetailSheet extends StatefulWidget {
   final PostModel post;
@@ -16,9 +17,11 @@ class PostDetailSheet extends StatefulWidget {
   final String currentUserProfilePicture;
   final bool isManager;
   final VoidCallback? onLike;
+  final void Function(String key)? onReact;
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
   final VoidCallback? onShowLikers;
+  final bool openComments;
 
   const PostDetailSheet({
     super.key,
@@ -28,9 +31,11 @@ class PostDetailSheet extends StatefulWidget {
     required this.currentUserProfilePicture,
     this.isManager = false,
     this.onLike,
+    this.onReact,
     this.onDelete,
     this.onPin,
     this.onShowLikers,
+    this.openComments = false,
   });
 
   @override
@@ -61,32 +66,29 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         .map((doc) => doc.exists ? PostModel.fromFirestore(doc) : null);
 
     _resolveProfilePicture();
+
+    if (widget.openComments) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 350), () {
+          if (mounted && _scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      });
+    }
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.post.authorProfilePicture;
-    if (picUrl.isEmpty) {
-      setState(() => _isLoadingProfilePic = false);
-      return;
-    }
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.post.authorProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoadingProfilePic = false;
       });
-      return;
-    }
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoadingProfilePic = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoadingProfilePic = false);
     }
   }
 
@@ -169,12 +171,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
 
   Future<void> _deleteComment(PostComment comment) async {
     HapticFeedback.mediumImpact();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => const _DeleteConfirmDialog(
-        title: 'מחיקת תגובה',
-        message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
-      ),
+    final confirm = await showAppDialog(
+      context,
+      title: 'מחיקת תגובה',
+      message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
+      confirmText: 'מחק',
+      icon: Icons.delete_outline_rounded,
+      isDestructive: true,
     );
 
     if (confirm != true) return;
@@ -451,7 +454,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ],
           ),
         ),
-        if (widget.isManager || post.authorId == widget.currentUserId)
+        if (post.authorId == widget.currentUserId || widget.isManager)
           _buildOptionsButton(post),
       ],
     );
@@ -516,8 +519,19 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       onSelected: (value) {
         HapticFeedback.selectionClick();
         if (value == 'delete') {
-          widget.onDelete?.call();
-          Navigator.pop(context);
+          final navigator = Navigator.of(context);
+          showAppDialog(
+            context,
+            title: 'מחיקת פוסט',
+            message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
+            confirmText: 'מחק',
+            icon: Icons.delete_outline_rounded,
+            isDestructive: true,
+          ).then((confirmed) {
+            if (!(confirmed ?? false)) return;
+            navigator.pop(); // close the sheet
+            widget.onDelete?.call();
+          });
         }
         if (value == 'pin') widget.onPin?.call();
       },
@@ -586,33 +600,48 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       padding: const EdgeInsets.only(top: 20),
       child: Column(
         children: [
-          // Media PageView
-          SizedBox(
-            height: 280,
-            child: PageView.builder(
-              controller: _mediaPageController,
-              itemCount: allMedia.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentMediaIndex = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                final media = allMedia[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: GestureDetector(
-                    onTap: () => _openFullScreenMedia(allMedia, index),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: media.isVideo
-                          ? _buildVideoThumbnail(media)
-                          : _buildImage(media),
-                    ),
-                  ),
-                );
-              },
-            ),
+          // Media PageView — height derived from current page's aspect ratio
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final currentMedia = allMedia[_currentMediaIndex];
+              final ar = currentMedia.aspectRatio;
+              double height;
+              if (ar != null && ar > 0) {
+                height = constraints.maxWidth / ar;
+                height = height.clamp(160.0, 400.0);
+              } else {
+                height = 280;
+              }
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                height: height,
+                child: PageView.builder(
+                  controller: _mediaPageController,
+                  itemCount: allMedia.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentMediaIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final media = allMedia[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: GestureDetector(
+                        onTap: () => _openFullScreenMedia(allMedia, index),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: media.isVideo
+                              ? _buildVideoThumbnail(media)
+                              : _buildImage(media),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
           // Page indicator dots (if more than 1 item)
           if (allMedia.length > 1)
@@ -734,14 +763,6 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     );
   }
 
-  Widget _buildVideoPlayer(PostMedia media) {
-    return VideoPlayerWidget(
-      videoUrl: media.url,
-      autoPlay: false,
-      showControls: true,
-    );
-  }
-
   Widget _buildEngagementBar(PostModel post, bool isLiked) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -752,15 +773,15 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       child: Row(
         children: [
           Expanded(
-            child: _EngagementButton(
-              icon: isLiked
-                  ? Icons.favorite_rounded
-                  : Icons.favorite_border_rounded,
-              label: '${post.likesCount}',
-              color: isLiked ? const Color(0xFFEF4444) : Colors.grey.shade600,
-              isActive: isLiked,
-              onTap: _handleLikeTap,
-              onLongPress: widget.onShowLikers,
+            child: _MergedDetailReactionButton(
+              post: post,
+              currentUserId: widget.currentUserId,
+              onLike: _handleLikeTap,
+              onReact: (key) {
+                HapticFeedback.lightImpact();
+                widget.onReact?.call(key);
+              },
+              onShowLikers: widget.onShowLikers,
             ),
           ),
           Container(
@@ -774,10 +795,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               label: '${post.commentsCount}',
               color: Colors.grey.shade600,
               onTap: () {
-                // Scroll to comments
                 _scrollController.animateTo(
-                  400,
-                  duration: const Duration(milliseconds: 300),
+                  _scrollController.position.maxScrollExtent,
+                  duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOut,
                 );
               },
@@ -846,8 +866,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final comment = post.comments[index];
-            final canDelete =
-                comment.userId == widget.currentUserId || widget.isManager;
+            final canDelete = comment.userId == widget.currentUserId || widget.isManager;
             return _ModernCommentCard(
               comment: comment,
               canDelete: canDelete,
@@ -1028,17 +1047,13 @@ class _EngagementButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final bool isActive;
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
 
   const _EngagementButton({
     required this.icon,
     required this.label,
     required this.color,
-    this.isActive = false,
     this.onTap,
-    this.onLongPress,
   });
 
   @override
@@ -1047,18 +1062,13 @@ class _EngagementButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedScale(
-                scale: isActive ? 1.0 : 1.0,
-                duration: const Duration(milliseconds: 150),
-                child: Icon(icon, size: 22, color: color),
-              ),
+              Icon(icon, size: 22, color: color),
               const SizedBox(width: 8),
               Text(
                 label,
@@ -1070,6 +1080,220 @@ class _EngagementButton extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Single merged reaction button: tap = ❤️ like, long-press = emoji picker ─
+class _MergedDetailReactionButton extends StatefulWidget {
+  final PostModel post;
+  final String currentUserId;
+  final VoidCallback? onLike;
+  final void Function(String key)? onReact;
+  final VoidCallback? onShowLikers;
+
+  const _MergedDetailReactionButton({
+    required this.post,
+    required this.currentUserId,
+    this.onLike,
+    this.onReact,
+    this.onShowLikers,
+  });
+
+  @override
+  State<_MergedDetailReactionButton> createState() =>
+      _MergedDetailReactionButtonState();
+}
+
+class _MergedDetailReactionButtonState
+    extends State<_MergedDetailReactionButton> {
+  OverlayEntry? _overlay;
+  final GlobalKey _key = GlobalKey();
+
+  bool get _isLiked => widget.post.isLikedBy(widget.currentUserId);
+  bool get _hasThumbsReaction =>
+      widget.post.hasReacted('thumbs', widget.currentUserId);
+  bool get _hasPartyReaction =>
+      widget.post.hasReacted('party', widget.currentUserId);
+  bool get _hasAnyReaction =>
+      _isLiked || _hasThumbsReaction || _hasPartyReaction;
+  int get _totalCount =>
+      widget.post.likesCount +
+      widget.post.reactionCount('thumbs') +
+      widget.post.reactionCount('party');
+
+  String get _displayEmoji {
+    if (_hasPartyReaction) return '🎉';
+    if (_hasThumbsReaction) return '👍';
+    return '❤️';
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _removeOverlay() {
+    _overlay?.remove();
+    _overlay = null;
+  }
+
+  void _showPicker() {
+    HapticFeedback.mediumImpact();
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final pos = box.localToGlobal(Offset.zero);
+    final size = box.size;
+    final screenWidth = MediaQuery.of(context).size.width;
+    const pickerWidth = 160.0;
+    final left = (pos.dx + size.width / 2 - pickerWidth / 2)
+        .clamp(8.0, screenWidth - pickerWidth - 8);
+
+    _overlay = OverlayEntry(
+      builder: (_) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _removeOverlay,
+            ),
+          ),
+          Positioned(
+            left: left,
+            top: pos.dy - 64,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: pickerWidth,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _DetailPickerEmoji(
+                      emoji: '❤️',
+                      isActive: _isLiked,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onLike?.call();
+                      },
+                    ),
+                    _DetailPickerEmoji(
+                      emoji: '👍',
+                      isActive: _hasThumbsReaction,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onReact?.call('thumbs');
+                      },
+                    ),
+                    _DetailPickerEmoji(
+                      emoji: '🎉',
+                      isActive: _hasPartyReaction,
+                      onTap: () {
+                        _removeOverlay();
+                        widget.onReact?.call('party');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    Overlay.of(context).insert(_overlay!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: _key,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          if (_hasThumbsReaction) {
+            widget.onReact?.call('thumbs');
+          } else if (_hasPartyReaction) {
+            widget.onReact?.call('party');
+          } else {
+            widget.onLike?.call();
+          }
+        },
+        onLongPress: _showPicker,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: _hasAnyReaction ? 1.2 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.elasticOut,
+                child: Text(_displayEmoji, style: const TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$_totalCount',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: _hasAnyReaction
+                      ? AppColors.primaryBlue
+                      : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailPickerEmoji extends StatelessWidget {
+  final String emoji;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _DetailPickerEmoji({
+    required this.emoji,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.primaryBlue.withOpacity(0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          emoji,
+          style: TextStyle(fontSize: isActive ? 26 : 22),
         ),
       ),
     );
@@ -1104,29 +1328,12 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
   }
 
   Future<void> _resolveProfilePicture() async {
-    final picUrl = widget.comment.userProfilePicture;
-    if (picUrl.isEmpty) {
-      setState(() => _isLoading = false);
-      return;
-    }
-    if (picUrl.startsWith('http')) {
+    final url = await ProfileUrlCache.resolve(widget.comment.userProfilePicture);
+    if (mounted) {
       setState(() {
-        _resolvedProfileUrl = picUrl;
+        _resolvedProfileUrl = url;
         _isLoading = false;
       });
-      return;
-    }
-    try {
-      final ref = FirebaseStorage.instance.ref(picUrl);
-      final url = await ref.getDownloadURL();
-      if (mounted) {
-        setState(() {
-          _resolvedProfileUrl = url;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -1303,58 +1510,6 @@ class _SendButton extends StatelessWidget {
   }
 }
 
-class _DeleteConfirmDialog extends StatelessWidget {
-  final String title;
-  final String message;
-
-  const _DeleteConfirmDialog({required this.title, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.delete_outline_rounded,
-                  color: Color(0xFFEF4444), size: 22),
-            ),
-            const SizedBox(width: 12),
-            Text(title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          ],
-        ),
-        content: Text(message,
-            style: TextStyle(color: Colors.grey.shade600, height: 1.5)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('ביטול', style: TextStyle(color: Colors.grey.shade600)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: const Text('מחק'),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _FullScreenMediaViewer extends StatefulWidget {
   final List<PostMedia> mediaList;
@@ -1410,6 +1565,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                           videoUrl: media.url,
                           autoPlay: true,
                           showControls: true,
+                          expectedAspectRatio: media.aspectRatio,
                         )
                       : InteractiveViewer(
                           minScale: 0.5,

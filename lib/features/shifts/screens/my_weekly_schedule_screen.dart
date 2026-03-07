@@ -6,9 +6,14 @@ import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
+import 'package:park_janana/features/shifts/screens/shifts_screen.dart';
 
 class MyWeeklyScheduleScreen extends StatefulWidget {
-  const MyWeeklyScheduleScreen({super.key});
+  /// When provided (e.g. tapped from a notification), the screen jumps to
+  /// the week containing this shift and auto-opens its details bottom sheet.
+  final ShiftModel? initialShift;
+
+  const MyWeeklyScheduleScreen({super.key, this.initialShift});
 
   @override
   State<MyWeeklyScheduleScreen> createState() => _MyWeeklyScheduleScreenState();
@@ -18,8 +23,37 @@ class _MyWeeklyScheduleScreenState extends State<MyWeeklyScheduleScreen> {
   final ShiftService _shiftService = ShiftService();
   final ScrollController _scrollController = ScrollController();
 
-  DateTime _weekStart = DateTimeUtils.startOfWeek(DateTime.now());
+  late DateTime _weekStart;
   bool _hasAutoScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialShift;
+    if (initial != null) {
+      // Jump to the week that contains the assigned shift.
+      _weekStart = DateTimeUtils.startOfWeek(initial.parsedDate);
+      // After the screen finishes its first render, pop open the shift sheet.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final d = initial.parsedDate;
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (_) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: _ShiftDetailsSheet(
+              shift: initial,
+              date: DateTime(d.year, d.month, d.day),
+            ),
+          ),
+        );
+      });
+    } else {
+      _weekStart = DateTimeUtils.startOfWeek(DateTime.now());
+    }
+  }
 
   void _prevWeek() {
     setState(() {
@@ -97,7 +131,7 @@ class _WeekHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final end = start.add(const Duration(days: 6));
     final range =
-        '${DateFormat('dd.MM').format(start)} – ${DateFormat('dd.MM').format(end)}';
+        '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
 
     // Use explicit Directionality.ltr for this Row to control arrow placement manually
     return Directionality(
@@ -194,11 +228,7 @@ class _Timeline extends StatelessWidget {
             .where((s) => s.isUserAssigned(userId) && s.status != 'cancelled')
             .toList();
 
-        if (shifts.isEmpty) {
-          return const _EmptyState();
-        }
-
-        // Group and sort shifts (before build, not during)
+        // Group into all 7 days of the week (even days with no shifts).
         final grouped = _groupShiftsByDate(shifts);
         final dates = grouped.keys.toList()..sort();
 
@@ -244,6 +274,12 @@ class _Timeline extends StatelessWidget {
 
   Map<DateTime, List<ShiftModel>> _groupShiftsByDate(List<ShiftModel> shifts) {
     final Map<DateTime, List<ShiftModel>> grouped = {};
+    // Always initialise all 7 days of the current week so the user sees
+    // the full week structure even on days without shifts.
+    for (int i = 0; i < 7; i++) {
+      final day = weekStart.add(Duration(days: i));
+      grouped[DateTime(day.year, day.month, day.day)] = [];
+    }
     for (final shift in shifts) {
       final d = shift.parsedDate;
       final key = DateTime(d.year, d.month, d.day);
@@ -425,16 +461,28 @@ class _DayTimeline extends StatelessWidget {
               const SizedBox(width: 16),
               // Shifts column
               Expanded(
-                child: Column(
-                  children: shifts
-                      .map((s) => _ShiftPill(
-                            shift: s,
-                            isPast: isPast,
-                            dayColor: accentColor,
-                            onTap: () => _showShiftDetails(context, s),
-                          ))
-                      .toList(),
-                ),
+                child: shifts.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'אין משמרות',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade400,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: shifts
+                            .map((s) => _ShiftPill(
+                                  shift: s,
+                                  isPast: isPast,
+                                  dayColor: accentColor,
+                                  onTap: () => _showShiftDetails(context, s),
+                                ))
+                            .toList(),
+                      ),
               ),
             ],
           ),
@@ -448,7 +496,10 @@ class _DayTimeline extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _ShiftDetailsSheet(shift: shift, date: date),
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: _ShiftDetailsSheet(shift: shift, date: date),
+      ),
     );
   }
 }
@@ -562,30 +613,17 @@ class _ShiftPillState extends State<_ShiftPill> {
                 ],
               ),
               const SizedBox(width: 16),
-              // Department & workers
+              // Department
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.shift.department,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers} עובדים',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  widget.shift.department,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              // Arrow indicator (points left in RTL = forward/expand)
+              // Arrow indicator
               Icon(
                 Icons.chevron_right_rounded,
                 color: Colors.grey.shade400,
@@ -706,33 +744,78 @@ class _ShiftDetailsSheet extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
 
-          // Workers count
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.people_outline_rounded, color: Colors.grey),
-                const SizedBox(width: 12),
-                Text(
-                  '${shift.assignedWorkers.length} מתוך ${shift.maxWorkers} עובדים',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey.shade700,
+          // View full details button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ShiftsScreen(initialDate: date),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        _departmentColor,
+                        _departmentColor.withOpacity(0.8),
+                      ],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _departmentColor.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'צפה בפרטי המשמרת',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -797,46 +880,6 @@ class _LoadingState extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_available_rounded,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'אין משמרות השבוע',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'נסה לבדוק שבוע אחר',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

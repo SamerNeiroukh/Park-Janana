@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/features/tasks/services/task_service.dart';
-import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/tasks/widgets/task_description_section.dart';
 import 'package:park_janana/features/tasks/widgets/task_comments_section.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 class WorkerTaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -21,9 +21,131 @@ class WorkerTaskDetailsScreen extends StatefulWidget {
       _WorkerTaskDetailsScreenState();
 }
 
+// ── Attachment display widget ──────────────────────────────────────────────
+
+class _AttachmentsSection extends StatelessWidget {
+  final List<String> attachments;
+  const _AttachmentsSection({required this.attachments});
+
+  IconData _iconFor(String url) {
+    final lower = url.toLowerCase();
+    if (lower.endsWith('.pdf')) return Icons.picture_as_pdf_rounded;
+    if (lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.webp')) return Icons.image_rounded;
+    if (lower.endsWith('.mp4') ||
+        lower.endsWith('.mov') ||
+        lower.endsWith('.avi')) return Icons.videocam_rounded;
+    if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
+      return Icons.description_rounded;
+    }
+    return Icons.attach_file_rounded;
+  }
+
+  String _labelFor(String url) {
+    try {
+      final name = Uri.parse(url).pathSegments.last;
+      return Uri.decodeComponent(name).split('?').first;
+    } catch (_) {
+      return 'קובץ מצורף';
+    }
+  }
+
+  Future<void> _open(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('לא ניתן לפתוח את הקובץ')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'קבצים מצורפים',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF374151),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...attachments.map((url) => _AttachmentTile(
+                label: _labelFor(url),
+                icon: _iconFor(url),
+                onTap: () => _open(context, url),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttachmentTile extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  const _AttachmentTile({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: ListTile(
+        dense: true,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        leading: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF4F46E5).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF4F46E5)),
+        ),
+        title: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF374151),
+          ),
+        ),
+        trailing: const Icon(Icons.open_in_new_rounded,
+            size: 16, color: Color(0xFF9CA3AF)),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   final TaskService _taskService = TaskService();
-  final WorkerService _workerService = WorkerService();
   final TextEditingController _commentController = TextEditingController();
 
   bool _isWorker = false;
@@ -31,6 +153,12 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   bool _isSubmitting = false;
 
   String? get _currentUid => context.read<AppAuthProvider>().uid;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -42,8 +170,6 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   Future<void> _fetchTaskAndWorkers() async {
     final updatedTask = await _taskService.getTaskById(widget.task.id);
     if (updatedTask != null) {
-      final workers =
-          await _workerService.getUsersByIds(updatedTask.assignedTo);
       setState(() {
         task = updatedTask;
         _isWorker = task.assignedTo.contains(_currentUid ?? "");
@@ -74,6 +200,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
       await _fetchTaskAndWorkers();
     } catch (e) {
       debugPrint("Failed to submit comment: $e");
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("שגיאה בשליחת תגובה")),
       );
@@ -114,6 +241,10 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                         isManager: false,
                         task: task,
                       ),
+                      if (task.attachments.isNotEmpty) ...[
+                        const SizedBox(height: 20),
+                        _AttachmentsSection(attachments: task.attachments),
+                      ],
                       const SizedBox(height: 24),
                       TaskCommentsSection(
                         comments: task.comments,

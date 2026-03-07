@@ -6,6 +6,10 @@ import 'package:park_janana/core/utils/custom_exception.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
 class WorkerService {
+  static final WorkerService _instance = WorkerService._internal();
+  factory WorkerService() => _instance;
+  WorkerService._internal();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, UserModel> _workerCache = {};
   static const Duration _cacheTtl = Duration(minutes: 10);
@@ -290,12 +294,14 @@ class WorkerService {
     }
   }
 
+  /// Returns all approved users who can be assigned to a shift:
+  /// both workers and managers.
   Future<List<UserModel>> fetchAllWorkers() async {
     try {
       final QuerySnapshot snapshot = await _firestore
           .collection(AppConstants.usersCollection)
-          .where('role', isEqualTo: 'worker')
-          .where('approved', isEqualTo: true) // ✅ Only approved workers
+          .where('role', whereIn: ['worker', 'manager'])
+          .where('approved', isEqualTo: true)
           .get();
 
       return snapshot.docs

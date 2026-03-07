@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -29,12 +30,20 @@ class NewsfeedService {
   }
 
   Stream<List<PostModel>> getPostsByCategory(String category, {int? limit}) {
+    // No orderBy here — composite index (category + isPinned + createdAt) not
+    // guaranteed to exist. We fetch the category slice and sort client-side;
+    // category post counts are small enough that this is fine.
     Query<Map<String, dynamic>> query = _postsRef
-        .where('category', isEqualTo: category)
-        .orderBy('isPinned', descending: true)
-        .orderBy('createdAt', descending: true);
+        .where('category', isEqualTo: category);
     if (limit != null) query = query.limit(limit);
-    return query.snapshots().map(_mapSnapshotToPosts);
+    return query.snapshots().map((snap) {
+      final posts = _mapSnapshotToPosts(snap);
+      posts.sort((a, b) {
+        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+        return b.createdAt.compareTo(a.createdAt);
+      });
+      return posts;
+    });
   }
 
   // ===============================
@@ -65,9 +74,29 @@ class NewsfeedService {
     });
   }
 
-  Future<void> deletePost(String postId) async {
-    await deletePostMedia(postId);
-    await _postsRef.doc(postId).delete();
+  Future<void> deletePost(PostModel post) async {
+    await _postsRef.doc(post.id).delete();
+    // Delete Storage files in the background — does not block the UI.
+    _deleteMediaFiles(post).catchError((Object e) {
+      debugPrint('[DELETE] NewsfeedService: background media cleanup error: $e');
+    });
+  }
+
+  Future<void> _deleteMediaFiles(PostModel post) async {
+    final urls = <String>[
+      for (final m in post.media) ...[
+        m.url,
+        if (m.thumbnailUrl != null) m.thumbnailUrl!,
+      ],
+      if (post.imageUrl != null && post.imageUrl!.isNotEmpty) post.imageUrl!,
+    ];
+    for (final url in urls) {
+      try {
+        await _storage.refFromURL(url).delete();
+      } catch (e) {
+        debugPrint('[DELETE] Failed to delete file $url: $e');
+      }
+    }
   }
 
   Future<void> togglePin(String postId, bool isPinned) async {
@@ -78,18 +107,57 @@ class NewsfeedService {
   }
 
   // ===============================
-  // Likes
+  // Reactions (mutually exclusive)
   // ===============================
 
-  Future<void> likePost(String postId, String userId) async {
-    await _postsRef.doc(postId).update({
-      'likedBy': FieldValue.arrayUnion([userId]),
-    });
-  }
+  /// Sets or clears a reaction for [userId] on [postId].
+  /// A user can hold at most one active reaction per post at a time.
+  ///
+  /// [reactionKey] — one of: 'love' (❤️ → likedBy), 'thumbs' (👍), 'party' (🎉).
+  ///
+  /// Behaviour:
+  ///   • If [reactionKey] is already active for the user → remove it (toggle off).
+  ///   • Otherwise → remove user from every other reaction slot, add to this one.
+  Future<void> setReaction(
+      String postId, String userId, String reactionKey) async {
+    final docRef = _postsRef.doc(postId);
+    await _firestore.runTransaction((txn) async {
+      final doc = await txn.get(docRef);
+      final data = doc.data() ?? {};
 
-  Future<void> unlikePost(String postId, String userId) async {
-    await _postsRef.doc(postId).update({
-      'likedBy': FieldValue.arrayRemove([userId]),
+      final likedBy = List<String>.from(data['likedBy'] as List? ?? []);
+      final reactionsRaw = Map<String, dynamic>.from(
+          (data['reactions'] as Map?)?.cast<String, dynamic>() ?? {});
+      final thumbs = List<String>.from(reactionsRaw['thumbs'] as List? ?? []);
+      final party  = List<String>.from(reactionsRaw['party']  as List? ?? []);
+
+      // Is this the user's currently active reaction?
+      final bool isActive = switch (reactionKey) {
+        'love'   => likedBy.contains(userId),
+        'thumbs' => thumbs.contains(userId),
+        'party'  => party.contains(userId),
+        _        => false,
+      };
+
+      // Remove user from every reaction slot
+      likedBy.remove(userId);
+      thumbs.remove(userId);
+      party.remove(userId);
+
+      // Re-add only if not toggling off
+      if (!isActive) {
+        switch (reactionKey) {
+          case 'love':   likedBy.add(userId); break;
+          case 'thumbs': thumbs.add(userId);  break;
+          case 'party':  party.add(userId);   break;
+        }
+      }
+
+      txn.update(docRef, {
+        'likedBy': likedBy,
+        'reactions': {...reactionsRaw, 'thumbs': thumbs, 'party': party},
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     });
   }
 
@@ -133,53 +201,86 @@ class NewsfeedService {
   Future<List<PostMedia>> uploadPostMedia({
     required String postId,
     required List<File> files,
-    Function(int current, int total)? onProgress,
+    void Function(double progress, String status)? onProgress,
   }) async {
     final List<PostMedia> uploadedMedia = [];
+    final int total = files.length;
 
-    for (int i = 0; i < files.length; i++) {
+    for (int i = 0; i < total; i++) {
       final file = files[i];
       final isVideo = _isVideoFile(file.path);
-      final extension = file.path.split('.').last.toLowerCase();
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$i.$extension';
-      final contentType = _getContentType(extension, isVideo);
+      final double fileBase = i / total;
+      final double fileSlice = 1.0 / total;
 
-      debugPrint('Uploading file ${i + 1}/${files.length}: $fileName (isVideo: $isVideo, contentType: $contentType)');
-
-      final ref = _storage.ref('posts/$postId/$fileName');
+      // Reports progress in [0,1] range for the whole batch
+      void reportProgress(double localFraction, String status) {
+        onProgress?.call(
+          (fileBase + localFraction * fileSlice).clamp(0.0, 1.0),
+          status,
+        );
+      }
 
       try {
+        double? aspectRatio;
+
+        if (isVideo) {
+          reportProgress(0.0, 'מעלה סרטון ${i + 1}/$total...');
+        } else {
+          aspectRatio = await _readImageAspectRatio(file);
+          reportProgress(0.0, 'מעלה תמונה ${i + 1}/$total...');
+        }
+
+        final extension = file.path.split('.').last.toLowerCase();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_$i.$extension';
+        final contentType = _getContentType(extension, isVideo);
+        final ref = _storage.ref('posts/$postId/$fileName');
+
+        // Upload with real byte-level progress via snapshotEvents
         final uploadTask = ref.putFile(
           file,
           SettableMetadata(contentType: contentType),
         );
 
-        // Wait for upload to complete
-        await uploadTask;
-        debugPrint('Upload complete for: $fileName');
+        await for (final snapshot in uploadTask.snapshotEvents) {
+          final state = snapshot.state;
+          if (state == TaskState.running || state == TaskState.paused) {
+            final byteRatio = snapshot.totalBytes > 0
+                ? snapshot.bytesTransferred / snapshot.totalBytes
+                : 0.0;
+            // Upload phase occupies 0–85% of the file's slice
+            reportProgress(byteRatio * 0.85, 'מעלה ${i + 1}/$total...');
+          } else if (state == TaskState.error) {
+            throw Exception('Upload failed for file ${i + 1}');
+          } else if (state == TaskState.success) {
+            break;
+          }
+        }
 
         final url = await ref.getDownloadURL();
-        debugPrint('Got download URL: $url');
 
-        // Generate and upload thumbnail for videos
+        // Thumbnail generation for videos (85–100% of slice)
         String? thumbnailUrl;
         if (isVideo) {
-          thumbnailUrl = await _generateAndUploadThumbnail(
+          reportProgress(0.85, 'מייצר תמונה מקדימה...');
+          final result = await _generateAndUploadThumbnail(
             videoFile: file,
             postId: postId,
             index: i,
           );
+          thumbnailUrl = result.url;
+          aspectRatio = result.aspectRatio;
         }
+
+        reportProgress(1.0, i + 1 == total ? 'מפרסם פוסט...' : 'קובץ ${i + 1} הועלה');
 
         uploadedMedia.add(PostMedia(
           url: url,
           type: isVideo ? 'video' : 'image',
           thumbnailUrl: thumbnailUrl,
+          aspectRatio: aspectRatio,
         ));
-
-        onProgress?.call(i + 1, files.length);
       } catch (e) {
-        debugPrint('Error uploading $fileName: $e');
+        debugPrint('Error uploading file ${i + 1}: $e');
         rethrow;
       }
     }
@@ -187,7 +288,24 @@ class NewsfeedService {
     return uploadedMedia;
   }
 
-  Future<String?> _generateAndUploadThumbnail({
+  /// Reads width/height from a local image file and returns width/height.
+  Future<double?> _readImageAspectRatio(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final img = frame.image;
+      final ratio = img.height > 0 ? img.width / img.height : null;
+      img.dispose();
+      codec.dispose();
+      return ratio;
+    } catch (e) {
+      debugPrint('Failed to read image dimensions: $e');
+      return null;
+    }
+  }
+
+  Future<({String? url, double? aspectRatio})> _generateAndUploadThumbnail({
     required File videoFile,
     required String postId,
     required int index,
@@ -195,11 +313,9 @@ class NewsfeedService {
     try {
       debugPrint('Generating thumbnail for video...');
 
-      // Get temp directory to store thumbnail
       final tempDir = await getTemporaryDirectory();
       final thumbnailPath = '${tempDir.path}/thumb_${postId}_$index.jpg';
 
-      // Generate thumbnail from video
       final thumbnail = await VideoThumbnail.thumbnailFile(
         video: videoFile.path,
         thumbnailPath: thumbnailPath,
@@ -210,32 +326,41 @@ class NewsfeedService {
 
       if (thumbnail == null) {
         debugPrint('Failed to generate thumbnail');
-        return null;
+        return (url: null, aspectRatio: null);
       }
 
       debugPrint('Thumbnail generated: $thumbnail');
 
-      // Upload thumbnail to Firebase Storage
       final thumbFile = File(thumbnail);
-      final thumbRef = _storage.ref('posts/$postId/thumb_$index.jpg');
 
+      // Read dimensions from thumbnail BEFORE deleting it
+      double? aspectRatio;
+      try {
+        final bytes = await thumbFile.readAsBytes();
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final img = frame.image;
+        if (img.height > 0) aspectRatio = img.width / img.height;
+        img.dispose();
+        codec.dispose();
+      } catch (e) {
+        debugPrint('Failed to read thumbnail dimensions: $e');
+      }
+
+      final thumbRef = _storage.ref('posts/$postId/thumb_$index.jpg');
       await thumbRef.putFile(
         thumbFile,
         SettableMetadata(contentType: 'image/jpeg'),
       );
-
       final thumbUrl = await thumbRef.getDownloadURL();
       debugPrint('Thumbnail uploaded: $thumbUrl');
 
-      // Clean up temp file
-      try {
-        await thumbFile.delete();
-      } catch (_) {}
+      try { await thumbFile.delete(); } catch (_) {}
 
-      return thumbUrl;
+      return (url: thumbUrl, aspectRatio: aspectRatio);
     } catch (e) {
       debugPrint('Error generating thumbnail: $e');
-      return null;
+      return (url: null, aspectRatio: null);
     }
   }
 
@@ -284,18 +409,6 @@ class NewsfeedService {
   bool _isVideoFile(String path) {
     final extension = path.split('.').last.toLowerCase();
     return ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'mpeg', 'mpg', 'm4v'].contains(extension);
-  }
-
-  Future<void> deletePostMedia(String postId) async {
-    try {
-      final ref = _storage.ref('posts/$postId');
-      final result = await ref.listAll();
-      for (final item in result.items) {
-        await item.delete();
-      }
-    } catch (e) {
-      debugPrint('Error deleting media for post $postId: $e');
-    }
   }
 
   // ===============================

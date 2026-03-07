@@ -7,6 +7,8 @@ import 'package:park_janana/features/home/screens/home_screen.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/auth/screens/forgot_password_screen.dart';
+import 'package:park_janana/core/services/biometric_service.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,12 +21,99 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final BiometricService _biometricService = BiometricService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _biometricAvailable = false;
+  bool _biometricLoginEnabled = false;
 
   String? _emailError;
   String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometric();
+  }
+
+  Future<void> _checkBiometric() async {
+    final available = await _biometricService.isAvailable();
+    final enabled = await _biometricService.isBiometricLoginEnabled();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricLoginEnabled = enabled;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    setState(() => _isLoading = true);
+    try {
+      final authenticated = await _biometricService.authenticate();
+      if (!authenticated) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('אימות ביומטרי נכשל. אנא נסה שוב.'),
+          backgroundColor: Colors.red,
+        ));
+        return;
+      }
+
+      final creds = await _biometricService.getCredentials();
+      if (creds == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('לא נמצאו פרטי כניסה שמורים. אנא כנס עם אימייל וסיסמה.'),
+          backgroundColor: Colors.orange,
+        ));
+        setState(() => _biometricLoginEnabled = false);
+        return;
+      }
+
+      await _authService.signIn(creds.email, creds.password);
+      if (!mounted) return;
+      _navigateToHomeScreen();
+    } on CustomException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        backgroundColor: Colors.red,
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('שגיאה: $e'),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _offerBiometricSetup(String email, String password) async {
+    if (!mounted) return;
+    final enable = await showAppDialog(
+      context,
+      title: 'כניסה ביומטרית',
+      message: 'האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?',
+      confirmText: 'אפשר',
+      cancelText: 'לא, תודה',
+      icon: Icons.fingerprint_rounded,
+      iconGradient: const [Color(0xFF6366F1), Color(0xFF4338CA)],
+    );
+    if (enable == true) {
+      await _biometricService.saveCredentials(email, password);
+    }
+  }
 
   Future<void> _login() async {
     // Clear previous errors
@@ -49,6 +138,11 @@ class _LoginScreenState extends State<LoginScreen> {
       // Use AuthService to sign in - it handles approval check automatically
       await _authService.signIn(email, password);
 
+      // Offer to enable biometric login on first successful sign-in
+      if (_biometricAvailable && !_biometricLoginEnabled) {
+        await _offerBiometricSetup(email, password);
+      }
+
       // AppAuthProvider's listener will automatically update auth state
       if (!mounted) return;
       _navigateToHomeScreen();
@@ -57,6 +151,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Parse the error message to set appropriate field errors
       final errorMsg = e.message;
+
+      // Rejected account — show dedicated dialog with re-apply option
+      if (errorMsg.startsWith('ACCOUNT_REJECTED:')) {
+        final uid = errorMsg.substring('ACCOUNT_REJECTED:'.length);
+        _showRejectedDialog(uid);
+        return;
+      }
+
       setState(() {
         if (errorMsg.contains('האימייל לא נמצא במערכת') ||
             errorMsg.contains('כתובת האימייל לא תקינה')) {
@@ -88,6 +190,44 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _showRejectedDialog(String uid) {
+    showAppDialog(
+      context,
+      title: 'הבקשה נדחתה',
+      message: 'בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.',
+      confirmText: 'שלח בקשה מחדש',
+      cancelText: 'ביטול',
+      icon: Icons.cancel_outlined,
+      iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
+    ).then((confirmed) async {
+      if (confirmed ?? false) {
+        await _reApply(uid);
+      } else {
+        await _authService.signOut();
+      }
+    });
+  }
+
+  Future<void> _reApply(String uid) async {
+    setState(() => _isLoading = true);
+    try {
+      await _authService.reApply(uid);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('הבקשה נשלחה מחדש. ההנהלה תעדכן אותך בהחלטה.'),
+        backgroundColor: Colors.green,
+      ));
+    } on CustomException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _navigateToHomeScreen() {
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
@@ -102,15 +242,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: AppDimensions.paddingHorizontalXXL,
-            child: Form(
-              key: _formKey,
-              child: AutofillGroup(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: AppDimensions.paddingHorizontalXXL,
+              child: Form(
+                key: _formKey,
+                child: AutofillGroup(
                 child: Container(
                   constraints: const BoxConstraints(
                       maxWidth: AppDimensions.maxWidthForm),
@@ -172,12 +314,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Padding(
-                            padding: EdgeInsets.only(
+                            padding: EdgeInsetsDirectional.only(
                                 bottom: AppDimensions.paddingS,
-                                right: AppDimensions.paddingXS),
+                                start: AppDimensions.paddingXS),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                Icon(
+                                  Icons.email_outlined,
+                                  size: AppDimensions.iconM,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: AppDimensions.spacingM),
                                 Text(
                                   'אימייל',
                                   style: TextStyle(
@@ -185,12 +332,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
-                                ),
-                                SizedBox(width: AppDimensions.spacingM),
-                                Icon(
-                                  Icons.email_outlined,
-                                  size: AppDimensions.iconM,
-                                  color: AppColors.primary,
                                 ),
                               ],
                             ),
@@ -259,12 +400,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Padding(
-                            padding: EdgeInsets.only(
+                            padding: EdgeInsetsDirectional.only(
                                 bottom: AppDimensions.paddingS,
-                                right: AppDimensions.paddingXS),
+                                start: AppDimensions.paddingXS),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                Icon(
+                                  Icons.lock_outlined,
+                                  size: AppDimensions.iconM,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: AppDimensions.spacingM),
                                 Text(
                                   'סיסמה',
                                   style: TextStyle(
@@ -272,12 +418,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
-                                ),
-                                SizedBox(width: AppDimensions.spacingM),
-                                Icon(
-                                  Icons.lock_outlined,
-                                  size: AppDimensions.iconM,
-                                  color: AppColors.primary,
                                 ),
                               ],
                             ),
@@ -356,7 +496,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Forgot Password Link
                       Align(
-                        alignment: Alignment.centerRight,
+                        alignment: AlignmentDirectional.centerStart,
                         child: GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -415,6 +555,53 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
+                      // Biometric login button — shown only when device supports it
+                      // and user has previously opted in
+                      if (_biometricAvailable && _biometricLoginEnabled) ...[
+                        const SizedBox(height: AppDimensions.spacingXL),
+                        Row(
+                          children: [
+                            const Expanded(child: Divider()),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppDimensions.paddingM),
+                              child: Text(
+                                'או',
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: AppDimensions.fontM,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider()),
+                          ],
+                        ),
+                        const SizedBox(height: AppDimensions.spacingXL),
+                        SizedBox(
+                          width: double.infinity,
+                          height: AppDimensions.buttonHeightL,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppDimensions.borderRadiusXL,
+                              ),
+                            ),
+                            onPressed: _isLoading ? null : _loginWithBiometrics,
+                            icon: const Icon(Icons.fingerprint,
+                                color: AppColors.primary),
+                            label: const Text(
+                              'כניסה ביומטרית',
+                              style: TextStyle(
+                                fontSize: AppDimensions.fontXXL,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+
                       const SizedBox(height: AppDimensions.spacingXXXL),
 
                       // Back Button
@@ -442,6 +629,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

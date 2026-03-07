@@ -14,11 +14,9 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
           backgroundColor: AppColors.background,
           body: SafeArea(
             child: Center(
@@ -80,7 +78,6 @@ class ErrorStateWidget extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

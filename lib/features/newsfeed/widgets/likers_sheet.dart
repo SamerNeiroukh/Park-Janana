@@ -7,10 +7,12 @@ import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class LikersSheet extends StatefulWidget {
   final List<String> likedByUserIds;
+  final Map<String, List<String>> reactions;
 
   const LikersSheet({
     super.key,
     required this.likedByUserIds,
+    this.reactions = const {},
   });
 
   @override
@@ -21,6 +23,8 @@ class _LikersSheetState extends State<LikersSheet>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   List<UserModel> _users = [];
+  // userId → set of reaction keys ('like', 'thumbs', 'party')
+  Map<String, Set<String>> _userReactionTypes = {};
   bool _isLoading = true;
   String? _error;
 
@@ -42,7 +46,19 @@ class _LikersSheetState extends State<LikersSheet>
   }
 
   Future<void> _fetchUsers() async {
-    if (widget.likedByUserIds.isEmpty) {
+    // Build reaction type map first
+    final Map<String, Set<String>> reactionTypes = {};
+    for (final uid in widget.likedByUserIds) {
+      reactionTypes.putIfAbsent(uid, () => {}).add('like');
+    }
+    for (final entry in widget.reactions.entries) {
+      for (final uid in entry.value) {
+        reactionTypes.putIfAbsent(uid, () => {}).add(entry.key);
+      }
+    }
+
+    final allIds = reactionTypes.keys.toList();
+    if (allIds.isEmpty) {
       setState(() => _isLoading = false);
       return;
     }
@@ -50,9 +66,9 @@ class _LikersSheetState extends State<LikersSheet>
     try {
       final List<UserModel> users = [];
 
-      // Fetch users in batches of 10 (Firestore whereIn limit)
-      for (var i = 0; i < widget.likedByUserIds.length; i += 10) {
-        final batch = widget.likedByUserIds.skip(i).take(10).toList();
+      // Fetch users in batches of 30 (Firestore whereIn limit)
+      for (var i = 0; i < allIds.length; i += 30) {
+        final batch = allIds.skip(i).take(30).toList();
         final snapshot = await FirebaseFirestore.instance
             .collection(AppConstants.usersCollection)
             .where(FieldPath.documentId, whereIn: batch)
@@ -66,6 +82,7 @@ class _LikersSheetState extends State<LikersSheet>
       if (mounted) {
         setState(() {
           _users = users;
+          _userReactionTypes = reactionTypes;
           _isLoading = false;
         });
       }
@@ -119,6 +136,14 @@ class _LikersSheetState extends State<LikersSheet>
     );
   }
 
+  int get _totalReactors {
+    final allIds = <String>{
+      ...widget.likedByUserIds,
+      for (final v in widget.reactions.values) ...v,
+    };
+    return allIds.length;
+  }
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 20, 14),
@@ -129,7 +154,7 @@ class _LikersSheetState extends State<LikersSheet>
             textDirection: TextDirection.rtl,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -139,25 +164,21 @@ class _LikersSheetState extends State<LikersSheet>
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.favorite_rounded,
-                  color: Colors.red,
-                  size: 20,
-                ),
+                child: const Text('❤️ 👍 🎉', style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'אהבו את הפוסט',
+                    'תגובות לפוסט',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '${widget.likedByUserIds.length} אנשים',
+                    '$_totalReactors אנשים',
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.greyMedium.withOpacity(0.8),
@@ -230,7 +251,11 @@ class _LikersSheetState extends State<LikersSheet>
       itemCount: _users.length,
       separatorBuilder: (_, __) => const SizedBox(height: 4),
       itemBuilder: (context, index) {
-        return _LikerCard(user: _users[index]);
+        final user = _users[index];
+        return _LikerCard(
+          user: user,
+          reactionTypes: _userReactionTypes[user.uid] ?? {},
+        );
       },
     );
   }
@@ -287,16 +312,19 @@ class _EmptyLikers extends StatelessWidget {
 // ===============================
 // Liker Card
 // ===============================
-class _LikerCard extends StatefulWidget {
+class _LikerCard extends StatelessWidget {
   final UserModel user;
+  final Set<String> reactionTypes;
 
-  const _LikerCard({required this.user});
+  const _LikerCard({required this.user, this.reactionTypes = const {}});
 
-  @override
-  State<_LikerCard> createState() => _LikerCardState();
-}
-
-class _LikerCardState extends State<_LikerCard> {
+  String _reactionEmojis() {
+    final emojis = <String>[];
+    if (reactionTypes.contains('like')) emojis.add('❤️');
+    if (reactionTypes.contains('thumbs')) emojis.add('👍');
+    if (reactionTypes.contains('party')) emojis.add('🎉');
+    return emojis.join(' ');
+  }
 
   String _getRoleDisplayName(String role) {
     switch (role.toLowerCase()) {
@@ -319,21 +347,35 @@ class _LikerCardState extends State<_LikerCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.greyLight.withOpacity(0.5),
-        ),
+        border: Border.all(color: AppColors.greyLight.withOpacity(0.5)),
       ),
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          _buildAvatar(),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ProfileAvatar(
+              imageUrl: user.profilePicture,
+              radius: 22,
+              backgroundColor: AppColors.greyLight,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.user.fullName,
+                  user.fullName,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
@@ -341,7 +383,7 @@ class _LikerCardState extends State<_LikerCard> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _getRoleDisplayName(widget.user.role),
+                  _getRoleDisplayName(user.role),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.greyMedium.withOpacity(0.7),
@@ -350,32 +392,11 @@ class _LikerCardState extends State<_LikerCard> {
               ],
             ),
           ),
-          Icon(
-            Icons.favorite_rounded,
-            size: 18,
-            color: Colors.red.withOpacity(0.6),
+          Text(
+            _reactionEmojis(),
+            style: const TextStyle(fontSize: 18),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ProfileAvatar(
-        imageUrl: widget.user.profilePicture,
-        radius: 22,
-        backgroundColor: AppColors.greyLight,
       ),
     );
   }

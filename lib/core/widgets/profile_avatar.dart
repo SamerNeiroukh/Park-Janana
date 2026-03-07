@@ -54,8 +54,8 @@ class ProfileAvatar extends StatelessWidget {
       ),
       fadeInDuration: const Duration(milliseconds: 200),
       fadeOutDuration: const Duration(milliseconds: 200),
-      memCacheWidth: (radius * 4).toInt(), // 2x for retina
-      memCacheHeight: (radius * 4).toInt(),
+      memCacheWidth: (radius * 4).toInt().clamp(0, 256),
+      memCacheHeight: (radius * 4).toInt().clamp(0, 256),
     );
   }
 }

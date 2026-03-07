@@ -11,7 +11,7 @@ class AttendanceRecord {
   });
 
   double get hoursWorked =>
-      clockOut.difference(clockIn).inMinutes / 60.0;
+      (clockOut.difference(clockIn).inMinutes / 60.0).clamp(0.0, double.infinity);
 
   Map<String, dynamic> toMap() => {
         'clockIn': Timestamp.fromDate(clockIn),
@@ -73,13 +73,17 @@ class AttendanceModel {
     required this.sessions,
   });
 
+  // Only count sessions where the worker actually clocked out
+  List<AttendanceRecord> get _completedSessions =>
+      sessions.where((r) => r.clockIn != r.clockOut).toList();
+
   int get daysWorked {
-    final uniqueDays = sessions.map((r) => r.clockIn.day).toSet();
+    final uniqueDays = _completedSessions.map((r) => r.clockIn.day).toSet();
     return uniqueDays.length;
   }
 
   double get totalHoursWorked {
-    return sessions.fold(0.0, (sum, r) => sum + r.hoursWorked);
+    return _completedSessions.fold(0.0, (total, r) => total + r.hoursWorked);
   }
 
   Map<String, dynamic> toMap() {
@@ -99,8 +103,9 @@ class AttendanceModel {
       userName: map['userName'],
       year: map['year'],
       month: map['month'],
-      sessions: (map['sessions'] as List<dynamic>)
-          .map((r) => AttendanceRecord.fromMap(r as Map<String, dynamic>))
+      sessions: (map['sessions'] as List<dynamic>? ?? [])
+          .where((r) => r is Map)
+          .map((r) => AttendanceRecord.fromMap(Map<String, dynamic>.from(r as Map)))
           .toList(),
     );
   }

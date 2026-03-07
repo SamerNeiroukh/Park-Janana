@@ -1,0 +1,121 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ✅ Keep existing users collection rules
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+
+      // notifications subcollection (only the owner can read/write)
+      match /notifications/{notifId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ✅ Keep existing shifts collection rules
+    match /shifts/{shiftId} {
+      // Allow authenticated users to read shift data
+      allow read: if request.auth != null;
+
+      // Allow authenticated users to create or delete shifts
+      allow create, delete: if request.auth != null;
+
+      // Allow authenticated users to update any of the following fields
+      allow update: if request.auth != null &&
+        request.resource.data.keys().hasAny([
+          "date",
+          "department",
+          "startTime",
+          "endTime",
+          "maxWorkers",
+          "requestedWorkers",
+          "assignedWorkers",
+          "messages",
+          "createdBy",
+          "createdAt",
+          "lastUpdatedBy",
+          "lastUpdatedAt",
+          "status",
+          "cancelReason",
+          "assignedWorkerData",
+          "shiftManager"
+        ]);
+    }
+
+    match /tasks/{taskId} {
+      allow read: if request.auth != null;
+
+      // Full write access for managers & owners
+      allow write: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["manager", "owner"];
+
+      // Allow assigned workers to update their progress, status, comments, activity log
+      allow update: if request.auth != null &&
+        resource.data.assignedTo.hasAny([request.auth.uid]) &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['workerProgress', 'status', 'updatedAt', 'activityLog', 'comments']);
+    }
+
+    match /attendance_logs/{logId} {
+      allow read: if request.auth != null && (
+        logId.split('_')[0] == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['manager', 'owner']
+      );
+
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+
+      allow update: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
+    }
+
+    match /posts/{postId} {
+
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.authorRole in ['manager', 'owner'];
+
+      allow update: if request.auth != null && (
+
+        // ❤️ Like / unlike (legacy individual update)
+        request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly(['likedBy', 'updatedAt'])
+
+        // 🔁 Unified reaction (likedBy + reactions written together)
+        || request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly(['likedBy', 'reactions', 'updatedAt'])
+
+        // 💬 Add / remove comment
+        || request.resource.data.diff(resource.data).changedKeys()
+          .hasOnly(['comments', 'updatedAt'])
+
+        // 📌 Pin / unpin (manager / owner only)
+        || (
+          request.resource.data.diff(resource.data).changedKeys()
+            .hasOnly(['isPinned', 'updatedAt'])
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.role in ['manager', 'owner']
+        )
+
+        // 👍🎉 Reactions only (legacy individual update)
+        || request.resource.data.diff(resource.data).changedKeys()
+            .hasOnly(['reactions', 'updatedAt'])
+      );
+
+      allow delete: if request.auth != null
+        && (
+          resource.data.authorId == request.auth.uid
+          || (
+            exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            && get(/databases/$(database)/documents/users/$(request.auth.uid))
+                .data.role in ['manager', 'owner']
+          )
+        );
+    }
+
+  }
+}

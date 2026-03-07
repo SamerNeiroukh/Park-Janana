@@ -1,4 +1,5 @@
 // ✅ Your original imports remain unchanged
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart' as flutter;
 import 'package:intl/intl.dart';
@@ -39,8 +40,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(), filename: 'דו״ח נוכחות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'דו״ח נוכחות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: attendance PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static Future<void> exportTaskReportPdf({
@@ -69,8 +76,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(), filename: 'דו״ח משימות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'דו״ח משימות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: task PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static Future<void> exportShiftReportPdf({
@@ -101,8 +114,14 @@ class PdfExportService {
       ),
     );
 
-    await Printing.sharePdf(
-        bytes: await pdf.save(), filename: 'דו״ח משמרות - $formattedMonth.pdf');
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'דו״ח משמרות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: shift PDF share failed: $e');
+      rethrow;
+    }
   }
 
   static pw.Widget _buildHeader(String title, String userName, String month,
@@ -372,8 +391,250 @@ class PdfExportService {
     }
   }
 
+  // ─── General manager reports ───────────────────────────────────────────────
+
+  static Future<void> exportWorkersHoursPdf({
+    required flutter.BuildContext context,
+    required List<AttendanceModel> records,
+    required DateTime month,
+  }) async {
+    final pdf = pw.Document();
+    final ttf = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
+    final imageLogo =
+        await imageFromAssetBundle('assets/images/park_logo.png');
+    final formattedMonth = DateFormat.yMMMM('he').format(month);
+
+    pdf.addPage(
+      pw.MultiPage(
+        theme: pw.ThemeData.withFont(base: ttf, bold: ttf),
+        textDirection: pw.TextDirection.rtl,
+        build: (pw.Context ctx) => [
+          _buildGeneralHeader(
+              'דו״ח שעות עבודה', formattedMonth, imageLogo, ttf),
+          pw.SizedBox(height: 10),
+          pw.TableHelper.fromTextArray(
+            headers: ['ממוצע יומי', 'סה"כ שעות', 'ימי עבודה', 'שם עובד'],
+            data: records.map((r) {
+              final avg = r.daysWorked > 0
+                  ? (r.totalHoursWorked / r.daysWorked).toStringAsFixed(1)
+                  : '0.0';
+              return [
+                avg,
+                r.totalHoursWorked.toStringAsFixed(1),
+                '${r.daysWorked}',
+                r.userName,
+              ];
+            }).toList(),
+            headerStyle:
+                pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold),
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
+            cellAlignment: pw.Alignment.centerRight,
+            headerDecoration:
+                const pw.BoxDecoration(color: PdfColors.grey300),
+            border: pw.TableBorder.all(color: PdfColors.grey),
+          ),
+        ],
+      ),
+    );
+
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'שעות עבודה - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: work hours PDF share failed: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> exportTaskDistributionPdf({
+    required flutter.BuildContext context,
+    required List<WorkerTaskStat> stats,
+    required DateTime month,
+  }) async {
+    final pdf = pw.Document();
+    final ttf = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
+    final imageLogo =
+        await imageFromAssetBundle('assets/images/park_logo.png');
+    final formattedMonth = DateFormat.yMMMM('he').format(month);
+
+    pdf.addPage(
+      pw.MultiPage(
+        theme: pw.ThemeData.withFont(base: ttf, bold: ttf),
+        textDirection: pw.TextDirection.rtl,
+        build: (pw.Context ctx) => [
+          _buildGeneralHeader(
+              'דו״ח התפלגות משימות', formattedMonth, imageLogo, ttf),
+          pw.SizedBox(height: 10),
+          pw.TableHelper.fromTextArray(
+            headers: [
+              'שיעור השלמה',
+              'ממתינות',
+              'בתהליך',
+              'הושלמו',
+              'משימות',
+              'שם עובד'
+            ],
+            data: stats.map((s) {
+              final rate = s.total > 0
+                  ? '${(s.done / s.total * 100).round()}%'
+                  : '0%';
+              return [
+                rate,
+                '${s.pending}',
+                '${s.inProgress}',
+                '${s.done}',
+                '${s.total}',
+                s.name,
+              ];
+            }).toList(),
+            headerStyle:
+                pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold),
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
+            cellAlignment: pw.Alignment.centerRight,
+            headerDecoration:
+                const pw.BoxDecoration(color: PdfColors.grey300),
+            border: pw.TableBorder.all(color: PdfColors.grey),
+          ),
+        ],
+      ),
+    );
+
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'התפלגות משימות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: task distribution PDF share failed: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> exportShiftCoveragePdf({
+    required flutter.BuildContext context,
+    required List<DeptShiftStat> stats,
+    required int totalShifts,
+    required DateTime month,
+  }) async {
+    final pdf = pw.Document();
+    final ttf = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/NotoSansHebrew-Regular.ttf'));
+    final imageLogo =
+        await imageFromAssetBundle('assets/images/park_logo.png');
+    final formattedMonth = DateFormat.yMMMM('he').format(month);
+
+    pdf.addPage(
+      pw.MultiPage(
+        theme: pw.ThemeData.withFont(base: ttf, bold: ttf),
+        textDirection: pw.TextDirection.rtl,
+        build: (pw.Context ctx) => [
+          _buildGeneralHeader(
+              'דו״ח כיסוי משמרות', formattedMonth, imageLogo, ttf),
+          pw.SizedBox(height: 10),
+          pw.TableHelper.fromTextArray(
+            headers: [
+              'אחוז מילוי',
+              'עובדים שובצו',
+              'קיבולת כוללת',
+              'משמרות',
+              'מחלקה'
+            ],
+            data: stats.map((s) {
+              final rate = s.totalCapacity > 0
+                  ? '${(s.filledSlots / s.totalCapacity * 100).round()}%'
+                  : '0%';
+              return [
+                rate,
+                '${s.filledSlots}',
+                '${s.totalCapacity}',
+                '${s.shiftCount}',
+                s.hebrewName,
+              ];
+            }).toList(),
+            headerStyle:
+                pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold),
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
+            cellAlignment: pw.Alignment.centerRight,
+            headerDecoration:
+                const pw.BoxDecoration(color: PdfColors.grey300),
+            border: pw.TableBorder.all(color: PdfColors.grey),
+          ),
+        ],
+      ),
+    );
+
+    try {
+      await Printing.sharePdf(
+          bytes: await pdf.save(),
+          filename: 'כיסוי משמרות - $formattedMonth.pdf');
+    } catch (e) {
+      debugPrint('PdfExportService: shift coverage PDF share failed: $e');
+      rethrow;
+    }
+  }
+
+  static pw.Widget _buildGeneralHeader(
+      String title, String month, pw.ImageProvider logo, pw.Font font) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(title,
+                style: pw.TextStyle(
+                    font: font,
+                    fontSize: 22,
+                    fontWeight: pw.FontWeight.bold)),
+            pw.Text('חודש: $month',
+                style: pw.TextStyle(font: font, fontSize: 14)),
+          ],
+        ),
+        pw.Image(logo, width: 60),
+      ],
+    );
+  }
+
   static Future<pw.ImageProvider> imageFromAssetBundle(String path) async {
     final byteData = await rootBundle.load(path);
     return pw.MemoryImage(byteData.buffer.asUint8List());
   }
+}
+
+// ─── Data classes used by PDF exports ─────────────────────────────────────────
+
+class WorkerTaskStat {
+  final String uid;
+  final String name;
+  final int total;
+  final int done;
+  final int inProgress;
+  final int pending;
+
+  const WorkerTaskStat({
+    required this.uid,
+    required this.name,
+    required this.total,
+    required this.done,
+    required this.inProgress,
+    required this.pending,
+  });
+}
+
+class DeptShiftStat {
+  final String department;
+  final String hebrewName;
+  final int shiftCount;
+  final int totalCapacity;
+  final int filledSlots;
+
+  const DeptShiftStat({
+    required this.department,
+    required this.hebrewName,
+    required this.shiftCount,
+    required this.totalCapacity,
+    required this.filledSlots,
+  });
 }

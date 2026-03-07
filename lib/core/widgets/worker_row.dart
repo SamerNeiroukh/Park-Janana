@@ -21,7 +21,6 @@ class WorkerRow extends StatelessWidget {
     required this.isApproved,
     required this.onApproveToggle,
     required this.showRemoveIcon,
-    required Null Function() onTap, // kept as-is (not image-related)
   });
 
   @override
