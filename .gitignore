@@ -51,3 +51,9 @@ firebase.json
 
 # App secrets — never commit real keys
 lib/core/constants/secrets.dart
+
+# Android signing — never commit these
+android/key.properties
+android/app/upload-keystore.jks
+android/app/*.jks
+android/app/*.keystore
