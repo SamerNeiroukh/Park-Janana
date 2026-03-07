@@ -61,7 +61,7 @@ dependencies:
   package_info_plus: ^9.0.0
   video_thumbnail: ^0.5.3
 
-  intl: ^0.19.0
+  intl: 0.20.2
   connectivity_plus: ^6.0.0
   url_launcher: ^6.3.0
   local_auth: ^2.3.0
