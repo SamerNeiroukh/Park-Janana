@@ -36,7 +36,14 @@
       "Bash(./gradlew:*)",
       "Bash(tee:*)",
       "Read(//c/Users/Samer Neiroukh/.claude/projects/c--dev-park-janana/**)",
-      "Read(//c/Users/Samer Neiroukh/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_functions-6.0.1/lib/**)"
+      "Read(//c/Users/Samer Neiroukh/AppData/Local/Pub/Cache/hosted/pub.dev/cloud_functions-6.0.1/lib/**)",
+      "Bash(keytool -version)",
+      "Bash(keytool -genkeypair -v -storetype JKS -keystore c:/dev/park_janana/android/app/upload-keystore.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 -storepass 'P7n6C2Q7M$^d$2KxPmWw' -keypass 'P7n6C2Q7M$^d$2KxPmWw' -dname \"CN=Park Janana, OU=App, O=Park Janana, L=Israel, ST=Israel, C=IL\")",
+      "Bash(keytool -importkeystore -srckeystore c:/dev/park_janana/android/app/upload-keystore.jks -destkeystore c:/dev/park_janana/android/app/upload-keystore.jks -deststoretype pkcs12 -srcstorepass 'P7n6C2Q7M$^d$2KxPmWw' -deststorepass 'P7n6C2Q7M$^d$2KxPmWw' -noprompt)"
+    ],
+    "additionalDirectories": [
+      "c:\\dev\\park_janana\\android\\app",
+      "c:\\Users\\Samer Neiroukh\\Desktop"
     ]
   }
 }

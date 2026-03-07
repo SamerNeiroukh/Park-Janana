@@ -1,4 +1,4 @@
-package com.example.park_janana
+package com.parkjanana.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
