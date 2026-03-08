@@ -41,11 +41,17 @@
       "Bash(keytool -genkeypair -v -storetype JKS -keystore c:/dev/park_janana/android/app/upload-keystore.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 -storepass 'P7n6C2Q7M$^d$2KxPmWw' -keypass 'P7n6C2Q7M$^d$2KxPmWw' -dname \"CN=Park Janana, OU=App, O=Park Janana, L=Israel, ST=Israel, C=IL\")",
       "Bash(keytool -importkeystore -srckeystore c:/dev/park_janana/android/app/upload-keystore.jks -destkeystore c:/dev/park_janana/android/app/upload-keystore.jks -deststoretype pkcs12 -srcstorepass 'P7n6C2Q7M$^d$2KxPmWw' -deststorepass 'P7n6C2Q7M$^d$2KxPmWw' -noprompt)",
       "Bash(flutter upgrade)",
-      "Bash(flutter upgrade --force)"
+      "Bash(flutter upgrade --force)",
+      "Bash(powershell.exe -Command \"setx PUB_CACHE ''C:\\\\pub-cache''\")",
+      "Bash(powershell.exe -Command \"Copy-Item -Path \"\"$env:LOCALAPPDATA\\\\Pub\\\\Cache\"\" -Destination ''C:\\\\pub-cache'' -Recurse -Force\")",
+      "Bash(powershell.exe -Command \"Copy-Item -Path \\(Join-Path $env:LOCALAPPDATA ''Pub\\\\Cache''\\) -Destination ''C:\\\\pub-cache'' -Recurse -Force\")",
+      "Bash(powershell.exe -NoProfile -Command \"& { Copy-Item -Path \"\"$env:LOCALAPPDATA\\\\Pub\\\\Cache\"\" -Destination ''C:\\\\pub-cache'' -Recurse -Force }\")",
+      "Bash(powershell.exe -NoProfile -Command 'Copy-Item -Path \"\"$env:LOCALAPPDATA\\\\Pub\\\\Cache\"\" -Destination \"\"C:\\\\pub-cache\"\" -Recurse -Force')",
+      "Bash(powershell.exe -NoProfile -Command 'Test-Path \"\"C:\\\\pub-cache\\\\hosted\"\"')",
+      "Bash(export PUB_CACHE=\"C:/pub-cache\")"
     ],
     "additionalDirectories": [
-      "c:\\dev\\park_janana\\android\\app",
-      "c:\\Users\\Samer Neiroukh\\Desktop"
+      "c:\\dev\\park_janana\\android\\app"
     ]
   }
 }
