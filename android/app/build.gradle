@@ -29,7 +29,7 @@ android {
 
     defaultConfig {
         applicationId = "com.parkjanana.app"
-        minSdkVersion 23  // Required by cloud_firestore
+        minSdkVersion flutter.minSdkVersion  // Required by cloud_firestore
         targetSdkVersion 35
         versionCode 1
         versionName "1.0.0"
