@@ -16,6 +16,7 @@ class PostDetailSheet extends StatefulWidget {
   final String currentUserName;
   final String currentUserProfilePicture;
   final bool isManager;
+  final bool isOwner;
   final VoidCallback? onLike;
   final void Function(String key)? onReact;
   final VoidCallback? onDelete;
@@ -30,6 +31,7 @@ class PostDetailSheet extends StatefulWidget {
     required this.currentUserName,
     required this.currentUserProfilePicture,
     this.isManager = false,
+    this.isOwner = false,
     this.onLike,
     this.onReact,
     this.onDelete,
@@ -454,7 +456,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ],
           ),
         ),
-        if (post.authorId == widget.currentUserId || widget.isManager)
+        if (post.authorId == widget.currentUserId || widget.isOwner)
           _buildOptionsButton(post),
       ],
     );
@@ -866,7 +868,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final comment = post.comments[index];
-            final canDelete = comment.userId == widget.currentUserId || widget.isManager;
+            final canDelete = comment.userId == widget.currentUserId || widget.isOwner;
             return _ModernCommentCard(
               comment: comment,
               canDelete: canDelete,

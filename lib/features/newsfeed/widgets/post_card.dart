@@ -9,6 +9,7 @@ class PostCard extends StatefulWidget {
   final PostModel post;
   final String currentUserId;
   final bool isManager;
+  final bool isOwner;
   final VoidCallback? onLike;
   final void Function(String key)? onReact;
   final VoidCallback? onComment;
@@ -23,6 +24,7 @@ class PostCard extends StatefulWidget {
     required this.post,
     required this.currentUserId,
     this.isManager = false,
+    this.isOwner = false,
     this.onLike,
     this.onReact,
     this.onComment,
@@ -300,7 +302,7 @@ class _PostCardState extends State<PostCard> {
             ],
           ),
         ),
-        if (widget.post.authorId == widget.currentUserId || widget.isManager)
+        if (widget.post.authorId == widget.currentUserId || widget.isOwner)
           _buildOptionsMenu(),
       ],
     );

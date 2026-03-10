@@ -15,6 +15,7 @@ class CommentsSheet extends StatefulWidget {
   final String currentUserName;
   final String currentUserProfilePicture;
   final bool isManager;
+  final bool isOwner;
 
   const CommentsSheet({
     super.key,
@@ -23,6 +24,7 @@ class CommentsSheet extends StatefulWidget {
     required this.currentUserName,
     required this.currentUserProfilePicture,
     this.isManager = false,
+    this.isOwner = false,
   });
 
   @override
@@ -318,7 +320,7 @@ class _CommentsSheetState extends State<CommentsSheet>
       itemCount: post.comments.length,
       itemBuilder: (context, index) {
         final comment = post.comments[index];
-        final canDelete = comment.userId == widget.currentUserId || widget.isManager;
+        final canDelete = comment.userId == widget.currentUserId || widget.isOwner;
 
         return _CommentCard(
           key: ValueKey(comment.id),

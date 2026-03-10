@@ -138,7 +138,11 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   }
 
   bool _isManager(String? role) {
-    return role == 'manager' || role == 'owner';
+    return role == 'manager' || role == 'owner' || role == 'co_owner';
+  }
+
+  bool _isOwner(String? role) {
+    return role == 'owner' || role == 'co_owner';
   }
 
   void _showCreatePostDialog(BuildContext context) {
@@ -181,6 +185,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     final userProvider = context.read<UserProvider>();
     final currentUser = userProvider.currentUser;
     final isManager = _isManager(authProvider.userRole);
+    final isOwner = _isOwner(authProvider.userRole);
 
     showModalBottomSheet(
       context: context,
@@ -192,6 +197,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         currentUserName: currentUser?.fullName ?? 'משתמש',
         currentUserProfilePicture: currentUser?.profilePicture ?? '',
         isManager: isManager,
+        isOwner: isOwner,
         openComments: openComments,
         onLike: () => _handleLike(post, userId),
         onReact: (key) => _handleReact(post, key, userId),
@@ -341,6 +347,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     return Consumer<AppAuthProvider>(
       builder: (context, authProvider, _) {
         final isManager = _isManager(authProvider.userRole);
+        final isOwner = _isOwner(authProvider.userRole);
         final userId = authProvider.uid ?? '';
 
         return Scaffold(
@@ -398,7 +405,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                     _buildCategoryFilters(),
                     const SizedBox(height: 8),
                     Expanded(
-                      child: _buildFeed(isManager, userId),
+                      child: _buildFeed(isManager, isOwner, userId),
                     ),
                   ],
                 ),
@@ -593,7 +600,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
     );
   }
 
-  Widget _buildFeed(bool isManager, String userId) {
+  Widget _buildFeed(bool isManager, bool isOwner, String userId) {
     return StreamBuilder<List<PostModel>>(
       // Use the cached stream to avoid recreating on every build
       stream: _postsStream,
@@ -685,6 +692,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                 post: post,
                 currentUserId: userId,
                 isManager: isManager,
+                isOwner: isOwner,
                 index: index,
                 onLike: () => _handleLike(post, userId),
                 onReact: (key) => _handleReact(post, key, userId),
