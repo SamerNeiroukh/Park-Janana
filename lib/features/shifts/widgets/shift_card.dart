@@ -52,7 +52,7 @@ class ShiftCardState extends State<ShiftCard> {
               _buildStatusIndicator(),
               const SizedBox(width: 14),
               Expanded(child: _buildMainInfo()),
-              const Icon(Icons.chevron_left, color: AppColors.textSecondary),
+              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
             ],
           ),
         ),
