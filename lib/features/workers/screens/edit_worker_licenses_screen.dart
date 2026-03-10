@@ -269,7 +269,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               ),
             ],
           ),
-          if (widget.currentUserRole == 'owner' || widget.currentUserRole == 'co_owner') ...[
+          if (widget.currentUserRole == 'owner') ...[
             const SizedBox(height: 12),
             _buildRoleTile(
               role: 'co_owner',

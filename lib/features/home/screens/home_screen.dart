@@ -275,9 +275,23 @@ class _HomeScreenState extends State<HomeScreen>
                                 context.read<UserProvider>().loadWorkStats(),
                           ),
 
+                          // ── 3. UNDERSTAFFED SHIFTS WARNING (managers only) ──
+                          if (userData.role == 'manager' ||
+                              userData.role == 'co_owner') ...[
+                            const SizedBox(height: 16),
+                            _UnderstaffedShiftsBanner(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const ManagerWeeklyScheduleScreen()),
+                              ),
+                            ),
+                          ],
+
                           const SizedBox(height: 16),
 
-                          // ── 3. HORIZONTAL ACTION STRIP ────────────
+                          // ── 4. HORIZONTAL ACTION STRIP ────────────
                           _HorizontalActionStrip(
                             items: _buildStripItems(
                               userData.role,
@@ -289,22 +303,6 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
 
                           const SizedBox(height: 16),
-
-                          // ── 4. UNDERSTAFFED SHIFTS WARNING (managers only) ──
-                          if (userData.role == 'manager' ||
-                              userData.role == 'co_owner')
-                            _UnderstaffedShiftsBanner(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const ManagerWeeklyScheduleScreen()),
-                              ),
-                            ),
-
-                          if (userData.role == 'manager' ||
-                              userData.role == 'co_owner')
-                            const SizedBox(height: 16),
 
                           // ── 5. LATEST POST CARD ───────────────────
                           LatestPostCard(
@@ -772,40 +770,43 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFEF4444), width: 1.5),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withOpacity(0.15),
-                  shape: BoxShape.circle,
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.warning_amber_rounded,
+                      color: Color(0xFFDC2626), size: 20),
                 ),
-                child: const Icon(Icons.warning_amber_rounded,
-                    color: Color(0xFFDC2626), size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$_understaffedCount משמרות היום חסרות עובדים',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF991B1B),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$_understaffedCount משמרות היום חסרות עובדים',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF991B1B),
+                        ),
                       ),
-                    ),
-                    const Text(
-                      'לחץ לסידור שבועי',
-                      style: TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
-                    ),
-                  ],
+                      const Text(
+                        'לחץ לסידור שבועי',
+                        style: TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(Icons.chevron_left_rounded,
-                  color: Color(0xFFDC2626), size: 22),
-            ],
+                const Icon(Icons.chevron_right_rounded,
+                    color: Color(0xFFDC2626), size: 22),
+              ],
+            ),
           ),
         ),
       ),

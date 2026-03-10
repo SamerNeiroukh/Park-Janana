@@ -566,7 +566,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_left_rounded,
+            const Icon(Icons.chevron_right_rounded,
                 color: Color(0xFFD97706), size: 22),
           ],
         ),
@@ -617,7 +617,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_left_rounded,
+            const Icon(Icons.chevron_right_rounded,
                 color: Color(0xFFDC2626), size: 22),
           ],
         ),
@@ -901,7 +901,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(Icons.chevron_left_rounded,
+                const Icon(Icons.chevron_right_rounded,
                     color: Color(0xFF94A3B8), size: 18),
                 const SizedBox(width: 4),
                 Text(

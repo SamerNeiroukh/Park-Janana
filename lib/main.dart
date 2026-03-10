@@ -134,10 +134,7 @@ class _MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('he'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('he'), Locale('en')],
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.ltr,

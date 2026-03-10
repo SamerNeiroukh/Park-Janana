@@ -48,7 +48,7 @@ service cloud.firestore {
       // Full write access for managers & owners
       allow write: if request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["manager", "owner"];
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["manager", "owner", "co_owner"];
 
       // Allow assigned workers to update their progress, status, comments, activity log
       allow update: if request.auth != null &&
@@ -60,7 +60,7 @@ service cloud.firestore {
     match /attendance_logs/{logId} {
       allow read: if request.auth != null && (
         logId.split('_')[0] == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['manager', 'owner']
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['manager', 'owner', 'co_owner']
       );
 
       allow create: if request.auth != null &&
@@ -76,7 +76,7 @@ service cloud.firestore {
 
       allow create: if request.auth != null
         && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.authorRole in ['manager', 'owner'];
+        && request.resource.data.authorRole in ['manager', 'owner', 'co_owner'];
 
       allow update: if request.auth != null && (
 
@@ -98,7 +98,7 @@ service cloud.firestore {
             .hasOnly(['isPinned', 'updatedAt'])
           && exists(/databases/$(database)/documents/users/$(request.auth.uid))
           && get(/databases/$(database)/documents/users/$(request.auth.uid))
-              .data.role in ['manager', 'owner']
+              .data.role in ['manager', 'owner', 'co_owner']
         )
 
         // 👍🎉 Reactions only (legacy individual update)
@@ -112,7 +112,7 @@ service cloud.firestore {
           || (
             exists(/databases/$(database)/documents/users/$(request.auth.uid))
             && get(/databases/$(database)/documents/users/$(request.auth.uid))
-                .data.role in ['manager', 'owner']
+                .data.role in ['manager', 'owner', 'co_owner']
           )
         );
     }

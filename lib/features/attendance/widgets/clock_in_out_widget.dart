@@ -9,6 +9,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
 
 // ── Color tokens (on the hero-card gradient background) ──────────────────────
@@ -215,8 +216,23 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     if (_actionInProgress) return;
 
     final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
-    final insidePark = await LocationUtils.isInsidePark();
+    bool? insidePark = await LocationUtils.isInsidePark();
     final isClockingIn = _ongoingSession == null;
+
+    if (insidePark == null && mounted) {
+      // Location service off or permission denied — ask user to enable it
+      final enabled = await _showLocationRequiredDialog();
+      if (!enabled || !mounted) {
+        _ringCtrl.animateBack(0, curve: Curves.easeOut);
+        return;
+      }
+      // Re-check after returning from settings
+      insidePark = await LocationUtils.isInsidePark();
+      if (insidePark == null && mounted) {
+        _ringCtrl.animateBack(0, curve: Curves.easeOut);
+        return;
+      }
+    }
 
     if (insidePark != true && mounted) {
       final confirm = await _showLocationWarning(isClockingIn);
@@ -266,6 +282,141 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         _actionFired = false;
       }
     }
+  }
+
+  // ── Location required (service off / permission denied) ──────────────────
+
+  Future<bool> _showLocationRequiredDialog() async {
+    final result = await showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: 'LocationRequired',
+      barrierColor: Colors.black54.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (ctx, _, __) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(ctx).size.width * 0.85,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10))
+              ],
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                          colors: [AppColors.salmon, AppColors.darkRed],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.red.withOpacity(0.4),
+                            blurRadius: 20,
+                            spreadRadius: 2)
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: const Icon(Icons.location_disabled_rounded,
+                        size: 48, color: Colors.white),
+                  ),
+                  const SizedBox(height: 22),
+                  const Text(
+                    'נדרשת גישה למיקום',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.black87),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'כדי לדווח כניסה או יציאה ממשמרת יש לאפשר שירותי מיקום במכשיר.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                        height: 1.5,
+                        color: Colors.black54),
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey[200],
+                              foregroundColor: Colors.black54,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                              elevation: 0),
+                          onPressed: () => Navigator.of(ctx).pop(false),
+                          child: const Text('ביטול',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 15)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                              elevation: 0,
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent),
+                          onPressed: () async {
+                            await Geolocator.openLocationSettings();
+                            if (ctx.mounted) Navigator.of(ctx).pop(true);
+                          },
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                  colors: [AppColors.darkRed, AppColors.salmon],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: const Text('הפעל מיקום',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 15,
+                                      color: Colors.white)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      transitionBuilder: (_, anim, __, child) {
+        final v = Curves.easeInOut.transform(anim.value);
+        return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
+      },
+    );
+    return result ?? false;
   }
 
   // ── Location warning (UNCHANGED) ─────────────────────────────────────────
