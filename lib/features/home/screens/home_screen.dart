@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 
 // ── Navigation targets (ALL UNCHANGED) ───────────────────────────────────
 import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
@@ -287,6 +289,22 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
 
                           const SizedBox(height: 16),
+
+                          // ── 4. UNDERSTAFFED SHIFTS WARNING (managers only) ──
+                          if (userData.role == 'manager' ||
+                              userData.role == 'co_owner')
+                            _UnderstaffedShiftsBanner(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const ManagerWeeklyScheduleScreen()),
+                              ),
+                            ),
+
+                          if (userData.role == 'manager' ||
+                              userData.role == 'co_owner')
+                            const SizedBox(height: 16),
 
                           // ── 5. LATEST POST CARD ───────────────────
                           LatestPostCard(
@@ -691,6 +709,104 @@ class _StripPillState extends State<_StripPill> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Understaffed shifts banner (managers only) ────────────────────────────
+
+class _UnderstaffedShiftsBanner extends StatefulWidget {
+  final VoidCallback onTap;
+  const _UnderstaffedShiftsBanner({required this.onTap});
+
+  @override
+  State<_UnderstaffedShiftsBanner> createState() =>
+      _UnderstaffedShiftsBannerState();
+}
+
+class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
+  int _understaffedCount = 0;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final today = '${DateTime.now().day.toString().padLeft(2, '0')}/'
+          '${DateTime.now().month.toString().padLeft(2, '0')}/'
+          '${DateTime.now().year}';
+      final snap = await FirebaseFirestore.instance
+          .collection(AppConstants.shiftsCollection)
+          .where('date', isEqualTo: today)
+          .get();
+      int count = 0;
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final max = (data['maxWorkers'] as num?)?.toInt() ?? 0;
+        final assigned = (data['assignedWorkerData'] as List?)?.length ?? 0;
+        if (max > 0 && assigned / max < 0.5) count++;
+      }
+      if (mounted) setState(() { _understaffedCount = count; _loaded = true; });
+    } catch (_) {
+      if (mounted) setState(() => _loaded = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded || _understaffedCount == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEE2E2),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEF4444), width: 1.5),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.warning_amber_rounded,
+                    color: Color(0xFFDC2626), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$_understaffedCount משמרות היום חסרות עובדים',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF991B1B),
+                      ),
+                    ),
+                    const Text(
+                      'לחץ לסידור שבועי',
+                      style: TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_left_rounded,
+                  color: Color(0xFFDC2626), size: 22),
+            ],
+          ),
         ),
       ),
     );
