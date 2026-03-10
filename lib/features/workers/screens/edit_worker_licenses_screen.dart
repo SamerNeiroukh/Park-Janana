@@ -264,12 +264,21 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                   label: 'מנהל',
                   icon: Icons.supervisor_account_rounded,
                   color: const Color(0xFF6366F1),
-                  lockedForNonOwner: widget.currentUserRole != 'owner',
+                  lockedForNonOwner: widget.currentUserRole != 'owner' && widget.currentUserRole != 'co_owner',
                 ),
               ),
             ],
           ),
-          if (widget.currentUserRole != 'owner') ...[
+          if (widget.currentUserRole == 'owner' || widget.currentUserRole == 'co_owner') ...[
+            const SizedBox(height: 12),
+            _buildRoleTile(
+              role: 'co_owner',
+              label: 'בעלים משותף',
+              icon: Icons.star_rounded,
+              color: const Color(0xFFF59E0B),
+            ),
+          ],
+          if (widget.currentUserRole != 'owner' && widget.currentUserRole != 'co_owner') ...[
             const SizedBox(height: 10),
             const Row(
               children: [

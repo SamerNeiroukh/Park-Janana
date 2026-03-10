@@ -322,7 +322,7 @@ class NotificationService {
 
   Future<void> _pushManagerBoardHighlight(NavigatorState nav, String taskId) async {
     final role = await _fetchCurrentRole();
-    if (role != 'manager' && role != 'owner' && role != 'admin') {
+    if (role != 'manager' && role != 'owner' && role != 'co_owner' && role != 'admin') {
       debugPrint('ManagerBoardHighlight blocked — role=$role is not authorized');
       return;
     }
@@ -336,7 +336,7 @@ class NotificationService {
 
   Future<void> _pushManageWorkers(NavigatorState nav) async {
     final role = await _fetchCurrentRole();
-    if (role != 'manager' && role != 'owner' && role != 'admin') {
+    if (role != 'manager' && role != 'owner' && role != 'co_owner' && role != 'admin') {
       debugPrint('ManageWorkers blocked — role=$role is not authorized');
       return;
     }

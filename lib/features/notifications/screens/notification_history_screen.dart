@@ -39,7 +39,7 @@ class _NotificationHistoryScreenState
   bool _isMarkingAll = false;
 
   bool get _isManager =>
-      _userRole == 'manager' || _userRole == 'owner' || _userRole == 'admin';
+      _userRole == 'manager' || _userRole == 'owner' || _userRole == 'co_owner' || _userRole == 'admin';
 
   // ── Build ─────────────────────────────────────────────────────────────────
 

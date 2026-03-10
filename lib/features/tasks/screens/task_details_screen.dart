@@ -42,7 +42,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
 
   bool get _isManager {
     final role = context.read<AppAuthProvider>().userRole;
-    return role == 'manager' || role == 'owner' || role == 'admin';
+    return role == 'manager' || role == 'owner' || role == 'co_owner' || role == 'admin';
   }
 
   bool get _isWorker => _task.assignedTo.contains(_currentUid ?? '');

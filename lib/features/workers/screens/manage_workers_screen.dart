@@ -68,7 +68,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     try {
       final snap = await FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .where('role', whereIn: ['worker', 'manager'])
+          .where('role', whereIn: ['worker', 'manager', 'co_owner'])
           .where('approved', isEqualTo: false)
           .get();
       if (!mounted) return;
@@ -156,7 +156,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .where('role', whereIn: ['worker', 'manager'])
+          .where('role', whereIn: ['worker', 'manager', 'co_owner'])
           .where('approved', isEqualTo: false)
           .snapshots(),
       builder: (context, snapshot) {
@@ -284,7 +284,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .where('role', whereIn: ['worker', 'manager'])
+          .where('role', whereIn: ['worker', 'manager', 'co_owner'])
           .where('approved', isEqualTo: true)
           .snapshots(),
       builder: (context, snapshot) {

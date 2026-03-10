@@ -37,7 +37,7 @@ class ReviewWorkerScreen extends StatelessWidget {
 
     // Managers cannot modify other managers — only owners can.
     final bool canManage =
-        currentUserRole == 'owner' || role != 'manager';
+        currentUserRole == 'owner' || currentUserRole == 'co_owner' || role != 'manager';
 
     final worker = UserModel(
       uid: uid,
