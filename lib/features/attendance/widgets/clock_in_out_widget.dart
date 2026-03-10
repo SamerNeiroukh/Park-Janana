@@ -43,19 +43,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   // ── Timers ────────────────────────────────────────────────────────────────
   Timer? _secondTimer;
   Timer? _elapsedTimer;
-  Timer? _quoteTimer;
   DateTime _now = DateTime.now();
   Duration _elapsed = Duration.zero;
-
-  // ── Quotes (idle state) ───────────────────────────────────────────────────
-  static const List<String> _quotes = [
-    '! היום זו הזדמנות חדשה להצטיין',
-    '! תן את המיטב שלך בפארק היום',
-    'אתה חלק חשוב בצוות שלנו 💪',
-    'כל משמרת היא הזדמנות להשפיע ✨',
-    'תשמור על חיוך – זה מדבק 😄',
-  ];
-  int _quoteIndex = 0;
 
   // ── Animation controllers ─────────────────────────────────────────────────
   late final AnimationController _ringCtrl;   // long-press ring fill 0→1
@@ -91,7 +80,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     )..repeat(reverse: true);
 
     _startSecondTimer();
-    _startQuoteTimer();
     _fetchSession();
   }
 
@@ -99,7 +87,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   void dispose() {
     _secondTimer?.cancel();
     _elapsedTimer?.cancel();
-    _quoteTimer?.cancel();
     _ringCtrl.dispose();
     _burstCtrl.dispose();
     _breatheCtrl.dispose();
@@ -127,12 +114,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         }
       });
     }
-  }
-
-  void _startQuoteTimer() {
-    _quoteTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      if (mounted) setState(() => _quoteIndex = (_quoteIndex + 1) % _quotes.length);
-    });
   }
 
   // ── Long-press ring callbacks ─────────────────────────────────────────────
@@ -466,28 +447,13 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
 
           const SizedBox(height: 10),
 
-          // ── Elapsed time OR motivational quote ──────────────────────────
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 450),
-            transitionBuilder: (child, anim) => FadeTransition(
-              opacity: anim,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                        begin: const Offset(0, 0.3), end: Offset.zero)
-                    .animate(anim),
-                child: child,
-              ),
+          // ── Elapsed time (when clocked in) ──────────────────────────────
+          if (isClockedIn)
+            _ActiveClockInfo(
+              key: const ValueKey('elapsed'),
+              elapsed: _elapsed,
+              clockInTime: _ongoingSession!.clockIn,
             ),
-            child: isClockedIn
-                ? _ActiveClockInfo(
-                    key: const ValueKey('elapsed'),
-                    elapsed: _elapsed,
-                    clockInTime: _ongoingSession!.clockIn,
-                  )
-                : _QuoteText(
-                    key: ValueKey(_quoteIndex),
-                    text: _quotes[_quoteIndex]),
-          ),
 
           const SizedBox(height: 5),
 
@@ -562,28 +528,6 @@ class _ActiveClockInfo extends StatelessWidget {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-//  Quote text widget (when idle)
-// ═════════════════════════════════════════════════════════════════════════════
-
-class _QuoteText extends StatelessWidget {
-  final String text;
-  const _QuoteText({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: Colors.white.withOpacity(0.65),
-        height: 1.4,
-      ),
-    );
-  }
-}
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  Analog clock CustomPainter
