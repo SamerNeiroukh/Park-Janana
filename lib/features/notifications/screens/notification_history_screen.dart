@@ -485,6 +485,12 @@ class _NotificationHistoryScreenState
         color: Color(0xFFF59E0B),
       );
     }
+    if (type == 'clockout_missed') {
+      return const _TypeConfig(
+        icon: Icons.timer_off_rounded,
+        color: Color(0xFFEF4444),
+      );
+    }
     return const _TypeConfig(
       icon: Icons.notifications_rounded,
       color: TaskTheme.primary,

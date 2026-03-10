@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
@@ -51,6 +53,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   late final AnimationController _burstCtrl;  // success micro-burst
   late final AnimationController _breatheCtrl; // idle clock glow
 
+  bool _autoClockOutDone = false;
   bool _actionFired = false;
   bool _haptic25 = false;
   bool _haptic50 = false;
@@ -103,16 +106,46 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
 
   void _startElapsedTimer() {
     _elapsedTimer?.cancel();
+    _autoClockOutDone = false;
     if (_ongoingSession != null) {
       _elapsed = DateTime.now().difference(_ongoingSession!.clockIn);
       _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (mounted && _ongoingSession != null) {
-          setState(
-              () => _elapsed = DateTime.now().difference(_ongoingSession!.clockIn));
+          final elapsed = DateTime.now().difference(_ongoingSession!.clockIn);
+          setState(() => _elapsed = elapsed);
+          if (!_autoClockOutDone && elapsed.inHours >= 16) {
+            _autoClockOutDone = true;
+            _elapsedTimer?.cancel();
+            _autoClockOut();
+          }
         } else {
           _elapsedTimer?.cancel();
         }
       });
+    }
+  }
+
+  Future<void> _autoClockOut() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || _ongoingSession == null) return;
+    try {
+      await _clockService.clockOut();
+      await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .collection('notifications')
+          .add({
+        'type': 'clockout_missed',
+        'title': 'יציאה אוטומטית ממשמרת',
+        'body': 'לא דיווחת יציאה לאחר 16 שעות – המערכת סיימה את המשמרת אוטומטית. פנה למנהל שלך.',
+        'entityId': '',
+        'isRead': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      await _fetchSession();
+      widget.onClockComplete?.call();
+    } catch (e) {
+      debugPrint('Auto clock-out error: $e');
     }
   }
 
