@@ -25,6 +25,7 @@ class EditWorkerLicensesScreen extends StatefulWidget {
 class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
   final List<String> _selectedDepartments = [];
   String _role = 'worker';
+  String _originalRole = 'worker';
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -44,9 +45,11 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         final data = doc.data() as Map<String, dynamic>;
         final List<String> licensed =
             List<String>.from(data['licensedDepartments'] ?? []);
+        final loadedRole = data['role'] as String? ?? 'worker';
         setState(() {
           _selectedDepartments.addAll(licensed);
-          _role = data['role'] ?? 'worker';
+          _role = loadedRole;
+          _originalRole = loadedRole;
         });
       }
     } catch (e) {
@@ -66,6 +69,15 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
     });
   }
 
+  String _roleLabel(String role) {
+    switch (role) {
+      case 'manager': return 'מנהל';
+      case 'co_owner': return 'בעלים משותף';
+      case 'owner': return 'בעלים';
+      default: return 'עובד';
+    }
+  }
+
   Future<void> _saveChanges() async {
     setState(() => _isSaving = true);
     try {
@@ -76,6 +88,23 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         'licensedDepartments': _selectedDepartments,
         'role': _role,
       });
+
+      // Send in-app notification if role changed
+      if (_role != _originalRole) {
+        await FirebaseFirestore.instance
+            .collection(AppConstants.usersCollection)
+            .doc(widget.uid)
+            .collection('notifications')
+            .add({
+          'type': 'role_changed',
+          'title': 'התפקיד שלך עודכן',
+          'body': 'תפקידך שונה מ${_roleLabel(_originalRole)} ל${_roleLabel(_role)}',
+          'entityId': '',
+          'isRead': false,
+          'createdAt': Timestamp.now(),
+        });
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
