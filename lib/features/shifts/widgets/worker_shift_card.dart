@@ -117,6 +117,37 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     });
   }
 
+  /// Returns true if [aStart, aEnd] overlaps with [bStart, bEnd] (HH:mm strings).
+  bool _timesOverlap(String aStart, String aEnd, String bStart, String bEnd) {
+    int toMinutes(String t) {
+      final parts = t.split(':');
+      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+    }
+    return toMinutes(aStart) < toMinutes(bEnd) &&
+        toMinutes(bStart) < toMinutes(aEnd);
+  }
+
+  Future<bool> _hasConflict() async {
+    final uid = widget.currentUser.uid;
+    final snap = await FirebaseFirestore.instance
+        .collection(AppConstants.shiftsCollection)
+        .where('date', isEqualTo: widget.shift.date)
+        .where('assignedWorkers', arrayContains: uid)
+        .get();
+
+    for (final doc in snap.docs) {
+      if (doc.id == widget.shift.id) continue;
+      final data = doc.data();
+      final existStart = data['startTime'] as String? ?? '';
+      final existEnd = data['endTime'] as String? ?? '';
+      if (_timesOverlap(widget.shift.startTime, widget.shift.endTime,
+          existStart, existEnd)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> _toggleShiftRequest() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -126,6 +157,44 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
         await widget.shiftService
             .cancelShiftRequest(widget.shift.id, widget.currentUser.uid);
       } else {
+        // Check for time conflicts before requesting
+        final conflict = await _hasConflict();
+        if (conflict && mounted) {
+          final proceed = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                title: const Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text('התנגשות משמרות'),
+                  ],
+                ),
+                content: Text(
+                  'כבר משובץ למשמרת בתאריך זה בשעות החופפות '
+                  '(${widget.shift.startTime}–${widget.shift.endTime}). '
+                  'האם להמשיך בכל זאת?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('ביטול'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange),
+                    child: const Text('המשך בכל זאת',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          );
+          if (proceed != true) return;
+        }
         await widget.shiftService
             .requestShift(widget.shift.id, widget.currentUser.uid);
       }
