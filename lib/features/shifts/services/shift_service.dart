@@ -175,7 +175,18 @@ class ShiftService {
     if (manager == null) throw CustomException("Manager not logged in");
 
     try {
-      // 1. Fetch worker info
+      // 1. Fetch shift info for notification body
+      final shiftDoc = await _firestore
+          .collection(AppConstants.shiftsCollection)
+          .doc(shiftId)
+          .get();
+      if (!shiftDoc.exists) throw CustomException("Shift not found");
+      final shiftData = shiftDoc.data()!;
+      final shiftDate = shiftData['date'] ?? '';
+      final startTime = shiftData['startTime'] ?? '';
+      final endTime = shiftData['endTime'] ?? '';
+
+      // 2. Fetch worker info
       final userDoc = await FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
           .doc(workerId)
@@ -195,14 +206,27 @@ class ShiftService {
         'decisionBy': manager.uid,
         'decisionAt': Timestamp.now(),
         'roleAtAssignment': role,
-        'requestedAt': Timestamp
-            .now(), // ✅ Optional: Replace with actual request time if tracked
+        'requestedAt': Timestamp.now(),
       };
 
       await _firebaseService.updateShift(shiftId, {
         'requestedWorkers': FieldValue.arrayRemove([workerId]),
         'assignedWorkers': FieldValue.arrayUnion([workerId]),
         'assignedWorkerData': FieldValue.arrayUnion([decisionData]),
+      });
+
+      // 3. Write in-app notification to worker
+      await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .doc(workerId)
+          .collection('notifications')
+          .add({
+        'type': 'shift_assigned',
+        'title': 'בקשתך למשמרת אושרה',
+        'body': 'אושרת למשמרת $shiftDate, $startTime–$endTime',
+        'entityId': shiftId,
+        'isRead': false,
+        'createdAt': Timestamp.now(),
       });
     } catch (e) {
       throw CustomException("שגיאה באישור העובד: $e");
@@ -214,6 +238,18 @@ class ShiftService {
     if (manager == null) throw CustomException("Manager not logged in");
 
     try {
+      // 1. Fetch shift info for notification body
+      final shiftDoc = await _firestore
+          .collection(AppConstants.shiftsCollection)
+          .doc(shiftId)
+          .get();
+      if (!shiftDoc.exists) throw CustomException("Shift not found");
+      final shiftData = shiftDoc.data()!;
+      final shiftDate = shiftData['date'] ?? '';
+      final startTime = shiftData['startTime'] ?? '';
+      final endTime = shiftData['endTime'] ?? '';
+
+      // 2. Fetch worker info
       final userDoc = await FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
           .doc(workerId)
@@ -239,6 +275,20 @@ class ShiftService {
       await _firebaseService.updateShift(shiftId, {
         'requestedWorkers': FieldValue.arrayRemove([workerId]),
         'rejectedWorkerData': FieldValue.arrayUnion([decisionData]),
+      });
+
+      // 3. Write in-app notification to worker
+      await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .doc(workerId)
+          .collection('notifications')
+          .add({
+        'type': 'shift_rejected',
+        'title': 'בקשתך למשמרת נדחתה',
+        'body': 'בקשתך למשמרת $shiftDate, $startTime–$endTime לא אושרה',
+        'entityId': shiftId,
+        'isRead': false,
+        'createdAt': Timestamp.now(),
       });
     } catch (e) {
       throw CustomException("שגיאה בדחיית העובד: $e");
