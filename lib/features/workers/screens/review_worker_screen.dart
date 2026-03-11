@@ -9,6 +9,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/workers/widgets/shifts_button.dart';
 import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
 import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
+import 'package:park_janana/features/attendance/screens/attendance_correction_screen.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -121,6 +122,20 @@ class ReviewWorkerScreen extends StatelessWidget {
                               userId: uid,
                               userName: fullName,
                               profileUrl: data['profile_picture'] ?? '',
+                            ),
+                          ),
+                        ),
+                      ),
+                      _buildActionCard(
+                        icon: Icons.edit_calendar_outlined,
+                        label: "תיקון נוכחות",
+                        color: Colors.teal,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AttendanceCorrectionScreen(
+                              userId: uid,
+                              userName: fullName,
                             ),
                           ),
                         ),
