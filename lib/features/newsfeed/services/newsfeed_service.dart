@@ -194,6 +194,25 @@ class NewsfeedService {
     });
   }
 
+  Future<void> editComment(
+      String postId, PostComment oldComment, String newContent) async {
+    final docRef = _postsRef.doc(postId);
+    await _firestore.runTransaction((txn) async {
+      final doc = await txn.get(docRef);
+      final data = doc.data() ?? {};
+      final comments = List<Map<String, dynamic>>.from(
+          (data['comments'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)));
+      final idx = comments.indexWhere((c) => c['id'] == oldComment.id);
+      if (idx != -1) {
+        comments[idx]['content'] = newContent;
+      }
+      txn.update(docRef, {
+        'comments': comments,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
   // ===============================
   // Media Upload
   // ===============================

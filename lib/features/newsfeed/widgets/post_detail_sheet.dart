@@ -192,6 +192,92 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     }
   }
 
+  Future<void> _editComment(PostComment comment) async {
+    HapticFeedback.lightImpact();
+    final ctrl = TextEditingController(text: comment.content);
+    final newContent = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('עריכת תגובה',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: ctrl,
+                  autofocus: true,
+                  maxLines: 4,
+                  minLines: 2,
+                  decoration: InputDecoration(
+                    hintText: 'ערוך את תגובתך...',
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('ביטול'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue),
+                        child: const Text('שמור',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    ctrl.dispose();
+    if (newContent == null || newContent.isEmpty || newContent == comment.content) return;
+    try {
+      await _newsfeedService.editComment(widget.post.id, comment, newContent);
+      if (mounted) _showSnackbar('התגובה עודכנה', isSuccess: true);
+    } catch (e) {
+      if (mounted) _showSnackbar('שגיאה בעדכון תגובה', isSuccess: false);
+    }
+  }
+
   void _showSnackbar(String message, {required bool isSuccess}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -869,10 +955,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           (context, index) {
             final comment = post.comments[index];
             final canDelete = comment.userId == widget.currentUserId || widget.isOwner;
+            final canEdit = comment.userId == widget.currentUserId;
             return _ModernCommentCard(
               comment: comment,
               canDelete: canDelete,
+              canEdit: canEdit,
               onDelete: () => _deleteComment(comment),
+              onEdit: () => _editComment(comment),
               timestamp: _formatTimestamp(comment.createdAt),
             );
           },
@@ -1305,13 +1394,17 @@ class _DetailPickerEmoji extends StatelessWidget {
 class _ModernCommentCard extends StatefulWidget {
   final PostComment comment;
   final bool canDelete;
+  final bool canEdit;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
   final String timestamp;
 
   const _ModernCommentCard({
     required this.comment,
     required this.canDelete,
+    required this.canEdit,
     required this.onDelete,
+    required this.onEdit,
     required this.timestamp,
   });
 
@@ -1391,6 +1484,23 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                   ],
                 ),
               ),
+              if (widget.canEdit)
+                GestureDetector(
+                  onTap: widget.onEdit,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.only(left: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ),
               if (widget.canDelete)
                 GestureDetector(
                   onTap: widget.onDelete,
