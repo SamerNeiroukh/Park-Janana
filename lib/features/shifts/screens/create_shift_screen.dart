@@ -4,6 +4,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateShiftScreen extends StatefulWidget {
   final DateTime? initialDate;
@@ -24,6 +25,18 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   TimeOfDay _endTime = const TimeOfDay(hour: 17, minute: 0);
 
   bool _isCreating = false;
+
+  // Draft / recurring
+  bool _recurringEnabled = false;
+  int _repeatWeeks = 1;
+
+  static const _kDraftDate = 'shift_draft_date';
+  static const _kDraftDept = 'shift_draft_dept';
+  static const _kDraftMax  = 'shift_draft_max';
+  static const _kDraftStartH = 'shift_draft_startH';
+  static const _kDraftStartM = 'shift_draft_startM';
+  static const _kDraftEndH   = 'shift_draft_endH';
+  static const _kDraftEndM   = 'shift_draft_endM';
 
   final List<Map<String, dynamic>> departments = [
     {
@@ -61,6 +74,50 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate ?? DateTime.now();
+    _loadDraft();
+  }
+
+  Future<void> _loadDraft() async {
+    // Don't override a pre-set initialDate
+    if (widget.initialDate != null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final dateMs = prefs.getInt(_kDraftDate);
+    if (dateMs == null) return; // no draft
+    setState(() {
+      _selectedDate = DateTime.fromMillisecondsSinceEpoch(dateMs);
+      _selectedDepartment = prefs.getString(_kDraftDept) ?? _selectedDepartment;
+      _maxWorkers        = prefs.getInt(_kDraftMax)       ?? _maxWorkers;
+      _startTime = TimeOfDay(
+        hour:   prefs.getInt(_kDraftStartH) ?? _startTime.hour,
+        minute: prefs.getInt(_kDraftStartM) ?? _startTime.minute,
+      );
+      _endTime = TimeOfDay(
+        hour:   prefs.getInt(_kDraftEndH) ?? _endTime.hour,
+        minute: prefs.getInt(_kDraftEndM) ?? _endTime.minute,
+      );
+    });
+  }
+
+  Future<void> _saveDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kDraftDate, _selectedDate.millisecondsSinceEpoch);
+    await prefs.setString(_kDraftDept, _selectedDepartment);
+    await prefs.setInt(_kDraftMax, _maxWorkers);
+    await prefs.setInt(_kDraftStartH, _startTime.hour);
+    await prefs.setInt(_kDraftStartM, _startTime.minute);
+    await prefs.setInt(_kDraftEndH, _endTime.hour);
+    await prefs.setInt(_kDraftEndM, _endTime.minute);
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kDraftDate);
+    await prefs.remove(_kDraftDept);
+    await prefs.remove(_kDraftMax);
+    await prefs.remove(_kDraftStartH);
+    await prefs.remove(_kDraftStartM);
+    await prefs.remove(_kDraftEndH);
+    await prefs.remove(_kDraftEndM);
   }
 
   Future<void> _createShift() async {
@@ -68,34 +125,38 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
     setState(() => _isCreating = true);
 
     try {
-      await _shiftService.createShift(
-        date: DateTimeUtils.formatDate(_selectedDate),
-        startTime: DateTimeUtils.formatTime(_startTime),
-        endTime: DateTimeUtils.formatTime(_endTime),
-        department: _selectedDepartment,
-        maxWorkers: _maxWorkers,
-      );
+      final weeks = _recurringEnabled ? _repeatWeeks : 1;
+      for (int i = 0; i < weeks; i++) {
+        final date = _selectedDate.add(Duration(days: 7 * i));
+        await _shiftService.createShift(
+          date: DateTimeUtils.formatDate(date),
+          startTime: DateTimeUtils.formatTime(_startTime),
+          endTime: DateTimeUtils.formatTime(_endTime),
+          department: _selectedDepartment,
+          maxWorkers: _maxWorkers,
+        );
+      }
+
+      await _clearDraft();
 
       if (mounted) {
         Navigator.pop(context);
+        final label = _recurringEnabled && _repeatWeeks > 1
+            ? '$_repeatWeeks משמרות נוצרו בהצלחה!'
+            : 'משמרת נוצרה בהצלחה!';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'משמרת נוצרה בהצלחה!',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                SizedBox(width: 8),
-                Icon(Icons.check_circle, color: Colors.white),
+                Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                const Icon(Icons.check_circle, color: Colors.white),
               ],
             ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             margin: const EdgeInsets.all(16),
           ),
         );
@@ -107,9 +168,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             content: Text('שגיאה ביצירת משמרת: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -133,7 +192,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         );
       },
     );
-    if (date != null) setState(() => _selectedDate = date);
+    if (date != null) {
+      setState(() => _selectedDate = date);
+      _saveDraft();
+    }
   }
 
   Future<void> _selectTime(bool isStart) async {
@@ -157,6 +219,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           _endTime = time;
         }
       });
+      _saveDraft();
     }
   }
 
@@ -189,6 +252,8 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                           _buildTimeSection(),
                           const SizedBox(height: 20),
                           _buildWorkersSection(),
+                          const SizedBox(height: 20),
+                          _buildRecurringSection(),
                           const SizedBox(height: 32),
                           _buildCreateButton(),
                           const SizedBox(height: 16),
@@ -363,7 +428,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             final color = dept['color'] as Color;
 
             return GestureDetector(
-              onTap: () => setState(() => _selectedDepartment = dept['name']),
+              onTap: () {
+                setState(() => _selectedDepartment = dept['name'] as String);
+                _saveDraft();
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding:
@@ -488,6 +556,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           children: [
             _buildWorkerCountButton(Icons.add, () {
               setState(() => _maxWorkers++);
+              _saveDraft();
             }),
             Expanded(
               child: Container(
@@ -515,7 +584,10 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               ),
             ),
             _buildWorkerCountButton(Icons.remove, () {
-              if (_maxWorkers > 1) setState(() => _maxWorkers--);
+              if (_maxWorkers > 1) {
+                setState(() => _maxWorkers--);
+                _saveDraft();
+              }
             }),
           ],
         ),
@@ -533,6 +605,70 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Icon(icon, color: _selectedColor, size: 24),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecurringSection() {
+    return _buildSectionCard(
+      title: 'חזרה שבועית',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Switch(
+                  value: _recurringEnabled,
+                  activeColor: _selectedColor,
+                  onChanged: (v) => setState(() => _recurringEnabled = v),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'צור משמרת חוזרת',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800),
+                ),
+              ],
+            ),
+            if (_recurringEnabled) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Text('מספר שבועות:',
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.grey.shade700)),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    color: _selectedColor,
+                    onPressed: _repeatWeeks > 1
+                        ? () => setState(() => _repeatWeeks--)
+                        : null,
+                  ),
+                  Text('$_repeatWeeks',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: _selectedColor)),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    color: _selectedColor,
+                    onPressed: _repeatWeeks < 12
+                        ? () => setState(() => _repeatWeeks++)
+                        : null,
+                  ),
+                ],
+              ),
+              Text(
+                'ייצור $_repeatWeeks משמרות מ-${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+              ),
+            ],
+          ],
         ),
       ),
     );
