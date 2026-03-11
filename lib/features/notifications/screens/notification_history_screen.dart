@@ -31,12 +31,14 @@ class NotificationHistoryScreen extends StatefulWidget {
 class _NotificationHistoryScreenState
     extends State<NotificationHistoryScreen> {
   // ── Config ───────────────────────────────────────────────────────────────
-  static const int _maxItems = 100;
+  static const int _pageSize = 20;
 
   // ── State ────────────────────────────────────────────────────────────────
   String? _uid;
   String? _userRole;
   bool _isMarkingAll = false;
+  int _displayLimit = _pageSize;
+  final ScrollController _scrollCtrl = ScrollController();
 
   bool get _isManager =>
       _userRole == 'manager' || _userRole == 'owner' || _userRole == 'co_owner' || _userRole == 'admin';
@@ -46,12 +48,26 @@ class _NotificationHistoryScreenState
   @override
   void initState() {
     super.initState();
+    _scrollCtrl.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AppAuthProvider>();
       _uid = auth.uid;
       _userRole = auth.userRole;
       setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 200) {
+      setState(() => _displayLimit += _pageSize);
+    }
   }
 
   @override
@@ -134,7 +150,7 @@ class _NotificationHistoryScreenState
           .doc(_uid)
           .collection('notifications')
           .orderBy('createdAt', descending: true)
-          .limit(_maxItems)
+          .limit(_displayLimit)
           .snapshots(),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
@@ -164,6 +180,7 @@ class _NotificationHistoryScreenState
         if (docs.isEmpty) return _buildEmptyState();
 
         return ListView.builder(
+          controller: _scrollCtrl,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           itemCount: docs.length,
           itemBuilder: (_, i) {
