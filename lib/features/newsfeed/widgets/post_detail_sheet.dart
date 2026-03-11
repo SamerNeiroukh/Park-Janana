@@ -622,6 +622,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           });
         }
         if (value == 'pin') widget.onPin?.call();
+        if (value == 'edit') _editPost(post);
       },
       itemBuilder: (_) => [
         if (widget.isManager)
@@ -641,6 +642,17 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               ],
             ),
           ),
+        if (post.authorId == widget.currentUserId || widget.isManager)
+          const PopupMenuItem(
+            value: 'edit',
+            child: Row(
+              children: [
+                Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryBlue),
+                SizedBox(width: 12),
+                Text('ערוך פוסט'),
+              ],
+            ),
+          ),
         const PopupMenuItem(
           value: 'delete',
           child: Row(
@@ -654,6 +666,108 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         ),
       ],
     );
+  }
+
+  Future<void> _editPost(PostModel post) async {
+    final titleCtrl = TextEditingController(text: post.title);
+    final contentCtrl = TextEditingController(text: post.content);
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('עריכת פוסט',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: titleCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'כותרת',
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: contentCtrl,
+                  maxLines: 5,
+                  minLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'תוכן',
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('ביטול'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue),
+                        child: const Text('שמור',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    titleCtrl.dispose();
+    contentCtrl.dispose();
+    if (saved != true) return;
+    try {
+      await _newsfeedService.updatePost(post.id, {
+        'title': titleCtrl.text.trim(),
+        'content': contentCtrl.text.trim(),
+      });
+      if (mounted) _showSnackbar('הפוסט עודכן', isSuccess: true);
+    } catch (e) {
+      if (mounted) _showSnackbar('שגיאה בעדכון הפוסט', isSuccess: false);
+    }
   }
 
   Widget _buildTitle(String title) {
