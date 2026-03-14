@@ -367,7 +367,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          AppColors.primaryBlue.withOpacity(0.1),
+                          AppColors.primaryBlue.withValues(alpha: 0.1),
                           Colors.transparent,
                         ],
                       ),
@@ -384,7 +384,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          AppColors.success.withOpacity(0.08),
+                          AppColors.success.withValues(alpha: 0.08),
                           Colors.transparent,
                         ],
                       ),
@@ -436,7 +436,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -495,7 +495,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: _categories.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
             final cat = _categories[index];
             final isSelected = _selectedCategory == cat['value'];
@@ -511,20 +511,20 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
                   color: isSelected ? color : Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: isSelected ? Colors.transparent : color.withOpacity(0.3),
+                    color: isSelected ? Colors.transparent : color.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.28),
+                            color: color.withValues(alpha: 0.28),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ]
                       : [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -568,8 +568,8 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryBlue.withOpacity(0.15),
-                  AppColors.primaryBlue.withOpacity(0.05),
+                  AppColors.primaryBlue.withValues(alpha: 0.15),
+                  AppColors.primaryBlue.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
@@ -736,7 +736,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.3),
+            color: AppColors.primaryBlue.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -780,13 +780,13 @@ class _EmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.article_outlined,
               size: 64,
-              color: AppColors.primaryBlue.withOpacity(0.5),
+              color: AppColors.primaryBlue.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 24),
@@ -808,7 +808,7 @@ class _EmptyState extends StatelessWidget {
                       : 'המנהלים יפרסמו כאן עדכונים בקרוב'),
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.greyMedium.withOpacity(0.8),
+                color: AppColors.greyMedium.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -833,13 +833,13 @@ class _ErrorState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.cloud_off_rounded,
               size: 56,
-              color: Colors.red.withOpacity(0.6),
+              color: Colors.red.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 20),

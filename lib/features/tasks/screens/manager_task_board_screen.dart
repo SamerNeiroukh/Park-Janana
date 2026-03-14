@@ -74,7 +74,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? colors[i].withOpacity(0.10)
+                      ? colors[i].withValues(alpha: 0.10)
                       : TaskTheme.surface,
                   borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                   border: Border.all(
@@ -302,7 +302,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                         left: i > 0 ? 8 : 0),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: isActive ? color.withOpacity(0.1) : Colors.transparent,
+                      color: isActive ? color.withValues(alpha: 0.1) : Colors.transparent,
                       borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                       border: Border.all(
                         color: isActive ? color : TaskTheme.border,
@@ -406,7 +406,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           final ctx = _highlightedCardKey.currentContext;
           if (ctx != null) {
             Scrollable.ensureVisible(
-              ctx,
+              ctx, // ignore: use_build_context_synchronously
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOut,
               alignment: 0.3,
@@ -427,13 +427,13 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: TaskTheme.primary.withOpacity(0.06),
+                color: TaskTheme.primary.withValues(alpha: 0.06),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.inbox_rounded,
                 size: 48,
-                color: TaskTheme.primary.withOpacity(0.4),
+                color: TaskTheme.primary.withValues(alpha: 0.4),
               ),
             ),
             const SizedBox(height: 16),
@@ -465,7 +465,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
             padding: const EdgeInsets.only(right: 20),
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: TaskTheme.overdue.withOpacity(0.1),
+              color: TaskTheme.overdue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(TaskTheme.radiusL),
             ),
             child: const Icon(Icons.delete_outline_rounded,
@@ -573,7 +573,7 @@ class _HighlightWrapper extends StatelessWidget {
       curve: Curves.easeOut,
       builder: (context, t, child) => Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF59E0B).withOpacity(0.22 * t),
+          color: const Color(0xFFF59E0B).withValues(alpha: 0.22 * t),
           borderRadius: BorderRadius.circular(TaskTheme.radiusL + 2),
         ),
         child: child,
@@ -687,7 +687,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusXL),
         boxShadow: [
           BoxShadow(
-            color: TaskTheme.primary.withOpacity(0.3),
+            color: TaskTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -699,7 +699,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.task_alt_rounded,
@@ -725,7 +725,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                       : '$completed מתוך $total הושלמו היום',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                   ),
                 ),
               ],
@@ -752,7 +752,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, size: 18, color: color),
@@ -764,7 +764,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -827,7 +827,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         boxShadow: [
           BoxShadow(
-            color: fromColor.withOpacity(0.38),
+            color: fromColor.withValues(alpha: 0.38),
             blurRadius: 14,
             spreadRadius: 0,
             offset: const Offset(0, 5),
@@ -838,7 +838,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-          splashColor: Colors.white.withOpacity(0.15),
+          splashColor: Colors.white.withValues(alpha: 0.15),
           onTap: () => provider.updateStatus(
               task.id, isStart ? 'in_progress' : 'done'),
           child: Padding(
@@ -849,7 +849,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.22),
+                    color: Colors.white.withValues(alpha: 0.22),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, size: 16, color: Colors.white),
@@ -885,7 +885,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: TaskTheme.done.withOpacity(0.1),
+                color: TaskTheme.done.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.check_circle_outline_rounded,
@@ -899,7 +899,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: TaskTheme.done.withOpacity(0.1),
+                color: TaskTheme.done.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -951,13 +951,13 @@ class _MyTasksTabState extends State<_MyTasksTab> {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: TaskTheme.primary.withOpacity(0.06),
+                color: TaskTheme.primary.withValues(alpha: 0.06),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.task_alt_rounded,
                 size: 56,
-                color: TaskTheme.primary.withOpacity(0.4),
+                color: TaskTheme.primary.withValues(alpha: 0.4),
               ),
             ),
             const SizedBox(height: 20),

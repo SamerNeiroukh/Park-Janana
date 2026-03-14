@@ -242,10 +242,10 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
             boxShadow: [
               BoxShadow(
                 color: _isCancelled
-                    ? Colors.grey.withOpacity(0.1)
+                    ? Colors.grey.withValues(alpha: 0.1)
                     : isOutdated
-                        ? Colors.grey.withOpacity(0.15)
-                        : _departmentColor.withOpacity(0.15),
+                        ? Colors.grey.withValues(alpha: 0.15)
+                        : _departmentColor.withValues(alpha: 0.15),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -264,7 +264,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                           ? [Colors.red.shade400, Colors.red.shade200]
                           : [
                               _departmentColor,
-                              _departmentColor.withOpacity(0.6),
+                              _departmentColor.withValues(alpha: 0.6),
                             ],
                     ),
                     borderRadius: const BorderRadius.only(
@@ -287,7 +287,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                             decoration: BoxDecoration(
                               color: _isCancelled
                                   ? Colors.red.shade50
-                                  : _departmentColor.withOpacity(0.1),
+                                  : _departmentColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
@@ -427,7 +427,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     return Material(
       color: _hasRequested
           ? Colors.red.shade50
-          : AppColors.success.withOpacity(0.1),
+          : AppColors.success.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -477,9 +477,9 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -522,7 +522,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -635,7 +635,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 gradient: LinearGradient(
                   colors: [
                     widget.departmentColor,
-                    widget.departmentColor.withOpacity(0.8),
+                    widget.departmentColor.withValues(alpha: 0.8),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
@@ -645,7 +645,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.info_outline,
@@ -669,7 +669,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                           '${widget.shift.date} | ${widget.shift.startTime} - ${widget.shift.endTime}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -721,7 +721,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: widget.departmentColor.withOpacity(0.1),
+            color: widget.departmentColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 18, color: widget.departmentColor),
@@ -777,14 +777,14 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: widget.departmentColor.withOpacity(0.3),
+                    color: widget.departmentColor.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
                 child: ProfileAvatar(
                   imageUrl: worker.profilePicture,
                   radius: 28,
-                  backgroundColor: widget.departmentColor.withOpacity(0.1),
+                  backgroundColor: widget.departmentColor.withValues(alpha: 0.1),
                 ),
               ),
               const SizedBox(height: 6),

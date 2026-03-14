@@ -84,7 +84,7 @@ class ShiftCardState extends State<ShiftCard> {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color),
@@ -118,7 +118,7 @@ class ShiftCardState extends State<ShiftCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.warningOrange.withOpacity(0.15),
+                  color: AppColors.warningOrange.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

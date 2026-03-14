@@ -190,9 +190,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'profile',
-      barrierColor: Colors.black.withOpacity(0.55),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       transitionDuration: const Duration(milliseconds: 280),
-      pageBuilder: (ctx, _, __) => Directionality(
+      pageBuilder: (ctx, _, _) => Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: Material(
@@ -206,7 +206,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.18),
+                    color: Colors.black.withValues(alpha: 0.18),
                     blurRadius: 36,
                     offset: const Offset(0, 14),
                   ),
@@ -292,7 +292,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final clamped = anim.value.clamp(0.0, 1.0);
         final curve = Curves.easeOutBack.transform(clamped);
         return Opacity(
@@ -436,7 +436,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withOpacity(opacity),
+          color: Colors.white.withValues(alpha: opacity),
         ),
       );
 
@@ -461,7 +461,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: _kPrimary.withOpacity(0.55),
+                  color: _kPrimary.withValues(alpha: 0.55),
                   blurRadius: 28,
                   offset: const Offset(0, 8),
                 ),
@@ -505,7 +505,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               border: Border.all(color: Colors.white, width: 2.5),
               boxShadow: [
                 BoxShadow(
-                  color: _kPrimary.withOpacity(0.45),
+                  color: _kPrimary.withValues(alpha: 0.45),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -541,14 +541,14 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [role.color, role.color.withOpacity(0.75)],
+              colors: [role.color, role.color.withValues(alpha: 0.75)],
               begin: Alignment.centerRight,
               end: Alignment.centerLeft,
             ),
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: role.color.withOpacity(0.35),
+                color: role.color.withValues(alpha: 0.35),
                 blurRadius: 14,
                 offset: const Offset(0, 4),
               ),
@@ -663,7 +663,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: _kPrimary.withOpacity(0.08),
+                color: _kPrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -743,7 +743,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -759,7 +759,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
             ),
           ),
-          if (trailing != null) trailing,
+          ?trailing,
         ],
       ),
     );
@@ -825,7 +825,7 @@ class _StatCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: _kCardShadow,
-        border: Border.all(color: color.withOpacity(0.12)),
+        border: Border.all(color: color.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [
@@ -833,7 +833,7 @@ class _StatCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 21),
@@ -899,7 +899,7 @@ class _InfoRow extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.09),
+                  color: iconColor.withValues(alpha: 0.09),
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Icon(icon, color: iconColor, size: 19),
@@ -965,10 +965,10 @@ class _DeptChip extends StatelessWidget {
     final effectiveColor =
         licensed ? color : const Color(0xFFCBD5E1);
     final bg = licensed
-        ? color.withOpacity(0.09)
+        ? color.withValues(alpha: 0.09)
         : const Color(0xFFF8FAFC);
     final border = licensed
-        ? color.withOpacity(0.28)
+        ? color.withValues(alpha: 0.28)
         : const Color(0xFFE2E8F0);
 
     return Container(
@@ -1025,7 +1025,7 @@ class _OptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withOpacity(0.06),
+      color: color.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -1038,7 +1038,7 @@ class _OptionTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: color.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 22),
@@ -1069,7 +1069,7 @@ class _OptionTile extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: color.withOpacity(0.4),
+                color: color.withValues(alpha: 0.4),
                 size: 20,
               ),
             ],

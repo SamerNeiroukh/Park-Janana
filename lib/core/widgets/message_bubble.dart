@@ -21,7 +21,7 @@ class MessageBubble extends StatefulWidget {
   });
 
   @override
-  _MessageBubbleState createState() => _MessageBubbleState();
+  State<MessageBubble> createState() => _MessageBubbleState();
 }
 
 class _MessageBubbleState extends State<MessageBubble> {

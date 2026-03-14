@@ -108,7 +108,7 @@ class _TaskCardState extends State<TaskCard>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: TaskTheme.primary.withOpacity(0.06),
+                          color: TaskTheme.primary.withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -151,7 +151,7 @@ class _TaskCardState extends State<TaskCard>
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: progress.clamp(0.0, 1.0),
-                            backgroundColor: TaskTheme.border.withOpacity(0.5),
+                            backgroundColor: TaskTheme.border.withValues(alpha: 0.5),
                             valueColor: AlwaysStoppedAnimation(
                               progress >= 1
                                   ? TaskTheme.done
@@ -165,7 +165,7 @@ class _TaskCardState extends State<TaskCard>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: (progress >= 1 ? TaskTheme.done : TaskTheme.inProgress).withOpacity(0.1),
+                          color: (progress >= 1 ? TaskTheme.done : TaskTheme.inProgress).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -216,9 +216,9 @@ class _TaskCardState extends State<TaskCard>
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: TaskTheme.doneBg.withOpacity(0.5),
+          color: TaskTheme.doneBg.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-          border: Border.all(color: TaskTheme.done.withOpacity(0.2)),
+          border: Border.all(color: TaskTheme.done.withValues(alpha: 0.2)),
           boxShadow: TaskTheme.softShadow,
         ),
         child: Row(

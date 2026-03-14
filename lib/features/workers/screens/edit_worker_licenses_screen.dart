@@ -188,7 +188,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.3),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -200,7 +200,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.manage_accounts_rounded,
@@ -244,7 +244,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -258,7 +258,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withOpacity(0.1),
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.badge_rounded,
@@ -345,7 +345,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
           color: isLocked
               ? const Color(0xFFF1F5F9)
               : isSelected
-                  ? color.withOpacity(0.1)
+                  ? color.withValues(alpha: 0.1)
                   : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
@@ -406,7 +406,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -420,7 +420,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.domain_rounded,
@@ -441,7 +441,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -480,11 +480,11 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color:
-              isSelected ? color.withOpacity(0.06) : const Color(0xFFF8FAFC),
+              isSelected ? color.withValues(alpha: 0.06) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
-                ? color.withOpacity(0.4)
+                ? color.withValues(alpha: 0.4)
                 : const Color(0xFFE2E8F0),
             width: isSelected ? 1.5 : 1,
           ),
@@ -547,7 +547,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -561,7 +561,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF6366F1),
             disabledBackgroundColor:
-                const Color(0xFF6366F1).withOpacity(0.6),
+                const Color(0xFF6366F1).withValues(alpha: 0.6),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),

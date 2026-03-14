@@ -255,7 +255,7 @@ class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusL),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.3),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -309,7 +309,7 @@ class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
 
   Widget _divider() {
     return Container(
-      width: 1, height: 48, color: Colors.white.withOpacity(0.2));
+      width: 1, height: 48, color: Colors.white.withValues(alpha: 0.2));
   }
 }
 
@@ -395,7 +395,7 @@ class _ReportCardTileState extends State<_ReportCardTile>
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.gradientColors[0].withOpacity(0.3),
+                        color: widget.gradientColors[0].withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),

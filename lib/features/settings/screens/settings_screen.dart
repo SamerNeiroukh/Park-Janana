@@ -309,7 +309,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: iconColor, size: 20),
@@ -346,7 +346,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: iconColor, size: 20),
@@ -358,7 +358,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         trailing: Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: TaskTheme.primary,
+          activeThumbColor: TaskTheme.primary,
         ),
       ),
     );
@@ -647,7 +647,7 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
                 const SizedBox(height: 20),
                 const Text('הפעלת כניסה ביומטרית', style: TaskTheme.heading2),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'הזן את הסיסמה הנוכחית שלך כדי לאפשר כניסה עם טביעת אצבע / זיהוי פנים.',
                   style: TaskTheme.caption,
                 ),

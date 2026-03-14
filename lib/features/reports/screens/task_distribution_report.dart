@@ -278,7 +278,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -333,7 +333,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                   alignment: BarChartAlignment.spaceAround,
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, _, rod, __) {
+                      getTooltipItem: (group, _, rod, _) {
                         final s = displayed[group.x];
                         return BarTooltipItem(
                           '${s.name.split(' ').first}\n${rod.toY.round()}%',
@@ -386,7 +386,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                     drawVerticalLine: false,
                     horizontalInterval: 25,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: TaskTheme.border.withOpacity(0.5),
+                      color: TaskTheme.border.withValues(alpha: 0.5),
                       strokeWidth: 1,
                     ),
                   ),
@@ -463,7 +463,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                     height: 30,
                     decoration: BoxDecoration(
                       color: rank <= 3
-                          ? TaskTheme.done.withOpacity(0.12)
+                          ? TaskTheme.done.withValues(alpha: 0.12)
                           : TaskTheme.background,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -505,7 +505,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: rateColor.withOpacity(0.1),
+                      color: rateColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -530,7 +530,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

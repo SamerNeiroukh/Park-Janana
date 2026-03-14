@@ -34,10 +34,14 @@ class _AttachmentsSection extends StatelessWidget {
         lower.endsWith('.jpeg') ||
         lower.endsWith('.png') ||
         lower.endsWith('.gif') ||
-        lower.endsWith('.webp')) return Icons.image_rounded;
+        lower.endsWith('.webp')) {
+      return Icons.image_rounded;
+    }
     if (lower.endsWith('.mp4') ||
         lower.endsWith('.mov') ||
-        lower.endsWith('.avi')) return Icons.videocam_rounded;
+        lower.endsWith('.avi')) {
+      return Icons.videocam_rounded;
+    }
     if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
       return Icons.description_rounded;
     }
@@ -119,7 +123,7 @@ class _AttachmentTile extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: const Color(0xFF4F46E5).withOpacity(0.1),
+            color: const Color(0xFF4F46E5).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 18, color: const Color(0xFF4F46E5)),

@@ -157,7 +157,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _selectedColor.withOpacity(0.1),
+                  color: _selectedColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(Icons.save, color: _selectedColor),
@@ -199,7 +199,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.warningOrange.withOpacity(0.1),
+                  color: AppColors.warningOrange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -440,14 +440,14 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_selectedColor, _selectedColor.withOpacity(0.8)],
+          colors: [_selectedColor, _selectedColor.withValues(alpha: 0.8)],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _selectedColor.withOpacity(0.3),
+            color: _selectedColor.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -458,7 +458,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.edit, color: Colors.white, size: 28),
@@ -510,7 +510,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -554,13 +554,13 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isChanged
-                  ? AppColors.warningOrange.withOpacity(0.1)
-                  : _selectedColor.withOpacity(0.08),
+                  ? AppColors.warningOrange.withValues(alpha: 0.1)
+                  : _selectedColor.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isChanged
-                    ? AppColors.warningOrange.withOpacity(0.5)
-                    : _selectedColor.withOpacity(0.2),
+                    ? AppColors.warningOrange.withValues(alpha: 0.5)
+                    : _selectedColor.withValues(alpha: 0.2),
                 width: isChanged ? 2 : 1,
               ),
             ),
@@ -639,16 +639,16 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? color : color.withOpacity(0.08),
+                  color: isSelected ? color : color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isSelected ? color : color.withOpacity(0.3),
+                    color: isSelected ? color : color.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.3),
+                            color: color.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -720,13 +720,13 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isChanged
-              ? AppColors.warningOrange.withOpacity(0.1)
-              : _selectedColor.withOpacity(0.08),
+              ? AppColors.warningOrange.withValues(alpha: 0.1)
+              : _selectedColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isChanged
-                ? AppColors.warningOrange.withOpacity(0.5)
-                : _selectedColor.withOpacity(0.2),
+                ? AppColors.warningOrange.withValues(alpha: 0.5)
+                : _selectedColor.withValues(alpha: 0.2),
             width: isChanged ? 2 : 1,
           ),
         ),
@@ -784,12 +784,12 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
                       color: isChanged
-                          ? AppColors.warningOrange.withOpacity(0.1)
-                          : _selectedColor.withOpacity(0.08),
+                          ? AppColors.warningOrange.withValues(alpha: 0.1)
+                          : _selectedColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(14),
                       border: isChanged
                           ? Border.all(
-                              color: AppColors.warningOrange.withOpacity(0.5),
+                              color: AppColors.warningOrange.withValues(alpha: 0.5),
                               width: 2,
                             )
                           : null,
@@ -827,9 +827,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -856,7 +856,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
 
   Widget _buildWorkerCountButton(IconData icon, VoidCallback onTap) {
     return Material(
-      color: _selectedColor.withOpacity(0.1),
+      color: _selectedColor.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -893,16 +893,16 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected ? color : color.withOpacity(0.08),
+                  color: isSelected ? color : color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isSelected ? color : color.withOpacity(0.3),
+                    color: isSelected ? color : color.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.3),
+                            color: color.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -944,7 +944,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         boxShadow: _hasChanges
             ? [
                 BoxShadow(
-                  color: _selectedColor.withOpacity(0.4),
+                  color: _selectedColor.withValues(alpha: 0.4),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),

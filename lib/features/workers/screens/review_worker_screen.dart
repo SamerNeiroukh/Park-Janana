@@ -244,7 +244,7 @@ class ReviewWorkerScreen extends StatelessWidget {
         borderRadius: AppDimensions.borderRadiusXXL,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
+            color: Colors.black12.withValues(alpha: 0.05),
             blurRadius: AppDimensions.shadowBlurM,
             offset: AppDimensions.shadowOffsetM,
           ),
@@ -319,7 +319,7 @@ class ReviewWorkerScreen extends StatelessWidget {
         margin: const EdgeInsets.only(top: AppDimensions.spacingL),
         padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingL, vertical: AppDimensions.paddingML),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: AppDimensions.borderRadiusXL,
         ),
         child: Row(

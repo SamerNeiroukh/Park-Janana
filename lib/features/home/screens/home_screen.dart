@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            const Color(0xFF6D28D9).withOpacity(0.10),
+                            const Color(0xFF6D28D9).withValues(alpha: 0.10),
                             Colors.transparent,
                           ],
                         ),
@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            const Color(0xFF4F46E5).withOpacity(0.06),
+                            const Color(0xFF4F46E5).withValues(alpha: 0.06),
                             Colors.transparent,
                           ],
                         ),
@@ -598,7 +598,7 @@ class _HorizontalActionStrip extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -672,7 +672,7 @@ class _StripPillState extends State<_StripPill> {
                 gradient: LinearGradient(
                   colors: [
                     widget.item.color,
-                    widget.item.color.withOpacity(0.70),
+                    widget.item.color.withValues(alpha: 0.70),
                   ],
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
@@ -680,7 +680,7 @@ class _StripPillState extends State<_StripPill> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: widget.item.color.withOpacity(0.35),
+                    color: widget.item.color.withValues(alpha: 0.35),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -777,7 +777,7 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444).withOpacity(0.15),
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.warning_amber_rounded,

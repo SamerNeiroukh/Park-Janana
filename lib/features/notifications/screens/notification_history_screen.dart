@@ -205,7 +205,7 @@ class _NotificationHistoryScreenState
         decoration: BoxDecoration(
           color: item.isRead
               ? TaskTheme.surface
-              : cfg.color.withOpacity(0.07),
+              : cfg.color.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
           boxShadow: TaskTheme.softShadow,
           border: Border(
@@ -225,7 +225,7 @@ class _NotificationHistoryScreenState
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: cfg.color.withOpacity(item.isRead ? 0.10 : 0.18),
+                  color: cfg.color.withValues(alpha: item.isRead ? 0.10 : 0.18),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(cfg.icon, color: cfg.color, size: 20),

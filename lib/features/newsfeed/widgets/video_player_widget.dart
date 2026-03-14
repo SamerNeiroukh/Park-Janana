@@ -126,8 +126,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isFormatError
-                    ? Colors.orange.withOpacity(0.15)
-                    : Colors.red.withOpacity(0.15),
+                    ? Colors.orange.withValues(alpha: 0.15)
+                    : Colors.red.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -154,7 +154,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   ? 'הסרטון מקודד בפורמט Dolby Vision / HEVC שלא נתמך\nבמכשיר זה. נסה להעלות סרטון ב-H.264 (MP4 רגיל).'
                   : 'אירעה שגיאה בהפעלת הסרטון.\nבדוק את החיבור ונסה שוב.',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
+                color: Colors.white.withValues(alpha: 0.65),
                 fontSize: 13,
                 height: 1.5,
               ),

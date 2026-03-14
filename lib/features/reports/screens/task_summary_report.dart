@@ -158,7 +158,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.assignment_outlined, size: 64, color: TaskTheme.textTertiary),
+          const Icon(Icons.assignment_outlined, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין משימות לחודש זה',
@@ -235,7 +235,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -298,10 +298,10 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       ),
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.pie_chart_rounded, size: 18, color: TaskTheme.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text('התפלגות סטטוס', style: TaskTheme.heading3),
             ],
           ),
@@ -329,7 +329,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                         color: TaskTheme.done,
                       ),
                     ),
-                    Text('ביצוע', style: TaskTheme.caption),
+                    const Text('ביצוע', style: TaskTheme.caption),
                   ],
                 ),
               ],
@@ -378,10 +378,10 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
             Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text('פירוט משימות', style: TaskTheme.heading3),
           ],
         ),
@@ -431,7 +431,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -458,7 +458,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             // Due date
             Row(
               children: [
-                Icon(Icons.event_rounded, size: 14, color: TaskTheme.textTertiary),
+                const Icon(Icons.event_rounded, size: 14, color: TaskTheme.textTertiary),
                 const SizedBox(width: 4),
                 Text(
                   'יעד: ${DateFormat('dd/MM/yyyy').format(dueDate)}',

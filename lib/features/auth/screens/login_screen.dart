@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -183,10 +183,11 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.red,
       ));
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -262,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: AppDimensions.borderRadiusXXXL,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: AppDimensions.shadowBlurL,
                         offset: AppDimensions.shadowOffsetL,
                       ),
@@ -276,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: AppDimensions.containerS,
                         height: AppDimensions.containerS,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: AppDimensions.borderRadiusCircle,
                         ),
                         child: const Icon(
@@ -527,7 +528,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             elevation: AppDimensions.elevationS,
-                            shadowColor: AppColors.primary.withOpacity(0.3),
+                            shadowColor: AppColors.primary.withValues(alpha: 0.3),
                             shape: RoundedRectangleBorder(
                               borderRadius: AppDimensions.borderRadiusXL,
                             ),
@@ -559,21 +560,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       // and user has previously opted in
                       if (_biometricAvailable && _biometricLoginEnabled) ...[
                         const SizedBox(height: AppDimensions.spacingXL),
-                        Row(
+                        const Row(
                           children: [
-                            const Expanded(child: Divider()),
+                            Expanded(child: Divider()),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: AppDimensions.paddingM),
                               child: Text(
                                 'או',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: AppDimensions.fontM,
                                 ),
                               ),
                             ),
-                            const Expanded(child: Divider()),
+                            Expanded(child: Divider()),
                           ],
                         ),
                         const SizedBox(height: AppDimensions.spacingXL),

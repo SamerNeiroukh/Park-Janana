@@ -351,7 +351,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -376,8 +376,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryBlue.withOpacity(0.1),
-                      AppColors.primaryBlue.withOpacity(0.05),
+                      AppColors.primaryBlue.withValues(alpha: 0.1),
+                      AppColors.primaryBlue.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(14),
@@ -417,7 +417,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -454,8 +454,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFBBF24).withOpacity(0.2),
-            const Color(0xFFF59E0B).withOpacity(0.1),
+            const Color(0xFFFBBF24).withValues(alpha: 0.2),
+            const Color(0xFFF59E0B).withValues(alpha: 0.1),
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -466,7 +466,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withOpacity(0.15),
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Row(
@@ -555,8 +555,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.3),
-            AppColors.primaryBlue.withOpacity(0.1),
+            AppColors.primaryBlue.withValues(alpha: 0.3),
+            AppColors.primaryBlue.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -572,7 +572,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -929,7 +929,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -950,13 +950,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       child: CachedNetworkImage(
         imageUrl: media.url,
         fit: BoxFit.contain,
-        placeholder: (_, __) => Container(
+        placeholder: (_, _) => Container(
           color: Colors.grey.shade200,
           child: const Center(
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
-        errorWidget: (_, __, ___) => Container(
+        errorWidget: (_, _, _) => Container(
           color: Colors.grey.shade200,
           child: Icon(Icons.broken_image_rounded,
               color: Colors.grey.shade400, size: 48),
@@ -1018,7 +1018,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -1040,7 +1040,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -1099,13 +1099,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.08),
+              color: AppColors.primaryBlue.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.chat_bubble_outline_rounded,
               size: 40,
-              color: AppColors.primaryBlue.withOpacity(0.5),
+              color: AppColors.primaryBlue.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -1144,7 +1144,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -1226,7 +1226,7 @@ class _CategoryChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -1380,7 +1380,7 @@ class _MergedDetailReactionButtonState
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -1492,7 +1492,7 @@ class _DetailPickerEmoji extends StatelessWidget {
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.primaryBlue.withOpacity(0.12)
+              ? AppColors.primaryBlue.withValues(alpha: 0.12)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -1557,7 +1557,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1605,10 +1605,10 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                     padding: const EdgeInsets.all(8),
                     margin: const EdgeInsets.only(left: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withOpacity(0.08),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.edit_outlined,
                       size: 16,
                       color: AppColors.primaryBlue,
@@ -1621,7 +1621,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withOpacity(0.08),
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -1661,8 +1661,8 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.3),
-            AppColors.primaryBlue.withOpacity(0.1),
+            AppColors.primaryBlue.withValues(alpha: 0.3),
+            AppColors.primaryBlue.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -1678,7 +1678,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -1717,7 +1717,7 @@ class _SendButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryBlue.withOpacity(0.3),
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1799,13 +1799,13 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                           child: CachedNetworkImage(
                             imageUrl: media.url,
                             fit: BoxFit.contain,
-                            placeholder: (_, __) => const Center(
+                            placeholder: (_, _) => const Center(
                               child: CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2,
                               ),
                             ),
-                            errorWidget: (_, __, ___) => const Icon(
+                            errorWidget: (_, _, _) => const Icon(
                               Icons.broken_image_rounded,
                               color: Colors.white54,
                               size: 64,
@@ -1824,7 +1824,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -1850,7 +1850,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

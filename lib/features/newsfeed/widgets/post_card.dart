@@ -128,13 +128,13 @@ class _PostCardState extends State<PostCard> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.07),
+              color: Colors.black.withValues(alpha: 0.07),
               blurRadius: 20,
               offset: const Offset(0, 8),
               spreadRadius: 0,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -149,8 +149,8 @@ class _PostCardState extends State<PostCard> {
               onHighlightChanged: (highlighted) {
                 setState(() => _isPressed = highlighted);
               },
-              splashColor: categoryColor.withOpacity(0.04),
-              highlightColor: categoryColor.withOpacity(0.02),
+              splashColor: categoryColor.withValues(alpha: 0.04),
+              highlightColor: categoryColor.withValues(alpha: 0.02),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -212,8 +212,8 @@ class _PostCardState extends State<PostCard> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.secondaryYellow.withOpacity(0.25),
-            AppColors.deepOrange.withOpacity(0.1),
+            AppColors.secondaryYellow.withValues(alpha: 0.25),
+            AppColors.deepOrange.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -223,7 +223,7 @@ class _PostCardState extends State<PostCard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.deepOrange.withOpacity(0.12),
+              color: AppColors.deepOrange.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
@@ -288,14 +288,14 @@ class _PostCardState extends State<PostCard> {
                     _formatTimestamp(date),
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.greyMedium.withOpacity(0.8),
+                      color: AppColors.greyMedium.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.access_time_rounded,
                     size: 12,
-                    color: AppColors.greyMedium.withOpacity(0.6),
+                    color: AppColors.greyMedium.withValues(alpha: 0.6),
                   ),
                 ],
               ),
@@ -314,13 +314,13 @@ class _PostCardState extends State<PostCard> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            categoryColor.withOpacity(0.25),
-            categoryColor.withOpacity(0.1),
+            categoryColor.withValues(alpha: 0.25),
+            categoryColor.withValues(alpha: 0.1),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: categoryColor.withOpacity(0.15),
+            color: categoryColor.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -338,7 +338,7 @@ class _PostCardState extends State<PostCard> {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: categoryColor.withOpacity(0.5),
+                  color: categoryColor.withValues(alpha: 0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -360,7 +360,7 @@ class _PostCardState extends State<PostCard> {
   Widget _buildOptionsMenu() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.greyLight.withOpacity(0.6),
+        color: AppColors.greyLight.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: PopupMenuButton<String>(
@@ -431,7 +431,7 @@ class _PostCardState extends State<PostCard> {
           style: TextStyle(
             fontSize: 14,
             height: 1.6,
-            color: AppColors.textSecondary.withOpacity(0.9),
+            color: AppColors.textSecondary.withValues(alpha: 0.9),
           ),
         );
         final textPainter = TextPainter(
@@ -453,7 +453,7 @@ class _PostCardState extends State<PostCard> {
               style: TextStyle(
                 fontSize: 14,
                 height: 1.6,
-                color: AppColors.textSecondary.withOpacity(0.9),
+                color: AppColors.textSecondary.withValues(alpha: 0.9),
               ),
             ),
             if (isOverflowing)
@@ -467,14 +467,14 @@ class _PostCardState extends State<PostCard> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primaryBlue.withOpacity(0.9),
+                        color: AppColors.primaryBlue.withValues(alpha: 0.9),
                       ),
                     ),
                     const SizedBox(width: 2),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 16,
-                      color: AppColors.primaryBlue.withOpacity(0.9),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.9),
                     ),
                   ],
                 ),
@@ -616,23 +616,23 @@ class _PostCardState extends State<PostCard> {
       imageUrl: media.url,
       fit: BoxFit.cover,
       height: height,
-      placeholder: (_, __) => Container(
+      placeholder: (_, _) => Container(
         height: height,
-        color: AppColors.greyLight.withOpacity(0.5),
+        color: AppColors.greyLight.withValues(alpha: 0.5),
         child: Center(
           child: SizedBox(
             width: 24,
             height: 24,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.primaryBlue.withOpacity(0.4),
+              color: AppColors.primaryBlue.withValues(alpha: 0.4),
             ),
           ),
         ),
       ),
-      errorWidget: (_, __, ___) => Container(
+      errorWidget: (_, _, _) => Container(
         height: height,
-        color: AppColors.greyLight.withOpacity(0.5),
+        color: AppColors.greyLight.withValues(alpha: 0.5),
         child: const Icon(Icons.broken_image_rounded, color: AppColors.greyMedium, size: 40),
       ),
     );
@@ -642,7 +642,7 @@ class _PostCardState extends State<PostCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.greyLight.withOpacity(0.35),
+        color: AppColors.greyLight.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -666,7 +666,7 @@ class _PostCardState extends State<PostCard> {
           Container(
               width: 1,
               height: 24,
-              color: AppColors.greyMedium.withOpacity(0.25)),
+              color: AppColors.greyMedium.withValues(alpha: 0.25)),
           _ActionButton(
             icon: Icons.chat_bubble_outline_rounded,
             label: '${widget.post.commentsCount}',
@@ -702,10 +702,10 @@ class _CategoryBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(0.18), color.withOpacity(0.08)],
+          colors: [color.withValues(alpha: 0.18), color.withValues(alpha: 0.08)],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -815,7 +815,7 @@ class _MergedReactionButtonState extends State<_MergedReactionButton> {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -903,7 +903,7 @@ class _MergedReactionButtonState extends State<_MergedReactionButton> {
                 fontWeight: FontWeight.w600,
                 color: _hasAnyReaction
                     ? AppColors.primaryBlue
-                    : AppColors.greyDark.withOpacity(0.75),
+                    : AppColors.greyDark.withValues(alpha: 0.75),
               ),
             ),
           ),
@@ -933,7 +933,7 @@ class _PickerEmoji extends StatelessWidget {
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.primaryBlue.withOpacity(0.12)
+              ? AppColors.primaryBlue.withValues(alpha: 0.12)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -967,14 +967,14 @@ class _ActionButton extends StatelessWidget {
         child: Row(
           textDirection: TextDirection.rtl,
           children: [
-            Icon(icon, size: 20, color: AppColors.greyDark.withOpacity(0.65)),
+            Icon(icon, size: 20, color: AppColors.greyDark.withValues(alpha: 0.65)),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.greyDark.withOpacity(0.75),
+                color: AppColors.greyDark.withValues(alpha: 0.75),
               ),
             ),
           ],

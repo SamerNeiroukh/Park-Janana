@@ -187,7 +187,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -300,7 +300,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               child: ElevatedButton(
                 onPressed: () => setState(() => selectedStatus = value),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected ? color : color.withOpacity(0.3),
+                  backgroundColor: isSelected ? color : color.withValues(alpha: 0.3),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -347,7 +347,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -460,7 +460,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         label = 'ממתין';
     }
     return Chip(
-      backgroundColor: color.withOpacity(0.15),
+      backgroundColor: color.withValues(alpha: 0.15),
       label: Text(label,
           style: TextStyle(color: color, fontWeight: FontWeight.bold)),
     );
@@ -477,7 +477,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: TextButton.styleFrom(
-        backgroundColor: color.withOpacity(0.09),
+        backgroundColor: color.withValues(alpha: 0.09),
         foregroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),

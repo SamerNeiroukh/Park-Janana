@@ -33,9 +33,9 @@ Future<bool?> showAppDialog(
     context: context,
     barrierDismissible: true,
     barrierLabel: title,
-    barrierColor: Colors.black.withOpacity(0.55),
+    barrierColor: Colors.black.withValues(alpha: 0.55),
     transitionDuration: const Duration(milliseconds: 280),
-    pageBuilder: (ctx, _, __) => Directionality(
+    pageBuilder: (ctx, _, _) => Directionality(
       textDirection: TextDirection.rtl,
       child: Center(
         child: Material(
@@ -49,7 +49,7 @@ Future<bool?> showAppDialog(
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.18),
+                  color: Colors.black.withValues(alpha: 0.18),
                   blurRadius: 36,
                   offset: const Offset(0, 14),
                 ),
@@ -76,7 +76,7 @@ Future<bool?> showAppDialog(
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: gradient.last.withOpacity(0.38),
+                              color: gradient.last.withValues(alpha: 0.38),
                               blurRadius: 22,
                               offset: const Offset(0, 8),
                             ),
@@ -174,7 +174,7 @@ Future<bool?> showAppDialog(
         ),
       ),
     ),
-    transitionBuilder: (_, anim, __, child) {
+    transitionBuilder: (_, anim, _, child) {
       final clamped = anim.value.clamp(0.0, 1.0);
       final curve = Curves.easeOutBack.transform(clamped);
       return Opacity(

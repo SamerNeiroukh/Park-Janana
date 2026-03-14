@@ -86,7 +86,7 @@ class MonthSelector extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: enabled
-                ? TaskTheme.primary.withOpacity(0.08)
+                ? TaskTheme.primary.withValues(alpha: 0.08)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),

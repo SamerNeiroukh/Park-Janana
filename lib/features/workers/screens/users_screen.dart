@@ -17,7 +17,7 @@ class UsersScreen extends StatefulWidget {
   });
 
   @override
-  _UsersScreenState createState() => _UsersScreenState();
+  State<UsersScreen> createState() => _UsersScreenState();
 }
 
 class _UsersScreenState extends State<UsersScreen> {
@@ -253,7 +253,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 8,
                     offset: const Offset(0, -2),
                   ),
@@ -262,7 +262,7 @@ class _UsersScreenState extends State<UsersScreen> {
               child: Material(
                 borderRadius: BorderRadius.circular(16),
                 elevation: 3,
-                shadowColor: Colors.green.withOpacity(0.3),
+                shadowColor: Colors.green.withValues(alpha: 0.3),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () => Navigator.pop(context, _selectedDraftIds.toList()),

@@ -291,9 +291,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       context: context,
       barrierDismissible: false,
       barrierLabel: 'LocationRequired',
-      barrierColor: Colors.black54.withOpacity(0.6),
+      barrierColor: Colors.black54.withValues(alpha: 0.6),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, __) => Center(
+      pageBuilder: (ctx, _, _) => Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -304,7 +304,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 10))
               ],
@@ -323,7 +323,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                           end: Alignment.bottomRight),
                       boxShadow: [
                         BoxShadow(
-                            color: Colors.red.withOpacity(0.4),
+                            color: Colors.red.withValues(alpha: 0.4),
                             blurRadius: 20,
                             spreadRadius: 2)
                       ],
@@ -411,7 +411,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final v = Curves.easeInOut.transform(anim.value);
         return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
       },
@@ -426,9 +426,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Location',
-      barrierColor: Colors.black54.withOpacity(0.6),
+      barrierColor: Colors.black54.withValues(alpha: 0.6),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, __) => Center(
+      pageBuilder: (ctx, _, _) => Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -440,7 +440,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 10))
               ],
@@ -457,7 +457,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                         end: Alignment.bottomRight),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.red.withOpacity(0.4),
+                          color: Colors.red.withValues(alpha: 0.4),
                           blurRadius: 20,
                           spreadRadius: 2)
                     ],
@@ -538,7 +538,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final v = Curves.easeInOut.transform(anim.value);
         return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
       },
@@ -577,7 +577,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
             onLongPressEnd: _onLongPressEnd,
             child: AnimatedBuilder(
               animation: Listenable.merge([_ringCtrl, _burstCtrl, _breatheCtrl]),
-              builder: (_, __) {
+              builder: (_, _) {
                 // Breathing scale (idle only) + burst scale (on success)
                 final burst = sin(_burstCtrl.value * pi) * 0.10;
                 final breathe = isClockedIn
@@ -618,7 +618,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                             height: _kClockSize,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                             ),
                           ),
                       ],
@@ -651,7 +651,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.60),
+                color: Colors.white.withValues(alpha: 0.60),
                 letterSpacing: 0.2,
               ),
             ),
@@ -703,7 +703,7 @@ class _ActiveClockInfo extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.55),
+            color: Colors.white.withValues(alpha: 0.55),
             letterSpacing: 0.5,
           ),
         ),
@@ -733,7 +733,7 @@ class _AnalogClockPainter extends CustomPainter {
         c,
         r,
         Paint()
-          ..color = Colors.white.withOpacity(0.13)
+          ..color = Colors.white.withValues(alpha: 0.13)
           ..style = PaintingStyle.fill);
 
     // Inner glow ring for active state
@@ -742,7 +742,7 @@ class _AnalogClockPainter extends CustomPainter {
           c,
           r - 1,
           Paint()
-            ..color = _kSecondHandActive.withOpacity(0.18)
+            ..color = _kSecondHandActive.withValues(alpha: 0.18)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 9
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
@@ -753,7 +753,7 @@ class _AnalogClockPainter extends CustomPainter {
         c,
         r,
         Paint()
-          ..color = Colors.white.withOpacity(0.30)
+          ..color = Colors.white.withValues(alpha: 0.30)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5);
 
@@ -770,7 +770,7 @@ class _AnalogClockPainter extends CustomPainter {
         Offset(c.dx + (r - 3) * cos(angle), c.dy + (r - 3) * sin(angle)),
         Offset(c.dx + (r - 3 - tickLen) * cos(angle),
             c.dy + (r - 3 - tickLen) * sin(angle)),
-        Colors.white.withOpacity(opacity),
+        Colors.white.withValues(alpha: opacity),
         tickW,
       );
     }
@@ -846,7 +846,7 @@ class _LongPressRingPainter extends CustomPainter {
         c,
         r,
         Paint()
-          ..color = Colors.white.withOpacity(0.10)
+          ..color = Colors.white.withValues(alpha: 0.10)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4);
 
@@ -859,7 +859,7 @@ class _LongPressRingPainter extends CustomPainter {
       2 * pi * progress,
       false,
       Paint()
-        ..color = color.withOpacity(0.35)
+        ..color = color.withValues(alpha: 0.35)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 10
         ..strokeCap = StrokeCap.round
@@ -888,7 +888,7 @@ class _LongPressRingPainter extends CustomPainter {
           tip,
           6,
           Paint()
-            ..color = color.withOpacity(0.50)
+            ..color = color.withValues(alpha: 0.50)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
     }
   }

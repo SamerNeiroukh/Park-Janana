@@ -243,7 +243,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.save, color: AppColors.success),
@@ -457,7 +457,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppColors.warningOrange.withOpacity(0.1),
+      color: AppColors.warningOrange.withValues(alpha: 0.1),
       child: Row(
         children: [
           const Icon(Icons.edit_note, size: 20, color: AppColors.warningOrange),
@@ -503,7 +503,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         color: const Color(0xFFF8F9FB),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -512,7 +512,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       child: Material(
         borderRadius: BorderRadius.circular(18),
         elevation: 4,
-        shadowColor: AppColors.success.withOpacity(0.3),
+        shadowColor: AppColors.success.withValues(alpha: 0.3),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: _isSaving ? null : () => _saveAllChanges(currentShift),
@@ -577,7 +577,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -592,7 +592,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: departmentColor.withOpacity(0.1),
+                  color: departmentColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -617,7 +617,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.warningOrange.withOpacity(0.1),
+                    color: AppColors.warningOrange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -640,7 +640,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               const SizedBox(width: 8),
               // Edit button
               Material(
-                color: departmentColor.withOpacity(0.1),
+                color: departmentColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(10),
@@ -758,11 +758,11 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                               colors: progress >= 1
                                   ? [
                                       AppColors.success,
-                                      AppColors.success.withOpacity(0.8)
+                                      AppColors.success.withValues(alpha: 0.8)
                                     ]
                                   : [
                                       departmentColor,
-                                      departmentColor.withOpacity(0.7)
+                                      departmentColor.withValues(alpha: 0.7)
                                     ],
                             ),
                             borderRadius: BorderRadius.circular(4),
@@ -810,7 +810,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 16,
           ),
         ],
@@ -826,7 +826,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? departmentColor.withOpacity(0.1)
+                      ? departmentColor.withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -953,7 +953,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           child: Material(
             color: isFull
                 ? Colors.grey.shade300
-                : departmentColor.withOpacity(0.1),
+                : departmentColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
@@ -1137,7 +1137,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1149,12 +1149,12 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                  color: departmentColor.withOpacity(0.3), width: 2),
+                  color: departmentColor.withValues(alpha: 0.3), width: 2),
             ),
             child: ProfileAvatar(
               imageUrl: user.profilePicture,
               radius: 26,
-              backgroundColor: departmentColor.withOpacity(0.1),
+              backgroundColor: departmentColor.withValues(alpha: 0.1),
             ),
           ),
           const SizedBox(width: 12),
@@ -1193,7 +1193,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     required VoidCallback onTap,
   }) {
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -1210,9 +1210,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1281,7 +1281,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -1394,7 +1394,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
           ),
         ],
@@ -1404,7 +1404,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: departmentColor.withOpacity(0.1),
+              color: departmentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 18, color: departmentColor),
@@ -1470,11 +1470,11 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: departmentColor.withOpacity(0.08),
+                color: departmentColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child:
-                  Icon(icon, size: 48, color: departmentColor.withOpacity(0.6)),
+                  Icon(icon, size: 48, color: departmentColor.withValues(alpha: 0.6)),
             ),
             const SizedBox(height: 20),
             Text(

@@ -167,7 +167,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                       decoration: BoxDecoration(
                         color: _isRangeMode
                             ? const Color(0xFF3B82F6)
-                            : const Color(0xFF3B82F6).withOpacity(0.1),
+                            : const Color(0xFF3B82F6).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -205,10 +205,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.4)),
+                      border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.4)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -278,7 +278,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
+          const Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין נתוני נוכחות לחודש זה',
@@ -345,7 +345,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -380,10 +380,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.bar_chart_rounded, size: 18, color: TaskTheme.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text('שעות עבודה לפי יום', style: TaskTheme.heading3),
             ],
           ),
@@ -448,7 +448,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                     drawVerticalLine: false,
                     horizontalInterval: maxY > 8 ? 2 : 1,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: TaskTheme.border.withOpacity(0.5),
+                      color: TaskTheme.border.withValues(alpha: 0.5),
                       strokeWidth: 1,
                     ),
                   ),
@@ -488,10 +488,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
             Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text('פירוט נוכחות', style: TaskTheme.heading3),
           ],
         ),
@@ -511,7 +511,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               color: TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               boxShadow: TaskTheme.softShadow,
-              border: Border(
+              border: const Border(
                 right: BorderSide(
                   color: TaskTheme.done,
                   width: 3,
@@ -539,12 +539,12 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: TaskTheme.done.withOpacity(0.1),
+                          color: TaskTheme.done.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '$hoursש׳ $minutesד׳',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: TaskTheme.done,
@@ -557,14 +557,14 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                   // Clock in/out row
                   Row(
                     children: [
-                      Icon(Icons.login_rounded, size: 16, color: TaskTheme.inProgress),
+                      const Icon(Icons.login_rounded, size: 16, color: TaskTheme.inProgress),
                       const SizedBox(width: 6),
                       Text(
                         'כניסה: $clockIn',
                         style: TaskTheme.body.copyWith(fontSize: 13),
                       ),
                       const SizedBox(width: 20),
-                      Icon(Icons.logout_rounded, size: 16, color: TaskTheme.overdue),
+                      const Icon(Icons.logout_rounded, size: 16, color: TaskTheme.overdue),
                       const SizedBox(width: 6),
                       Text(
                         'יציאה: $clockOut',

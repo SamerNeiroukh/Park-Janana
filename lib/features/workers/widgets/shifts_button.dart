@@ -84,7 +84,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
           borderRadius: AppDimensions.borderRadiusXL,
           boxShadow: [
             BoxShadow(
-              color: Colors.black12.withOpacity(0.05),
+              color: Colors.black12.withValues(alpha: 0.05),
               blurRadius: AppDimensions.elevationXL,
               offset: AppDimensions.shadowOffsetS,
             ),
@@ -261,10 +261,10 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: AppDimensions.borderRadiusML,
-                  border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black12.withOpacity(0.08),
+                      color: Colors.black12.withValues(alpha: 0.08),
                       blurRadius: AppDimensions.elevationXL,
                       offset: AppDimensions.shadowOffsetS,
                     ),

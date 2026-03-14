@@ -122,7 +122,7 @@ class _NetworkBannerState extends State<NetworkBanner>
                 : const Color(0xFF15803D),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -152,7 +152,7 @@ class _NetworkBannerState extends State<NetworkBanner>
                 Text(
                   'פועל במצב לא מקוון',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
+                    color: Colors.white.withValues(alpha: 0.75),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                     height: 1,

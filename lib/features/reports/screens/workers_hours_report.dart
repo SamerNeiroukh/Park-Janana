@@ -197,7 +197,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -256,7 +256,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                   alignment: BarChartAlignment.spaceAround,
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, _, rod, __) {
+                      getTooltipItem: (group, _, rod, _) {
                         final name = displayed[group.x].userName;
                         return BarTooltipItem(
                           '$name\n${rod.toY.toStringAsFixed(1)} ש׳',
@@ -311,7 +311,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                     horizontalInterval:
                         maxY > 40 ? 10 : maxY > 16 ? 4 : 2,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: TaskTheme.border.withOpacity(0.5),
+                      color: TaskTheme.border.withValues(alpha: 0.5),
                       strokeWidth: 1,
                     ),
                   ),
@@ -382,7 +382,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                     height: 30,
                     decoration: BoxDecoration(
                       color: rank <= 3
-                          ? const Color(0xFF3B82F6).withOpacity(0.12)
+                          ? const Color(0xFF3B82F6).withValues(alpha: 0.12)
                           : TaskTheme.background,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -417,7 +417,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                      color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

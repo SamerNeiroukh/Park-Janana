@@ -104,8 +104,8 @@ class AttendanceModel {
       year: map['year'],
       month: map['month'],
       sessions: (map['sessions'] as List<dynamic>? ?? [])
-          .where((r) => r is Map)
-          .map((r) => AttendanceRecord.fromMap(Map<String, dynamic>.from(r as Map)))
+          .whereType<Map>()
+          .map((r) => AttendanceRecord.fromMap(Map<String, dynamic>.from(r)))
           .toList(),
     );
   }
