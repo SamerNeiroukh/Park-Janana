@@ -58,7 +58,7 @@ class _MainActionCardState extends State<MainActionCard> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: widget.gradient.first.withOpacity(0.22),
+                color: widget.gradient.first.withValues(alpha: 0.22),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
@@ -92,7 +92,7 @@ class _MainActionCardState extends State<MainActionCard> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
-                            color: Colors.white.withOpacity(0.78),
+                            color: Colors.white.withValues(alpha: 0.78),
                             height: 1.4,
                           ),
                         ),
@@ -136,10 +136,10 @@ class _MainActionCardState extends State<MainActionCard> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.16),
+                      color: Colors.white.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(20),
                       border:
-                          Border.all(color: Colors.white.withOpacity(0.12)),
+                          Border.all(color: Colors.white.withValues(alpha: 0.12)),
                     ),
                     child: Icon(
                       widget.icon,

@@ -192,6 +192,92 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     }
   }
 
+  Future<void> _editComment(PostComment comment) async {
+    HapticFeedback.lightImpact();
+    final ctrl = TextEditingController(text: comment.content);
+    final newContent = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('עריכת תגובה',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: ctrl,
+                  autofocus: true,
+                  maxLines: 4,
+                  minLines: 2,
+                  decoration: InputDecoration(
+                    hintText: 'ערוך את תגובתך...',
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('ביטול'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue),
+                        child: const Text('שמור',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    ctrl.dispose();
+    if (newContent == null || newContent.isEmpty || newContent == comment.content) return;
+    try {
+      await _newsfeedService.editComment(widget.post.id, comment, newContent);
+      if (mounted) _showSnackbar('התגובה עודכנה', isSuccess: true);
+    } catch (e) {
+      if (mounted) _showSnackbar('שגיאה בעדכון תגובה', isSuccess: false);
+    }
+  }
+
   void _showSnackbar(String message, {required bool isSuccess}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -265,7 +351,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -290,8 +376,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryBlue.withOpacity(0.1),
-                      AppColors.primaryBlue.withOpacity(0.05),
+                      AppColors.primaryBlue.withValues(alpha: 0.1),
+                      AppColors.primaryBlue.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(14),
@@ -331,7 +417,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -368,8 +454,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFBBF24).withOpacity(0.2),
-            const Color(0xFFF59E0B).withOpacity(0.1),
+            const Color(0xFFFBBF24).withValues(alpha: 0.2),
+            const Color(0xFFF59E0B).withValues(alpha: 0.1),
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -380,7 +466,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withOpacity(0.15),
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Row(
@@ -469,8 +555,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.3),
-            AppColors.primaryBlue.withOpacity(0.1),
+            AppColors.primaryBlue.withValues(alpha: 0.3),
+            AppColors.primaryBlue.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -486,7 +572,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -536,6 +622,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           });
         }
         if (value == 'pin') widget.onPin?.call();
+        if (value == 'edit') _editPost(post);
       },
       itemBuilder: (_) => [
         if (widget.isManager)
@@ -555,6 +642,17 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               ],
             ),
           ),
+        if (post.authorId == widget.currentUserId || widget.isManager)
+          const PopupMenuItem(
+            value: 'edit',
+            child: Row(
+              children: [
+                Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryBlue),
+                SizedBox(width: 12),
+                Text('ערוך פוסט'),
+              ],
+            ),
+          ),
         const PopupMenuItem(
           value: 'delete',
           child: Row(
@@ -568,6 +666,108 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         ),
       ],
     );
+  }
+
+  Future<void> _editPost(PostModel post) async {
+    final titleCtrl = TextEditingController(text: post.title);
+    final contentCtrl = TextEditingController(text: post.content);
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('עריכת פוסט',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: titleCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'כותרת',
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: contentCtrl,
+                  maxLines: 5,
+                  minLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'תוכן',
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('ביטול'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue),
+                        child: const Text('שמור',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    titleCtrl.dispose();
+    contentCtrl.dispose();
+    if (saved != true) return;
+    try {
+      await _newsfeedService.updatePost(post.id, {
+        'title': titleCtrl.text.trim(),
+        'content': contentCtrl.text.trim(),
+      });
+      if (mounted) _showSnackbar('הפוסט עודכן', isSuccess: true);
+    } catch (e) {
+      if (mounted) _showSnackbar('שגיאה בעדכון הפוסט', isSuccess: false);
+    }
   }
 
   Widget _buildTitle(String title) {
@@ -729,7 +929,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -818,7 +1018,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -840,7 +1040,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -869,10 +1069,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           (context, index) {
             final comment = post.comments[index];
             final canDelete = comment.userId == widget.currentUserId || widget.isOwner;
+            final canEdit = comment.userId == widget.currentUserId;
             return _ModernCommentCard(
               comment: comment,
               canDelete: canDelete,
+              canEdit: canEdit,
               onDelete: () => _deleteComment(comment),
+              onEdit: () => _editComment(comment),
               timestamp: _formatTimestamp(comment.createdAt),
             );
           },
@@ -896,13 +1099,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.08),
+              color: AppColors.primaryBlue.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.chat_bubble_outline_rounded,
               size: 40,
-              color: AppColors.primaryBlue.withOpacity(0.5),
+              color: AppColors.primaryBlue.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -941,7 +1144,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -1023,7 +1226,7 @@ class _CategoryChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -1177,7 +1380,7 @@ class _MergedDetailReactionButtonState
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -1289,7 +1492,7 @@ class _DetailPickerEmoji extends StatelessWidget {
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.primaryBlue.withOpacity(0.12)
+              ? AppColors.primaryBlue.withValues(alpha: 0.12)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -1305,13 +1508,17 @@ class _DetailPickerEmoji extends StatelessWidget {
 class _ModernCommentCard extends StatefulWidget {
   final PostComment comment;
   final bool canDelete;
+  final bool canEdit;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
   final String timestamp;
 
   const _ModernCommentCard({
     required this.comment,
     required this.canDelete,
+    required this.canEdit,
     required this.onDelete,
+    required this.onEdit,
     required this.timestamp,
   });
 
@@ -1350,7 +1557,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1391,13 +1598,30 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                   ],
                 ),
               ),
+              if (widget.canEdit)
+                GestureDetector(
+                  onTap: widget.onEdit,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.only(left: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: AppColors.primaryBlue,
+                    ),
+                  ),
+                ),
               if (widget.canDelete)
                 GestureDetector(
                   onTap: widget.onDelete,
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withOpacity(0.08),
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -1437,8 +1661,8 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.3),
-            AppColors.primaryBlue.withOpacity(0.1),
+            AppColors.primaryBlue.withValues(alpha: 0.3),
+            AppColors.primaryBlue.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -1454,7 +1678,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -1493,7 +1717,7 @@ class _SendButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryBlue.withOpacity(0.3),
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1600,7 +1824,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -1626,7 +1850,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

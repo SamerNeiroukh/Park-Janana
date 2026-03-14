@@ -98,13 +98,13 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
         gradient: LinearGradient(
           colors: [
             AppColors.primary,
-            AppColors.primary.withOpacity(0.8),
+            AppColors.primary.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -136,7 +136,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                   '$startDate - $endDate',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -160,7 +160,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -207,7 +207,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                     ? LinearGradient(
                         colors: [
                           AppColors.primary,
-                          AppColors.primary.withOpacity(0.8),
+                          AppColors.primary.withValues(alpha: 0.8),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -221,8 +221,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                 boxShadow: [
                   BoxShadow(
                     color: isSelected
-                        ? AppColors.primary.withOpacity(0.4)
-                        : Colors.black.withOpacity(0.06),
+                        ? AppColors.primary.withValues(alpha: 0.4)
+                        : Colors.black.withValues(alpha: 0.06),
                     blurRadius: isSelected ? 12 : 8,
                     offset: const Offset(0, 4),
                   ),
@@ -245,7 +245,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.white.withOpacity(0.2)
+                          ? Colors.white.withValues(alpha: 0.2)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -338,8 +338,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
             boxShadow: [
               BoxShadow(
                 color: isCancelled
-                    ? Colors.grey.withOpacity(0.1)
-                    : color.withOpacity(0.12),
+                    ? Colors.grey.withValues(alpha: 0.1)
+                    : color.withValues(alpha: 0.12),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -371,7 +371,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                           decoration: BoxDecoration(
                             color: isCancelled
                                 ? Colors.red.shade50
-                                : color.withOpacity(0.1),
+                                : color.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Icon(
@@ -437,8 +437,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                                 horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: isFull
-                                  ? AppColors.success.withOpacity(0.1)
-                                  : color.withOpacity(0.1),
+                                  ? AppColors.success.withValues(alpha: 0.1)
+                                  : color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
@@ -469,7 +469,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: AppColors.warningOrange.withOpacity(0.1),
+                                color: AppColors.warningOrange.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Row(
@@ -501,10 +501,10 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color: shift.status == 'active'
-                                ? AppColors.success.withOpacity(0.1)
+                                ? AppColors.success.withValues(alpha: 0.1)
                                 : shift.status == 'cancelled'
-                                    ? Colors.red.withOpacity(0.1)
-                                    : Colors.grey.withOpacity(0.1),
+                                    ? Colors.red.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(

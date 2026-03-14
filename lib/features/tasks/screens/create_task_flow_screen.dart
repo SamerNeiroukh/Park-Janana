@@ -212,7 +212,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                     boxShadow: (isActive || isDone)
                         ? [BoxShadow(
                             color: (isDone ? TaskTheme.done : TaskTheme.primary)
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           )]
@@ -388,7 +388,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
               margin: const EdgeInsets.only(left: 8),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? color.withOpacity(0.1) : TaskTheme.surface,
+                color: isSelected ? color.withValues(alpha: 0.1) : TaskTheme.surface,
                 borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                 border: Border.all(
                   color: isSelected ? color : TaskTheme.border,
@@ -437,7 +437,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isSelected
-                  ? TaskTheme.primary.withOpacity(0.1)
+                  ? TaskTheme.primary.withValues(alpha: 0.1)
                   : TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               border: Border.all(
@@ -513,7 +513,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: TaskTheme.primary.withOpacity(0.1),
+                          color: TaskTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Row(
@@ -571,7 +571,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? TaskTheme.primary.withOpacity(0.06)
+                        ? TaskTheme.primary.withValues(alpha: 0.06)
                         : TaskTheme.surface,
                     borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                     border: Border.all(
@@ -585,7 +585,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                       ProfileAvatar(
                         imageUrl: user.profilePicture,
                         radius: 20,
-                        backgroundColor: TaskTheme.primary.withOpacity(0.1),
+                        backgroundColor: TaskTheme.primary.withValues(alpha: 0.1),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -685,7 +685,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: TaskTheme.primary.withOpacity(0.1),
+                color: TaskTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: TaskTheme.primary, size: 22),
@@ -788,7 +788,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: TaskTheme.primary.withOpacity(0.08),
+              color: TaskTheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 18, color: TaskTheme.primary),
@@ -894,7 +894,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                   gradient: LinearGradient(
-                    colors: [btnColor, btnColor.withOpacity(0.85)],
+                    colors: [btnColor, btnColor.withValues(alpha: 0.85)],
                     begin: Alignment.centerRight,
                     end: Alignment.centerLeft,
                   ),

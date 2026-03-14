@@ -134,7 +134,7 @@ class _PostPreviewState extends State<_PostPreview> {
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
+                      color: Colors.black.withValues(alpha: 0.07),
                       blurRadius: 18,
                       offset: const Offset(0, 6),
                     ),
@@ -204,11 +204,11 @@ class _PostPreviewState extends State<_PostPreview> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: catColor.withOpacity(0.10),
+                                    color: catColor.withValues(alpha: 0.10),
                                     borderRadius:
                                         BorderRadius.circular(999),
                                     border: Border.all(
-                                        color: catColor.withOpacity(0.25)),
+                                        color: catColor.withValues(alpha: 0.25)),
                                   ),
                                   child: Text(
                                     post.categoryDisplayName,
@@ -264,7 +264,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                   Icons.favorite_rounded,
                                   size: 14,
                                   color: const Color(0xFFEF4444)
-                                      .withOpacity(0.80),
+                                      .withValues(alpha: 0.80),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -280,7 +280,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                   Icons.chat_bubble_outline_rounded,
                                   size: 14,
                                   color: const Color(0xFF3B82F6)
-                                      .withOpacity(0.80),
+                                      .withValues(alpha: 0.80),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -302,7 +302,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: const Color(0xFF4F46E5)
-                                            .withOpacity(0.85),
+                                            .withValues(alpha: 0.85),
                                       ),
                                     ),
                                     const SizedBox(width: 3),
@@ -310,7 +310,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                       Icons.keyboard_arrow_down_rounded,
                                       size: 14,
                                       color: const Color(0xFF4F46E5)
-                                          .withOpacity(0.85),
+                                          .withValues(alpha: 0.85),
                                     ),
                                   ],
                                 ),

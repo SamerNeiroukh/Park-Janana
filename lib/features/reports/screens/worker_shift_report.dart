@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -245,6 +246,8 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                     children: [
                       _buildStatRow(),
                       const SizedBox(height: 16),
+                      _buildDecisionPieChart(),
+                      const SizedBox(height: 16),
                       _buildShiftList(),
                       const SizedBox(height: 80),
                     ],
@@ -327,7 +330,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -341,6 +344,108 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
           Text(label, style: TaskTheme.caption),
         ],
       ),
+    );
+  }
+
+  Widget _buildDecisionPieChart() {
+    final counts = _getDecisionCounts();
+    final accepted = counts['accepted']!;
+    final rejected = counts['rejected']!;
+    final other    = counts['other']!;
+    final total    = accepted + rejected + other;
+
+    if (total == 0) return const SizedBox.shrink();
+
+    final sections = <PieChartSectionData>[
+      if (accepted > 0)
+        PieChartSectionData(
+          value: accepted.toDouble(),
+          color: const Color(0xFF10B981),
+          title: '$accepted',
+          radius: 52,
+          titleStyle: const TextStyle(
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+      if (rejected > 0)
+        PieChartSectionData(
+          value: rejected.toDouble(),
+          color: const Color(0xFFEF4444),
+          title: '$rejected',
+          radius: 52,
+          titleStyle: const TextStyle(
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+      if (other > 0)
+        PieChartSectionData(
+          value: other.toDouble(),
+          color: const Color(0xFFF59E0B),
+          title: '$other',
+          radius: 52,
+          titleStyle: const TextStyle(
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: TaskTheme.surface,
+        borderRadius: BorderRadius.circular(TaskTheme.radiusL),
+        boxShadow: TaskTheme.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.pie_chart_rounded, size: 18, color: TaskTheme.primary),
+            SizedBox(width: 8),
+            Text('התפלגות החלטות', style: TaskTheme.heading3),
+          ]),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 140,
+            child: Row(
+              children: [
+                Expanded(
+                  child: PieChart(
+                    PieChartData(
+                      sections: sections,
+                      sectionsSpace: 2,
+                      centerSpaceRadius: 30,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _legend(const Color(0xFF10B981), 'מאושר ($accepted)'),
+                    const SizedBox(height: 8),
+                    _legend(const Color(0xFFEF4444), 'נדחה ($rejected)'),
+                    const SizedBox(height: 8),
+                    _legend(const Color(0xFFF59E0B), 'אחר ($other)'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _legend(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12, height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: TaskTheme.caption),
+      ],
     );
   }
 
@@ -526,7 +631,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

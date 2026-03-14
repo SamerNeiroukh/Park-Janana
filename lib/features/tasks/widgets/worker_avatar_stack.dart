@@ -41,7 +41,7 @@ class WorkerAvatarStack extends StatelessWidget {
                 child: ProfileAvatar(
                   imageUrl: displayed[i].profilePicture,
                   radius: radius,
-                  backgroundColor: TaskTheme.primary.withOpacity(0.1),
+                  backgroundColor: TaskTheme.primary.withValues(alpha: 0.1),
                 ),
               ),
             ),
@@ -52,7 +52,7 @@ class WorkerAvatarStack extends StatelessWidget {
                 width: radius * 2,
                 height: radius * 2,
                 decoration: BoxDecoration(
-                  color: TaskTheme.primary.withOpacity(0.1),
+                  color: TaskTheme.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),

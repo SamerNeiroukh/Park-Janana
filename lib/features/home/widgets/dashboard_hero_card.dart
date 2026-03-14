@@ -69,7 +69,7 @@ class DashboardHeroCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.18),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.18),
               blurRadius: 32,
               offset: const Offset(0, 18),
             ),
@@ -85,7 +85,7 @@ class DashboardHeroCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.white.withOpacity(0.08),
+                        Colors.white.withValues(alpha: 0.08),
                         Colors.transparent,
                       ],
                       begin: Alignment.topLeft,
@@ -130,7 +130,7 @@ class DashboardHeroCard extends StatelessWidget {
                                       Text(
                                         _roleLabel(),
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.85),
+                                          color: Colors.white.withValues(alpha: 0.85),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -141,7 +141,7 @@ class DashboardHeroCard extends StatelessWidget {
                                           dept,
                                           style: TextStyle(
                                             color:
-                                                Colors.white.withOpacity(0.65),
+                                                Colors.white.withValues(alpha: 0.65),
                                             fontSize: 11,
                                           ),
                                           overflow: TextOverflow.ellipsis,
@@ -172,7 +172,7 @@ class DashboardHeroCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 18),
                       Divider(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                         thickness: 1,
                       ),
                       const SizedBox(height: 14),
@@ -188,7 +188,7 @@ class DashboardHeroCard extends StatelessWidget {
                           Text(
                             currentDate,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withValues(alpha: 0.6),
                               fontSize: 12,
                             ),
                           ),
@@ -247,9 +247,9 @@ class _StatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
+        color: Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
       ),
       child: Text(
         '$value $label',
@@ -279,9 +279,9 @@ class _WeatherChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
+        color: Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
       ),
       child: Text(
         '$emoji  $temp°C · $desc',

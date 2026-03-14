@@ -114,7 +114,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         gradient: LinearGradient(
           colors: [
             AppColors.primary,
-            AppColors.primary.withOpacity(0.8),
+            AppColors.primary.withValues(alpha: 0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -122,7 +122,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -154,7 +154,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                   '$startDate - $endDate',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -175,7 +175,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
   Widget _buildNavButton({required IconData icon, required VoidCallback onTap}) {
     return Material(
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -220,7 +220,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                     ? LinearGradient(
                         colors: [
                           AppColors.primary,
-                          AppColors.primary.withOpacity(0.8),
+                          AppColors.primary.withValues(alpha: 0.8),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -234,8 +234,8 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                 boxShadow: [
                   BoxShadow(
                     color: isSelected
-                        ? AppColors.primary.withOpacity(0.4)
-                        : Colors.black.withOpacity(0.06),
+                        ? AppColors.primary.withValues(alpha: 0.4)
+                        : Colors.black.withValues(alpha: 0.06),
                     blurRadius: isSelected ? 12 : 8,
                     offset: const Offset(0, 4),
                   ),
@@ -258,7 +258,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.white.withOpacity(0.2)
+                          ? Colors.white.withValues(alpha: 0.2)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -350,13 +350,13 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.event_busy_rounded,
                 size: 56,
-                color: AppColors.primary.withOpacity(0.5),
+                color: AppColors.primary.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 24),

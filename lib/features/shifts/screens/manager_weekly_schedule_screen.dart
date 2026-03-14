@@ -138,7 +138,7 @@ class _ManagerWeeklyScheduleScreenState
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? colors[i].withOpacity(0.12)
+                      ? colors[i].withValues(alpha: 0.12)
                       : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
@@ -424,7 +424,7 @@ class _DepartmentFilter extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? color.withOpacity(0.15) : Colors.white,
+                  color: isSelected ? color.withValues(alpha: 0.15) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected ? color : Colors.grey.shade300,
@@ -524,7 +524,7 @@ class _DaySection extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: textColor.withOpacity(0.8),
+                        color: textColor.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -533,7 +533,7 @@ class _DaySection extends StatelessWidget {
                       height: 44,
                       decoration: BoxDecoration(
                         color:
-                            accentColor.withOpacity(isToday ? 0.15 : 0.1),
+                            accentColor.withValues(alpha: isToday ? 0.15 : 0.1),
                         shape: BoxShape.circle,
                         border: isToday
                             ? Border.all(color: accentColor, width: 2)
@@ -593,8 +593,8 @@ class _DaySection extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      accentColor.withOpacity(0.6),
-                      accentColor.withOpacity(0.2),
+                      accentColor.withValues(alpha: 0.6),
+                      accentColor.withValues(alpha: 0.2),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(2),
@@ -710,7 +710,7 @@ class _ShiftCardState extends State<_ShiftCard> {
     final borderColor = widget.isPast
         ? Colors.grey.shade300
         : (_isPressed
-            ? _deptColor.withOpacity(0.3)
+            ? _deptColor.withValues(alpha: 0.3)
             : Colors.grey.shade200);
 
     // Resolve workers for this shift
@@ -742,7 +742,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                 : [
                     BoxShadow(
                       color:
-                          Colors.black.withOpacity(_isPressed ? 0.08 : 0.05),
+                          Colors.black.withValues(alpha: _isPressed ? 0.08 : 0.05),
                       blurRadius: _isPressed ? 8 : 12,
                       offset: Offset(0, _isPressed ? 2 : 4),
                     ),
@@ -772,7 +772,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _deptColor.withOpacity(0.1),
+                            color: _deptColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -800,7 +800,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: _countColor.withOpacity(0.1),
+                            color: _countColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -1015,7 +1015,7 @@ class _ShiftDetailSheet extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: _deptColor.withOpacity(0.1),
+              color: _deptColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -1200,7 +1200,7 @@ class _ShiftDetailSheet extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         _deptColor,
-                        _deptColor.withOpacity(0.8),
+                        _deptColor.withValues(alpha: 0.8),
                       ],
                       begin: Alignment.centerRight,
                       end: Alignment.centerLeft,
@@ -1208,7 +1208,7 @@ class _ShiftDetailSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: _deptColor.withOpacity(0.3),
+                        color: _deptColor.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -1222,7 +1222,7 @@ class _ShiftDetailSheet extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(

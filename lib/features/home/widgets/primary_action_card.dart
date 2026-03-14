@@ -55,7 +55,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: firstColor.withOpacity(0.25),
+                color: firstColor.withValues(alpha: 0.25),
                 blurRadius: 22,
                 offset: const Offset(0, 12),
               ),
@@ -71,7 +71,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.white.withOpacity(0.08),
+                          Colors.white.withValues(alpha: 0.08),
                           Colors.transparent,
                         ],
                         begin: Alignment.topLeft,
@@ -106,7 +106,7 @@ class _PrimaryActionCardState extends State<PrimaryActionCard> {
                               Text(
                                 widget.subtitle,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.80),
+                                  color: Colors.white.withValues(alpha: 0.80),
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                   height: 1.35,
@@ -164,10 +164,10 @@ class _GlassIconContainer extends StatelessWidget {
           width: 54,
           height: 54,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.20),
+            color: Colors.white.withValues(alpha: 0.20),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.25),
+              color: Colors.white.withValues(alpha: 0.25),
             ),
           ),
           child: Icon(

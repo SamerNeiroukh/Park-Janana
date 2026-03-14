@@ -121,7 +121,7 @@ class SmartContextPanel extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -152,7 +152,7 @@ class SmartContextPanel extends StatelessWidget {
                         borderRadius: BorderRadius.circular(13),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF4F46E5).withOpacity(0.28),
+                            color: const Color(0xFF4F46E5).withValues(alpha: 0.28),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),
@@ -235,7 +235,7 @@ class _ContextRow extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: item.color.withOpacity(0.10),
+            color: item.color.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(13),
           ),
           child: Icon(item.icon, size: 19, color: item.color),
@@ -262,7 +262,7 @@ class _ContextRow extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   item.color,
-                  item.color.withOpacity(0.72),
+                  item.color.withValues(alpha: 0.72),
                 ],
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
@@ -270,7 +270,7 @@ class _ContextRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               boxShadow: [
                 BoxShadow(
-                  color: item.color.withOpacity(0.30),
+                  color: item.color.withValues(alpha: 0.30),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),

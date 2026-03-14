@@ -42,7 +42,7 @@ class _SecondaryActionCardState extends State<SecondaryActionCard> {
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 14,
                   offset: const Offset(0, 8),
                 ),
@@ -61,7 +61,7 @@ class _SecondaryActionCardState extends State<SecondaryActionCard> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: widget.accentColor.withOpacity(0.12),
+                        color: widget.accentColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(

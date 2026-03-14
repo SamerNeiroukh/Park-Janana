@@ -193,13 +193,13 @@ class _CommentsSheetState extends State<CommentsSheet>
               end: Alignment.bottomCenter,
               colors: [
                 Colors.white,
-                Colors.white.withOpacity(0.98),
+                Colors.white.withValues(alpha: 0.98),
               ],
             ),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, -5),
               ),
@@ -235,8 +235,8 @@ class _CommentsSheetState extends State<CommentsSheet>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.greyMedium.withOpacity(0.3),
-            AppColors.greyMedium.withOpacity(0.5),
+            AppColors.greyMedium.withValues(alpha: 0.3),
+            AppColors.greyMedium.withValues(alpha: 0.5),
           ],
         ),
         borderRadius: BorderRadius.circular(3),
@@ -258,8 +258,8 @@ class _CommentsSheetState extends State<CommentsSheet>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryBlue.withOpacity(0.15),
-                      AppColors.primaryBlue.withOpacity(0.05),
+                      AppColors.primaryBlue.withValues(alpha: 0.15),
+                      AppColors.primaryBlue.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -285,7 +285,7 @@ class _CommentsSheetState extends State<CommentsSheet>
                     '${post.commentsCount} תגובות',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.greyMedium.withOpacity(0.8),
+                      color: AppColors.greyMedium.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -294,7 +294,7 @@ class _CommentsSheetState extends State<CommentsSheet>
           ),
           const Spacer(),
           Material(
-            color: AppColors.greyLight.withOpacity(0.5),
+            color: AppColors.greyLight.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
               onTap: () => Navigator.pop(context),
@@ -347,7 +347,7 @@ class _CommentsSheetState extends State<CommentsSheet>
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 15,
               offset: const Offset(0, -8),
             ),
@@ -362,7 +362,7 @@ class _CommentsSheetState extends State<CommentsSheet>
                   color: const Color(0xFFF5F7FA),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppColors.greyLight.withOpacity(0.5),
+                    color: AppColors.greyLight.withValues(alpha: 0.5),
                   ),
                 ),
                 child: TextField(
@@ -375,7 +375,7 @@ class _CommentsSheetState extends State<CommentsSheet>
                   decoration: InputDecoration(
                     hintText: 'כתוב תגובה...',
                     hintStyle: TextStyle(
-                      color: AppColors.greyMedium.withOpacity(0.7),
+                      color: AppColors.greyMedium.withValues(alpha: 0.7),
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -414,13 +414,13 @@ class _EmptyComments extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.08),
+              color: AppColors.primaryBlue.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.chat_bubble_outline_rounded,
               size: 56,
-              color: AppColors.primaryBlue.withOpacity(0.4),
+              color: AppColors.primaryBlue.withValues(alpha: 0.4),
             ),
           ),
           const SizedBox(height: 20),
@@ -437,7 +437,7 @@ class _EmptyComments extends StatelessWidget {
             'היה הראשון להגיב!',
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.greyMedium.withOpacity(0.8),
+              color: AppColors.greyMedium.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -500,7 +500,7 @@ class _CommentCardState extends State<_CommentCard> {
         ),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: AppColors.greyLight.withOpacity(0.5),
+          color: AppColors.greyLight.withValues(alpha: 0.5),
         ),
       ),
       child: Column(
@@ -529,14 +529,14 @@ class _CommentCardState extends State<_CommentCard> {
                         widget.timestamp,
                         style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.greyMedium.withOpacity(0.7),
+                          color: AppColors.greyMedium.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(
                         Icons.access_time_rounded,
                         size: 11,
-                        color: AppColors.greyMedium.withOpacity(0.6),
+                        color: AppColors.greyMedium.withValues(alpha: 0.6),
                       ),
                     ],
                   ),
@@ -545,7 +545,7 @@ class _CommentCardState extends State<_CommentCard> {
               const Spacer(),
               if (widget.canDelete)
                 Material(
-                  color: Colors.red.withOpacity(0.08),
+                  color: Colors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                   child: InkWell(
                     onTap: widget.onDelete,
@@ -583,8 +583,8 @@ class _CommentCardState extends State<_CommentCard> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryBlue.withOpacity(0.2),
-            AppColors.primaryBlue.withOpacity(0.1),
+            AppColors.primaryBlue.withValues(alpha: 0.2),
+            AppColors.primaryBlue.withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -600,7 +600,7 @@ class _CommentCardState extends State<_CommentCard> {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.5),
                 ),
               )
             : (_resolvedProfileUrl == null
@@ -639,7 +639,7 @@ class _SendButton extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.3),
+            color: AppColors.primaryBlue.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

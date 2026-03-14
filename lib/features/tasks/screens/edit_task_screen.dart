@@ -200,7 +200,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: TaskTheme.primary.withOpacity(0.1),
+                                  color: TaskTheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(18),
                                 ),
                                 child: Row(
@@ -287,7 +287,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? TaskTheme.primary.withOpacity(0.06)
+                                        ? TaskTheme.primary.withValues(alpha: 0.06)
                                         : TaskTheme.surface,
                                     borderRadius: BorderRadius.circular(
                                         TaskTheme.radiusM),
@@ -409,7 +409,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color:
-                    isSelected ? color.withOpacity(0.1) : TaskTheme.surface,
+                    isSelected ? color.withValues(alpha: 0.1) : TaskTheme.surface,
                 borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                 border: Border.all(
                   color: isSelected ? color : TaskTheme.border,
@@ -459,7 +459,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isSelected
-                  ? TaskTheme.primary.withOpacity(0.1)
+                  ? TaskTheme.primary.withValues(alpha: 0.1)
                   : TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               border: Border.all(

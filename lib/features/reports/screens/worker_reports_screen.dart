@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/reports/screens/attendance_summary_report.dart';
 import 'package:park_janana/features/reports/screens/task_summary_report.dart';
 import 'package:park_janana/features/reports/screens/worker_shift_report.dart';
@@ -64,7 +67,11 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                       'צפייה בנתוני נוכחות, משימות ומשמרות',
                       style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
+                    _PerformanceSummaryCard(
+                      userId: widget.userId,
+                    ),
+                    const SizedBox(height: 20),
                     _buildReportCard(
                       index: 0,
                       icon: Icons.access_time_rounded,
@@ -164,6 +171,148 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
   }
 }
 
+// ── Performance Summary ────────────────────────────────────────────────────
+
+class _PerformanceSummaryCard extends StatefulWidget {
+  final String userId;
+  const _PerformanceSummaryCard({required this.userId});
+
+  @override
+  State<_PerformanceSummaryCard> createState() =>
+      _PerformanceSummaryCardState();
+}
+
+class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
+  bool _loading = true;
+  double _hoursThisMonth = 0;
+  int _daysThisMonth = 0;
+  int _totalTasks = 0;
+  int _completedTasks = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch();
+  }
+
+  Future<void> _fetch() async {
+    final now = DateTime.now();
+    final docId =
+        '${widget.userId}_${now.year}_${now.month.toString().padLeft(2, '0')}';
+    try {
+      // Attendance
+      final attSnap = await FirebaseFirestore.instance
+          .collection(AppConstants.attendanceCollection)
+          .doc(docId)
+          .get();
+      if (attSnap.exists && attSnap.data() != null) {
+        final model = AttendanceModel.fromMap(attSnap.data()!, docId);
+        _hoursThisMonth = model.totalHoursWorked;
+        _daysThisMonth = model.daysWorked;
+      }
+
+      // Tasks
+      final taskSnap = await FirebaseFirestore.instance
+          .collection(AppConstants.tasksCollection)
+          .where('assignedTo', arrayContains: widget.userId)
+          .get();
+      _totalTasks = taskSnap.docs.length;
+      _completedTasks = taskSnap.docs
+          .where((d) => d.data()['status'] == 'completed')
+          .length;
+    } catch (e) {
+      debugPrint('_PerformanceSummaryCard fetch error: $e');
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Container(
+        height: 90,
+        decoration: BoxDecoration(
+          color: TaskTheme.surface,
+          borderRadius: BorderRadius.circular(TaskTheme.radiusL),
+          boxShadow: TaskTheme.cardShadow,
+        ),
+        child: const Center(
+            child: CircularProgressIndicator(color: TaskTheme.primary)),
+      );
+    }
+
+    final completionRate =
+        _totalTasks > 0 ? (_completedTasks / _totalTasks * 100).round() : 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusL),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.bar_chart_rounded, color: Colors.white70, size: 18),
+            SizedBox(width: 6),
+            Text('סיכום ביצועים — החודש',
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
+          ]),
+          const SizedBox(height: 14),
+          Row(children: [
+            _metric(Icons.access_time_rounded,
+                '${_hoursThisMonth.toStringAsFixed(1)} שעות', 'נוכחות'),
+            _divider(),
+            _metric(Icons.calendar_today_rounded, '$_daysThisMonth ימים', 'בעבודה'),
+            _divider(),
+            _metric(Icons.task_alt_rounded, '$completionRate%', 'משימות הושלמו'),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _metric(IconData icon, String value, String label) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(height: 6),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800)),
+          const SizedBox(height: 2),
+          Text(label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+              textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+
+  Widget _divider() {
+    return Container(
+      width: 1, height: 48, color: Colors.white.withValues(alpha: 0.2));
+  }
+}
+
 class _ReportCardTile extends StatefulWidget {
   final IconData icon;
   final String title;
@@ -246,7 +395,7 @@ class _ReportCardTileState extends State<_ReportCardTile>
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.gradientColors[0].withOpacity(0.3),
+                        color: widget.gradientColors[0].withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),

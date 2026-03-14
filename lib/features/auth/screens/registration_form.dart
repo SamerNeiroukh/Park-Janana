@@ -133,10 +133,11 @@ class _RegistrationFormState extends State<RegistrationForm> {
         ),
       );
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

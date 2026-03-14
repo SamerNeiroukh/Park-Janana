@@ -216,7 +216,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: TaskTheme.primary.withOpacity(0.06),
+                    color: TaskTheme.primary.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -247,9 +247,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.06),
+                      color: statusColor.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: statusColor.withOpacity(0.25)),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.25)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -456,7 +456,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
           ProfileAvatar(
             imageUrl: worker.profilePicture,
             radius: 18,
-            backgroundColor: TaskTheme.primary.withOpacity(0.1),
+            backgroundColor: TaskTheme.primary.withValues(alpha: 0.1),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -471,7 +471,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -504,7 +504,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                 children: [
                   Icon(Icons.chat_bubble_outline_rounded,
                       size: 48,
-                      color: TaskTheme.textTertiary.withOpacity(0.4)),
+                      color: TaskTheme.textTertiary.withValues(alpha: 0.4)),
                   const SizedBox(height: 12),
                   Text('אין תגובות עדיין',
                       style: TaskTheme.body
@@ -573,7 +573,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: isMe
-                  ? TaskTheme.primary.withOpacity(0.1)
+                  ? TaskTheme.primary.withValues(alpha: 0.1)
                   : TaskTheme.surface,
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(18),
@@ -701,9 +701,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF59E0B).withOpacity(0.12),
+        color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
       ),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -733,7 +733,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.85)],
+          colors: [color, color.withValues(alpha: 0.85)],
           begin: Alignment.centerRight,
           end: Alignment.centerLeft,
         ),

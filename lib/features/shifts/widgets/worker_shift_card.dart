@@ -117,6 +117,37 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     });
   }
 
+  /// Returns true if [aStart, aEnd] overlaps with [bStart, bEnd] (HH:mm strings).
+  bool _timesOverlap(String aStart, String aEnd, String bStart, String bEnd) {
+    int toMinutes(String t) {
+      final parts = t.split(':');
+      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+    }
+    return toMinutes(aStart) < toMinutes(bEnd) &&
+        toMinutes(bStart) < toMinutes(aEnd);
+  }
+
+  Future<bool> _hasConflict() async {
+    final uid = widget.currentUser.uid;
+    final snap = await FirebaseFirestore.instance
+        .collection(AppConstants.shiftsCollection)
+        .where('date', isEqualTo: widget.shift.date)
+        .where('assignedWorkers', arrayContains: uid)
+        .get();
+
+    for (final doc in snap.docs) {
+      if (doc.id == widget.shift.id) continue;
+      final data = doc.data();
+      final existStart = data['startTime'] as String? ?? '';
+      final existEnd = data['endTime'] as String? ?? '';
+      if (_timesOverlap(widget.shift.startTime, widget.shift.endTime,
+          existStart, existEnd)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> _toggleShiftRequest() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
@@ -126,6 +157,44 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
         await widget.shiftService
             .cancelShiftRequest(widget.shift.id, widget.currentUser.uid);
       } else {
+        // Check for time conflicts before requesting
+        final conflict = await _hasConflict();
+        if (conflict && mounted) {
+          final proceed = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                title: const Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text('התנגשות משמרות'),
+                  ],
+                ),
+                content: Text(
+                  'כבר משובץ למשמרת בתאריך זה בשעות החופפות '
+                  '(${widget.shift.startTime}–${widget.shift.endTime}). '
+                  'האם להמשיך בכל זאת?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('ביטול'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange),
+                    child: const Text('המשך בכל זאת',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          );
+          if (proceed != true) return;
+        }
         await widget.shiftService
             .requestShift(widget.shift.id, widget.currentUser.uid);
       }
@@ -173,10 +242,10 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
             boxShadow: [
               BoxShadow(
                 color: _isCancelled
-                    ? Colors.grey.withOpacity(0.1)
+                    ? Colors.grey.withValues(alpha: 0.1)
                     : isOutdated
-                        ? Colors.grey.withOpacity(0.15)
-                        : _departmentColor.withOpacity(0.15),
+                        ? Colors.grey.withValues(alpha: 0.15)
+                        : _departmentColor.withValues(alpha: 0.15),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -195,7 +264,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                           ? [Colors.red.shade400, Colors.red.shade200]
                           : [
                               _departmentColor,
-                              _departmentColor.withOpacity(0.6),
+                              _departmentColor.withValues(alpha: 0.6),
                             ],
                     ),
                     borderRadius: const BorderRadius.only(
@@ -218,7 +287,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                             decoration: BoxDecoration(
                               color: _isCancelled
                                   ? Colors.red.shade50
-                                  : _departmentColor.withOpacity(0.1),
+                                  : _departmentColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
@@ -358,7 +427,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     return Material(
       color: _hasRequested
           ? Colors.red.shade50
-          : AppColors.success.withOpacity(0.1),
+          : AppColors.success.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -408,9 +477,9 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -453,7 +522,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -566,7 +635,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 gradient: LinearGradient(
                   colors: [
                     widget.departmentColor,
-                    widget.departmentColor.withOpacity(0.8),
+                    widget.departmentColor.withValues(alpha: 0.8),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
@@ -576,7 +645,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.info_outline,
@@ -600,7 +669,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                           '${widget.shift.date} | ${widget.shift.startTime} - ${widget.shift.endTime}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -652,7 +721,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: widget.departmentColor.withOpacity(0.1),
+            color: widget.departmentColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 18, color: widget.departmentColor),
@@ -708,14 +777,14 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: widget.departmentColor.withOpacity(0.3),
+                    color: widget.departmentColor.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
                 child: ProfileAvatar(
                   imageUrl: worker.profilePicture,
                   radius: 28,
-                  backgroundColor: widget.departmentColor.withOpacity(0.1),
+                  backgroundColor: widget.departmentColor.withValues(alpha: 0.1),
                 ),
               ),
               const SizedBox(height: 6),

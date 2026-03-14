@@ -162,7 +162,7 @@ class ApproveWorkerScreen extends StatelessWidget {
         borderRadius: AppDimensions.borderRadiusXXL,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
+            color: Colors.black12.withValues(alpha: 0.05),
             blurRadius: AppDimensions.shadowBlurM,
             offset: AppDimensions.shadowOffsetM,
           ),

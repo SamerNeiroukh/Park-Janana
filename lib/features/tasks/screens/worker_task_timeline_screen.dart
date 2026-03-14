@@ -150,7 +150,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusXL),
         boxShadow: [
           BoxShadow(
-            color: TaskTheme.primary.withOpacity(0.3),
+            color: TaskTheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -170,7 +170,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                 return CustomPaint(
                   painter: _ProgressRingPainter(
                     progress: value,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     progressColor: Colors.white,
                     strokeWidth: 6,
                   ),
@@ -208,7 +208,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                       : '$completed מתוך $total הושלמו היום',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                   ),
                 ),
               ],
@@ -236,7 +236,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, size: 18, color: color),
@@ -250,7 +250,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -299,9 +299,9 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF59E0B).withOpacity(0.12),
+        color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
       ),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -345,7 +345,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         boxShadow: [
           BoxShadow(
-            color: fromColor.withOpacity(0.38),
+            color: fromColor.withValues(alpha: 0.38),
             blurRadius: 14,
             spreadRadius: 0,
             offset: const Offset(0, 5),
@@ -356,7 +356,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-          splashColor: Colors.white.withOpacity(0.15),
+          splashColor: Colors.white.withValues(alpha: 0.15),
           onTap: () => provider.updateStatus(task.id, nextStatus),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 13),
@@ -366,7 +366,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.22),
+                    color: Colors.white.withValues(alpha: 0.22),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, size: 17, color: Colors.white),
@@ -402,7 +402,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: TaskTheme.done.withOpacity(0.1),
+                color: TaskTheme.done.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.check_circle_outline_rounded,
@@ -417,7 +417,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: TaskTheme.done.withOpacity(0.1),
+                color: TaskTheme.done.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -469,13 +469,13 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: TaskTheme.primary.withOpacity(0.06),
+                color: TaskTheme.primary.withValues(alpha: 0.06),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.task_alt_rounded,
                 size: 56,
-                color: TaskTheme.primary.withOpacity(0.4),
+                color: TaskTheme.primary.withValues(alpha: 0.4),
               ),
             ),
             const SizedBox(height: 20),

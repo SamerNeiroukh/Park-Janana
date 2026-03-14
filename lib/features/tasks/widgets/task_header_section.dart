@@ -54,7 +54,7 @@ class TaskHeaderSection extends StatelessWidget {
     }
 
     return Chip(
-      backgroundColor: color.withOpacity(0.15),
+      backgroundColor: color.withValues(alpha: 0.15),
       label: Text(
         label,
         style: TextStyle(color: color, fontWeight: FontWeight.bold),

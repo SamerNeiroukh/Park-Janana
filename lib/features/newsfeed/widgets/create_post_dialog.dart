@@ -324,7 +324,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     required VoidCallback onTap,
   }) {
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -337,7 +337,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -398,7 +398,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Text(
               'וידאו',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
                 fontSize: 9,
                 fontWeight: FontWeight.w600,
               ),
@@ -424,7 +424,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                  colors: [Colors.black.withValues(alpha: 0.5), Colors.transparent],
                 ),
               ),
             ),
@@ -590,18 +590,18 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 end: Alignment.bottomRight,
                 colors: [
                   Colors.white,
-                  Colors.white.withOpacity(0.98),
+                  Colors.white.withValues(alpha: 0.98),
                 ],
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryBlue.withOpacity(0.15),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.15),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -653,7 +653,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.3),
+            color: AppColors.primaryBlue.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -668,7 +668,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
@@ -692,7 +692,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                   Text(
                     'שתף עדכונים עם הצוות',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 13,
                     ),
                   ),
@@ -702,7 +702,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           ),
           const Spacer(),
           Material(
-            color: Colors.white.withOpacity(_isSubmitting ? 0.1 : 0.2),
+            color: Colors.white.withValues(alpha: _isSubmitting ? 0.1 : 0.2),
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
               onTap: _isSubmitting ? null : () => Navigator.pop(context),
@@ -711,7 +711,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   Icons.close_rounded,
-                  color: Colors.white.withOpacity(_isSubmitting ? 0.4 : 1.0),
+                  color: Colors.white.withValues(alpha: _isSubmitting ? 0.4 : 1.0),
                   size: 22,
                 ),
               ),
@@ -732,7 +732,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Icon(
               Icons.category_rounded,
               size: 18,
-              color: AppColors.primaryBlue.withOpacity(0.7),
+              color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -765,19 +765,19 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 decoration: BoxDecoration(
                   gradient: isSelected
                       ? LinearGradient(
-                          colors: [color, color.withOpacity(0.8)],
+                          colors: [color, color.withValues(alpha: 0.8)],
                         )
                       : null,
                   color: isSelected ? null : Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isSelected ? Colors.transparent : color.withOpacity(0.4),
+                    color: isSelected ? Colors.transparent : color.withValues(alpha: 0.4),
                     width: 1.5,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: color.withOpacity(0.3),
+                            color: color.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -822,7 +822,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Icon(
               Icons.title_rounded,
               size: 18,
-              color: AppColors.primaryBlue.withOpacity(0.7),
+              color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -864,7 +864,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Icon(
               Icons.notes_rounded,
               size: 18,
-              color: AppColors.primaryBlue.withOpacity(0.7),
+              color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -906,7 +906,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Icon(
               Icons.photo_library_rounded,
               size: 18,
-              color: AppColors.primaryBlue.withOpacity(0.7),
+              color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
             Text(
@@ -928,7 +928,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.greyLight.withOpacity(0.5),
+                color: AppColors.greyLight.withValues(alpha: 0.5),
                 width: 1.5,
               ),
             ),
@@ -1031,7 +1031,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.primaryBlue.withOpacity(0.3),
+                color: AppColors.primaryBlue.withValues(alpha: 0.3),
                 width: 1.5,
                 style: BorderStyle.solid,
               ),
@@ -1042,7 +1042,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               children: [
                 Icon(
                   Icons.add_photo_alternate_rounded,
-                  color: AppColors.primaryBlue.withOpacity(0.7),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.7),
                   size: 22,
                 ),
                 const SizedBox(width: 8),
@@ -1051,7 +1051,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryBlue.withOpacity(0.8),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -1069,7 +1069,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
-        color: AppColors.greyMedium.withOpacity(0.6),
+        color: AppColors.greyMedium.withValues(alpha: 0.6),
         fontWeight: FontWeight.normal,
       ),
       filled: true,
@@ -1077,7 +1077,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       prefixIcon: prefixIcon != null
           ? Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: Icon(prefixIcon, color: AppColors.primaryBlue.withOpacity(0.5)),
+              child: Icon(prefixIcon, color: AppColors.primaryBlue.withValues(alpha: 0.5)),
             )
           : null,
       border: OutlineInputBorder(
@@ -1087,7 +1087,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(
-          color: AppColors.greyLight.withOpacity(0.5),
+          color: AppColors.greyLight.withValues(alpha: 0.5),
           width: 1.5,
         ),
       ),
@@ -1121,10 +1121,10 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.primaryBlue.withOpacity(0.06),
+          color: AppColors.primaryBlue.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.primaryBlue.withOpacity(0.25),
+            color: AppColors.primaryBlue.withValues(alpha: 0.25),
             width: 1.5,
           ),
         ),
@@ -1170,7 +1170,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               child: LinearProgressIndicator(
                 value: _uploadProgress,
                 minHeight: 6,
-                backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.15),
                 valueColor:
                     const AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
               ),
@@ -1188,7 +1188,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryBlue.withOpacity(0.35),
+            color: AppColors.primaryBlue.withValues(alpha: 0.35),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),

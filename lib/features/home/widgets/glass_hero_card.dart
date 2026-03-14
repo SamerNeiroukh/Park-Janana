@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/clock_service.dart';
@@ -87,6 +90,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
 
   bool _fired = false;
   bool _h25 = false, _h50 = false, _h75 = false;
+  bool _autoClockOutDone = false;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -127,15 +131,46 @@ class _GlassHeroCardState extends State<GlassHeroCard>
 
   void _startElapsed() {
     _elapsedTimer?.cancel();
+    _autoClockOutDone = false;
     if (_session == null) return;
     _elapsed = DateTime.now().difference(_session!.clockIn);
     _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted && _session != null) {
-        setState(() => _elapsed = DateTime.now().difference(_session!.clockIn));
+        final elapsed = DateTime.now().difference(_session!.clockIn);
+        setState(() => _elapsed = elapsed);
+        if (!_autoClockOutDone && elapsed.inHours >= 16) {
+          _autoClockOutDone = true;
+          _elapsedTimer?.cancel();
+          _autoClockOut();
+        }
       } else {
         _elapsedTimer?.cancel();
       }
     });
+  }
+
+  Future<void> _autoClockOut() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || _session == null) return;
+    try {
+      await _clockService.clockOut();
+      await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .collection('notifications')
+          .add({
+        'type': 'clockout_missed',
+        'title': 'יציאה אוטומטית ממשמרת',
+        'body': 'לא דיווחת יציאה לאחר 16 שעות – המערכת סיימה את המשמרת אוטומטית. פנה למנהל שלך.',
+        'entityId': '',
+        'isRead': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      await _fetchSession();
+      widget.onClockComplete?.call();
+    } catch (e) {
+      debugPrint('GlassHeroCard auto clock-out error: $e');
+    }
   }
 
   // ── Long-press ring callbacks ──────────────────────────────────────────────
@@ -250,7 +285,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Location',
-      barrierColor: Colors.black54.withOpacity(0.6),
+      barrierColor: Colors.black54.withValues(alpha: 0.6),
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (ctx, _, _) => Center(
         child: Material(
@@ -261,7 +296,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(28),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 10))],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -270,7 +305,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(colors: [AppColors.salmon, AppColors.darkRed], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                    boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 20, spreadRadius: 2)],
+                    boxShadow: [BoxShadow(color: Colors.red.withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 2)],
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Icon(gpsUnavailable ? Icons.gps_off_rounded : Icons.location_off_rounded, size: 48, color: Colors.white),
@@ -368,7 +403,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF4338CA).withOpacity(0.48),
+              color: const Color(0xFF4338CA).withValues(alpha: 0.48),
               blurRadius: 32,
               offset: const Offset(0, 14),
             ),
@@ -377,10 +412,10 @@ class _GlassHeroCardState extends State<GlassHeroCard>
         child: Stack(
           children: [
             // ── Decorative ambient circles ────────────────────────────────
-            Positioned(top: -36, left: -36,    child: _Circle(120, Colors.white.withOpacity(0.055))),
-            Positioned(bottom: -50, right: -28, child: _Circle(160, Colors.white.withOpacity(0.040))),
-            Positioned(top: 22, left: 100,      child: _Circle(56,  Colors.white.withOpacity(0.045))),
-            Positioned(bottom: 60, left: 30,    child: _Circle(28,  Colors.white.withOpacity(0.065))),
+            Positioned(top: -36, left: -36,    child: _Circle(120, Colors.white.withValues(alpha: 0.055))),
+            Positioned(bottom: -50, right: -28, child: _Circle(160, Colors.white.withValues(alpha: 0.040))),
+            Positioned(top: 22, left: 100,      child: _Circle(56,  Colors.white.withValues(alpha: 0.045))),
+            Positioned(bottom: 60, left: 30,    child: _Circle(28,  Colors.white.withValues(alpha: 0.065))),
 
             // ── Main content ──────────────────────────────────────────────
             Directionality(
@@ -403,7 +438,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                             children: [
                               Text(_greeting(), style: TextStyle(
                                 fontSize: 13, fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.60),
+                                color: Colors.white.withValues(alpha: 0.60),
                               )),
                               const SizedBox(height: 3),
                               Text(
@@ -430,11 +465,11 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                             Container(
                               width: 54, height: 54,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.12),
+                                color: Colors.white.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(18),
-                                border: Border.all(color: Colors.white.withOpacity(0.18), width: 1),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
                               ),
-                              child: Icon(widget.roleIcon, size: 26, color: Colors.white.withOpacity(0.92)),
+                              child: Icon(widget.roleIcon, size: 26, color: Colors.white.withValues(alpha: 0.92)),
                             ),
                             // Green dot when clocked in
                             if (active)
@@ -446,7 +481,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                     color: _kSecondActive,
                                     shape: BoxShape.circle,
                                     border: Border.all(color: const Color(0xFF3730A3), width: 2),
-                                    boxShadow: [BoxShadow(color: _kSecondActive.withOpacity(0.5), blurRadius: 6)],
+                                    boxShadow: [BoxShadow(color: _kSecondActive.withValues(alpha: 0.5), blurRadius: 6)],
                                   ),
                                 ),
                               ),
@@ -458,7 +493,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     const SizedBox(height: 22),
 
                     // ── 2. Divider ─────────────────────────────────────────
-                    Container(height: 1, color: Colors.white.withOpacity(0.12)),
+                    Container(height: 1, color: Colors.white.withValues(alpha: 0.12)),
 
                     const SizedBox(height: 22),
 
@@ -470,7 +505,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                               child: Center(child: SizedBox(
                                 width: 22, height: 22,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white.withOpacity(0.45)),
+                                  strokeWidth: 2, color: Colors.white.withValues(alpha: 0.45)),
                               )),
                             )
                           : GestureDetector(
@@ -499,7 +534,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                           if (_busy)
                                             SizedBox(width: _kFace, height: _kFace,
                                               child: CircularProgressIndicator(
-                                                strokeWidth: 2, color: Colors.white.withOpacity(0.70)),
+                                                strokeWidth: 2, color: Colors.white.withValues(alpha: 0.70)),
                                             ),
                                         ],
                                       ),
@@ -565,7 +600,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                       ? Icons.touch_app_rounded
                                       : Icons.touch_app_rounded,
                                   size: 14,
-                                  color: Colors.white.withOpacity(opacity),
+                                  color: Colors.white.withValues(alpha: opacity),
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
@@ -576,7 +611,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white.withOpacity(opacity),
+                                    color: Colors.white.withValues(alpha: opacity),
                                     letterSpacing: 0.3,
                                   ),
                                 ),
@@ -590,7 +625,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     const SizedBox(height: 22),
 
                     // ── 6. Divider ─────────────────────────────────────────
-                    Container(height: 1, color: Colors.white.withOpacity(0.12)),
+                    Container(height: 1, color: Colors.white.withValues(alpha: 0.12)),
 
                     const SizedBox(height: 18),
 
@@ -601,7 +636,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.45),
+                          color: Colors.white.withValues(alpha: 0.45),
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -614,14 +649,14 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                           value: '${widget.daysWorked}',
                           label: 'ימים',
                         )),
-                        Container(width: 1, height: 44, color: Colors.white.withOpacity(0.14)),
+                        Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.14)),
                         Expanded(child: _Stat(
                           icon: Icons.access_time_rounded,
                           value: widget.hoursWorked.toStringAsFixed(1),
                           label: "שע'",
                         )),
                         if (widget.weatherDescription != null && widget.temperature != null) ...[
-                          Container(width: 1, height: 44, color: Colors.white.withOpacity(0.14)),
+                          Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.14)),
                           Expanded(child: _WeatherStat(
                             emoji: _weatherEmoji(widget.weatherDescription!),
                             temp: widget.temperature!,
@@ -666,9 +701,9 @@ class _DeptChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.14),
+      color: Colors.white.withValues(alpha: 0.14),
       borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: Colors.white.withOpacity(0.20)),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
     ),
     child: Text(label, style: const TextStyle(
       fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white,
@@ -694,7 +729,7 @@ class _ActiveInfo extends StatelessWidget {
       const SizedBox(height: 4),
       Text(since, style: TextStyle(
         fontSize: 11, fontWeight: FontWeight.w500,
-        color: Colors.white.withOpacity(0.55), letterSpacing: 0.5,
+        color: Colors.white.withValues(alpha: 0.55), letterSpacing: 0.5,
       )),
     ]);
   }
@@ -709,7 +744,7 @@ class _QuoteText extends StatelessWidget {
     textAlign: TextAlign.center,
     style: TextStyle(
       fontSize: 12.5, fontWeight: FontWeight.w500,
-      color: Colors.white.withOpacity(0.65), height: 1.4,
+      color: Colors.white.withValues(alpha: 0.65), height: 1.4,
     ),
   );
 }
@@ -723,14 +758,14 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      Icon(icon, size: 18, color: Colors.white.withOpacity(0.65)),
+      Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.65)),
       const SizedBox(height: 5),
       Text(value, style: const TextStyle(
         fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white, height: 1.0,
       )),
       const SizedBox(height: 3),
       Text(label, style: TextStyle(
-        fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white.withOpacity(0.50),
+        fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.50),
       )),
     ],
   );
@@ -751,7 +786,7 @@ class _WeatherStat extends StatelessWidget {
       )),
       const SizedBox(height: 3),
       Text('מזג אוויר', style: TextStyle(
-        fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white.withOpacity(0.50),
+        fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.50),
       )),
     ],
   );
@@ -773,13 +808,13 @@ class _ClockPainter extends CustomPainter {
 
     // Face fill
     canvas.drawCircle(c, r, Paint()
-      ..color = Colors.white.withOpacity(0.11)
+      ..color = Colors.white.withValues(alpha: 0.11)
       ..style = PaintingStyle.fill);
 
     // Inner glow when active
     if (active) {
       canvas.drawCircle(c, r - 1, Paint()
-        ..color = _kSecondActive.withOpacity(0.20)
+        ..color = _kSecondActive.withValues(alpha: 0.20)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 10
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5));
@@ -787,7 +822,7 @@ class _ClockPainter extends CustomPainter {
 
     // Border ring
     canvas.drawCircle(c, r, Paint()
-      ..color = Colors.white.withOpacity(0.28)
+      ..color = Colors.white.withValues(alpha: 0.28)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5);
 
@@ -799,7 +834,7 @@ class _ClockPainter extends CustomPainter {
         Offset(c.dx + (r - 3) * cos(angle), c.dy + (r - 3) * sin(angle)),
         Offset(c.dx + (r - 3 - (isHour ? 9.0 : 4.0)) * cos(angle),
                c.dy + (r - 3 - (isHour ? 9.0 : 4.0)) * sin(angle)),
-        Colors.white.withOpacity(isHour ? 0.90 : 0.30),
+        Colors.white.withValues(alpha: isHour ? 0.90 : 0.30),
         isHour ? 2.5 : 1.1,
       );
     }
@@ -855,7 +890,7 @@ class _RingPainter extends CustomPainter {
 
     // Ghost track
     canvas.drawCircle(c, r, Paint()
-      ..color = Colors.white.withOpacity(0.09)
+      ..color = Colors.white.withValues(alpha: 0.09)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.5);
 
@@ -864,7 +899,7 @@ class _RingPainter extends CustomPainter {
     // Glow
     canvas.drawArc(Rect.fromCircle(center: c, radius: r), -pi / 2, 2 * pi * progress, false,
       Paint()
-        ..color = color.withOpacity(0.35)
+        ..color = color.withValues(alpha: 0.35)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12
         ..strokeCap = StrokeCap.round
@@ -886,7 +921,7 @@ class _RingPainter extends CustomPainter {
       );
       canvas.drawCircle(tip, 4.5, Paint()..color = Colors.white);
       canvas.drawCircle(tip, 7.0, Paint()
-        ..color = color.withOpacity(0.45)
+        ..color = color.withValues(alpha: 0.45)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5));
     }
   }

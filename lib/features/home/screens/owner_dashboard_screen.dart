@@ -447,7 +447,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7C3AED).withOpacity(0.4),
+            color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -461,7 +461,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(Icons.dashboard_rounded,
@@ -498,7 +498,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -539,7 +539,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withOpacity(0.15),
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.person_add_alt_1_rounded,
@@ -591,7 +591,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withOpacity(0.15),
+                color: const Color(0xFFEF4444).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.warning_amber_rounded,
@@ -676,7 +676,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -687,7 +687,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: p.color.withOpacity(0.12),
+              color: p.color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(p.icon, color: p.color, size: 18),
@@ -762,7 +762,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -805,10 +805,10 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: action.color.withOpacity(0.08),
+          color: action.color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: action.color.withOpacity(0.20),
+            color: action.color.withValues(alpha: 0.20),
             width: 1,
           ),
         ),
@@ -849,7 +849,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -863,7 +863,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7C3AED).withOpacity(0.1),
+                    color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.people_alt_rounded,
@@ -972,7 +972,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1004,7 +1004,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.10),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -1129,7 +1129,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1143,7 +1143,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5).withOpacity(0.1),
+                    color: const Color(0xFF4F46E5).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.manage_history_rounded,
@@ -1205,7 +1205,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1219,7 +1219,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.assignment_rounded,
@@ -1293,7 +1293,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1329,7 +1329,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.12),
+                      color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
@@ -1365,7 +1365,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.10),
+                      color: color.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -1406,7 +1406,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0EA5E9).withOpacity(0.35),
+              color: const Color(0xFF0EA5E9).withValues(alpha: 0.35),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -1417,7 +1417,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(Icons.access_time_filled_rounded,
@@ -1630,7 +1630,7 @@ class _GaugePainter extends CustomPainter {
       2 * math.pi,
       false,
       Paint()
-        ..color = color.withOpacity(0.12)
+        ..color = color.withValues(alpha: 0.12)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 6
         ..strokeCap = StrokeCap.round,

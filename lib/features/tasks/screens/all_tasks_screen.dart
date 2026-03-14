@@ -304,7 +304,7 @@ class _TaskRow extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: TaskTheme.cardShadow,
           border: isOverdue
-              ? Border.all(color: TaskTheme.overdue.withOpacity(0.4))
+              ? Border.all(color: TaskTheme.overdue.withValues(alpha: 0.4))
               : null,
         ),
         child: IntrinsicHeight(

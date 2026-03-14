@@ -167,7 +167,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                       decoration: BoxDecoration(
                         color: _isRangeMode
                             ? const Color(0xFF3B82F6)
-                            : const Color(0xFF3B82F6).withOpacity(0.1),
+                            : const Color(0xFF3B82F6).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -205,10 +205,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.4)),
+                      border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.4)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -345,7 +345,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -448,7 +448,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                     drawVerticalLine: false,
                     horizontalInterval: maxY > 8 ? 2 : 1,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: TaskTheme.border.withOpacity(0.5),
+                      color: TaskTheme.border.withValues(alpha: 0.5),
                       strokeWidth: 1,
                     ),
                   ),
@@ -504,6 +504,8 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
           final duration = session.clockOut.difference(session.clockIn);
           final hours = duration.inHours;
           final minutes = duration.inMinutes.remainder(60);
+          final isMissed = session.hoursWorked >= 16;
+          const missedColor = Color(0xFFF97316);
 
           return Container(
             margin: const EdgeInsets.only(bottom: 10),
@@ -513,7 +515,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               boxShadow: TaskTheme.softShadow,
               border: const Border(
                 right: BorderSide(
-                  color: TaskTheme.done,
+                  color: isMissed ? missedColor : TaskTheme.done,
                   width: 3,
                 ),
               ),
@@ -533,13 +535,37 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         ),
                       ),
                       const Spacer(),
+                      if (isMissed)
+                        Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: missedColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.timer_off_rounded, size: 11, color: missedColor),
+                              SizedBox(width: 4),
+                              Text(
+                                'יציאה חסרה',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: missedColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: TaskTheme.done.withOpacity(0.1),
+                          color: (isMissed ? missedColor : TaskTheme.done).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -547,7 +573,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: TaskTheme.done,
+                            color: isMissed ? missedColor : TaskTheme.done,
                           ),
                         ),
                       ),

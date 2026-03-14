@@ -448,7 +448,7 @@ class _ReportCardTileState extends State<_ReportCardTile>
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.gradientColors[0].withOpacity(0.3),
+                        color: widget.gradientColors[0].withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),

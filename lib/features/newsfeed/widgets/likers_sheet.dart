@@ -129,7 +129,7 @@ class _LikersSheetState extends State<LikersSheet>
         width: 40,
         height: 4,
         decoration: BoxDecoration(
-          color: AppColors.greyMedium.withOpacity(0.3),
+          color: AppColors.greyMedium.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -158,8 +158,8 @@ class _LikersSheetState extends State<LikersSheet>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.red.withOpacity(0.15),
-                      Colors.red.withOpacity(0.05),
+                      Colors.red.withValues(alpha: 0.15),
+                      Colors.red.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -181,7 +181,7 @@ class _LikersSheetState extends State<LikersSheet>
                     '$_totalReactors אנשים',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.greyMedium.withOpacity(0.8),
+                      color: AppColors.greyMedium.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -190,7 +190,7 @@ class _LikersSheetState extends State<LikersSheet>
           ),
           const Spacer(),
           Material(
-            color: AppColors.greyLight.withOpacity(0.5),
+            color: AppColors.greyLight.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
               onTap: () => Navigator.pop(context),
@@ -226,13 +226,13 @@ class _LikersSheetState extends State<LikersSheet>
               Icon(
                 Icons.error_outline_rounded,
                 size: 48,
-                color: AppColors.greyMedium.withOpacity(0.5),
+                color: AppColors.greyMedium.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 12),
               Text(
                 _error!,
                 style: TextStyle(
-                  color: AppColors.greyMedium.withOpacity(0.8),
+                  color: AppColors.greyMedium.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -277,13 +277,13 @@ class _EmptyLikers extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.greyLight.withOpacity(0.5),
+              color: AppColors.greyLight.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.favorite_border_rounded,
               size: 40,
-              color: AppColors.greyMedium.withOpacity(0.6),
+              color: AppColors.greyMedium.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 16),
@@ -292,7 +292,7 @@ class _EmptyLikers extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.greyMedium.withOpacity(0.8),
+              color: AppColors.greyMedium.withValues(alpha: 0.8),
             ),
           ),
           const SizedBox(height: 4),
@@ -300,7 +300,7 @@ class _EmptyLikers extends StatelessWidget {
             'היה הראשון לאהוב את הפוסט!',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.greyMedium.withOpacity(0.6),
+              color: AppColors.greyMedium.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -347,7 +347,7 @@ class _LikerCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.greyLight.withOpacity(0.5)),
+        border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.5)),
       ),
       child: Row(
         textDirection: TextDirection.rtl,
@@ -357,7 +357,7 @@ class _LikerCard extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryBlue.withOpacity(0.1),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -386,7 +386,7 @@ class _LikerCard extends StatelessWidget {
                   _getRoleDisplayName(user.role),
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.greyMedium.withOpacity(0.7),
+                    color: AppColors.greyMedium.withValues(alpha: 0.7),
                   ),
                 ),
               ],

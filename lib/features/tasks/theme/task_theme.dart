@@ -130,12 +130,12 @@ class TaskTheme {
   // ─── Shadows ───────────────────────────────────────────────
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
     BoxShadow(
-      color: Colors.black.withOpacity(0.02),
+      color: Colors.black.withValues(alpha: 0.02),
       blurRadius: 4,
       offset: const Offset(0, 1),
     ),
@@ -143,12 +143,12 @@ class TaskTheme {
 
   static List<BoxShadow> get elevatedShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 6,
       offset: const Offset(0, 2),
     ),
@@ -156,7 +156,7 @@ class TaskTheme {
 
   static List<BoxShadow> get softShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.03),
+      color: Colors.black.withValues(alpha: 0.03),
       blurRadius: 8,
       offset: const Offset(0, 2),
     ),
@@ -164,12 +164,12 @@ class TaskTheme {
 
   static List<BoxShadow> buttonShadow(Color color) => [
     BoxShadow(
-      color: color.withOpacity(0.35),
+      color: color.withValues(alpha: 0.35),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
     BoxShadow(
-      color: color.withOpacity(0.15),
+      color: color.withValues(alpha: 0.15),
       blurRadius: 4,
       offset: const Offset(0, 1),
     ),
@@ -177,7 +177,7 @@ class TaskTheme {
 
   static List<BoxShadow> get topBarShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.06),
+      color: Colors.black.withValues(alpha: 0.06),
       blurRadius: 12,
       offset: const Offset(0, -4),
     ),
