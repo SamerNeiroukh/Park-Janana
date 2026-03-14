@@ -112,7 +112,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
 
             return Column(
               children: [
-                Directionality(
+                const Directionality(
                   textDirection: TextDirection.ltr,
                   child: UserHeader(),
                 ),
@@ -237,7 +237,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: _workers.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (context, i) {
                   final w = _workers[i];
                   final status = _task.workerStatusFor(w.uid);
@@ -781,7 +781,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   Future<void> _addComment() async {
     if (_commentController.text.trim().isEmpty ||
         _isSubmitting ||
-        _currentUid == null) return;
+        _currentUid == null) {
+      return;
+    }
 
     setState(() => _isSubmitting = true);
     try {

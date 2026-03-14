@@ -91,28 +91,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (enabled) {
-      final settings = await messaging.requestPermission();
-      final authorized = settings.authorizationStatus ==
-              AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional;
-      if (authorized && uid != null) {
+      try {
+        final settings = await messaging.requestPermission();
+        final authorized = settings.authorizationStatus ==
+                AuthorizationStatus.authorized ||
+            settings.authorizationStatus == AuthorizationStatus.provisional;
+        if (authorized && uid != null) {
+          final token = await messaging.getToken();
+          if (token != null) {
+            await FirebaseFirestore.instance
+                .collection(AppConstants.usersCollection)
+                .doc(uid)
+                .update({'fcmTokens': FieldValue.arrayUnion([token])});
+          }
+        }
+      } catch (e) {
+        debugPrint('FCM enable notifications skipped: $e');
+      }
+    } else {
+      try {
         final token = await messaging.getToken();
-        if (token != null) {
+        await messaging.deleteToken();
+        if (token != null && uid != null) {
           await FirebaseFirestore.instance
               .collection(AppConstants.usersCollection)
               .doc(uid)
-              .update({'fcmTokens': FieldValue.arrayUnion([token])});
+              .update({'fcmTokens': FieldValue.arrayRemove([token])});
         }
-      }
-    } else {
-      // Capture token before deleting it
-      final token = await messaging.getToken();
-      await messaging.deleteToken();
-      if (token != null && uid != null) {
-        await FirebaseFirestore.instance
-            .collection(AppConstants.usersCollection)
-            .doc(uid)
-            .update({'fcmTokens': FieldValue.arrayRemove([token])});
+      } catch (e) {
+        debugPrint('FCM disable notifications skipped: $e');
       }
     }
 
@@ -358,7 +365,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         trailing: Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: TaskTheme.primary,
+          activeThumbColor: TaskTheme.primary,
         ),
       ),
     );
@@ -647,7 +654,7 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
                 const SizedBox(height: 20),
                 const Text('הפעלת כניסה ביומטרית', style: TaskTheme.heading2),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'הזן את הסיסמה הנוכחית שלך כדי לאפשר כניסה עם טביעת אצבע / זיהוי פנים.',
                   style: TaskTheme.caption,
                 ),

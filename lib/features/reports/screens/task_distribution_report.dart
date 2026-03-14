@@ -333,7 +333,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                   alignment: BarChartAlignment.spaceAround,
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, _, rod, __) {
+                      getTooltipItem: (group, _, rod, _) {
                         final s = displayed[group.x];
                         return BarTooltipItem(
                           '${s.name.split(' ').first}\n${rod.toY.round()}%',

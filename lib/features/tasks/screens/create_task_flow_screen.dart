@@ -283,7 +283,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
           children: [
             const Text('פרטי המשימה', style: TaskTheme.heading2),
             const SizedBox(height: 8),
-            Text('מלא את הפרטים הבסיסיים של המשימה',
+            const Text('מלא את הפרטים הבסיסיים של המשימה',
                 style: TaskTheme.body),
             const SizedBox(height: 24),
 
@@ -488,13 +488,13 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                   controller: _searchController,
                   onChanged: _filterUsers,
                   style: const TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'חיפוש לפי שם או תפקיד...',
-                    hintStyle: const TextStyle(color: TaskTheme.textTertiary),
-                    prefixIcon: const Icon(Icons.search_rounded,
+                    hintStyle: TextStyle(color: TaskTheme.textTertiary),
+                    prefixIcon: Icon(Icons.search_rounded,
                         size: 20, color: TaskTheme.textTertiary),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -506,7 +506,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: _selectedWorkers.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, i) {
                       final w = _selectedWorkers[i];
                       return Container(
@@ -604,8 +604,8 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                                 key: ValueKey('checked'),
                                 color: TaskTheme.primary,
                                 size: 24)
-                            : Icon(Icons.circle_outlined,
-                                key: const ValueKey('unchecked'),
+                            : const Icon(Icons.circle_outlined,
+                                key: ValueKey('unchecked'),
                                 color: TaskTheme.textTertiary,
                                 size: 24),
                       ),
@@ -630,7 +630,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
         children: [
           const Text('מועד יעד', style: TaskTheme.heading2),
           const SizedBox(height: 8),
-          Text('הגדר תאריך ושעת סיום למשימה', style: TaskTheme.body),
+          const Text('הגדר תאריך ושעת סיום למשימה', style: TaskTheme.body),
           const SizedBox(height: 32),
 
           // Date picker
@@ -747,7 +747,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
         children: [
           const Text('סיכום ויצירה', style: TaskTheme.heading2),
           const SizedBox(height: 8),
-          Text('בדוק את הפרטים לפני יצירת המשימה', style: TaskTheme.body),
+          const Text('בדוק את הפרטים לפני יצירת המשימה', style: TaskTheme.body),
           const SizedBox(height: 24),
 
           _buildReviewCard('כותרת', _titleController.text, Icons.title_rounded),
@@ -864,11 +864,11 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                       onTap: () => _goToStep(_currentStep - 1),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Icon(Icons.arrow_back_rounded,
                                 size: 18, color: TaskTheme.textSecondary),
                             SizedBox(width: 6),

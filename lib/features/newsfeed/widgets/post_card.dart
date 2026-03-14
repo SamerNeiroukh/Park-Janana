@@ -616,7 +616,7 @@ class _PostCardState extends State<PostCard> {
       imageUrl: media.url,
       fit: BoxFit.cover,
       height: height,
-      placeholder: (_, __) => Container(
+      placeholder: (_, _) => Container(
         height: height,
         color: AppColors.greyLight.withOpacity(0.5),
         child: Center(
@@ -630,7 +630,7 @@ class _PostCardState extends State<PostCard> {
           ),
         ),
       ),
-      errorWidget: (_, __, ___) => Container(
+      errorWidget: (_, _, _) => Container(
         height: height,
         color: AppColors.greyLight.withOpacity(0.5),
         child: const Icon(Icons.broken_image_rounded, color: AppColors.greyMedium, size: 40),

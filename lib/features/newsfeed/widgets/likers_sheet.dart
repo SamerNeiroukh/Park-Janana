@@ -249,7 +249,7 @@ class _LikersSheetState extends State<LikersSheet>
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: 12),
       itemCount: _users.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 4),
+      separatorBuilder: (_, _) => const SizedBox(height: 4),
       itemBuilder: (context, index) {
         final user = _users[index];
         return _LikerCard(

@@ -252,7 +252,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
       barrierLabel: 'Location',
       barrierColor: Colors.black54.withOpacity(0.6),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, __) => Center(
+      pageBuilder: (ctx, _, _) => Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -318,7 +318,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final v = Curves.easeInOut.transform(anim.value);
         return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
       },
@@ -478,7 +478,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                               onLongPressEnd:   _onLongPressEnd,
                               child: AnimatedBuilder(
                                 animation: Listenable.merge([_ringCtrl, _burstCtrl, _breatheCtrl]),
-                                builder: (_, __) {
+                                builder: (_, _) {
                                   final burst   = sin(_burstCtrl.value * pi) * 0.10;
                                   final breathe = active ? 0.0 : _breatheCtrl.value * 0.022;
                                   return Transform.scale(
@@ -552,7 +552,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                         child: AnimatedBuilder(
                           key: ValueKey(active),
                           animation: _breatheCtrl,
-                          builder: (_, __) {
+                          builder: (_, _) {
                             // Pulse opacity on hint text when idle to draw attention
                             final opacity = active
                                 ? 0.70

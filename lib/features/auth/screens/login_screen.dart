@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
       icon: Icons.fingerprint_rounded,
       iconGradient: const [Color(0xFF6366F1), Color(0xFF4338CA)],
     );
-    if (enable == true) {
+    if (enable ?? false) {
       await _biometricService.saveCredentials(email, password);
     }
   }
@@ -559,21 +559,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       // and user has previously opted in
                       if (_biometricAvailable && _biometricLoginEnabled) ...[
                         const SizedBox(height: AppDimensions.spacingXL),
-                        Row(
+                        const Row(
                           children: [
-                            const Expanded(child: Divider()),
+                            Expanded(child: Divider()),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: AppDimensions.paddingM),
                               child: Text(
                                 'או',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: AppDimensions.fontM,
                                 ),
                               ),
                             ),
-                            const Expanded(child: Divider()),
+                            Expanded(child: Divider()),
                           ],
                         ),
                         const SizedBox(height: AppDimensions.spacingXL),

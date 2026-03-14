@@ -962,7 +962,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                               : Image.file(
                                   file,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
+                                  errorBuilder: (_, _, _) => Container(
                                     color: AppColors.greyLight,
                                     child: const Icon(Icons.broken_image_rounded),
                                   ),

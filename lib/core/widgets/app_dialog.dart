@@ -35,7 +35,7 @@ Future<bool?> showAppDialog(
     barrierLabel: title,
     barrierColor: Colors.black.withOpacity(0.55),
     transitionDuration: const Duration(milliseconds: 280),
-    pageBuilder: (ctx, _, __) => Directionality(
+    pageBuilder: (ctx, _, _) => Directionality(
       textDirection: TextDirection.rtl,
       child: Center(
         child: Material(
@@ -174,7 +174,7 @@ Future<bool?> showAppDialog(
         ),
       ),
     ),
-    transitionBuilder: (_, anim, __, child) {
+    transitionBuilder: (_, anim, _, child) {
       final clamped = anim.value.clamp(0.0, 1.0);
       final curve = Curves.easeOutBack.transform(clamped);
       return Opacity(

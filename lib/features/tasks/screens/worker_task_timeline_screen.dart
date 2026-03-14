@@ -142,7 +142,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [TaskTheme.primary, TaskTheme.primaryLight],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
@@ -484,7 +484,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
               style: TaskTheme.heading3.copyWith(color: TaskTheme.textTertiary),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'משימות חדשות יופיעו כאן',
               style: TaskTheme.body,
             ),

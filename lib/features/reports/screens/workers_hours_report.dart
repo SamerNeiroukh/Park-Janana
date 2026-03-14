@@ -256,7 +256,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                   alignment: BarChartAlignment.spaceAround,
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, _, rod, __) {
+                      getTooltipItem: (group, _, rod, _) {
                         final name = displayed[group.x].userName;
                         return BarTooltipItem(
                           '$name\n${rod.toY.toStringAsFixed(1)} ש׳',

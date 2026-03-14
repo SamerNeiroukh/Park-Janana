@@ -750,13 +750,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       child: CachedNetworkImage(
         imageUrl: media.url,
         fit: BoxFit.contain,
-        placeholder: (_, __) => Container(
+        placeholder: (_, _) => Container(
           color: Colors.grey.shade200,
           child: const Center(
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
-        errorWidget: (_, __, ___) => Container(
+        errorWidget: (_, _, _) => Container(
           color: Colors.grey.shade200,
           child: Icon(Icons.broken_image_rounded,
               color: Colors.grey.shade400, size: 48),
@@ -1575,13 +1575,13 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                           child: CachedNetworkImage(
                             imageUrl: media.url,
                             fit: BoxFit.contain,
-                            placeholder: (_, __) => const Center(
+                            placeholder: (_, _) => const Center(
                               child: CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2,
                               ),
                             ),
-                            errorWidget: (_, __, ___) => const Icon(
+                            errorWidget: (_, _, _) => const Icon(
                               Icons.broken_image_rounded,
                               color: Colors.white54,
                               size: 64,

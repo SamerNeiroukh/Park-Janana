@@ -293,7 +293,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       barrierLabel: 'LocationRequired',
       barrierColor: Colors.black54.withOpacity(0.6),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, __) => Center(
+      pageBuilder: (ctx, _, _) => Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -411,7 +411,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final v = Curves.easeInOut.transform(anim.value);
         return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
       },
@@ -428,7 +428,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       barrierLabel: 'Location',
       barrierColor: Colors.black54.withOpacity(0.6),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, __) => Center(
+      pageBuilder: (ctx, _, _) => Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -538,7 +538,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final v = Curves.easeInOut.transform(anim.value);
         return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
       },
@@ -577,7 +577,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
             onLongPressEnd: _onLongPressEnd,
             child: AnimatedBuilder(
               animation: Listenable.merge([_ringCtrl, _burstCtrl, _breatheCtrl]),
-              builder: (_, __) {
+              builder: (_, _) {
                 // Breathing scale (idle only) + burst scale (on success)
                 final burst = sin(_burstCtrl.value * pi) * 0.10;
                 final breathe = isClockedIn

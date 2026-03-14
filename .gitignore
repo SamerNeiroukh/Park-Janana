@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -42,12 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 lib/firebase_options.dart
-lib/firebase_options.dart
 lib/google-services.json
 android/app/google-services.json
-android/app/google-services.json
-lib/firebase_options.dart
 firebase.json
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
 
 # App secrets — never commit real keys
 lib/core/constants/secrets.dart

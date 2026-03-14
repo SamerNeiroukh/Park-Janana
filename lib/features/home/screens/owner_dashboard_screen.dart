@@ -1035,7 +1035,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: active.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
                 itemBuilder: (_, i) {
                   final w = active[i];
                   final elapsed = w.elapsed;

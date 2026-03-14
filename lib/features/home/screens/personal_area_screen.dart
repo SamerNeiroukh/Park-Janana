@@ -192,7 +192,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       barrierLabel: 'profile',
       barrierColor: Colors.black.withOpacity(0.55),
       transitionDuration: const Duration(milliseconds: 280),
-      pageBuilder: (ctx, _, __) => Directionality(
+      pageBuilder: (ctx, _, _) => Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: Material(
@@ -292,7 +292,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           ),
         ),
       ),
-      transitionBuilder: (_, anim, __, child) {
+      transitionBuilder: (_, anim, _, child) {
         final clamped = anim.value.clamp(0.0, 1.0);
         final curve = Curves.easeOutBack.transform(clamped);
         return Opacity(
@@ -759,7 +759,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
             ),
           ),
-          if (trailing != null) trailing,
+          ?trailing,
         ],
       ),
     );

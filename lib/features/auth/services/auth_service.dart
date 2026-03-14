@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
@@ -16,30 +17,40 @@ class AuthService {
   // 🟢 Create a new user with a default profile picture uploaded to Firebase
   Future<void> createUser(String email, String password, String fullName,
       String idNumber, String phoneNumber) async {
-    // 🔒 First, validate that email, phone, and ID are unique
-    final validation = await _firebaseService.validateUserUniqueness(
-      email: email,
-      phoneNumber: phoneNumber,
-      idNumber: idNumber,
-    );
-
-    if (validation['emailTaken'] ?? false) {
-      throw CustomException('כתובת האימייל כבר קיימת במערכת.');
-    }
-    if (validation['phoneTaken'] ?? false) {
-      throw CustomException('מספר הטלפון כבר קיים במערכת.');
-    }
-    if (validation['idTaken'] ?? false) {
-      throw CustomException('מספר תעודת הזהות כבר קיים במערכת.');
-    }
-
+    // Create the Firebase Auth user first so subsequent Firestore reads are
+    // authenticated (security rules require auth for reads/writes).
+    UserCredential? userCredential;
     try {
-      final UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+      userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      final String uid = userCredential.user!.uid;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw CustomException('כתובת האימייל כבר קיימת במערכת.');
+      }
+      throw CustomException('שגיאה ביצירת משתמש.');
+    }
+
+    final String uid = userCredential.user!.uid;
+
+    try {
+      // 🔒 Validate uniqueness now that the user is authenticated
+      final validation = await _firebaseService.validateUserUniqueness(
+        email: email,
+        phoneNumber: phoneNumber,
+        idNumber: idNumber,
+      );
+
+      if (validation['emailTaken'] ?? false) {
+        throw CustomException('כתובת האימייל כבר קיימת במערכת.');
+      }
+      if (validation['phoneTaken'] ?? false) {
+        throw CustomException('מספר הטלפון כבר קיים במערכת.');
+      }
+      if (validation['idTaken'] ?? false) {
+        throw CustomException('מספר תעודת הזהות כבר קיים במערכת.');
+      }
 
       // ✅ Upload default profile picture to Firebase Storage
       final String storagePath = 'profile_pictures/$uid/profile.jpg';
@@ -62,12 +73,10 @@ class AuthService {
       // ✅ Cache user role (UID-scoped)
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userRole_$uid', 'worker');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        throw CustomException('כתובת האימייל כבר קיימת במערכת.');
-      }
-      throw CustomException('שגיאה ביצירת משתמש.');
     } catch (e) {
+      // If anything fails after auth user creation, clean up the auth account
+      // so the user can retry without getting "email already in use".
+      await userCredential.user?.delete();
       if (e is CustomException) rethrow;
       throw CustomException('שגיאה ביצירת משתמש.');
     }
@@ -129,8 +138,13 @@ class AuthService {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userRole_$uid', data['role'] ?? 'worker');
 
-      // Save FCM token for push notifications
-      await NotificationService().saveTokenAfterLogin();
+      // Save FCM token — non-critical, must not fail the sign-in flow.
+      // On iOS the APNS token may not be ready yet on first launch.
+      try {
+        await NotificationService().saveTokenAfterLogin();
+      } catch (e) {
+        debugPrint('FCM token save skipped after login: $e');
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         throw CustomException('האימייל לא נמצא במערכת');

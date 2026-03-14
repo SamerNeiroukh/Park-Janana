@@ -34,10 +34,14 @@ class _AttachmentsSection extends StatelessWidget {
         lower.endsWith('.jpeg') ||
         lower.endsWith('.png') ||
         lower.endsWith('.gif') ||
-        lower.endsWith('.webp')) return Icons.image_rounded;
+        lower.endsWith('.webp')) {
+      return Icons.image_rounded;
+    }
     if (lower.endsWith('.mp4') ||
         lower.endsWith('.mov') ||
-        lower.endsWith('.avi')) return Icons.videocam_rounded;
+        lower.endsWith('.avi')) {
+      return Icons.videocam_rounded;
+    }
     if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
       return Icons.description_rounded;
     }

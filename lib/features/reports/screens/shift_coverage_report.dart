@@ -323,7 +323,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                   alignment: BarChartAlignment.spaceAround,
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, _, rod, __) {
+                      getTooltipItem: (group, _, rod, _) {
                         final d = _deptStats[group.x];
                         return BarTooltipItem(
                           '${d.hebrewName}\n${d.shiftCount} משמרות',

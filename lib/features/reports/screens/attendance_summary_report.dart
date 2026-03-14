@@ -278,7 +278,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
+          const Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין נתוני נוכחות לחודש זה',
@@ -380,10 +380,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.bar_chart_rounded, size: 18, color: TaskTheme.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text('שעות עבודה לפי יום', style: TaskTheme.heading3),
             ],
           ),
@@ -488,10 +488,10 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
             Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text('פירוט נוכחות', style: TaskTheme.heading3),
           ],
         ),
@@ -511,7 +511,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               color: TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               boxShadow: TaskTheme.softShadow,
-              border: Border(
+              border: const Border(
                 right: BorderSide(
                   color: TaskTheme.done,
                   width: 3,
@@ -544,7 +544,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         ),
                         child: Text(
                           '$hoursש׳ $minutesד׳',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: TaskTheme.done,
@@ -557,14 +557,14 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                   // Clock in/out row
                   Row(
                     children: [
-                      Icon(Icons.login_rounded, size: 16, color: TaskTheme.inProgress),
+                      const Icon(Icons.login_rounded, size: 16, color: TaskTheme.inProgress),
                       const SizedBox(width: 6),
                       Text(
                         'כניסה: $clockIn',
                         style: TaskTheme.body.copyWith(fontSize: 13),
                       ),
                       const SizedBox(width: 20),
-                      Icon(Icons.logout_rounded, size: 16, color: TaskTheme.overdue),
+                      const Icon(Icons.logout_rounded, size: 16, color: TaskTheme.overdue),
                       const SizedBox(width: 6),
                       Text(
                         'יציאה: $clockOut',
