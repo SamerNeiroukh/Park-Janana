@@ -513,7 +513,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               color: TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               boxShadow: TaskTheme.softShadow,
-              border: Border(
+              border: const Border(
                 right: BorderSide(
                   color: isMissed ? missedColor : TaskTheme.done,
                   width: 3,
@@ -570,7 +570,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         ),
                         child: Text(
                           '$hoursש׳ $minutesד׳',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: isMissed ? missedColor : TaskTheme.done,

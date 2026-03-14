@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
       icon: Icons.fingerprint_rounded,
       iconGradient: const [Color(0xFF6366F1), Color(0xFF4338CA)],
     );
-    if (enable == true) {
+    if (enable ?? false) {
       await _biometricService.saveCredentials(email, password);
     }
   }

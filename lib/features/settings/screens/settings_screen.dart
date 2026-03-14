@@ -91,28 +91,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (enabled) {
-      final settings = await messaging.requestPermission();
-      final authorized = settings.authorizationStatus ==
-              AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional;
-      if (authorized && uid != null) {
+      try {
+        final settings = await messaging.requestPermission();
+        final authorized = settings.authorizationStatus ==
+                AuthorizationStatus.authorized ||
+            settings.authorizationStatus == AuthorizationStatus.provisional;
+        if (authorized && uid != null) {
+          final token = await messaging.getToken();
+          if (token != null) {
+            await FirebaseFirestore.instance
+                .collection(AppConstants.usersCollection)
+                .doc(uid)
+                .update({'fcmTokens': FieldValue.arrayUnion([token])});
+          }
+        }
+      } catch (e) {
+        debugPrint('FCM enable notifications skipped: $e');
+      }
+    } else {
+      try {
         final token = await messaging.getToken();
-        if (token != null) {
+        await messaging.deleteToken();
+        if (token != null && uid != null) {
           await FirebaseFirestore.instance
               .collection(AppConstants.usersCollection)
               .doc(uid)
-              .update({'fcmTokens': FieldValue.arrayUnion([token])});
+              .update({'fcmTokens': FieldValue.arrayRemove([token])});
         }
-      }
-    } else {
-      // Capture token before deleting it
-      final token = await messaging.getToken();
-      await messaging.deleteToken();
-      if (token != null && uid != null) {
-        await FirebaseFirestore.instance
-            .collection(AppConstants.usersCollection)
-            .doc(uid)
-            .update({'fcmTokens': FieldValue.arrayRemove([token])});
+      } catch (e) {
+        debugPrint('FCM disable notifications skipped: $e');
       }
     }
 

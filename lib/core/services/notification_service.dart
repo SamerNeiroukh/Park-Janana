@@ -62,10 +62,24 @@ class NotificationService {
     tz_data.initializeTimeZones();
     // tz.local is a `late` field — must be set explicitly after initializeTimeZones().
     tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
-    await _requestPermission();
+    try {
+      await _requestPermission();
+    } catch (e) {
+      // On iOS, Firebase Messaging may attempt to fetch the APNS token during
+      // requestPermission(). If the token isn't ready yet (common on first launch
+      // or debug builds), it throws apns-token-not-set. Safe to swallow — the
+      // token will be obtained later via onTokenRefresh or saveTokenAfterLogin().
+      debugPrint('Notification permission request skipped: $e');
+    }
     await _initializeLocalNotifications();
     _setupMessageHandlers();
-    await _saveTokenToFirestore();
+    try {
+      await _saveTokenToFirestore();
+    } catch (e) {
+      // APNS token may not be available yet on first iOS launch — safe to skip here
+      // since the token will be saved on next login via saveTokenAfterLogin().
+      debugPrint('FCM token save skipped during init: $e');
+    }
     _messaging.onTokenRefresh.listen(_updateTokenInFirestore);
     _isInitialized = true;
     debugPrint('NotificationService initialized');

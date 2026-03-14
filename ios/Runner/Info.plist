@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -22,8 +24,37 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה למצלמה כדי לצלם תמונת פרופיל ולפרסם תמונות וסרטונים</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>אנו משתמשים ב-Face ID כדי לאמת את זהותך בצורה מאובטחת</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה למיקרופון כדי לצלם סרטונים לפרסום</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה לגלריה כדי לשמור תמונות</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה לגלריה כדי לבחור תמונת פרופיל ולפרסם תמונות וסרטונים</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -41,18 +72,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-	<key>NSFaceIDUsageDescription</key>
-	<string>אנו משתמשים ב-Face ID כדי לאמת את זהותך בצורה מאובטחת</string>
 </dict>
 </plist>
