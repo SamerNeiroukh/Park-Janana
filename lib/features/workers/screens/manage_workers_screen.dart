@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/shimmer_loading.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:park_janana/features/attendance/screens/attendance_correction_screen.dart';
 
 class ManageWorkersScreen extends StatefulWidget {
   const ManageWorkersScreen({super.key});
@@ -27,6 +29,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  // Workers with an open (unclosed) attendance session this month
+  Set<String> _workerIdsWithOpenSession = {};
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +42,49 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
       });
     });
     _resolveInitialTab();
+    _loadAttendanceIssues();
+  }
+
+  /// Loads all attendance docs for the current month in a single query,
+  /// then finds workers who have an open (unclosed) session.
+  Future<void> _loadAttendanceIssues() async {
+    try {
+      final now = DateTime.now();
+      final snap = await FirebaseFirestore.instance
+          .collection(AppConstants.attendanceCollection)
+          .where('year', isEqualTo: now.year)
+          .where('month', isEqualTo: now.month)
+          .get();
+
+      final ids = <String>{};
+
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final sessions = data['sessions'] as List<dynamic>? ?? [];
+        final hasOpen = sessions.any((s) {
+          final map = s as Map<String, dynamic>;
+          final ci = (map['clockIn'] as dynamic).toDate() as DateTime;
+          final co = (map['clockOut'] as dynamic).toDate() as DateTime;
+          // Only flag as missed clock-out if clocked in for 16+ hours without clocking out
+          if (ci != co) return false;
+          return DateTime.now().difference(ci).inHours >= 16;
+        });
+        if (hasOpen) {
+          final uid = data['userId'] as String? ?? '';
+          if (uid.isNotEmpty) {
+            ids.add(uid);
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _workerIdsWithOpenSession = ids;
+        });
+      }
+    } catch (e) {
+      debugPrint('ManageWorkersScreen: attendance issues query failed: $e');
+    }
   }
 
   Future<void> _callWorker(
@@ -62,8 +110,6 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     }
   }
 
-  /// Switches to the "new workers" tab if there are any pending (non-rejected)
-  /// registration requests. Otherwise stays on the "active workers" tab.
   Future<void> _resolveInitialTab() async {
     try {
       final snap = await FirebaseFirestore.instance
@@ -107,6 +153,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
               Tab(text: "עובדים פעילים"),
             ],
           ),
+          // Attendance issues banner
+          if (_workerIdsWithOpenSession.isNotEmpty)
+            _buildAttendanceBanner(),
           const SizedBox(height: AppDimensions.spacingS),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -125,7 +174,8 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                       : null,
                   filled: true,
                   fillColor: Colors.grey.shade100,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -149,9 +199,48 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     );
   }
 
-  /// =========================
-  /// New Workers Tab
-  /// =========================
+  /// Orange banner shown when one or more workers have an unclosed session.
+  Widget _buildAttendanceBanner() {
+    final count = _workerIdsWithOpenSession.length;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: GestureDetector(
+        onTap: () {
+          // Scroll to show the workers with issues — just refresh the list
+          // by jumping to "עובדים פעילים" tab
+          _tabController.animateTo(1);
+        },
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF7ED),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFF97316).withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded,
+                  color: Color(0xFFF97316), size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '$count ${count == 1 ? 'עובד' : 'עובדים'} עם שעת יציאה חסרה החודש',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF92400E),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ========================= New Workers Tab =========================
   Widget _buildNewWorkersTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -169,13 +258,15 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
         }
 
         final allWorkers = snapshot.data!.docs
-            .where((doc) => (doc.data() as Map<String, dynamic>)['rejected'] != true)
+            .where((doc) =>
+                (doc.data() as Map<String, dynamic>)['rejected'] != true)
             .toList();
         final newWorkers = _searchQuery.isEmpty
             ? allWorkers
             : allWorkers.where((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                final name = (data['fullName'] ?? '').toString().toLowerCase();
+                final name =
+                    (data['fullName'] ?? '').toString().toLowerCase();
                 return name.contains(_searchQuery);
               }).toList();
 
@@ -208,11 +299,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                 child: InkWell(
                   borderRadius: AppDimensions.borderRadiusXL,
                   onTap: () {
-                    final currentRole = context
-                            .read<UserProvider>()
-                            .currentUser
-                            ?.role ??
-                        'manager';
+                    final currentRole =
+                        context.read<UserProvider>().currentUser?.role ??
+                            'manager';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -277,14 +366,12 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
     );
   }
 
-  /// =========================
-  /// Approved Workers Tab
-  /// =========================
+  // ========================= Approved Workers Tab =========================
   Widget _buildApprovedWorkersTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(AppConstants.usersCollection)
-          .where('role', whereIn: ['worker', 'manager', 'co_owner'])
+          .where('role', whereIn: ['worker', 'manager', 'co_owner', 'owner'])
           .where('approved', isEqualTo: true)
           .snapshots(),
       builder: (context, snapshot) {
@@ -296,12 +383,19 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           return const Center(child: Text("אין עובדים פעילים במערכת"));
         }
 
-        final allWorkers = snapshot.data!.docs;
+        const roleOrder = {'owner': 0, 'co_owner': 1, 'manager': 2, 'worker': 3};
+        final allWorkers = snapshot.data!.docs.toList()
+          ..sort((a, b) {
+            final ra = (a.data() as Map<String, dynamic>)['role'] as String? ?? 'worker';
+            final rb = (b.data() as Map<String, dynamic>)['role'] as String? ?? 'worker';
+            return (roleOrder[ra] ?? 3).compareTo(roleOrder[rb] ?? 3);
+          });
         final workers = _searchQuery.isEmpty
             ? allWorkers
             : allWorkers.where((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                final name = (data['fullName'] ?? '').toString().toLowerCase();
+                final name =
+                    (data['fullName'] ?? '').toString().toLowerCase();
                 return name.contains(_searchQuery);
               }).toList();
 
@@ -313,7 +407,9 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           );
         }
 
-        return ListView.builder(
+        return RefreshIndicator(
+          onRefresh: _loadAttendanceIssues,
+          child: ListView.builder(
           padding: AppDimensions.paddingAllM,
           itemCount: workers.length,
           itemBuilder: (context, index) {
@@ -322,107 +418,165 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
 
             final fullName = data['fullName'] ?? '---';
             final phone = data['phoneNumber'] ?? '---';
+            final uid = user.id; // document ID = Firebase Auth UID
             final role = data['role'] as String? ?? 'worker';
-            final isManager = role == 'manager';
+            final roleLabel = switch (role) {
+              'owner' => 'בעלים',
+              'co_owner' => 'שותף',
+              'manager' => 'מנהל',
+              _ => null,
+            };
+            final hasAttendanceIssue = _workerIdsWithOpenSession.contains(uid);
 
             return Directionality(
               textDirection: TextDirection.rtl,
               child: Card(
                 elevation: AppDimensions.elevationM,
                 margin: const EdgeInsets.symmetric(vertical: 6),
+                clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                   borderRadius: AppDimensions.borderRadiusXL,
                 ),
-                child: InkWell(
-                  borderRadius: AppDimensions.borderRadiusXL,
-                  onTap: () {
-                    final currentRole = context
-                            .read<UserProvider>()
-                            .currentUser
-                            ?.role ??
-                        'manager';
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ReviewWorkerScreen(
-                          userData: user,
-                          currentUserRole: currentRole,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 10.0),
-                    child: Row(
-                      children: [
-                        ProfileAvatar(
-                          imageUrl: data['profile_picture'],
-                          radius: 28,
-                          backgroundColor: Colors.grey.shade300,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                child: Column(
+                  children: [
+                    // Tap → ReviewWorkerScreen
+                    InkWell(
+                      onTap: () {
+                        final currentRole =
+                            context.read<UserProvider>().currentUser?.role ??
+                                'manager';
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ReviewWorkerScreen(
+                              userData: user,
+                              currentUserRole: currentRole,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        color: hasAttendanceIssue
+                            ? const Color(0xFFFFFBEB)
+                            : Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 10.0),
+                        child: Row(
+                          children: [
+                            // Avatar (no dot — the warning row below is enough)
+                            ProfileAvatar(
+                              imageUrl: data['profile_picture'],
+                              radius: 28,
+                              backgroundColor: Colors.grey.shade300,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    fullName,
-                                    style: AppTheme.bodyText.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  if (isManager) ...[
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: const Text(
-                                        'מנהל',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.primary,
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          fullName,
+                                          style: AppTheme.bodyText.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
+                                      if (roleLabel != null) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary
+                                                .withValues(alpha: 0.12),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            roleLabel,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    phone,
+                                    style: AppTheme.bodyText.copyWith(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade700,
                                     ),
-                                  ],
+                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.phone_rounded,
+                                  color: Colors.green),
+                              tooltip: 'התקשר',
+                              onPressed: phone.isNotEmpty
+                                  ? () =>
+                                      _callWorker(context, fullName, phone)
+                                  : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // ── Attendance warning row — visible & tappable ──
+                    if (hasAttendanceIssue)
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AttendanceCorrectionScreen(
+                              userId: uid,
+                              userName: fullName,
+                            ),
+                          ),
+                        ).then((_) => _loadAttendanceIssues()),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 9),
+                          color: const Color(0xFFF97316),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.timer_off_rounded,
+                                  size: 15, color: Colors.white),
+                              SizedBox(width: 8),
                               Text(
-                                phone,
-                                style: AppTheme.bodyText.copyWith(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade700,
+                                'חסר שעת יציאה — לחץ לתיקון',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
                                 ),
                               ),
+                              Spacer(),
+                              Icon(Icons.arrow_forward_ios_rounded,
+                                  size: 12, color: Colors.white),
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.phone_rounded,
-                              color: Colors.green),
-                          tooltip: 'התקשר',
-                          onPressed: phone.isNotEmpty
-                              ? () => _callWorker(context, fullName, phone)
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                  ],
                 ),
               ),
             );
           },
+        ),
         );
       },
     );
