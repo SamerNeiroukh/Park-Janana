@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/clock_service.dart';
@@ -87,6 +90,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
 
   bool _fired = false;
   bool _h25 = false, _h50 = false, _h75 = false;
+  bool _autoClockOutDone = false;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -127,15 +131,46 @@ class _GlassHeroCardState extends State<GlassHeroCard>
 
   void _startElapsed() {
     _elapsedTimer?.cancel();
+    _autoClockOutDone = false;
     if (_session == null) return;
     _elapsed = DateTime.now().difference(_session!.clockIn);
     _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted && _session != null) {
-        setState(() => _elapsed = DateTime.now().difference(_session!.clockIn));
+        final elapsed = DateTime.now().difference(_session!.clockIn);
+        setState(() => _elapsed = elapsed);
+        if (!_autoClockOutDone && elapsed.inHours >= 16) {
+          _autoClockOutDone = true;
+          _elapsedTimer?.cancel();
+          _autoClockOut();
+        }
       } else {
         _elapsedTimer?.cancel();
       }
     });
+  }
+
+  Future<void> _autoClockOut() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || _session == null) return;
+    try {
+      await _clockService.clockOut();
+      await FirebaseFirestore.instance
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .collection('notifications')
+          .add({
+        'type': 'clockout_missed',
+        'title': 'יציאה אוטומטית ממשמרת',
+        'body': 'לא דיווחת יציאה לאחר 16 שעות – המערכת סיימה את המשמרת אוטומטית. פנה למנהל שלך.',
+        'entityId': '',
+        'isRead': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      await _fetchSession();
+      widget.onClockComplete?.call();
+    } catch (e) {
+      debugPrint('GlassHeroCard auto clock-out error: $e');
+    }
   }
 
   // ── Long-press ring callbacks ──────────────────────────────────────────────

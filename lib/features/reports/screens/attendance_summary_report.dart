@@ -504,6 +504,8 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
           final duration = session.clockOut.difference(session.clockIn);
           final hours = duration.inHours;
           final minutes = duration.inMinutes.remainder(60);
+          final isMissed = session.hoursWorked >= 16;
+          const missedColor = Color(0xFFF97316);
 
           return Container(
             margin: const EdgeInsets.only(bottom: 10),
@@ -511,9 +513,9 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               color: TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               boxShadow: TaskTheme.softShadow,
-              border: const Border(
+              border: Border(
                 right: BorderSide(
-                  color: TaskTheme.done,
+                  color: isMissed ? missedColor : TaskTheme.done,
                   width: 3,
                 ),
               ),
@@ -533,21 +535,45 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         ),
                       ),
                       const Spacer(),
+                      if (isMissed)
+                        Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: missedColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.timer_off_rounded, size: 11, color: missedColor),
+                              SizedBox(width: 4),
+                              Text(
+                                'יציאה חסרה',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: missedColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: TaskTheme.done.withValues(alpha: 0.1),
+                          color: (isMissed ? missedColor : TaskTheme.done).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '$hoursש׳ $minutesד׳',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: TaskTheme.done,
+                            color: isMissed ? missedColor : TaskTheme.done,
                           ),
                         ),
                       ),

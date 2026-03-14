@@ -498,7 +498,9 @@ class _AttendanceCorrectionScreenState
         _sessions.where((s) => s.clockIn != s.clockOut).toList();
     final now = DateTime.now();
     final openSessions = _sessions
-        .where((s) => s.clockIn == s.clockOut && now.difference(s.clockIn).inHours >= 16)
+        .where((s) =>
+            (s.clockIn == s.clockOut && now.difference(s.clockIn).inHours >= 16) ||
+            (s.clockIn != s.clockOut && s.hoursWorked >= 16))
         .length;
     final totalHours =
         completedSessions.fold(0.0, (acc, s) => acc + s.hoursWorked);
@@ -662,7 +664,8 @@ class _AttendanceCorrectionScreenState
     final dateFmt = DateFormat('dd/MM');
     final timeFmt = DateFormat('HH:mm');
     final isOngoing = s.clockIn == s.clockOut;
-    final isMissedClockout = isOngoing && DateTime.now().difference(s.clockIn).inHours >= 16;
+    final isMissedClockout = (isOngoing && DateTime.now().difference(s.clockIn).inHours >= 16)
+        || (!isOngoing && s.hoursWorked >= 16);
     // For missed clock-out, cap displayed hours at 16; for still-working sessions show elapsed (up to 16)
     final hours = isOngoing
         ? DateTime.now().difference(s.clockIn).inHours.clamp(0, 16).toDouble()
