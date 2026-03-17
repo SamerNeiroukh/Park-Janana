@@ -66,18 +66,16 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   }
 
   Future<void> _fetchData() async {
-    final updated = await _taskService.getTaskById(widget.task.id);
-    if (updated != null) {
-      final workers = await _workerService.getUsersByIds(updated.assignedTo);
-      if (mounted) {
-        setState(() {
-          _task = updated;
-          _workers = workers;
-          for (final w in workers) {
-            _userNameCache[w.uid] = w.fullName;
-          }
-        });
-      }
+    // The task doc is kept live by the StreamBuilder — no need to re-fetch it.
+    // Only fetch the worker profiles needed for the UI.
+    final workers = await _workerService.getUsersByIds(widget.task.assignedTo);
+    if (mounted) {
+      setState(() {
+        _workers = workers;
+        for (final w in workers) {
+          _userNameCache[w.uid] = w.fullName;
+        }
+      });
     }
   }
 
@@ -816,7 +814,26 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     );
     if ((confirmed ?? false) && mounted) {
       await _taskService.deleteTask(_task.id);
-      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(children: [
+              const Icon(Icons.delete_outline_rounded,
+                  color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Text('המשימה "${_task.title}" נמחקה',
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+            ]),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        Navigator.pop(context);
+      }
     }
   }
 }

@@ -18,43 +18,45 @@ class TaskBoardProvider extends ChangeNotifier {
   String? _departmentFilter;
   bool _isLoading = true;
 
+  // Memoised filtered list — recomputed only when tasks/search/filter change.
+  List<TaskModel> _cachedFiltered = [];
+
+  void _recomputeFiltered() {
+    var tasks = _allTasks;
+    if (_departmentFilter != null) {
+      tasks = tasks.where((t) => t.department == _departmentFilter).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      tasks = tasks
+          .where((t) =>
+              t.title.toLowerCase().contains(q) ||
+              t.description.toLowerCase().contains(q))
+          .toList();
+    }
+    _cachedFiltered = tasks;
+  }
+
   // Getters
   bool get isLoading => _isLoading;
   String get searchQuery => _searchQuery;
   String? get departmentFilter => _departmentFilter;
   Map<String, UserModel> get workerCache => _workerCache;
 
-  List<TaskModel> get _filteredTasks {
-    var tasks = _allTasks;
-
-    if (_departmentFilter != null) {
-      tasks = tasks.where((t) => t.department == _departmentFilter).toList();
-    }
-
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      tasks = tasks.where((t) =>
-          t.title.toLowerCase().contains(q) ||
-          t.description.toLowerCase().contains(q)).toList();
-    }
-
-    return tasks;
-  }
-
   List<TaskModel> get pendingTasks =>
-      _filteredTasks.where((t) => t.status == 'pending').toList()
+      _cachedFiltered.where((t) => t.status == 'pending').toList()
         ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
   List<TaskModel> get inProgressTasks =>
-      _filteredTasks.where((t) => t.status == 'in_progress').toList()
+      _cachedFiltered.where((t) => t.status == 'in_progress').toList()
         ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
   List<TaskModel> get doneTasks =>
-      _filteredTasks.where((t) => t.status == 'done').toList()
+      _cachedFiltered.where((t) => t.status == 'done').toList()
         ..sort((a, b) => b.dueDate.compareTo(a.dueDate));
 
-  int get totalCount => _filteredTasks.length;
-  int get overdueCount => _filteredTasks.where((t) => t.isOverdue).length;
+  int get totalCount => _cachedFiltered.length;
+  int get overdueCount => _cachedFiltered.where((t) => t.isOverdue).length;
 
   void init(String managerId) {
     _subscription?.cancel();
@@ -64,6 +66,7 @@ class TaskBoardProvider extends ChangeNotifier {
     _subscription = _taskService.getTasksCreatedBy(managerId).listen(
       (tasks) async {
         _allTasks = tasks;
+        _recomputeFiltered();
         await _fetchWorkers(tasks);
         _isLoading = false;
         notifyListeners();
@@ -100,11 +103,13 @@ class TaskBoardProvider extends ChangeNotifier {
 
   void setSearch(String query) {
     _searchQuery = query.trim();
+    _recomputeFiltered();
     notifyListeners();
   }
 
   void setDepartmentFilter(String? department) {
     _departmentFilter = department;
+    _recomputeFiltered();
     notifyListeners();
   }
 
