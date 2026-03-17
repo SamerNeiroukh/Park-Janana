@@ -32,12 +32,15 @@ class _NotificationHistoryScreenState
     extends State<NotificationHistoryScreen> {
   // ── Config ───────────────────────────────────────────────────────────────
   static const int _pageSize = 20;
+  static const int _maxDisplayLimit = 100;
 
   // ── State ────────────────────────────────────────────────────────────────
   String? _uid;
   String? _userRole;
   bool _isMarkingAll = false;
   int _displayLimit = _pageSize;
+  bool _isPaginating = false;
+  List<DocumentSnapshot> _lastDocs = [];
   final ScrollController _scrollCtrl = ScrollController();
 
   bool get _isManager =>
@@ -64,9 +67,13 @@ class _NotificationHistoryScreenState
   }
 
   void _onScroll() {
+    if (_isPaginating) return;
     if (_scrollCtrl.position.pixels >=
         _scrollCtrl.position.maxScrollExtent - 200) {
-      setState(() => _displayLimit += _pageSize);
+      setState(() {
+        _isPaginating = true;
+        _displayLimit = (_displayLimit + _pageSize).clamp(0, _maxDisplayLimit);
+      });
     }
   }
 
@@ -153,7 +160,7 @@ class _NotificationHistoryScreenState
           .limit(_displayLimit)
           .snapshots(),
       builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) {
+        if (snap.connectionState == ConnectionState.waiting && _lastDocs.isEmpty) {
           return const Center(
               child: CircularProgressIndicator(color: TaskTheme.primary));
         }
@@ -176,7 +183,11 @@ class _NotificationHistoryScreenState
           );
         }
 
-        final docs = snap.data?.docs ?? [];
+        final docs = snap.data?.docs ?? _lastDocs;
+        if (snap.hasData) {
+          _lastDocs = docs;
+          _isPaginating = false;
+        }
         if (docs.isEmpty) return _buildEmptyState();
 
         return ListView.builder(
@@ -367,6 +378,11 @@ class _NotificationHistoryScreenState
       }
     } catch (e) {
       debugPrint('_openShift error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('שגיאה בפתיחת המשמרת')),
+        );
+      }
     }
   }
 
@@ -402,6 +418,11 @@ class _NotificationHistoryScreenState
       );
     } catch (e) {
       debugPrint('_openTask error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('שגיאה בפתיחת המשימה')),
+        );
+      }
     }
   }
 

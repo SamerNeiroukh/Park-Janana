@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
@@ -21,7 +22,8 @@ class FirebaseService {
           .doc(userData['uid'])
           .set(userData);
     } on FirebaseException catch (e) {
-      throw CustomException('שגיאה ביצירת משתמש: ${e.message}');
+      debugPrint('addUser Firebase error: ${e.code} ${e.message}');
+      throw CustomException('שגיאה ביצירת משתמש. נסה שוב.');
     }
   }
 
@@ -30,7 +32,8 @@ class FirebaseService {
     try {
       return await _firestore.collection(AppConstants.usersCollection).doc(uid).get();
     } on FirebaseException catch (e) {
-      throw CustomException('שגיאה בקבלת נתוני המשתמש: ${e.message}');
+      debugPrint('getUser Firebase error: ${e.code} ${e.message}');
+      throw CustomException('שגיאה בקבלת נתוני המשתמש. נסה שוב.');
     }
   }
 
@@ -39,7 +42,8 @@ class FirebaseService {
     try {
       await _firestore.collection(AppConstants.usersCollection).doc(uid).update(updates);
     } on FirebaseException catch (e) {
-      throw CustomException('שגיאה בעדכון הנתונים: ${e.message}');
+      debugPrint('updateUser Firebase error: ${e.code} ${e.message}');
+      throw CustomException('שגיאה בעדכון הנתונים. נסה שוב.');
     }
   }
 
@@ -117,7 +121,8 @@ class FirebaseService {
     try {
       await _firestore.collection(AppConstants.shiftsCollection).doc(shiftData['shift_id']).set(shiftData);
     } on FirebaseException catch (e) {
-      throw CustomException('שגיאה ביצירת משמרת: ${e.message}');
+      debugPrint('createShift Firebase error: ${e.code} ${e.message}');
+      throw CustomException('שגיאה ביצירת משמרת. נסה שוב.');
     }
   }
 
@@ -126,7 +131,8 @@ class FirebaseService {
     try {
       await _firestore.collection(AppConstants.shiftsCollection).doc(shiftId).update(updates);
     } on FirebaseException catch (e) {
-      throw CustomException('שגיאה בעדכון משמרת: ${e.message}');
+      debugPrint('updateShift Firebase error: ${e.code} ${e.message}');
+      throw CustomException('שגיאה בעדכון משמרת. נסה שוב.');
     }
   }
 
@@ -135,7 +141,8 @@ class FirebaseService {
     try {
       await _firestore.collection(AppConstants.shiftsCollection).doc(shiftId).delete();
     } on FirebaseException catch (e) {
-      throw CustomException('שגיאה במחיקת המשמרת: ${e.message}');
+      debugPrint('deleteShift Firebase error: ${e.code} ${e.message}');
+      throw CustomException('שגיאה במחיקת המשמרת. נסה שוב.');
     }
   }
 }

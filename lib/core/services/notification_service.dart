@@ -60,8 +60,15 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
     tz_data.initializeTimeZones();
-    // tz.local is a `late` field — must be set explicitly after initializeTimeZones().
-    tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
+    // Set the local timezone. Defaults to Asia/Jerusalem for this deployment.
+    // To support multiple timezones, add flutter_timezone and call
+    // tz.setLocalLocation(tz.getLocation(await FlutterTimezone.getLocalTimezone())).
+    try {
+      tz.setLocalLocation(tz.getLocation('Asia/Jerusalem'));
+    } catch (e) {
+      debugPrint('Failed to set timezone, falling back to UTC: $e');
+      tz.setLocalLocation(tz.UTC);
+    }
     try {
       await _requestPermission();
     } catch (e) {

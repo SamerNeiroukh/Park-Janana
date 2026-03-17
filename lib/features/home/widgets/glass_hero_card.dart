@@ -508,39 +508,44 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                   strokeWidth: 2, color: Colors.white.withValues(alpha: 0.45)),
                               )),
                             )
-                          : GestureDetector(
-                              onLongPressStart: _onLongPressStart,
-                              onLongPressEnd:   _onLongPressEnd,
-                              child: AnimatedBuilder(
-                                animation: Listenable.merge([_ringCtrl, _burstCtrl, _breatheCtrl]),
-                                builder: (_, _) {
-                                  final burst   = sin(_burstCtrl.value * pi) * 0.10;
-                                  final breathe = active ? 0.0 : _breatheCtrl.value * 0.022;
-                                  return Transform.scale(
-                                    scale: 1.0 + burst + breathe,
-                                    child: SizedBox(
-                                      width: _kRing, height: _kRing,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          CustomPaint(
-                                            size: const Size(_kRing, _kRing),
-                                            painter: _RingPainter(progress: _ringCtrl.value, color: arcColor),
-                                          ),
-                                          CustomPaint(
-                                            size: const Size(_kFace, _kFace),
-                                            painter: _ClockPainter(now: _now, active: active),
-                                          ),
-                                          if (_busy)
-                                            SizedBox(width: _kFace, height: _kFace,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2, color: Colors.white.withValues(alpha: 0.70)),
+                          : Semantics(
+                              button: true,
+                              label: active ? 'לחץ לאיפוס שעון יציאה' : 'לחץ לרישום שעון כניסה',
+                              hint: 'לחץ לחיצה ארוכה',
+                              child: GestureDetector(
+                                onLongPressStart: _onLongPressStart,
+                                onLongPressEnd:   _onLongPressEnd,
+                                child: AnimatedBuilder(
+                                  animation: Listenable.merge([_ringCtrl, _burstCtrl, _breatheCtrl]),
+                                  builder: (_, _) {
+                                    final burst   = sin(_burstCtrl.value * pi) * 0.10;
+                                    final breathe = active ? 0.0 : _breatheCtrl.value * 0.022;
+                                    return Transform.scale(
+                                      scale: 1.0 + burst + breathe,
+                                      child: SizedBox(
+                                        width: _kRing, height: _kRing,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            CustomPaint(
+                                              size: const Size(_kRing, _kRing),
+                                              painter: _RingPainter(progress: _ringCtrl.value, color: arcColor),
                                             ),
-                                        ],
+                                            CustomPaint(
+                                              size: const Size(_kFace, _kFace),
+                                              painter: _ClockPainter(now: _now, active: active),
+                                            ),
+                                            if (_busy)
+                                              SizedBox(width: _kFace, height: _kFace,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2, color: Colors.white.withValues(alpha: 0.70)),
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                     ),

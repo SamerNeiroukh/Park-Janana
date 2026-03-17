@@ -33,6 +33,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
   // Date range mode
   bool _isRangeMode = false;
   DateTimeRange? _dateRange;
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -104,15 +105,20 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
     _loadAttendance();
   }
 
-  void _exportToPdf() async {
-    if (attendanceData == null) return;
-    await PdfExportService.exportAttendancePdf(
-      context: context,
-      userName: widget.userName,
-      profileUrl: widget.profileUrl,
-      attendance: attendanceData!,
-      month: selectedMonth,
-    );
+  Future<void> _exportToPdf() async {
+    if (attendanceData == null || _isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await PdfExportService.exportAttendancePdf(
+        context: context,
+        userName: widget.userName,
+        profileUrl: widget.profileUrl,
+        attendance: attendanceData!,
+        month: selectedMonth,
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   // Group sessions by day number for the bar chart
@@ -513,7 +519,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               color: TaskTheme.surface,
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
               boxShadow: TaskTheme.softShadow,
-              border: const Border(
+              border: Border(
                 right: BorderSide(
                   color: isMissed ? missedColor : TaskTheme.done,
                   width: 3,
@@ -570,7 +576,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         ),
                         child: Text(
                           '$hoursש׳ $minutesד׳',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: isMissed ? missedColor : TaskTheme.done,
@@ -632,17 +638,26 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             borderRadius: BorderRadius.circular(TaskTheme.radiusM),
             child: InkWell(
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-              onTap: _exportToPdf,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
+              onTap: _isExporting ? null : _exportToPdf,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.picture_as_pdf_rounded, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                    if (_isExporting)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    else
+                      const Icon(Icons.picture_as_pdf_rounded,
+                          color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'ייצוא PDF',
-                      style: TextStyle(
+                      _isExporting ? 'מייצא...' : 'ייצוא PDF',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,

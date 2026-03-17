@@ -28,6 +28,7 @@ class TaskSummaryReport extends StatefulWidget {
 class _TaskSummaryReportState extends State<TaskSummaryReport> {
   late DateTime selectedMonth;
   bool isLoading = true;
+  bool _isExporting = false;
   List<TaskModel> tasks = [];
 
   @override
@@ -56,16 +57,21 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
     _loadTasks();
   }
 
-  void _exportToPdf() async {
-    if (tasks.isEmpty) return;
-    await PdfExportService.exportTaskReportPdf(
-      context: context,
-      userName: widget.userName,
-      profileUrl: widget.profileUrl,
-      tasks: tasks,
-      month: selectedMonth,
-      userId: widget.userId,
-    );
+  Future<void> _exportToPdf() async {
+    if (tasks.isEmpty || _isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await PdfExportService.exportTaskReportPdf(
+        context: context,
+        userName: widget.userName,
+        profileUrl: widget.profileUrl,
+        tasks: tasks,
+        month: selectedMonth,
+        userId: widget.userId,
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   // Count tasks by worker-specific status
@@ -543,17 +549,26 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             borderRadius: BorderRadius.circular(TaskTheme.radiusM),
             child: InkWell(
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-              onTap: _exportToPdf,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
+              onTap: _isExporting ? null : _exportToPdf,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.picture_as_pdf_rounded, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                    if (_isExporting)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    else
+                      const Icon(Icons.picture_as_pdf_rounded,
+                          color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'ייצוא PDF',
-                      style: TextStyle(
+                      _isExporting ? 'מייצא...' : 'ייצוא PDF',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,

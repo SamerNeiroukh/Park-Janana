@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import FirebaseCore
 import FirebaseMessaging
+import AVFoundation
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -9,6 +10,12 @@ import FirebaseMessaging
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Configure audio session for video playback
+    try? AVAudioSession.sharedInstance().setCategory(
+      .playback,
+      options: .mixWithOthers
+    )
+
     // Configure Firebase
     FirebaseApp.configure()
 
