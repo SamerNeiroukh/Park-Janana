@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 
+// Debounce duration — batches rapid consecutive stream firings into one rebuild.
+const _kNotifyDebounce = Duration(milliseconds: 60);
+
 class HomeBadgeProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -17,6 +20,13 @@ class HomeBadgeProvider extends ChangeNotifier {
   String? _userRole;
   bool _initialized = false;
   bool _initializing = false;
+  Timer? _notifyDebounce;
+
+  /// Batches rapid successive stream firings into a single rebuild.
+  void _scheduleNotify() {
+    _notifyDebounce?.cancel();
+    _notifyDebounce = Timer(_kNotifyDebounce, notifyListeners);
+  }
 
   HomeBadgeProvider() {
     // Auto-reset whenever the user signs out or the session expires,
@@ -111,7 +121,7 @@ class HomeBadgeProvider extends ChangeNotifier {
       }
       if (_badgeCounts['newsfeed'] != count) {
         _badgeCounts['newsfeed'] = count;
-        notifyListeners();
+        _scheduleNotify();
       }
     }, onError: (e) {
       debugPrint('HomeBadgeProvider newsfeed error: $e');
@@ -177,7 +187,7 @@ class HomeBadgeProvider extends ChangeNotifier {
             _badgeCounts['shifts'] != shiftsCount;
         _badgeCounts['schedule'] = scheduleCount;
         _badgeCounts['shifts'] = shiftsCount;
-        if (changed) notifyListeners();
+        if (changed) _scheduleNotify();
       } catch (e) {
         debugPrint('HomeBadgeProvider worker shifts error: $e');
       }
@@ -224,7 +234,7 @@ class HomeBadgeProvider extends ChangeNotifier {
             _badgeCounts['shifts'] != shiftsCount;
         _badgeCounts['schedule'] = scheduleCount;
         _badgeCounts['shifts'] = shiftsCount;
-        if (changed) notifyListeners();
+        if (changed) _scheduleNotify();
       } catch (e) {
         debugPrint('HomeBadgeProvider manager shifts error: $e');
       }
@@ -266,7 +276,7 @@ class HomeBadgeProvider extends ChangeNotifier {
       }
       if (_badgeCounts['tasks'] != count) {
         _badgeCounts['tasks'] = count;
-        notifyListeners();
+        _scheduleNotify();
       }
     }, onError: (e) {
       debugPrint('HomeBadgeProvider tasks error: $e');
@@ -319,6 +329,7 @@ class HomeBadgeProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _notifyDebounce?.cancel();
     _authSubscription?.cancel();
     _cancelSubscriptions();
     super.dispose();

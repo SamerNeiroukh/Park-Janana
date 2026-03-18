@@ -123,6 +123,45 @@ class _AttendanceCorrectionScreenState
     }
   }
 
+  Future<void> _clockOutNow(int index) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('סיום משמרת',
+              style: TextStyle(fontWeight: FontWeight.w800)),
+          content: const Text('לרשום יציאה עכשיו עבור משמרת זו?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('ביטול'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: TextButton.styleFrom(foregroundColor: _kRed),
+              child: const Text('סיים משמרת'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+    setState(() {
+      _sessions[index] = AttendanceRecord(
+        clockIn: _sessions[index].clockIn,
+        clockOut: DateTime.now(),
+      );
+      _isDirty = true;
+    });
+    _showBanner(
+      message: 'שעת יציאה נרשמה — זכור לשמור',
+      icon: Icons.stop_circle_rounded,
+      color: _kRed,
+    );
+  }
+
   Future<void> _editSession(int index) async {
     final session = _sessions[index];
     DateTime newClockIn = session.clockIn;
@@ -262,7 +301,41 @@ class _AttendanceCorrectionScreenState
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
+      child: PopScope(
+        canPop: !_isDirty,
+        onPopInvokedWithResult: (didPop, _) async {
+          if (didPop) return;
+          final leave = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                title: const Text('שינויים לא נשמרו',
+                    style: TextStyle(fontWeight: FontWeight.w800)),
+                content: const Text(
+                    'יש שינויים שלא נשמרו. האם לצאת בלי לשמור?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('הישאר'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    style: TextButton.styleFrom(
+                        foregroundColor: _kRed),
+                    child: const Text('צא בלי לשמור'),
+                  ),
+                ],
+              ),
+            ),
+          );
+          if (leave == true && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Scaffold(
         backgroundColor: const Color(0xFFF1F5F9),
         body: Column(
           children: [
@@ -300,6 +373,7 @@ class _AttendanceCorrectionScreenState
             ),
             if (!_isLoading) _buildBottomBar(),
           ],
+        ),
         ),
       ),
     );
@@ -777,18 +851,20 @@ class _AttendanceCorrectionScreenState
                         _timeChip(
                           icon: Icons.login_rounded,
                           time: timeFmt.format(s.clockIn),
+                          date: dateFmt.format(s.clockIn),
                           color: _kGreen,
                           label: 'כניסה',
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 6),
-                          child: Icon(Icons.arrow_back_rounded,
+                          child: Icon(Icons.arrow_forward_rounded,
                               size: 16, color: Color(0xFFCBD5E1)),
                         ),
                         // Clock Out
                         _timeChip(
                           icon: Icons.logout_rounded,
                           time: isOngoing ? '...' : timeFmt.format(s.clockOut),
+                          date: isOngoing ? '' : dateFmt.format(s.clockOut),
                           color: isMissedClockout
                               ? const Color(0xFFF97316)
                               : isOngoing
@@ -804,11 +880,25 @@ class _AttendanceCorrectionScreenState
                       ],
                     ),
                   ),
-                  // Edit hint
+                  // Stop button (open shifts only) or edit hint
                   const SizedBox(width: 8),
-                  Icon(Icons.edit_outlined,
-                      size: 18,
-                      color: _kIndigo.withValues(alpha: 0.4)),
+                  if (isOngoing)
+                    GestureDetector(
+                      onTap: () => _clockOutNow(index),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: _kRed.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.stop_circle_rounded,
+                            size: 18, color: _kRed),
+                      ),
+                    )
+                  else
+                    Icon(Icons.edit_outlined,
+                        size: 18,
+                        color: _kIndigo.withValues(alpha: 0.4)),
                 ],
               ),
             ),
@@ -823,6 +913,7 @@ class _AttendanceCorrectionScreenState
     required String time,
     required Color color,
     required String label,
+    String date = '',
     bool isAlert = false,
   }) {
     return Column(
@@ -859,6 +950,17 @@ class _AttendanceCorrectionScreenState
             ],
           ),
         ),
+        if (date.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            date,
+            style: TextStyle(
+              fontSize: 9,
+              color: color.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ],
     );
   }

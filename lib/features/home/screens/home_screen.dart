@@ -91,7 +91,6 @@ class _HomeScreenState extends State<HomeScreen>
     final userProvider = context.watch<UserProvider>();
     final appStateProvider = context.watch<AppStateProvider>();
     final authProvider = context.watch<AppAuthProvider>();
-    final badgeProvider = context.watch<HomeBadgeProvider>();
 
     final currentUser = authProvider.user;
 
@@ -167,18 +166,16 @@ class _HomeScreenState extends State<HomeScreen>
         userProvider.workStats ?? {'hoursWorked': 0.0, 'daysWorked': 0.0};
     final weatherData = appStateProvider.weatherData;
 
-    // Wire badge provider once
+    // Wire badge provider once — use read so this never triggers a rebuild.
     if (!_badgeInitialized) {
       _badgeInitialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        badgeProvider.init(userId: currentUser.uid, userRole: userData.role);
+        context.read<HomeBadgeProvider>().init(
+              userId: currentUser.uid,
+              userRole: userData.role,
+            );
       });
     }
-
-    final shiftsBadge = badgeProvider.getBadgeCount('shifts');
-    final tasksBadge = badgeProvider.getBadgeCount('tasks');
-    final newsfeedBadge = badgeProvider.getBadgeCount('newsfeed');
-    final totalBadge = shiftsBadge + tasksBadge + newsfeedBadge;
 
     final dept = userData.licensedDepartments.isNotEmpty
         ? userData.licensedDepartments.first
@@ -192,37 +189,45 @@ class _HomeScreenState extends State<HomeScreen>
             Expanded(
               child: Stack(
                 children: [
-                  // ── Decorative background blobs ──────────────────────
-                  Positioned(
+                  // ── Decorative background blobs (static — isolated from rebuilds) ──
+                  const Positioned(
                     top: -50,
                     right: -70,
-                    child: Container(
-                      width: 260,
-                      height: 260,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            const Color(0xFF6D28D9).withValues(alpha: 0.10),
-                            Colors.transparent,
-                          ],
+                    child: RepaintBoundary(
+                      child: SizedBox(
+                        width: 260,
+                        height: 260,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                Color(0x1A6D28D9),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Positioned(
+                  const Positioned(
                     bottom: 80,
                     left: -60,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            const Color(0xFF4F46E5).withValues(alpha: 0.06),
-                            Colors.transparent,
-                          ],
+                    child: RepaintBoundary(
+                      child: SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                Color(0x0F4F46E5),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -237,24 +242,30 @@ class _HomeScreenState extends State<HomeScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // ── 1. TOP BAR (logo centred, RTL) ────────
-                          HomeTopBar(
-                            profilePictureUrl: userData.profilePicture,
-                            notificationBadgeCount: totalBadge,
-                            onProfileTap: () =>
-                                _navigateToProfile(currentUser.uid),
-                            onNotificationTap: () {
-                              Navigator.push(
+                          // ── 1. TOP BAR — only rebuilds when total badge count changes ──
+                          Selector<HomeBadgeProvider, int>(
+                            selector: (_, p) =>
+                                p.getBadgeCount('shifts') +
+                                p.getBadgeCount('tasks') +
+                                p.getBadgeCount('newsfeed'),
+                            builder: (_, totalBadge, _) => HomeTopBar(
+                              profilePictureUrl: userData.profilePicture,
+                              notificationBadgeCount: totalBadge,
+                              onProfileTap: () =>
+                                  _navigateToProfile(currentUser.uid),
+                              onNotificationTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const NotificationHistoryScreen()),
+                                );
+                              },
+                              onSettingsTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const NotificationHistoryScreen()),
-                              );
-                            },
-                            onSettingsTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const SettingsScreen()),
+                                    builder: (_) => const SettingsScreen()),
+                              ),
                             ),
                           ),
 
@@ -291,14 +302,17 @@ class _HomeScreenState extends State<HomeScreen>
 
                           const SizedBox(height: 16),
 
-                          // ── 4. HORIZONTAL ACTION STRIP ────────────
-                          _HorizontalActionStrip(
-                            items: _buildStripItems(
-                              userData.role,
-                              currentUser.uid,
-                              userData.fullName,
-                              userData.profilePicture,
-                              badgeProvider,
+                          // ── 4. HORIZONTAL ACTION STRIP — only rebuilds when badges change ──
+                          Consumer<HomeBadgeProvider>(
+                            builder: (_, badgeProvider, _) =>
+                                _HorizontalActionStrip(
+                              items: _buildStripItems(
+                                userData.role,
+                                currentUser.uid,
+                                userData.fullName,
+                                userData.profilePicture,
+                                badgeProvider,
+                              ),
                             ),
                           ),
 

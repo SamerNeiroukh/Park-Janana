@@ -270,6 +270,8 @@ class NewsfeedService {
             reportProgress(byteRatio * 0.85, 'מעלה ${i + 1}/$total...');
           } else if (state == TaskState.error) {
             throw Exception('Upload failed for file ${i + 1}');
+          } else if (state == TaskState.canceled) {
+            throw Exception('Upload was canceled for file ${i + 1}');
           } else if (state == TaskState.success) {
             break;
           }

@@ -42,13 +42,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _initializePlayer();
   }
 
-  Future<void> _initializePlayer() async {
+  Future<void> _initializePlayer({int attempt = 1}) async {
     try {
       _videoPlayerController = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl),
       );
 
-      await _videoPlayerController.initialize();
+      await _videoPlayerController.initialize().timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          throw Exception('timed out');
+        },
+      );
 
       // Prefer the caller-supplied aspect ratio (from the upload thumbnail,
       // which has correct orientation) over the controller's reported value,
@@ -87,6 +92,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
     } catch (e) {
       debugPrint('Error initializing video player: $e');
+      final isTimeout = e.toString().contains('-1001') ||
+          e.toString().toLowerCase().contains('timed out');
+      if (isTimeout && attempt < 3) {
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) _initializePlayer(attempt: attempt + 1);
+        return;
+      }
       if (mounted) {
         setState(() {
           _hasError = true;

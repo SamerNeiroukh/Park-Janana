@@ -104,6 +104,38 @@ class ClockService {
     }
   }
 
+  /// Manager-side: force clock out any worker by userId.
+  Future<void> clockOutWorker(String userId) async {
+    final now = DateTime.now();
+    final docId = _getDocId(userId, now);
+    final docRef = _firestore.collection(collectionName).doc(docId);
+    final snapshot = await docRef.get();
+
+    if (!snapshot.exists) return;
+    final data = snapshot.data();
+    if (data == null || data['sessions'] == null) return;
+
+    try {
+      final model = AttendanceModel.fromMap(data, docId);
+      final updatedSessions = [...model.sessions];
+      if (updatedSessions.isEmpty) return;
+
+      final last = updatedSessions.last;
+      if (last.clockIn != last.clockOut) return; // already clocked out
+
+      final newRecord = AttendanceRecord(clockIn: last.clockIn, clockOut: now);
+      updatedSessions.removeLast();
+      updatedSessions.add(newRecord);
+
+      await docRef.update({
+        'sessions': updatedSessions.map((r) => r.toMap()).toList(),
+      });
+    } catch (e) {
+      debugPrint('Error clocking out worker $userId: $e');
+      rethrow;
+    }
+  }
+
   Future<Map<String, double>> getMonthlyWorkStats(String userId) async {
   final now = DateTime.now();
   final docId = _getDocId(userId, now);

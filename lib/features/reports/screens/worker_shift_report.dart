@@ -30,6 +30,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
   final FirebaseService _firebaseService = FirebaseService();
   late DateTime _selectedMonth;
   bool _isLoading = true;
+  bool _isExporting = false;
   List<ShiftModel> _shifts = [];
   Map<String, String> _uidToName = {};
 
@@ -107,17 +108,22 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
     _fetchShifts();
   }
 
-  void _exportPdf() async {
-    if (_shifts.isEmpty) return;
-    await PdfExportService.exportShiftReportPdf(
-      context: context,
-      userName: widget.fullName,
-      profileUrl: widget.profilePicture,
-      shifts: _shifts,
-      month: _selectedMonth,
-      userId: widget.uid,
-      uidToNameMap: _uidToName,
-    );
+  Future<void> _exportPdf() async {
+    if (_shifts.isEmpty || _isExporting) return;
+    setState(() => _isExporting = true);
+    try {
+      await PdfExportService.exportShiftReportPdf(
+        context: context,
+        userName: widget.fullName,
+        profileUrl: widget.profilePicture,
+        shifts: _shifts,
+        month: _selectedMonth,
+        userId: widget.uid,
+        uidToNameMap: _uidToName,
+      );
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   // Get decision stats
@@ -696,18 +702,26 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             borderRadius: BorderRadius.circular(TaskTheme.radiusM),
             child: InkWell(
               borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-              onTap: _exportPdf,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
+              onTap: _isExporting ? null : _exportPdf,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.picture_as_pdf_rounded,
-                        color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                    if (_isExporting)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    else
+                      const Icon(Icons.picture_as_pdf_rounded,
+                          color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'ייצוא PDF',
-                      style: TextStyle(
+                      _isExporting ? 'מייצא...' : 'ייצוא PDF',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,

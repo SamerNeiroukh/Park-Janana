@@ -119,12 +119,25 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
   /// Returns true if [aStart, aEnd] overlaps with [bStart, bEnd] (HH:mm strings).
   bool _timesOverlap(String aStart, String aEnd, String bStart, String bEnd) {
-    int toMinutes(String t) {
-      final parts = t.split(':');
-      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+    int? toMinutes(String t) {
+      try {
+        final parts = t.split(':');
+        if (parts.length != 2) return null;
+        final h = int.parse(parts[0]);
+        final m = int.parse(parts[1]);
+        if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+        return h * 60 + m;
+      } catch (_) {
+        return null;
+      }
     }
-    return toMinutes(aStart) < toMinutes(bEnd) &&
-        toMinutes(bStart) < toMinutes(aEnd);
+
+    final aS = toMinutes(aStart);
+    final aE = toMinutes(aEnd);
+    final bS = toMinutes(bStart);
+    final bE = toMinutes(bEnd);
+    if (aS == null || aE == null || bS == null || bE == null) return false;
+    return aS < bE && bS < aE;
   }
 
   Future<bool> _hasConflict() async {
@@ -133,6 +146,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
         .collection(AppConstants.shiftsCollection)
         .where('date', isEqualTo: widget.shift.date)
         .where('assignedWorkers', arrayContains: uid)
+        .limit(10) // A worker can't have more than a handful of shifts per day.
         .get();
 
     for (final doc in snap.docs) {
@@ -156,6 +170,24 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       if (_hasRequested) {
         await widget.shiftService
             .cancelShiftRequest(widget.shift.id, widget.currentUser.uid);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(children: [
+                Icon(Icons.cancel_outlined, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text('הבקשה למשמרת בוטלה',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+              ]),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.all(16),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
         // Check for time conflicts before requesting
         final conflict = await _hasConflict();
@@ -424,46 +456,52 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       );
     }
 
-    return Material(
-      color: _hasRequested
-          ? Colors.red.shade50
-          : AppColors.success.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+    return Semantics(
+      button: true,
+      label: _hasRequested ? 'בטל בקשה למשמרת' : 'הצטרף למשמרת',
+      child: Material(
+        color: _hasRequested
+            ? Colors.red.shade50
+            : AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        onTap: _isLoading ? null : _toggleShiftRequest,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: _isLoading
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: _hasRequested ? Colors.red : AppColors.success,
-                  ),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _hasRequested ? 'ביטול' : 'הצטרף',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            _hasRequested ? Colors.red.shade600 : AppColors.success,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: _isLoading ? null : _toggleShiftRequest,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: _isLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: _hasRequested ? Colors.red : AppColors.success,
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _hasRequested ? 'ביטול' : 'הצטרף',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _hasRequested
+                              ? Colors.red.shade600
+                              : AppColors.success,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Icon(
-                      _hasRequested ? Icons.close_rounded : Icons.add_rounded,
-                      size: 18,
-                      color:
-                          _hasRequested ? Colors.red.shade600 : AppColors.success,
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 6),
+                      Icon(
+                        _hasRequested ? Icons.close_rounded : Icons.add_rounded,
+                        size: 18,
+                        color: _hasRequested
+                            ? Colors.red.shade600
+                            : AppColors.success,
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -577,25 +615,50 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
   }
 
   Future<void> _fetchAssignedWorkers() async {
-    final List<UserModel> workers = [];
-    for (String workerId in widget.shift.assignedWorkers) {
+    final List<UserModel> cachedWorkers = [];
+    final List<String> uncachedIds = [];
+
+    for (final workerId in widget.shift.assignedWorkers) {
       if (_workerCache.containsKey(workerId)) {
-        workers.add(_workerCache[workerId]!);
+        cachedWorkers.add(_workerCache[workerId]!);
       } else {
-        try {
-          final List<UserModel> fetched =
-              await widget.shiftService.fetchWorkerDetails([workerId]);
-          if (fetched.isEmpty) continue;
-          final UserModel worker = fetched.first;
-          _workerCache[workerId] = worker;
-          workers.add(worker);
-        } catch (_) {}
+        uncachedIds.add(workerId);
+      }
+    }
+
+    final List<UserModel> fetchedWorkers = [];
+    if (uncachedIds.isNotEmpty) {
+      final results = await Future.wait(
+        uncachedIds.map((id) async {
+          try {
+            return await widget.shiftService.fetchWorkerDetails([id]);
+          } catch (e) {
+            debugPrint('Failed to fetch worker $id: $e');
+            return <UserModel>[];
+          }
+        }),
+      );
+      // Evict oldest entries if cache would exceed 200 slots.
+      const kCacheLimit = 200;
+      final overflow = (_workerCache.length + uncachedIds.length) - kCacheLimit;
+      if (overflow > 0) {
+        final toRemove = _workerCache.keys.take(overflow).toList();
+        for (final k in toRemove) {
+          _workerCache.remove(k);
+        }
+      }
+      for (int i = 0; i < uncachedIds.length; i++) {
+        final fetched = results[i];
+        if (fetched.isNotEmpty) {
+          _workerCache[uncachedIds[i]] = fetched.first;
+          fetchedWorkers.add(fetched.first);
+        }
       }
     }
 
     if (mounted) {
       setState(() {
-        assignedWorkers = workers;
+        assignedWorkers = [...cachedWorkers, ...fetchedWorkers];
         isLoadingWorkers = false;
       });
     }

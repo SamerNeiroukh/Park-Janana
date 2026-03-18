@@ -551,6 +551,25 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
 
     if (result ?? false) {
       await _provider.deleteTask(task.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(children: [
+              const Icon(Icons.delete_outline_rounded,
+                  color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Text('המשימה "${task.title}" נמחקה',
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+            ]),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
       return true;
     }
     return false;

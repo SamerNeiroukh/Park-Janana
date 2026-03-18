@@ -130,6 +130,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     });
   }
 
+
   void _cancelPendingAction(String workerId) {
     setState(() {
       _pendingApprovals.remove(workerId);

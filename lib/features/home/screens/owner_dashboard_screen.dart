@@ -103,6 +103,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   }
 
   Future<void> _loadKpis() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _error = null;
@@ -283,6 +284,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               ))
           .toList();
 
+      if (!mounted) return;
       setState(() {
         _kpi = _KpiData(
           workersCount: workersSnap.docs.length,
@@ -307,6 +309,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       });
     } catch (e) {
       debugPrint('OwnerDashboard load error: $e');
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
