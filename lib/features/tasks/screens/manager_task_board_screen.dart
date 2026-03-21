@@ -497,22 +497,105 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   }
 
   Widget _buildApproveButton(TaskModel task, TaskBoardProvider provider) {
-    final workers = provider.pendingReviewWorkers(task);
-    return SizedBox(
-      width: double.infinity,
-      child: TextButton(
-        onPressed: () => _approveAllPendingReview(task, workers, provider),
-        style: TextButton.styleFrom(
-          backgroundColor: TaskTheme.done,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(TaskTheme.radiusM)),
-          textStyle:
-              const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+    final workerIds = provider.pendingReviewWorkers(task);
+    final names = workerIds
+        .map((id) => provider.workerCache[id]?.fullName ?? id)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Who is waiting for approval
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.hourglass_top_rounded,
+                      size: 13, color: Color(0xFFB45309)),
+                  SizedBox(width: 5),
+                  Text(
+                    'ממתינים לאישור:',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFB45309),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: names
+                    .map((name) => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFB45309),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ],
+          ),
         ),
-        child: const Text('אשר'),
-      ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: () =>
+                    _approveAllPendingReview(task, workerIds, provider),
+                style: TextButton.styleFrom(
+                  backgroundColor: TaskTheme.done,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(TaskTheme.radiusM)),
+                  textStyle: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+                child: const Text('אשר'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextButton(
+                onPressed: () =>
+                    _rejectAllPendingReview(task, workerIds, provider),
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(TaskTheme.radiusM)),
+                  textStyle: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+                child: const Text('דחה'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -530,6 +613,29 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
         SnackBar(
           content: const Text('המשימה אושרה בהצלחה'),
           backgroundColor: TaskTheme.done,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    }
+  }
+
+  Future<void> _rejectAllPendingReview(
+    TaskModel task,
+    List<String> workerIds,
+    TaskBoardProvider provider,
+  ) async {
+    if (_uid == null) return;
+    for (final workerId in workerIds) {
+      await provider.rejectWorker(task.id, workerId, _uid!);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('המשימה הוחזרה לביצוע'),
+          backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -808,9 +914,12 @@ class _MyTasksTabState extends State<_MyTasksTab> {
       TaskModel task, TaskTimelineProvider provider, bool showActions) {
     final workerStatus = task.workerStatusFor(widget.uid);
 
-    // Show action button on every non-done task, regardless of section.
-    final Widget? actionWidget =
-        workerStatus != 'done' ? _buildCompactAction(task, workerStatus, provider) : null;
+    Widget? actionWidget;
+    if (workerStatus == 'pending_review') {
+      actionWidget = _buildPendingReviewBanner();
+    } else if (workerStatus != 'done') {
+      actionWidget = _buildCompactAction(task, workerStatus, provider);
+    }
 
     return TaskCard(
       task: task,
@@ -823,17 +932,44 @@ class _MyTasksTabState extends State<_MyTasksTab> {
     );
   }
 
+  Widget _buildPendingReviewBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(TaskTheme.radiusM),
+        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.hourglass_top_rounded, size: 18, color: Color(0xFFF59E0B)),
+          SizedBox(width: 8),
+          Text(
+            'ממתין לאישור מנהל',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFB45309),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Full-width gradient action button inside the task card.
   Widget _buildCompactAction(
       TaskModel task, String workerStatus, TaskTimelineProvider provider) {
     final isStart = workerStatus == 'pending';
     final Color fromColor =
-        isStart ? const Color(0xFF6366F1) : const Color(0xFF059669);
+        isStart ? const Color(0xFF6366F1) : const Color(0xFFF59E0B);
     final Color toColor =
-        isStart ? const Color(0xFF818CF8) : const Color(0xFF34D399);
-    final String label = isStart ? 'התחל משימה' : 'סיים משימה';
+        isStart ? const Color(0xFF818CF8) : const Color(0xFFFBBF24);
+    final String label = isStart ? 'התחל משימה' : 'שלח לאישור מנהל';
     final IconData icon =
-        isStart ? Icons.play_arrow_rounded : Icons.check_circle_rounded;
+        isStart ? Icons.play_arrow_rounded : Icons.send_rounded;
 
     return Container(
       width: double.infinity,
@@ -858,8 +994,8 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
           splashColor: Colors.white.withValues(alpha: 0.15),
-          onTap: () => provider.updateStatus(
-              task.id, isStart ? 'in_progress' : 'done'),
+          onTap: provider.isUpdatingStatus ? null : () => provider.updateStatus(
+              task.id, isStart ? 'in_progress' : 'pending_review'),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(

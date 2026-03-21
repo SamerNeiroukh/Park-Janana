@@ -188,7 +188,7 @@ class _TaskCardState extends State<TaskCard>
                     if (widget.assignedWorkers.isNotEmpty)
                       WorkerAvatarStack(workers: widget.assignedWorkers),
                     const Spacer(),
-                    TaskDeadlineText(dueDate: task.dueDate.toDate()),
+                    TaskDeadlineText(dueDate: task.dueDate.toDate(), taskStatus: task.status),
                   ],
                 ),
 
@@ -245,6 +245,7 @@ class _TaskCardState extends State<TaskCard>
               dueDate: task.dueDate.toDate(),
               showIcon: false,
               fontSize: 11,
+              taskStatus: task.status,
             ),
           ],
         ),

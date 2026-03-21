@@ -12,9 +12,11 @@ class TaskTimelineProvider extends ChangeNotifier {
   StreamSubscription? _subscription;
   List<TaskModel> _allTasks = [];
   bool _isLoading = true;
+  bool _isUpdatingStatus = false;
   String? _userId;
 
   bool get isLoading => _isLoading;
+  bool get isUpdatingStatus => _isUpdatingStatus;
 
   // pending_review is treated as active (worker is waiting for manager approval)
   bool _isActive(TaskModel t) => _workerStatus(t) != 'done';
@@ -100,8 +102,15 @@ class TaskTimelineProvider extends ChangeNotifier {
   }
 
   Future<void> updateStatus(String taskId, String newStatus) async {
-    if (_userId == null) return;
-    await _taskService.updateWorkerStatus(taskId, _userId!, newStatus);
+    if (_userId == null || _isUpdatingStatus) return;
+    _isUpdatingStatus = true;
+    notifyListeners();
+    try {
+      await _taskService.updateWorkerStatus(taskId, _userId!, newStatus);
+    } finally {
+      _isUpdatingStatus = false;
+      notifyListeners();
+    }
   }
 
   /// Schedule a 24-hour-before reminder for every upcoming task that is not

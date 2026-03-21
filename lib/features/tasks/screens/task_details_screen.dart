@@ -37,6 +37,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   List<UserModel> _workers = [];
   final Map<String, String> _userNameCache = {};
   bool _isSubmitting = false;
+  bool _isUpdatingStatus = false;
 
   String? get _currentUid => context.read<AppAuthProvider>().uid;
 
@@ -472,13 +473,20 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
               color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              TaskTheme.statusLabel(status),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: statusColor,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(TaskTheme.statusIcon(status), size: 11, color: statusColor),
+                const SizedBox(width: 4),
+                Text(
+                  TaskTheme.statusLabel(status),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -741,7 +749,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
-          onTap: () => _updateWorkerStatus(nextStatus),
+          onTap: _isUpdatingStatus ? null : () => _updateWorkerStatus(nextStatus),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
             child: Row(
@@ -771,9 +779,14 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   }
 
   Future<void> _updateWorkerStatus(String newStatus) async {
-    if (_currentUid == null) return;
-    await _taskService.updateWorkerStatus(_task.id, _currentUid!, newStatus);
-    await _fetchData();
+    if (_currentUid == null || _isUpdatingStatus) return;
+    setState(() => _isUpdatingStatus = true);
+    try {
+      await _taskService.updateWorkerStatus(_task.id, _currentUid!, newStatus);
+      await _fetchData();
+    } finally {
+      if (mounted) setState(() => _isUpdatingStatus = false);
+    }
   }
 
   Future<void> _addComment() async {

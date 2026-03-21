@@ -238,6 +238,7 @@ class NotificationService {
         if (entityId != null) _pushShiftDetails(navigator, entityId, initialTab: 2);
       case 'task_assigned':
       case 'task_approved':
+      case 'task_rejected':
         if (entityId != null) _pushTaskDetails(navigator, entityId);
       case 'task_review_requested':
         if (entityId != null) _pushManagerBoardHighlight(navigator, entityId);

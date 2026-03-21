@@ -437,6 +437,19 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
         )
       );
     }
+
+    if (nowStatus === "in_progress" && nowEntry.rejectedBy && !prevEntry.rejectedBy) {
+      notifications.push(
+        notifyUser(
+          uid,
+          {
+            title: "המשימה הוחזרה לביצוע 🔄",
+            body: `"${taskTitle}" לא אושרה על ידי המנהל - יש להמשיך בביצוע`,
+          },
+          { type: "task_rejected", entityId: taskId, entityType: "task", taskId }
+        )
+      );
+    }
   }
 
   await Promise.all(notifications);

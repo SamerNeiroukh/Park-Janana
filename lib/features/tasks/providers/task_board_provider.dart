@@ -132,6 +132,11 @@ class TaskBoardProvider extends ChangeNotifier {
     await _taskService.approveWorkerTask(taskId, workerId, managerId);
   }
 
+  Future<void> rejectWorker(
+      String taskId, String workerId, String managerId) async {
+    await _taskService.rejectWorkerTask(taskId, workerId, managerId);
+  }
+
   Future<void> deleteTask(String taskId) async {
     await _taskService.deleteTask(taskId);
   }

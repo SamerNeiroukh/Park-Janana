@@ -323,6 +323,7 @@ class _NotificationHistoryScreenState
         await _openShift(item.entityId, initialTab: 2);
       case 'task_assigned':
       case 'task_approved':
+      case 'task_rejected':
         await _openTask(item.entityId);
       case 'task_review_requested':
         _openManagerBoardHighlight(item.entityId);

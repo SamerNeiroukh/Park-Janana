@@ -357,7 +357,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(TaskTheme.radiusM),
           splashColor: Colors.white.withValues(alpha: 0.15),
-          onTap: () => provider.updateStatus(task.id, nextStatus),
+          onTap: provider.isUpdatingStatus ? null : () => provider.updateStatus(task.id, nextStatus),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 13),
             child: Row(

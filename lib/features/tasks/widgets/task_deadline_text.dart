@@ -6,12 +6,14 @@ class TaskDeadlineText extends StatelessWidget {
   final DateTime dueDate;
   final bool showIcon;
   final double fontSize;
+  final String? taskStatus;
 
   const TaskDeadlineText({
     super.key,
     required this.dueDate,
     this.showIcon = true,
     this.fontSize = 12,
+    this.taskStatus,
   });
 
   @override
@@ -20,10 +22,13 @@ class TaskDeadlineText extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final due = DateTime(dueDate.year, dueDate.month, dueDate.day);
     final diff = due.difference(today).inDays;
+    final isDone = taskStatus == 'done';
 
     String text;
     Color color;
     IconData icon;
+
+    if (diff < 0 && isDone) return const SizedBox.shrink();
 
     if (diff < 0) {
       text = 'באיחור ${diff.abs()} ${diff.abs() == 1 ? "יום" : "ימים"}';
@@ -31,7 +36,7 @@ class TaskDeadlineText extends StatelessWidget {
       icon = Icons.warning_amber_rounded;
     } else if (diff == 0) {
       text = 'היום, ${DateFormat('HH:mm').format(dueDate)}';
-      color = dueDate.isAfter(now) ? TaskTheme.pending : TaskTheme.overdue;
+      color = (!isDone && dueDate.isBefore(now)) ? TaskTheme.overdue : TaskTheme.pending;
       icon = Icons.today_rounded;
     } else if (diff == 1) {
       text = 'מחר, ${DateFormat('HH:mm').format(dueDate)}';

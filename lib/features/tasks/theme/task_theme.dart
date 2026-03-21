@@ -35,10 +35,12 @@ class TaskTheme {
     switch (status) {
       case 'in_progress':
         return inProgress;
+      case 'pending_review':
+        return const Color(0xFFF59E0B); // Amber — awaiting approval
       case 'done':
         return done;
       default:
-        return pending;
+        return const Color(0xFF94A3B8); // Slate — not started
     }
   }
 
@@ -46,10 +48,12 @@ class TaskTheme {
     switch (status) {
       case 'in_progress':
         return inProgressBg;
+      case 'pending_review':
+        return pendingBg;
       case 'done':
         return doneBg;
       default:
-        return pendingBg;
+        return const Color(0xFFF1F5F9); // Slate bg — not started
     }
   }
 
@@ -57,10 +61,12 @@ class TaskTheme {
     switch (status) {
       case 'in_progress':
         return 'בביצוע';
+      case 'pending_review':
+        return 'ממתין לאישור';
       case 'done':
         return 'הושלם';
       default:
-        return 'ממתין';
+        return 'טרם התחיל';
     }
   }
 
@@ -68,6 +74,8 @@ class TaskTheme {
     switch (status) {
       case 'in_progress':
         return Icons.play_circle_outline_rounded;
+      case 'pending_review':
+        return Icons.hourglass_top_rounded;
       case 'done':
         return Icons.check_circle_outline_rounded;
       default:

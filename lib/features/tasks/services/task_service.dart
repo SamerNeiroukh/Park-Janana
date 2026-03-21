@@ -263,6 +263,63 @@ class TaskService {
     });
   }
 
+  /// Called by the task creator (manager) to reject a worker's submitted work.
+  /// Moves that worker from [pending_review] → [in_progress] so they can
+  /// revise and resubmit.
+  Future<void> rejectWorkerTask(
+      String taskId, String workerId, String managerId) async {
+    final taskRef = _firestore.collection(_collection).doc(taskId);
+
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(taskRef);
+      if (!snapshot.exists) return;
+
+      final data = snapshot.data()!;
+      final now = Timestamp.now();
+
+      final workerProgress =
+          Map<String, dynamic>.from(data['workerProgress'] ?? {});
+      final progressEntry = Map<String, dynamic>.from(
+          workerProgress[workerId] ?? {'status': 'pending_review'});
+
+      progressEntry['status'] = 'in_progress';
+      progressEntry['rejectedAt'] = now;
+      progressEntry['rejectedBy'] = managerId;
+      // Clear the pending review timestamp so a fresh submission is tracked
+      progressEntry['submittedForReviewAt'] = null;
+
+      workerProgress[workerId] = progressEntry;
+
+      final allStatuses = workerProgress.values
+          .map((e) => (e is Map ? (e as Map<String, dynamic>)['status'] as String? : null) ?? 'pending')
+          .toList();
+
+      String overallStatus;
+      if (allStatuses.every((s) => s == 'done')) {
+        overallStatus = 'done';
+      } else if (allStatuses.any(
+          (s) => s == 'in_progress' || s == 'done' || s == 'pending_review')) {
+        overallStatus = 'in_progress';
+      } else {
+        overallStatus = 'pending';
+      }
+
+      transaction.update(taskRef, {
+        'workerProgress.$workerId': progressEntry,
+        'status': overallStatus,
+        'updatedAt': now,
+        'activityLog': FieldValue.arrayUnion([
+          {
+            'action': 'worker_rejected',
+            'by': managerId,
+            'timestamp': now,
+            'details': 'המנהל לא אישר את סיום המשימה לעובד - המשימה חזרה לביצוע',
+          }
+        ]),
+      });
+    });
+  }
+
   // Get task by ID
   Future<TaskModel?> getTaskById(String taskId) async {
     final doc = await _firestore.collection(_collection).doc(taskId).get();

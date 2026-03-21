@@ -99,13 +99,11 @@ class TaskModel {
   }
 
   static Map<String, Map<String, dynamic>> _parseWorkerProgress(dynamic raw) {
-    if (raw is Map<String, dynamic>) {
-      return raw.map((key, value) => MapEntry(
-        key,
-        value is Map ? Map<String, dynamic>.from(value) : {},
-      ));
-    }
-    return {};
+    if (raw == null || raw is! Map) return {};
+    return Map<String, dynamic>.from(raw).map((key, value) => MapEntry(
+      key,
+      value is Map ? Map<String, dynamic>.from(value) : {},
+    ));
   }
 
   // Helpers
