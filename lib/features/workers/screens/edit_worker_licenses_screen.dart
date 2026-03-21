@@ -158,8 +158,11 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                               children: [
                                 _buildHeader(),
                                 const SizedBox(height: 20),
-                                _buildRoleSection(),
-                                const SizedBox(height: 16),
+                                // Managers can only manage certificates, not roles.
+                                if (widget.currentUserRole != 'manager') ...[
+                                  _buildRoleSection(),
+                                  const SizedBox(height: 16),
+                                ],
                                 _buildDepartmentsSection(),
                                 const SizedBox(height: 8),
                               ],
@@ -293,20 +296,23 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                   label: 'מנהל',
                   icon: Icons.supervisor_account_rounded,
                   color: const Color(0xFF6366F1),
-                  lockedForNonOwner: widget.currentUserRole != 'owner' && widget.currentUserRole != 'co_owner',
+                  lockedForNonOwner: widget.currentUserRole != 'owner' &&
+                      widget.currentUserRole != 'co_owner',
                 ),
               ),
+              if (widget.currentUserRole == 'owner') ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildRoleTile(
+                    role: 'co_owner',
+                    label: 'בעלים משותף',
+                    icon: Icons.star_rounded,
+                    color: const Color(0xFFF59E0B),
+                  ),
+                ),
+              ],
             ],
           ),
-          if (widget.currentUserRole == 'owner') ...[
-            const SizedBox(height: 12),
-            _buildRoleTile(
-              role: 'co_owner',
-              label: 'בעלים משותף',
-              icon: Icons.star_rounded,
-              color: const Color(0xFFF59E0B),
-            ),
-          ],
           if (widget.currentUserRole != 'owner' && widget.currentUserRole != 'co_owner') ...[
             const SizedBox(height: 10),
             const Row(

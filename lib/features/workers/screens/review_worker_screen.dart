@@ -36,9 +36,17 @@ class ReviewWorkerScreen extends StatelessWidget {
     final String uid = data['uid'] ?? '';
     final String role = data['role'] ?? '';
 
-    // Managers cannot modify other managers — only owners can.
-    final bool canManage =
-        currentUserRole == 'owner' || currentUserRole == 'co_owner' || role != 'manager';
+    // Role hierarchy:
+    // - Owner can manage anyone.
+    // - Co-owner can manage managers and workers only (not owner, not other co-owners).
+    // - Manager can manage certificates for workers only (not roles, not unapproval).
+    final bool canManageRole = currentUserRole == 'owner' ||
+        (currentUserRole == 'co_owner' &&
+            role != 'owner' &&
+            role != 'co_owner');
+
+    final bool canManageCertificates = canManageRole ||
+        (currentUserRole == 'manager' && role == 'worker');
 
     final worker = UserModel(
       uid: uid,
@@ -143,7 +151,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                     ]),
                     const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🛠 ניהול משא", [
-                      if (canManage) ...[
+                      if (canManageCertificates) ...[
                         _buildFullWidthButton(
                           context,
                           label: "ניהול הרשאות ותפקיד",
@@ -162,14 +170,16 @@ class ReviewWorkerScreen extends StatelessWidget {
                             );
                           },
                         ),
-                        const SizedBox(height: AppDimensions.spacingL),
-                        _buildFullWidthButton(
-                          context,
-                          label: "בטל אישור עובד",
-                          icon: Icons.person_off_rounded,
-                          color: AppColors.redLight,
-                          onPressed: () => _unapproveWorker(context, uid),
-                        ),
+                        if (canManageRole) ...[
+                          const SizedBox(height: AppDimensions.spacingL),
+                          _buildFullWidthButton(
+                            context,
+                            label: "בטל אישור עובד",
+                            icon: Icons.person_off_rounded,
+                            color: AppColors.redLight,
+                            onPressed: () => _unapproveWorker(context, uid),
+                          ),
+                        ],
                       ] else
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -180,7 +190,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                                   size: 16, color: Colors.grey.shade400),
                               const SizedBox(width: 8),
                               Text(
-                                'אין הרשאה לניהול מנהלים אחרים',
+                                'אין הרשאה לניהול משתמש זה',
                                 style: TextStyle(
                                     color: Colors.grey.shade500, fontSize: 13),
                               ),
