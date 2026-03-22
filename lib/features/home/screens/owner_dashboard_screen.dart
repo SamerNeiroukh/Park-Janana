@@ -1058,12 +1058,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                           .limit(1)
                           .get();
                       if (snap.docs.isNotEmpty && mounted) {
+                        final currentUid = context.read<UserProvider>().currentUser?.uid ?? '';
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => ReviewWorkerScreen(
                               userData: snap.docs.first,
                               currentUserRole: 'owner',
+                              currentUserId: currentUid,
                             ),
                           ),
                         );

@@ -9,12 +9,14 @@ class EditWorkerLicensesScreen extends StatefulWidget {
   final String uid;
   final String fullName;
   final String currentUserRole;
+  final String currentUserId;
 
   const EditWorkerLicensesScreen({
     super.key,
     required this.uid,
     required this.fullName,
     this.currentUserRole = 'manager',
+    this.currentUserId = '',
   });
 
   @override
@@ -159,7 +161,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                                 _buildHeader(),
                                 const SizedBox(height: 20),
                                 // Managers can only manage certificates, not roles.
-                                if (widget.currentUserRole != 'manager') ...[
+                                // Owners cannot demote themselves.
+                                if (widget.currentUserRole != 'manager' &&
+                                    widget.currentUserId != widget.uid) ...[
                                   _buildRoleSection(),
                                   const SizedBox(height: 16),
                                 ],

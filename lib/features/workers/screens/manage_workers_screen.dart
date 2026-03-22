@@ -442,15 +442,14 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                     // Tap → ReviewWorkerScreen
                     InkWell(
                       onTap: () {
-                        final currentRole =
-                            context.read<UserProvider>().currentUser?.role ??
-                                'manager';
+                        final currentUser = context.read<UserProvider>().currentUser;
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => ReviewWorkerScreen(
                               userData: user,
-                              currentUserRole: currentRole,
+                              currentUserRole: currentUser?.role ?? 'manager',
+                              currentUserId: currentUser?.uid ?? '',
                             ),
                           ),
                         );

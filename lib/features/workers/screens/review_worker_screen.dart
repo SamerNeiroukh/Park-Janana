@@ -16,13 +16,16 @@ import 'package:park_janana/core/constants/app_constants.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
-  /// Role of the currently logged-in manager ('manager' | 'owner')
+  /// Role of the currently logged-in user ('manager' | 'co_owner' | 'owner')
   final String currentUserRole;
+  /// UID of the currently logged-in user (used to prevent self-demotion)
+  final String currentUserId;
 
   const ReviewWorkerScreen({
     super.key,
     required this.userData,
     this.currentUserRole = 'manager',
+    this.currentUserId = '',
   });
 
   @override
@@ -165,6 +168,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                                   uid: uid,
                                   fullName: fullName,
                                   currentUserRole: currentUserRole,
+                                  currentUserId: currentUserId,
                                 ),
                               ),
                             );
