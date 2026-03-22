@@ -21,6 +21,27 @@ class ProfileAvatar extends StatelessWidget {
     this.backgroundColor,
   });
 
+  /// Opens a full-screen viewer for [imageUrl].
+  /// Does nothing if [imageUrl] is null/empty/invalid.
+  static void showFullScreen(BuildContext context, String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty || !imageUrl.startsWith('http')) {
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        transitionDuration: const Duration(milliseconds: 260),
+        reverseTransitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (_, _, _) => _FullScreenPhotoPage(imageUrl: imageUrl),
+        transitionsBuilder: (_, anim, _, child) => FadeTransition(
+          opacity: anim,
+          child: child,
+        ),
+      ),
+    );
+  }
+
   static const String _defaultAsset = 'assets/images/default_profile.png';
 
   @override
@@ -74,6 +95,60 @@ class _ShimmerCircle extends StatelessWidget {
       child: CircleAvatar(
         radius: radius,
         backgroundColor: backgroundColor,
+      ),
+    );
+  }
+}
+
+class _FullScreenPhotoPage extends StatelessWidget {
+  final String imageUrl;
+  const _FullScreenPhotoPage({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    final topPad = MediaQuery.of(context).padding.top;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 4.0,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (_, _) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                  errorWidget: (_, _, _) => const Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.white54,
+                    size: 64,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: topPad + 8,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close_rounded,
+                      color: Colors.white, size: 22),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

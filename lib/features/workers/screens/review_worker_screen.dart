@@ -75,7 +75,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingXXL),
                 child: Column(
                   children: [
-                    _buildSpiritualProfile(data),
+                    _buildSpiritualProfile(context, data),
                     const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildSoftCard("🧾 פרטי העובד", [
                       _buildInfoRow(Icons.email_rounded, "אימייל", email),
@@ -213,24 +213,28 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpiritualProfile(Map<String, dynamic> data) {
+  Widget _buildSpiritualProfile(BuildContext context, Map<String, dynamic> data) {
     return Column(
       children: [
-        Container(
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: AppDimensions.shadowBlurS,
-                offset: AppDimensions.shadowOffsetS,
-              ),
-            ],
-          ),
-          child: ProfileAvatar(
-            imageUrl: data['profile_picture'],
-            radius: AppDimensions.avatarM,
-            backgroundColor: Colors.grey.shade300,
+        GestureDetector(
+          onTap: () => ProfileAvatar.showFullScreen(
+              context, data['profile_picture'] as String?),
+          child: Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: AppDimensions.shadowBlurS,
+                  offset: AppDimensions.shadowOffsetS,
+                ),
+              ],
+            ),
+            child: ProfileAvatar(
+              imageUrl: data['profile_picture'],
+              radius: AppDimensions.avatarM,
+              backgroundColor: Colors.grey.shade300,
+            ),
           ),
         ),
         const SizedBox(height: AppDimensions.spacingXL),

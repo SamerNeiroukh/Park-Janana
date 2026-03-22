@@ -441,15 +441,13 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       );
 
   Widget _buildAvatar(UserModel user) {
-    // Wrap entire avatar (photo + camera button) in one GestureDetector so
-    // tapping the photo OR the camera icon both open the image picker.
-    return GestureDetector(
-      onTap: _showImageOptions,
-      child: Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          // Gradient ring + white buffer + photo
-          Container(
+    return Stack(
+      alignment: Alignment.bottomLeft,
+      children: [
+        // Gradient ring + white buffer + photo — tap to view full screen
+        GestureDetector(
+          onTap: () => ProfileAvatar.showFullScreen(context, user.profilePicture),
+          child: Container(
             width: 122,
             height: 122,
             decoration: BoxDecoration(
@@ -467,7 +465,6 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 ),
               ],
             ),
-            // White buffer ring so the gradient ring is more visible
             padding: const EdgeInsets.all(3),
             child: Container(
               decoration: const BoxDecoration(
@@ -493,8 +490,11 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
             ),
           ),
-          // Camera edit button (visual; tap is handled by parent GestureDetector)
-          Container(
+        ),
+        // Camera button — tap to open image picker
+        GestureDetector(
+          onTap: _showImageOptions,
+          child: Container(
             width: 34,
             height: 34,
             decoration: BoxDecoration(
@@ -514,8 +514,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
             child: const Icon(Icons.camera_alt_rounded,
                 color: Colors.white, size: 16),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
