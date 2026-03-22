@@ -42,14 +42,21 @@ class AuthService {
         idNumber: idNumber,
       );
 
+      final fieldErrors = <String, String>{};
       if (validation['emailTaken'] ?? false) {
-        throw CustomException('כתובת האימייל כבר קיימת במערכת.');
+        fieldErrors['email'] = 'כתובת האימייל כבר קיימת במערכת.';
       }
       if (validation['phoneTaken'] ?? false) {
-        throw CustomException('מספר הטלפון כבר קיים במערכת.');
+        fieldErrors['phone'] = 'מספר הטלפון כבר קיים במערכת.';
       }
       if (validation['idTaken'] ?? false) {
-        throw CustomException('מספר תעודת הזהות כבר קיים במערכת.');
+        fieldErrors['id'] = 'מספר תעודת הזהות כבר קיים במערכת.';
+      }
+      if (fieldErrors.isNotEmpty) {
+        throw CustomException(
+          fieldErrors.values.first,
+          fieldErrors: fieldErrors,
+        );
       }
 
       // ✅ Upload default profile picture to Firebase Storage

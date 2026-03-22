@@ -78,11 +78,18 @@ class NewWorkerScreen extends StatelessWidget {
   }
 
   void _showRegistrationForm(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const RegistrationForm();
-      },
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, _, _) => const RegistrationForm(),
+        transitionsBuilder: (_, anim, _, child) => SlideTransition(
+          position: Tween(
+            begin: const Offset(0.0, 1.0),
+            end: Offset.zero,
+          ).chain(CurveTween(curve: Curves.easeOutCubic)).animate(anim),
+          child: child,
+        ),
+        transitionDuration: const Duration(milliseconds: 350),
+      ),
     );
   }
 }
