@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:async';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +17,13 @@ const _kSlate = Color(0xFF0F172A);
 class AttendanceCorrectionScreen extends StatefulWidget {
   final String userId;
   final String userName;
+  final DateTime? highlightClockIn;
 
   const AttendanceCorrectionScreen({
     super.key,
     required this.userId,
     required this.userName,
+    this.highlightClockIn,
   });
 
   @override
@@ -30,14 +33,17 @@ class AttendanceCorrectionScreen extends StatefulWidget {
 
 class _AttendanceCorrectionScreenState
     extends State<AttendanceCorrectionScreen> with TickerProviderStateMixin {
-  int _selectedYear = DateTime.now().year;
-  int _selectedMonth = DateTime.now().month; // 1–12
+  late int _selectedYear;
+  late int _selectedMonth;
 
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isDirty = false;
   List<AttendanceRecord> _sessions = [];
+  int _highlightedIndex = -1;
+  Timer? _highlightTimer;
 
+  final ScrollController _scrollCtrl = ScrollController();
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
 
@@ -48,6 +54,8 @@ class _AttendanceCorrectionScreenState
   @override
   void initState() {
     super.initState();
+    _selectedYear = widget.highlightClockIn?.year ?? DateTime.now().year;
+    _selectedMonth = widget.highlightClockIn?.month ?? DateTime.now().month;
     _fadeCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
@@ -58,7 +66,9 @@ class _AttendanceCorrectionScreenState
 
   @override
   void dispose() {
+    _highlightTimer?.cancel();
     _fadeCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -85,7 +95,32 @@ class _AttendanceCorrectionScreenState
     } finally {
       setState(() => _isLoading = false);
       _fadeCtrl.forward();
+      _maybeScrollToHighlight();
     }
+  }
+
+  void _maybeScrollToHighlight() {
+    if (widget.highlightClockIn == null) return;
+    final idx = _sessions.indexWhere(
+      (s) => s.clockIn.isAtSameMomentAs(widget.highlightClockIn!),
+    );
+    if (idx < 0) return;
+    setState(() => _highlightedIndex = idx);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        const tileHeight = 116.0;
+        const topPadding = 16.0;
+        _scrollCtrl.animateTo(
+          (topPadding + idx * tileHeight)
+              .clamp(0.0, _scrollCtrl.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+        );
+      }
+      _highlightTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _highlightedIndex = -1);
+      });
+    });
   }
 
   Future<void> _save() async {
@@ -726,6 +761,7 @@ class _AttendanceCorrectionScreenState
     }
 
     return ListView.builder(
+      controller: _scrollCtrl,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       physics: const BouncingScrollPhysics(),
       itemCount: _sessions.length,
@@ -745,6 +781,8 @@ class _AttendanceCorrectionScreenState
         ? DateTime.now().difference(s.clockIn).inHours.clamp(0, 16).toDouble()
         : s.hoursWorked;
 
+    final isHighlighted = index == _highlightedIndex;
+
     return Dismissible(
       key: ValueKey('${s.clockIn.millisecondsSinceEpoch}_$index'),
       direction: DismissDirection.startToEnd,
@@ -760,20 +798,27 @@ class _AttendanceCorrectionScreenState
             color: Colors.white, size: 28),
       ),
       onDismissed: (_) => _deleteSession(index),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isHighlighted
+              ? const Color(0xFFFFF7ED)
+              : Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: isMissedClockout
-              ? Border.all(color: const Color(0xFFF97316), width: 1.5)
-              : null,
+          border: isHighlighted
+              ? Border.all(color: const Color(0xFFF97316), width: 2)
+              : isMissedClockout
+                  ? Border.all(color: const Color(0xFFF97316), width: 1.5)
+                  : null,
           boxShadow: [
             BoxShadow(
-              color: isMissedClockout
-                  ? const Color(0xFFF97316).withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
+              color: isHighlighted
+                  ? const Color(0xFFF97316).withValues(alpha: 0.25)
+                  : isMissedClockout
+                      ? const Color(0xFFF97316).withValues(alpha: 0.12)
+                      : Colors.black.withValues(alpha: 0.05),
+              blurRadius: isHighlighted ? 20 : 12,
               offset: const Offset(0, 4),
             ),
           ],

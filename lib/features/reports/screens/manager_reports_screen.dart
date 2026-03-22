@@ -5,6 +5,7 @@ import 'package:park_janana/features/reports/screens/worker_shift_report.dart';
 import 'package:park_janana/features/reports/screens/workers_hours_report.dart';
 import 'package:park_janana/features/reports/screens/task_distribution_report.dart';
 import 'package:park_janana/features/reports/screens/shift_coverage_report.dart';
+import 'package:park_janana/features/reports/screens/missing_clockout_report.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
 
@@ -328,6 +329,18 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
               MaterialPageRoute(builder: (_) => const ShiftCoverageReport()),
             ),
           ),
+          const SizedBox(height: 14),
+          _buildCard(
+            index: 3,
+            icon: Icons.login_rounded,
+            title: 'יציאות חסרות',
+            description: 'עובדים שלא שכחו לצאת לפי חודש',
+            gradientColors: const [Color(0xFFEF4444), Color(0xFFDC2626)],
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MissingClockoutReport()),
+            ),
+          ),
         ],
       ),
     );
@@ -345,7 +358,7 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
       parent: _animController,
       curve: Interval(
         index * 0.15,
-        0.6 + index * 0.15,
+        (0.6 + index * 0.15).clamp(0.0, 1.0),
         curve: Curves.easeOutCubic,
       ),
     );

@@ -258,17 +258,22 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
               Expanded(child: _buildEmptyState())
             else
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      _buildStatRow(),
-                      const SizedBox(height: 16),
-                      _buildBarChart(),
-                      const SizedBox(height: 20),
-                      _buildSessionList(),
-                      const SizedBox(height: 80),
-                    ],
+                child: RefreshIndicator(
+                  color: TaskTheme.inProgress,
+                  onRefresh: _loadAttendance,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        _buildStatRow(),
+                        const SizedBox(height: 16),
+                        _buildBarChart(),
+                        const SizedBox(height: 20),
+                        _buildSessionList(),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
                   ),
                 ),
               ),

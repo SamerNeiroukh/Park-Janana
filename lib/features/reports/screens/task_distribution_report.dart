@@ -178,17 +178,22 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
               Expanded(child: _buildEmptyState())
             else
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      _buildStatRow(),
-                      const SizedBox(height: 16),
-                      _buildBarChart(),
-                      const SizedBox(height: 20),
-                      _buildWorkerList(),
-                      const SizedBox(height: 80),
-                    ],
+                child: RefreshIndicator(
+                  color: TaskTheme.pending,
+                  onRefresh: _loadSafe,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        _buildStatRow(),
+                        const SizedBox(height: 16),
+                        _buildBarChart(),
+                        const SizedBox(height: 20),
+                        _buildWorkerList(),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
                   ),
                 ),
               ),

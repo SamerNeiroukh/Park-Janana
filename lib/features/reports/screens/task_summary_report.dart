@@ -138,17 +138,22 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
               Expanded(child: _buildEmptyState())
             else
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      _buildStatRow(),
-                      const SizedBox(height: 16),
-                      _buildPieChart(),
-                      const SizedBox(height: 16),
-                      _buildTaskList(),
-                      const SizedBox(height: 80),
-                    ],
+                child: RefreshIndicator(
+                  color: TaskTheme.pending,
+                  onRefresh: _loadTasks,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        _buildStatRow(),
+                        const SizedBox(height: 16),
+                        _buildPieChart(),
+                        const SizedBox(height: 16),
+                        _buildTaskList(),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
                   ),
                 ),
               ),

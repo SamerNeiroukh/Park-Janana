@@ -172,17 +172,22 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
               Expanded(child: _buildEmptyState())
             else
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      _buildStatRow(),
-                      const SizedBox(height: 16),
-                      _buildBarChart(),
-                      const SizedBox(height: 20),
-                      _buildDeptList(),
-                      const SizedBox(height: 80),
-                    ],
+                child: RefreshIndicator(
+                  color: TaskTheme.done,
+                  onRefresh: _loadSafe,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        _buildStatRow(),
+                        const SizedBox(height: 16),
+                        _buildBarChart(),
+                        const SizedBox(height: 20),
+                        _buildDeptList(),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
                   ),
                 ),
               ),
