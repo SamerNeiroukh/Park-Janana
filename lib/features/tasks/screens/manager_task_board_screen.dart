@@ -32,6 +32,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   String? _uid;
   final GlobalKey _highlightedCardKey = GlobalKey();
   bool _scrolledToHighlight = false;
+  int _highlightColumnIndex = -1;
 
   @override
   void initState() {
@@ -359,25 +360,32 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           );
         }
 
-        if (widget.highlightTaskId != null && !_scrolledToHighlight) {
-          _scrolledToHighlight = true;
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _scrollToHighlight(provider),
-          );
-        }
-
         final columns = [
           provider.pendingTasks,
           provider.inProgressTasks,
           provider.doneTasks,
         ];
 
+        if (widget.highlightTaskId != null && !_scrolledToHighlight) {
+          _scrolledToHighlight = true;
+          // Compute which column owns the highlighted task before building.
+          for (int i = 0; i < columns.length; i++) {
+            if (columns[i].any((t) => t.id == widget.highlightTaskId)) {
+              _highlightColumnIndex = i;
+              break;
+            }
+          }
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _scrollToHighlight(provider),
+          );
+        }
+
         return PageView.builder(
           controller: _pageController,
           onPageChanged: (i) => setState(() => _currentPage = i),
           itemCount: 3,
           itemBuilder: (context, columnIndex) {
-            return _buildColumn(columns[columnIndex], provider);
+            return _buildColumn(columns[columnIndex], provider, columnIndex);
           },
         );
       },
@@ -418,7 +426,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
     }
   }
 
-  Widget _buildColumn(List<TaskModel> tasks, TaskBoardProvider provider) {
+  Widget _buildColumn(List<TaskModel> tasks, TaskBoardProvider provider, int columnIndex) {
     if (tasks.isEmpty) {
       return Center(
         child: Column(
@@ -453,8 +461,9 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
       itemBuilder: (context, index) {
         final task = tasks[index];
         final hasPendingReview = provider.hasPendingReview(task);
-        final isHighlighted =
-            widget.highlightTaskId != null && task.id == widget.highlightTaskId;
+        final isHighlighted = widget.highlightTaskId != null &&
+            task.id == widget.highlightTaskId &&
+            columnIndex == _highlightColumnIndex;
 
         final card = Dismissible(
           key: ValueKey(task.id),

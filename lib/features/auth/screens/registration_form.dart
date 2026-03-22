@@ -80,9 +80,7 @@ class _RegistrationFormState extends State<RegistrationForm>
 
     void blurListener(FocusNode node, String key) {
       node.addListener(() {
-        if (!node.hasFocus && _touched.contains(key) == false) {
-          // Only validate once the user has left the field at least once
-        }
+        if (!mounted) return;
         if (!node.hasFocus) _validateField(key);
       });
     }
@@ -116,6 +114,7 @@ class _RegistrationFormState extends State<RegistrationForm>
   // ── Validation ───────────────────────────────────────────────────────────────
 
   void _validateField(String key) {
+    if (!mounted) return;
     setState(() {
       _touched.add(key);
       _errors[key] = _getError(key);
