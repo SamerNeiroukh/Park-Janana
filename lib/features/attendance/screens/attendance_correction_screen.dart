@@ -86,6 +86,7 @@ class _AttendanceCorrectionScreenState
           .collection(AppConstants.attendanceCollection)
           .doc(_docId)
           .get();
+      if (!mounted) return;
       if (snap.exists && snap.data() != null) {
         final model = AttendanceModel.fromMap(snap.data()!, _docId);
         setState(() => _sessions = List.from(model.sessions));
@@ -93,9 +94,11 @@ class _AttendanceCorrectionScreenState
     } catch (e) {
       debugPrint('AttendanceCorrectionScreen load error: $e');
     } finally {
-      setState(() => _isLoading = false);
-      _fadeCtrl.forward();
-      _maybeScrollToHighlight();
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _fadeCtrl.forward();
+        _maybeScrollToHighlight();
+      }
     }
   }
 

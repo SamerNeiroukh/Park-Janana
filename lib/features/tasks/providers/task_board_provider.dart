@@ -18,8 +18,11 @@ class TaskBoardProvider extends ChangeNotifier {
   String? _departmentFilter;
   bool _isLoading = true;
 
-  // Memoised filtered list — recomputed only when tasks/search/filter change.
+  // Memoised filtered lists — recomputed only when tasks/search/filter change.
   List<TaskModel> _cachedFiltered = [];
+  List<TaskModel> _pendingTasks = [];
+  List<TaskModel> _inProgressTasks = [];
+  List<TaskModel> _doneTasks = [];
 
   void _recomputeFiltered() {
     var tasks = _allTasks;
@@ -35,6 +38,14 @@ class TaskBoardProvider extends ChangeNotifier {
           .toList();
     }
     _cachedFiltered = tasks;
+
+    // Pre-sort each column once so getters are O(1) reads.
+    _pendingTasks = tasks.where((t) => t.status == 'pending').toList()
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    _inProgressTasks = tasks.where((t) => t.status == 'in_progress').toList()
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    _doneTasks = tasks.where((t) => t.status == 'done').toList()
+      ..sort((a, b) => b.dueDate.compareTo(a.dueDate));
   }
 
   // Getters
@@ -43,17 +54,9 @@ class TaskBoardProvider extends ChangeNotifier {
   String? get departmentFilter => _departmentFilter;
   Map<String, UserModel> get workerCache => _workerCache;
 
-  List<TaskModel> get pendingTasks =>
-      _cachedFiltered.where((t) => t.status == 'pending').toList()
-        ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
-
-  List<TaskModel> get inProgressTasks =>
-      _cachedFiltered.where((t) => t.status == 'in_progress').toList()
-        ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
-
-  List<TaskModel> get doneTasks =>
-      _cachedFiltered.where((t) => t.status == 'done').toList()
-        ..sort((a, b) => b.dueDate.compareTo(a.dueDate));
+  List<TaskModel> get pendingTasks => _pendingTasks;
+  List<TaskModel> get inProgressTasks => _inProgressTasks;
+  List<TaskModel> get doneTasks => _doneTasks;
 
   int get totalCount => _cachedFiltered.length;
   int get overdueCount => _cachedFiltered.where((t) => t.isOverdue).length;

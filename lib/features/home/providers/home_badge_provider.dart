@@ -204,6 +204,7 @@ class HomeBadgeProvider extends ChangeNotifier {
     final stream = _firestore
         .collection(AppConstants.shiftsCollection)
         .where('createdAt', isGreaterThan: cutoff)
+        .limit(200)
         .snapshots();
 
     final sub = stream.listen((snapshot) {

@@ -290,9 +290,10 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
           return _buildEmptyState();
         }
 
-        final shifts = snapshot.data!.where((shift) {
-          return shift.date == DateFormat('dd/MM/yyyy').format(_selectedDay);
-        }).toList();
+        final selectedDateStr = DateFormat('dd/MM/yyyy').format(_selectedDay);
+        final shifts = snapshot.data!
+            .where((shift) => shift.date == selectedDateStr)
+            .toList();
 
         if (shifts.isEmpty) {
           return _buildEmptyState();
@@ -302,7 +303,10 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
           physics: const BouncingScrollPhysics(),
           itemCount: shifts.length,
-          itemBuilder: (context, index) => _buildShiftCard(shifts[index]),
+          itemBuilder: (context, index) => KeyedSubtree(
+            key: ValueKey(shifts[index].id),
+            child: _buildShiftCard(shifts[index]),
+          ),
         );
       },
     );

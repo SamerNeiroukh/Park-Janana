@@ -72,7 +72,7 @@ class NewWorkerScreen extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.35),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                        child: const Icon(Icons.arrow_forward_ios_rounded,
                             color: Colors.white, size: 18),
                       ),
                     ),

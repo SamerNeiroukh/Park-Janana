@@ -205,7 +205,7 @@ class HomeTopBar extends StatelessWidget {
 
 // ── Private sub-widget: notification bell ─────────────────────────────────
 
-class _NotificationBell extends StatelessWidget {
+class _NotificationBell extends StatefulWidget {
   // notificationBadgeCount kept for API compatibility but ignored —
   // the real unread count is streamed from Firestore below.
   final int notificationBadgeCount;
@@ -217,18 +217,32 @@ class _NotificationBell extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final uid = context.read<AppAuthProvider>().uid;
+  State<_NotificationBell> createState() => _NotificationBellState();
+}
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: uid == null
+class _NotificationBellState extends State<_NotificationBell> {
+  Stream<QuerySnapshot>? _stream;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_stream == null) {
+      final uid = context.read<AppAuthProvider>().uid;
+      _stream = uid == null
           ? const Stream.empty()
           : FirebaseFirestore.instance
               .collection(AppConstants.usersCollection)
               .doc(uid)
               .collection('notifications')
               .where('isRead', isEqualTo: false)
-              .snapshots(),
+              .snapshots();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _stream,
       builder: (context, snap) {
         final count = snap.data?.docs.length ?? 0;
         return Stack(
@@ -241,7 +255,7 @@ class _NotificationBell extends StatelessWidget {
                 size: 24,
               ),
               tooltip: 'התראות',
-              onPressed: onTap,
+              onPressed: widget.onTap,
             ),
             if (count > 0)
               Positioned(
