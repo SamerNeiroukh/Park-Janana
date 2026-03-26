@@ -49,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen>
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
   bool _badgeInitialized = false;
+  int _refreshKey = 0;
 
   @override
   void initState() {
@@ -75,6 +76,15 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     _fadeCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _onRefresh() async {
+    await Future.wait([
+      context.read<UserProvider>().loadCurrentUser(),
+      context.read<UserProvider>().loadWorkStats(),
+      context.read<AppStateProvider>().loadWeather(),
+    ]);
+    if (mounted) setState(() => _refreshKey++);
   }
 
   void _navigateToProfile(String uid) {
@@ -236,8 +246,14 @@ class _HomeScreenState extends State<HomeScreen>
                   // ── Scrollable content ───────────────────────────────
                   FadeTransition(
                     opacity: _fadeAnim,
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
+                    child: RefreshIndicator(
+                      onRefresh: _onRefresh,
+                      color: _kPrimary,
+                      displacement: 20,
+                      child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
                       padding: const EdgeInsets.only(bottom: 32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -291,6 +307,7 @@ class _HomeScreenState extends State<HomeScreen>
                               userData.role == 'co_owner') ...[
                             const SizedBox(height: 16),
                             _UnderstaffedShiftsBanner(
+                              key: ValueKey(_refreshKey),
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -331,6 +348,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                       ),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -731,7 +749,7 @@ class _StripPillState extends State<_StripPill> {
 
 class _UnderstaffedShiftsBanner extends StatefulWidget {
   final VoidCallback onTap;
-  const _UnderstaffedShiftsBanner({required this.onTap});
+  const _UnderstaffedShiftsBanner({super.key, required this.onTap});
 
   @override
   State<_UnderstaffedShiftsBanner> createState() =>
