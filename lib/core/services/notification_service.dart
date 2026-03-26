@@ -100,10 +100,12 @@ class NotificationService {
 
   Future<void> _initializeLocalNotifications() async {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    // Do NOT request permission here — that is deferred to post-login via
+    // requestPermission(). Setting these to false prevents a cold-launch prompt.
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
     await _localNotifications.initialize(
       const InitializationSettings(android: androidSettings, iOS: iosSettings),

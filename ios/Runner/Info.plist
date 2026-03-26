@@ -40,8 +40,6 @@
 	<string>האפליקציה זקוקה לגישה לגלריה כדי לשמור תמונות</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>האפליקציה זקוקה לגישה לגלריה כדי לבחור תמונת פרופיל ולפרסם תמונות וסרטונים</string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>האפליקציה משתמשת ברשת המקומית כדי לתקשר עם שירותי Firebase לניהול נוכחות ומשמרות</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>
