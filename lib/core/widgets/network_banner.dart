@@ -54,7 +54,7 @@ class _NetworkBannerState extends State<NetworkBanner>
   /// Performs an actual DNS lookup to verify internet reachability.
   Future<bool> _hasInternet() async {
     try {
-      final result = await InternetAddress.lookup('firestore.googleapis.com')
+      final result = await InternetAddress.lookup('dns.google')
           .timeout(const Duration(seconds: 3));
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } catch (_) {

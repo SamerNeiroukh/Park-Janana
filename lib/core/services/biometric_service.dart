@@ -8,7 +8,14 @@ class BiometricService {
   BiometricService._internal();
 
   final LocalAuthentication _auth = LocalAuthentication();
-  static const _storage = FlutterSecureStorage();
+  // Restrict Keychain items to this device only (no iCloud backup/restore) and
+  // require the device to be unlocked before access. This prevents credentials
+  // from being readable on a different device via iCloud Keychain sync.
+  static const _storage = FlutterSecureStorage(
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.unlocked_this_device,
+    ),
+  );
 
   static const _keyEmail = 'biometric_email';
   static const _keyPassword = 'biometric_password';

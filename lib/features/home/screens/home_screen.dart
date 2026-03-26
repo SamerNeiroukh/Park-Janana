@@ -69,6 +69,13 @@ class _HomeScreenState extends State<HomeScreen>
       // Navigate to the correct screen if the app was launched by tapping
       // a notification while it was fully terminated (not just backgrounded).
       NotificationService().consumePendingNavigation();
+
+      // Request notification permission here (post-login) rather than at cold
+      // launch so iOS shows the prompt in context after the user has signed in.
+      NotificationService().requestPermission().catchError((e) {
+        debugPrint('Notification permission request failed: $e');
+        return false;
+      });
     });
   }
 

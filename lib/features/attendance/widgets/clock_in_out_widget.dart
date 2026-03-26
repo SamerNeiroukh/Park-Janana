@@ -216,6 +216,13 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     if (_actionInProgress) return;
 
     final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown';
+
+    // Show pre-permission rationale if location permission has not yet been
+    // granted. This surfaces our custom explanation before the OS prompt.
+    if (mounted) {
+      await LocationUtils.requestPermissionWithRationale(context);
+    }
+
     bool? insidePark = await LocationUtils.isInsidePark();
     final isClockingIn = _ongoingSession == null;
 

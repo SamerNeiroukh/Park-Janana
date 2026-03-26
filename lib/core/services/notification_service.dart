@@ -69,15 +69,6 @@ class NotificationService {
       debugPrint('Failed to set timezone, falling back to UTC: $e');
       tz.setLocalLocation(tz.UTC);
     }
-    try {
-      await _requestPermission();
-    } catch (e) {
-      // On iOS, Firebase Messaging may attempt to fetch the APNS token during
-      // requestPermission(). If the token isn't ready yet (common on first launch
-      // or debug builds), it throws apns-token-not-set. Safe to swallow — the
-      // token will be obtained later via onTokenRefresh or saveTokenAfterLogin().
-      debugPrint('Notification permission request skipped: $e');
-    }
     await _initializeLocalNotifications();
     _setupMessageHandlers();
     try {
@@ -92,7 +83,9 @@ class NotificationService {
     debugPrint('NotificationService initialized');
   }
 
-  Future<bool> _requestPermission() async {
+  /// Requests FCM + local notification permission from the user.
+  /// Call this after the user has logged in, not at cold launch.
+  Future<bool> requestPermission() async {
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,

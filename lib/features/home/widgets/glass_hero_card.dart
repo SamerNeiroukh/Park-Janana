@@ -225,6 +225,13 @@ class _GlassHeroCardState extends State<GlassHeroCard>
       // Use the Firestore fullName passed as widget.userName — Firebase Auth
       // displayName is never set during registration and would always be null.
       final name = widget.userName.isNotEmpty ? widget.userName : 'Unknown';
+
+      // Show pre-permission rationale if location permission has not yet been
+      // granted. This surfaces our custom explanation before the OS prompt.
+      if (mounted) {
+        await LocationUtils.requestPermissionWithRationale(context);
+      }
+
       final insidePark = await LocationUtils.isInsidePark();
       if (mounted) setState(() => _checkingLocation = false);
       final clockingIn = _session == null;
