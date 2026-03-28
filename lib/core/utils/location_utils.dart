@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class LocationUtils {
   static const double parkLatitude = 31.7683;
@@ -23,49 +24,15 @@ class LocationUtils {
 
     // Show our custom rationale dialog before triggering the OS prompt.
     if (!context.mounted) return false;
-    final agreed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            children: [
-              Icon(Icons.location_on_rounded, color: Color(0xFFE53E3E)),
-              SizedBox(width: 8),
-              Text('גישה למיקום',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800)),
-            ],
-          ),
-          content: const Text(
-            'האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק.\n\nהמיקום משמש אך ורק לאימות נוכחות ואינו נשמר או משותף.',
-            style: TextStyle(fontSize: 14, height: 1.55),
-          ),
-          actionsPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('לא עכשיו',
-                  style: TextStyle(color: Colors.black54)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE53E3E),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-              ),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('אשר גישה',
-                  style: TextStyle(fontWeight: FontWeight.w700)),
-            ),
-          ],
-        ),
-      ),
+    final agreed = await showAppDialog(
+      context,
+      title: 'גישה למיקום',
+      message:
+          'האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק.\n\nהמיקום משמש אך ורק לאימות נוכחות ואינו נשמר או משותף.',
+      confirmText: 'אשר גישה',
+      cancelText: 'לא עכשיו',
+      icon: Icons.location_on_rounded,
+      isDestructive: false,
     );
 
     if (agreed != true) return false;

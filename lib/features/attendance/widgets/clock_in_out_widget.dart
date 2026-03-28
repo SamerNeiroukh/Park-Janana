@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/widgets/app_dialog.dart';
 import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -298,119 +299,122 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
       context: context,
       barrierDismissible: false,
       barrierLabel: 'LocationRequired',
-      barrierColor: Colors.black54.withValues(alpha: 0.6),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, _) => Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(ctx).size.width * 0.85,
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ],
-            ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
+      barrierColor: Colors.black.withValues(alpha: 0.55),
+      transitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (ctx, _, _) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(ctx).size.width * 0.88,
+              constraints: const BoxConstraints(maxWidth: 380),
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 36,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                          colors: [AppColors.salmon, AppColors.darkRed],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.red.withValues(alpha: 0.4),
-                            blurRadius: 20,
-                            spreadRadius: 2)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(28, 36, 28, 0),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 76,
+                          height: 76,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [AppColors.salmon, AppColors.darkRed],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.darkRed.withValues(alpha: 0.38),
+                                blurRadius: 22,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.location_disabled_rounded,
+                              size: 38, color: Colors.white),
+                        ),
+                        const SizedBox(height: 22),
+                        const Text(
+                          'נדרשת גישה למיקום',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'כדי לדווח כניסה או יציאה ממשמרת יש לאפשר שירותי מיקום במכשיר.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54,
+                            height: 1.55,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
                       ],
                     ),
-                    padding: const EdgeInsets.all(16),
-                    child: const Icon(Icons.location_disabled_rounded,
-                        size: 48, color: Colors.white),
                   ),
-                  const SizedBox(height: 22),
-                  const Text(
-                    'נדרשת גישה למיקום',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black87),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'כדי לדווח כניסה או יציאה ממשמרת יש לאפשר שירותי מיקום במכשיר.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        height: 1.5,
-                        color: Colors.black54),
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
-                              foregroundColor: Colors.black54,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                              elevation: 0),
-                          onPressed: () => Navigator.of(ctx).pop(false),
-                          child: const Text('ביטול',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 15)),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                              elevation: 0,
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent),
-                          onPressed: () async {
-                            await Geolocator.openLocationSettings();
-                            if (ctx.mounted) Navigator.of(ctx).pop(true);
-                          },
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                  colors: [AppColors.darkRed, AppColors.salmon],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight),
-                              borderRadius: BorderRadius.circular(30),
+                  const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+                  IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.black45,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: const RoundedRectangleBorder(),
                             ),
-                            child: Container(
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              child: const Text('הפעל מיקום',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 15,
-                                      color: Colors.white)),
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text(
+                              'ביטול',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                        Container(width: 1, color: const Color(0xFFEEEEEE)),
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFFD8363A),
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: const RoundedRectangleBorder(),
+                            ),
+                            onPressed: () async {
+                              await Geolocator.openLocationSettings();
+                              if (ctx.mounted) Navigator.of(ctx).pop(true);
+                            },
+                            child: const Text(
+                              'הפעל מיקום',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -419,136 +423,29 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
         ),
       ),
       transitionBuilder: (_, anim, _, child) {
-        final v = Curves.easeInOut.transform(anim.value);
-        return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
+        final clamped = anim.value.clamp(0.0, 1.0);
+        final curve = Curves.easeOutBack.transform(clamped);
+        return Opacity(
+          opacity: clamped,
+          child: Transform.scale(scale: 0.82 + 0.18 * curve, child: child),
+        );
       },
     );
     return result ?? false;
   }
 
-  // ── Location warning (UNCHANGED) ─────────────────────────────────────────
+  // ── Location warning ─────────────────────────────────────────────────────
 
   Future<bool?> _showLocationWarning(bool isClockingIn) {
-    return showGeneralDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      barrierLabel: 'Location',
-      barrierColor: Colors.black54.withValues(alpha: 0.6),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (ctx, _, _) => Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(ctx).size.width * 0.85,
-            padding:
-                const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                        colors: [AppColors.salmon, AppColors.darkRed],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.red.withValues(alpha: 0.4),
-                          blurRadius: 20,
-                          spreadRadius: 2)
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: const Icon(Icons.location_off_rounded,
-                      size: 48, color: Colors.white),
-                ),
-                const SizedBox(height: 22),
-                const Text('אינך נמצא בגבולות הפארק',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black87)),
-                const SizedBox(height: 12),
-                Text(
-                    'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        height: 1.4,
-                        color: Colors.black54)),
-                const SizedBox(height: 28),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
-                          foregroundColor: Colors.black87,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 28, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          elevation: 0,
-                          minimumSize: const Size(100, 48)),
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text('לא',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 16)),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          elevation: 0,
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          minimumSize: const Size(100, 48)),
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              colors: [AppColors.darkRed, AppColors.salmon],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 28, vertical: 14),
-                          child: const Text('כן',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 16,
-                                  color: Colors.white)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      transitionBuilder: (_, anim, _, child) {
-        final v = Curves.easeInOut.transform(anim.value);
-        return Opacity(opacity: v, child: Transform.scale(scale: v, child: child));
-      },
+    return showAppDialog(
+      context,
+      title: 'אינך נמצא בגבולות הפארק',
+      message:
+          'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?',
+      confirmText: 'כן',
+      cancelText: 'לא',
+      icon: Icons.location_off_rounded,
+      isDestructive: true,
     );
   }
 
