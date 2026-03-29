@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/reports/screens/attendance_summary_report.dart';
@@ -74,7 +75,7 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                     const SizedBox(height: 20),
                     _buildReportCard(
                       index: 0,
-                      icon: Icons.access_time_rounded,
+                      icon: PhosphorIconsRegular.clock,
                       title: 'דו״ח נוכחות',
                       description: 'שעות עבודה, ימי נוכחות וסיכום חודשי',
                       gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
@@ -92,7 +93,7 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                     const SizedBox(height: 14),
                     _buildReportCard(
                       index: 1,
-                      icon: Icons.task_alt_rounded,
+                      icon: PhosphorIconsRegular.checkSquare,
                       title: 'דו״ח משימות',
                       description: 'סטטוס משימות, התקדמות ואחוזי ביצוע',
                       gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
@@ -110,7 +111,7 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                     const SizedBox(height: 14),
                     _buildReportCard(
                       index: 2,
-                      icon: Icons.schedule_rounded,
+                      icon: PhosphorIconsRegular.clock,
                       title: 'דו״ח משמרות',
                       description: 'היסטוריית משמרות, אישורים והחלטות',
                       gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
@@ -265,7 +266,7 @@ class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(children: [
-            Icon(Icons.bar_chart_rounded, color: Colors.white70, size: 18),
+            Icon(PhosphorIconsRegular.chartBar, color: Colors.white70, size: 18),
             SizedBox(width: 6),
             Text('סיכום ביצועים — החודש',
                 style: TextStyle(
@@ -275,12 +276,12 @@ class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
           ]),
           const SizedBox(height: 14),
           Row(children: [
-            _metric(Icons.access_time_rounded,
+            _metric(PhosphorIconsRegular.clock,
                 '${_hoursThisMonth.toStringAsFixed(1)} שעות', 'נוכחות'),
             _divider(),
-            _metric(Icons.calendar_today_rounded, '$_daysThisMonth ימים', 'בעבודה'),
+            _metric(PhosphorIconsRegular.calendarBlank, '$_daysThisMonth ימים', 'בעבודה'),
             _divider(),
-            _metric(Icons.task_alt_rounded, '$completionRate%', 'משימות הושלמו'),
+            _metric(PhosphorIconsRegular.checkSquare, '$completionRate%', 'משימות הושלמו'),
           ]),
         ],
       ),
@@ -429,7 +430,7 @@ class _ReportCardTileState extends State<_ReportCardTile>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
-                    Icons.chevron_right_rounded,
+                    PhosphorIconsRegular.caretRight,
                     color: TaskTheme.textSecondary,
                     size: 22,
                   ),

@@ -15,6 +15,7 @@ import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/shimmer_loading.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/attendance/screens/attendance_correction_screen.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ManageWorkersScreen extends StatefulWidget {
   const ManageWorkersScreen({super.key});
@@ -94,7 +95,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
       title: 'שיחה יוצאת',
       message: 'להתקשר אל $name?\n$phone',
       confirmText: 'התקשר',
-      icon: Icons.phone_rounded,
+      icon: PhosphorIconsRegular.phone,
       iconGradient: const [Color(0xFF4CAF50), Color(0xFF2E7D32)],
     );
 
@@ -165,10 +166,10 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'חיפוש עובד לפי שם...',
-                  prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                  prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.primary),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
+                          icon: const Icon(PhosphorIconsRegular.x, size: 20),
                           onPressed: () => _searchController.clear(),
                         )
                       : null,
@@ -220,7 +221,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
           ),
           child: Row(
             children: [
-              const Icon(Icons.warning_amber_rounded,
+              const Icon(PhosphorIconsRegular.warning,
                   color: Color(0xFFF97316), size: 20),
               const SizedBox(width: 10),
               Expanded(
@@ -347,7 +348,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.phone_rounded,
+                          icon: const Icon(PhosphorIconsRegular.phone,
                               color: Colors.green),
                           tooltip: 'התקשר',
                           onPressed: phone.isNotEmpty
@@ -521,7 +522,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.phone_rounded,
+                              icon: const Icon(PhosphorIconsRegular.phone,
                                   color: Colors.green),
                               tooltip: 'התקשר',
                               onPressed: phone.isNotEmpty
@@ -552,7 +553,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                           color: const Color(0xFFF97316),
                           child: const Row(
                             children: [
-                              Icon(Icons.timer_off_rounded,
+                              Icon(PhosphorIconsRegular.timer,
                                   size: 15, color: Colors.white),
                               SizedBox(width: 8),
                               Text(
@@ -564,7 +565,7 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen>
                                 ),
                               ),
                               Spacer(),
-                              Icon(Icons.arrow_forward_ios_rounded,
+                              Icon(PhosphorIconsRegular.arrowRight,
                                   size: 12, color: Colors.white),
                             ],
                           ),

@@ -9,6 +9,7 @@ import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/main.dart' show navigatorKey;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Minimal RTL top bar for the Home Screen.
 ///
@@ -36,7 +37,7 @@ class HomeTopBar extends StatelessWidget {
       title: 'התנתקות',
       message: 'האם אתה בטוח שברצונך להתנתק?',
       confirmText: 'התנתק',
-      icon: Icons.logout_rounded,
+      icon: PhosphorIconsRegular.signOut,
       isDestructive: true,
     );
 
@@ -109,7 +110,7 @@ class HomeTopBar extends StatelessWidget {
             // Overflow menu (settings + logout)
             PopupMenuButton<String>(
               icon: const Icon(
-                Icons.more_vert_rounded,
+                PhosphorIconsRegular.dotsThreeVertical,
                 color: Color(0xFF374151),
                 size: 22,
               ),
@@ -128,7 +129,7 @@ class HomeTopBar extends StatelessWidget {
                     textDirection: TextDirection.rtl,
                     child: Row(
                       children: [
-                        Icon(Icons.settings_rounded,
+                        Icon(PhosphorIconsRegular.gear,
                             size: 19, color: Color(0xFF374151)),
                         SizedBox(width: 10),
                         Text('הגדרות',
@@ -144,7 +145,7 @@ class HomeTopBar extends StatelessWidget {
                     textDirection: TextDirection.rtl,
                     child: Row(
                       children: [
-                        Icon(Icons.logout, color: Colors.red, size: 19),
+                        Icon(PhosphorIconsRegular.signOut, color: Colors.red, size: 19),
                         SizedBox(width: 10),
                         Text('התנתקות',
                             style: TextStyle(color: Colors.red)),
@@ -208,7 +209,7 @@ class _NotificationBellState extends State<_NotificationBell> {
           children: [
             IconButton(
               icon: const Icon(
-                Icons.notifications_outlined,
+                PhosphorIconsRegular.bell,
                 color: Color(0xFF374151),
                 size: 24,
               ),

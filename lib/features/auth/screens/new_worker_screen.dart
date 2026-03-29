@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'registration_form.dart';
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
@@ -72,7 +73,7 @@ class NewWorkerScreen extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.35),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.arrow_forward_ios_rounded,
+                        child: const Icon(PhosphorIconsRegular.arrowLeft,
                             color: Colors.white, size: 18),
                       ),
                     ),
@@ -138,19 +139,19 @@ class NewWorkerScreen extends StatelessWidget {
                       // Steps
                       _buildStep(
                         number: '1',
-                        icon: Icons.edit_note_rounded,
+                        icon: PhosphorIconsRegular.notePencil,
                         title: 'מלא טופס הרשמה',
                         subtitle: 'הזן את פרטיך האישיים ובחר סיסמה',
                       ),
                       _buildStep(
                         number: '2',
-                        icon: Icons.admin_panel_settings_outlined,
+                        icon: PhosphorIconsRegular.shieldStar,
                         title: 'אישור ההנהלה',
                         subtitle: 'הנהלת הפארק תבדוק את פרטיך ותאשר את חשבונך',
                       ),
                       _buildStep(
                         number: '3',
-                        icon: Icons.celebration_rounded,
+                        icon: PhosphorIconsRegular.confetti,
                         title: 'הצטרף לצוות',
                         subtitle: 'לאחר האישור תוכל להתחבר ולהתחיל לעבוד',
                         isLast: true,
@@ -173,7 +174,7 @@ class NewWorkerScreen extends StatelessWidget {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.send_rounded, size: 18),
+                            Icon(PhosphorIconsRegular.paperPlaneTilt, size: 18),
                             SizedBox(width: 8),
                             Text(
                               'שלח בקשת הצטרפות',

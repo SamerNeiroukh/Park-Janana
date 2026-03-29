@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/features/newsfeed/models/post_model.dart';
 import 'package:park_janana/features/newsfeed/services/newsfeed_service.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Shows a preview of the latest newsfeed post.
 ///
@@ -97,7 +98,7 @@ class _PostPreviewState extends State<_PostPreview> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
-                      Icons.newspaper_rounded,
+                      PhosphorIconsRegular.newspaper,
                       color: Colors.white,
                       size: 15,
                     ),
@@ -261,7 +262,7 @@ class _PostPreviewState extends State<_PostPreview> {
                             Row(
                               children: [
                                 Icon(
-                                  Icons.favorite_rounded,
+                                  PhosphorIconsFill.heart,
                                   size: 14,
                                   color: const Color(0xFFEF4444)
                                       .withValues(alpha: 0.80),
@@ -277,7 +278,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                 ),
                                 const SizedBox(width: 14),
                                 Icon(
-                                  Icons.chat_bubble_outline_rounded,
+                                  PhosphorIconsRegular.chatCircle,
                                   size: 14,
                                   color: const Color(0xFF3B82F6)
                                       .withValues(alpha: 0.80),
@@ -307,7 +308,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                     ),
                                     const SizedBox(width: 3),
                                     Icon(
-                                      Icons.keyboard_arrow_down_rounded,
+                                      PhosphorIconsRegular.caretDown,
                                       size: 14,
                                       color: const Color(0xFF4F46E5)
                                           .withValues(alpha: 0.85),

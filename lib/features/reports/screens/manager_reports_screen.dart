@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/reports/screens/attendance_summary_report.dart';
 import 'package:park_janana/features/reports/screens/task_summary_report.dart';
 import 'package:park_janana/features/reports/screens/worker_shift_report.dart';
@@ -152,7 +153,7 @@ class _PersonalReportsTabState extends State<_PersonalReportsTab>
           const SizedBox(height: 24),
           _buildCard(
             index: 0,
-            icon: Icons.access_time_rounded,
+            icon: PhosphorIconsRegular.clock,
             title: 'דו״ח נוכחות',
             description: 'שעות עבודה, ימי נוכחות וסיכום חודשי',
             gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
@@ -170,7 +171,7 @@ class _PersonalReportsTabState extends State<_PersonalReportsTab>
           const SizedBox(height: 14),
           _buildCard(
             index: 1,
-            icon: Icons.task_alt_rounded,
+            icon: PhosphorIconsRegular.checkSquare,
             title: 'דו״ח משימות',
             description: 'סטטוס משימות, התקדמות ואחוזי ביצוע',
             gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
@@ -188,7 +189,7 @@ class _PersonalReportsTabState extends State<_PersonalReportsTab>
           const SizedBox(height: 14),
           _buildCard(
             index: 2,
-            icon: Icons.schedule_rounded,
+            icon: PhosphorIconsRegular.clock,
             title: 'דו״ח משמרות',
             description: 'היסטוריית משמרות, אישורים והחלטות',
             gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
@@ -295,7 +296,7 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           const SizedBox(height: 24),
           _buildCard(
             index: 0,
-            icon: Icons.people_alt_rounded,
+            icon: PhosphorIconsRegular.users,
             title: 'שעות עבודה',
             description: 'סיכום שעות עבודה חודשי לפי עובד',
             gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
@@ -307,7 +308,7 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           const SizedBox(height: 14),
           _buildCard(
             index: 1,
-            icon: Icons.bar_chart_rounded,
+            icon: PhosphorIconsRegular.chartBar,
             title: 'התפלגות משימות',
             description: 'משימות לפי עובד, אחוזי ביצוע ודירוג',
             gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
@@ -320,7 +321,7 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           const SizedBox(height: 14),
           _buildCard(
             index: 2,
-            icon: Icons.domain_rounded,
+            icon: PhosphorIconsRegular.buildings,
             title: 'כיסוי משמרות',
             description: 'משמרות לפי מחלקה, אחוז מילוי ופירוט',
             gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
@@ -332,7 +333,7 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           const SizedBox(height: 14),
           _buildCard(
             index: 3,
-            icon: Icons.login_rounded,
+            icon: PhosphorIconsRegular.signIn,
             title: 'יציאות חסרות',
             description: 'עובדים שלא שכחו לצאת לפי חודש',
             gradientColors: const [Color(0xFFEF4444), Color(0xFFDC2626)],
@@ -494,7 +495,7 @@ class _ReportCardTileState extends State<_ReportCardTile>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
-                    Icons.chevron_right_rounded,
+                    PhosphorIconsRegular.caretRight,
                     color: TaskTheme.textSecondary,
                     size: 22,
                   ),

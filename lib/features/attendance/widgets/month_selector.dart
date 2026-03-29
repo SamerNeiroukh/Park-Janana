@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
 
 class MonthSelector extends StatelessWidget {
@@ -43,7 +44,7 @@ class MonthSelector extends StatelessWidget {
           children: [
             // Next month — left side of screen
             _buildArrowButton(
-              icon: Icons.chevron_left_rounded,
+              icon: PhosphorIconsRegular.caretLeft,
               onTap: isCurrentMonth ? null : () => _changeMonth(1),
               enabled: !isCurrentMonth,
             ),
@@ -60,7 +61,7 @@ class MonthSelector extends StatelessWidget {
             ),
             // Prev month — right side of screen
             _buildArrowButton(
-              icon: Icons.chevron_right_rounded,
+              icon: PhosphorIconsRegular.caretRight,
               onTap: () => _changeMonth(-1),
               enabled: true,
             ),

@@ -1,5 +1,6 @@
 // unchanged import statements
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/core/models/user_model.dart';
@@ -52,7 +53,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         backgroundColor: AppColors.primary,
         onPressed: _handleCreateTaskPress,
         label: const Text("יצירת משימה", style: TextStyle(color: Colors.white)),
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(PhosphorIconsRegular.plus, color: Colors.white),
       ),
       body: Column(
         children: [
@@ -177,7 +178,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            icon: const Icon(Icons.chevron_left, size: 30),
+            icon: const Icon(PhosphorIconsRegular.caretLeft, size: 30),
             onPressed: () => _changeDate(-1),
           ),
           Container(
@@ -203,14 +204,14 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _pickDate,
-                  child: const Icon(Icons.calendar_today,
+                  child: const Icon(PhosphorIconsRegular.calendarBlank,
                       size: 20, color: AppColors.primary),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_right, size: 30),
+            icon: const Icon(PhosphorIconsRegular.caretRight, size: 30),
             onPressed: () => _changeDate(1),
           ),
         ],
@@ -253,10 +254,10 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
           },
           decoration: InputDecoration(
             hintText: 'חיפוש משימה לפי שם...',
-            prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+            prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.primary),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.clear, size: 20),
+                    icon: const Icon(PhosphorIconsRegular.x, size: 20),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _searchQuery = '');
@@ -420,7 +421,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               children: [
                 _buildCardAction(
                   label: "ערוך",
-                  icon: Icons.edit_outlined,
+                  icon: PhosphorIconsRegular.pencilSimple,
                   color: AppColors.primary,
                   onPressed: () => Navigator.push(
                     context,
@@ -431,7 +432,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 const SizedBox(width: 8),
                 _buildCardAction(
                   label: "מחק",
-                  icon: Icons.delete_outline_rounded,
+                  icon: PhosphorIconsRegular.trash,
                   color: Colors.red.shade600,
                   onPressed: () => _confirmDeleteTask(task),
                 ),
@@ -494,7 +495,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
       title: 'אישור מחיקה',
       message: "האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?",
       confirmText: 'מחק',
-      icon: Icons.delete_outline_rounded,
+      icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
     if ((confirmed ?? false) && mounted) {
@@ -503,7 +504,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(children: [
-              const Icon(Icons.delete_outline_rounded,
+              const Icon(PhosphorIconsRegular.trash,
                   color: Colors.white, size: 18),
               const SizedBox(width: 8),
               Text('המשימה "${task.title}" נמחקה',

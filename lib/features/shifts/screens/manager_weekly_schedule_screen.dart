@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/config/departments.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
@@ -347,7 +348,7 @@ class _WeekHeader extends StatelessWidget {
             // LEFT side - next week (future)
             IconButton(
               onPressed: onNext,
-              icon: const Icon(Icons.chevron_left_rounded, size: 28),
+              icon: const Icon(PhosphorIconsRegular.caretLeft, size: 28),
               tooltip: 'שבוע הבא',
             ),
             Expanded(
@@ -375,7 +376,7 @@ class _WeekHeader extends StatelessWidget {
             // RIGHT side - prev week (past)
             IconButton(
               onPressed: onPrev,
-              icon: const Icon(Icons.chevron_right_rounded, size: 28),
+              icon: const Icon(PhosphorIconsRegular.caretRight, size: 28),
               tooltip: 'שבוע קודם',
             ),
           ],
@@ -649,7 +650,7 @@ class _EmptyDayPlaceholder extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.event_busy_outlined, size: 18, color: Colors.grey.shade400),
+          Icon(PhosphorIconsRegular.calendarX, size: 18, color: Colors.grey.shade400),
           const SizedBox(width: 8),
           Text(
             'אין משמרות',
@@ -806,7 +807,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.people_outline_rounded,
+                              Icon(PhosphorIconsRegular.users,
                                   size: 14, color: _countColor),
                               const SizedBox(width: 3),
                               Text(
@@ -826,7 +827,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                     // Time row
                     Row(
                       children: [
-                        Icon(Icons.access_time_rounded,
+                        Icon(PhosphorIconsRegular.clock,
                             size: 14, color: Colors.grey.shade500),
                         const SizedBox(width: 4),
                         Text(
@@ -855,7 +856,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(Icons.chevron_right_rounded,
+              Icon(PhosphorIconsRegular.caretRight,
                   color: Colors.grey.shade400, size: 20),
             ],
           ),
@@ -1042,7 +1043,7 @@ class _ShiftDetailSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.calendar_today_rounded,
+              Icon(PhosphorIconsRegular.calendarBlank,
                   size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
@@ -1057,7 +1058,7 @@ class _ShiftDetailSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.access_time_rounded,
+              Icon(PhosphorIconsRegular.clock,
                   size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
@@ -1226,7 +1227,7 @@ class _ShiftDetailSheet extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
-                            Icons.arrow_forward_rounded,
+                            PhosphorIconsRegular.arrowRight,
                             size: 18,
                             color: Colors.white,
                           ),
@@ -1365,7 +1366,7 @@ class _MyShiftsTabState extends State<_MyShiftsTab> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.event_busy_outlined,
+                Icon(PhosphorIconsRegular.calendarX,
                     size: 64, color: Colors.grey.shade300),
                 const SizedBox(height: 12),
                 Text(
@@ -1497,7 +1498,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded,
+            Icon(PhosphorIconsRegular.warningCircle,
                 size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(
@@ -1509,7 +1510,7 @@ class _ErrorState extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: const Icon(PhosphorIconsRegular.arrowsClockwise, size: 18),
                 label: const Text('נסה שוב'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,

@@ -64,6 +64,7 @@ dependencies:
   url_launcher: ^6.3.0
   local_auth: ^2.3.0
   flutter_secure_storage: ^9.2.4
+  phosphor_flutter: ^2.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

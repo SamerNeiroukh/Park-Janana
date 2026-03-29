@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -19,7 +20,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       leading: onProfileTap != null
           ? IconButton(
-              icon: const Icon(Icons.person_rounded),
+              icon: const Icon(PhosphorIconsRegular.user),
               tooltip: 'פרופיל',
               onPressed: onProfileTap,
             )
@@ -34,7 +35,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: showLogoutButton
           ? [
               IconButton(
-              icon: const Icon(Icons.logout),
+              icon: const Icon(PhosphorIconsRegular.signOut),
               tooltip: 'התנתקות',
               onPressed: () async {
                 final shouldLogout = await showAppDialog(
@@ -42,7 +43,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                   title: 'התנתקות',
                   message: 'האם אתה בטוח שברצונך להתנתק?',
                   confirmText: 'התנתק',
-                  icon: Icons.logout_rounded,
+                  icon: PhosphorIconsRegular.signOut,
                   isDestructive: true,
                 );
                 if (shouldLogout ?? false) {

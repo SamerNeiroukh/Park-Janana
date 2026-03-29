@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/profile_url_cache.dart';
@@ -93,13 +94,13 @@ class _PostCardState extends State<PostCard> {
   IconData _categoryIcon() {
     switch (widget.post.category) {
       case 'announcement':
-        return Icons.campaign_rounded;
+        return PhosphorIconsFill.megaphone;
       case 'update':
-        return Icons.update_rounded;
+        return PhosphorIconsRegular.arrowsClockwise;
       case 'event':
-        return Icons.event_rounded;
+        return PhosphorIconsRegular.calendarBlank;
       default:
-        return Icons.article_rounded;
+        return PhosphorIconsRegular.article;
     }
   }
 
@@ -230,7 +231,7 @@ class _PostCardState extends State<PostCard> {
               mainAxisSize: MainAxisSize.min,
               textDirection: TextDirection.rtl,
               children: [
-                Icon(Icons.push_pin_rounded, size: 13, color: AppColors.deepOrange),
+                Icon(PhosphorIconsFill.pushPin, size: 13, color: AppColors.deepOrange),
                 SizedBox(width: 4),
                 Text(
                   'פוסט נעוץ',
@@ -293,7 +294,7 @@ class _PostCardState extends State<PostCard> {
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    Icons.access_time_rounded,
+                    PhosphorIconsRegular.clock,
                     size: 12,
                     color: AppColors.greyMedium.withValues(alpha: 0.6),
                   ),
@@ -365,7 +366,7 @@ class _PostCardState extends State<PostCard> {
       ),
       child: PopupMenuButton<String>(
         icon: const Icon(
-          Icons.more_horiz_rounded,
+          PhosphorIconsRegular.dotsThree,
           color: AppColors.greyMedium,
           size: 20,
         ),
@@ -388,8 +389,8 @@ class _PostCardState extends State<PostCard> {
                 children: [
                   Icon(
                     widget.post.isPinned
-                        ? Icons.push_pin_outlined
-                        : Icons.push_pin_rounded,
+                        ? PhosphorIconsRegular.pushPin
+                        : PhosphorIconsFill.pushPin,
                     size: 18,
                     color: AppColors.primaryBlue,
                   ),
@@ -406,7 +407,7 @@ class _PostCardState extends State<PostCard> {
             child: Row(
               textDirection: TextDirection.rtl,
               children: [
-                Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                Icon(PhosphorIconsRegular.trash, size: 18, color: Colors.red),
                 SizedBox(width: 10),
                 Text(
                   'מחק פוסט',
@@ -472,7 +473,7 @@ class _PostCardState extends State<PostCard> {
                     ),
                     const SizedBox(width: 2),
                     Icon(
-                      Icons.keyboard_arrow_down_rounded,
+                      PhosphorIconsRegular.caretDown,
                       size: 16,
                       color: AppColors.primaryBlue.withValues(alpha: 0.9),
                     ),
@@ -595,7 +596,7 @@ class _PostCardState extends State<PostCard> {
               )
             else
               const Center(
-                child: Icon(Icons.videocam_rounded, color: Colors.white54, size: 40),
+                child: Icon(PhosphorIconsRegular.videoCamera, color: Colors.white54, size: 40),
               ),
             Center(
               child: Container(
@@ -604,7 +605,7 @@ class _PostCardState extends State<PostCard> {
                   color: Colors.black54,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                child: const Icon(PhosphorIconsRegular.play, color: Colors.white, size: 32),
               ),
             ),
           ],
@@ -633,7 +634,7 @@ class _PostCardState extends State<PostCard> {
       errorWidget: (_, _, _) => Container(
         height: height,
         color: AppColors.greyLight.withValues(alpha: 0.5),
-        child: const Icon(Icons.broken_image_rounded, color: AppColors.greyMedium, size: 40),
+        child: const Icon(PhosphorIconsRegular.imageBroken, color: AppColors.greyMedium, size: 40),
       ),
     );
   }
@@ -668,7 +669,7 @@ class _PostCardState extends State<PostCard> {
               height: 24,
               color: AppColors.greyMedium.withValues(alpha: 0.25)),
           _ActionButton(
-            icon: Icons.chat_bubble_outline_rounded,
+            icon: PhosphorIconsRegular.chatCircle,
             label: '${widget.post.commentsCount}',
             onTap: () {
               HapticFeedback.selectionClick();

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Navigation targets (ALL UNCHANGED) ───────────────────────────────────
 import 'package:park_janana/features/reports/screens/worker_reports_screen.dart';
@@ -132,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
-                    Icons.wifi_off_rounded,
+                    PhosphorIconsRegular.wifiSlash,
                     size: 64,
                     color: Color(0xFF9CA3AF),
                   ),
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen>
                       context.read<UserProvider>().loadCurrentUser();
                       context.read<UserProvider>().loadWorkStats();
                     },
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
                     label: const Text('נסה שוב'),
                     style: FilledButton.styleFrom(
                       backgroundColor: _kPrimary,
@@ -371,11 +372,11 @@ class _HomeScreenState extends State<HomeScreen>
   IconData _roleIcon(String role) {
     switch (role) {
       case 'worker':
-        return Icons.badge_rounded;
+        return PhosphorIconsFill.identificationCard;
       case 'manager':
-        return Icons.supervisor_account_rounded;
+        return PhosphorIconsRegular.usersThree;
       default:
-        return Icons.business_rounded;
+        return PhosphorIconsRegular.buildings;
     }
   }
 
@@ -394,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen>
       items.addAll([
         // Primary CTA (first = rightmost in RTL strip)
         _StripItem(
-          icon: Icons.schedule_rounded,
+          icon: PhosphorIconsRegular.clock,
           label: 'משמרות',
           badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
@@ -405,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         _StripItem(
-          icon: Icons.calendar_view_week_rounded,
+          icon: PhosphorIconsRegular.calendarDots,
           label: 'סידור עבודה',
           badge: badgeProvider.getBadgeCount('schedule'),
           color: const Color(0xFF6366F1),
@@ -418,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         _StripItem(
-          icon: Icons.task_alt_rounded,
+          icon: PhosphorIconsRegular.checkSquare,
           label: 'משימות',
           badge: badgeProvider.getBadgeCount('tasks'),
           color: const Color(0xFF8B5CF6),
@@ -428,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen>
                   builder: (_) => const WorkerTaskTimelineScreen())),
         ),
         _StripItem(
-          icon: Icons.bar_chart_rounded,
+          icon: PhosphorIconsRegular.chartBar,
           label: 'דוחות',
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
@@ -440,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen>
                       profileUrl: profileUrl))),
         ),
         _StripItem(
-          icon: Icons.newspaper_rounded,
+          icon: PhosphorIconsRegular.newspaper,
           label: 'לוח מודעות',
           badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
@@ -455,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen>
       items.addAll([
         // Primary CTA
         _StripItem(
-          icon: Icons.manage_history_rounded,
+          icon: PhosphorIconsRegular.clockCounterClockwise,
           label: 'משמרות',
           badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
@@ -466,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         _StripItem(
-          icon: Icons.calendar_view_week_rounded,
+          icon: PhosphorIconsRegular.calendarDots,
           label: 'סידור שבועי',
           badge: badgeProvider.getBadgeCount('schedule'),
           color: const Color(0xFF6366F1),
@@ -479,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         _StripItem(
-          icon: Icons.assignment_rounded,
+          icon: PhosphorIconsRegular.clipboard,
           label: 'משימות',
           badge: badgeProvider.getBadgeCount('tasks'),
           color: const Color(0xFF8B5CF6),
@@ -489,14 +490,14 @@ class _HomeScreenState extends State<HomeScreen>
                   builder: (_) => const ManagerTaskBoardScreen())),
         ),
         _StripItem(
-          icon: Icons.group_rounded,
+          icon: PhosphorIconsRegular.usersThree,
           label: 'ניהול עובדים',
           color: const Color(0xFF0EA5E9),
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ManageWorkersScreen())),
         ),
         _StripItem(
-          icon: Icons.stacked_bar_chart_rounded,
+          icon: PhosphorIconsRegular.chartBar,
           label: 'דוחות',
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
@@ -508,7 +509,7 @@ class _HomeScreenState extends State<HomeScreen>
                       profileUrl: profileUrl))),
         ),
         _StripItem(
-          icon: Icons.newspaper_rounded,
+          icon: PhosphorIconsRegular.newspaper,
           label: 'לוח מודעות',
           badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
@@ -523,14 +524,14 @@ class _HomeScreenState extends State<HomeScreen>
       // owner — full manager access + exclusive dashboard
       items.addAll([
         _StripItem(
-          icon: Icons.dashboard_rounded,
+          icon: PhosphorIconsRegular.squaresFour,
           label: 'לוח בקרה',
           color: const Color(0xFF7C3AED),
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const OwnerDashboardScreen())),
         ),
         _StripItem(
-          icon: Icons.manage_history_rounded,
+          icon: PhosphorIconsRegular.clockCounterClockwise,
           label: 'משמרות',
           badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
@@ -541,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         _StripItem(
-          icon: Icons.calendar_view_week_rounded,
+          icon: PhosphorIconsRegular.calendarDots,
           label: 'סידור שבועי',
           badge: badgeProvider.getBadgeCount('schedule'),
           color: const Color(0xFF6366F1),
@@ -554,7 +555,7 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         _StripItem(
-          icon: Icons.assignment_rounded,
+          icon: PhosphorIconsRegular.clipboard,
           label: 'משימות',
           badge: badgeProvider.getBadgeCount('tasks'),
           color: const Color(0xFF8B5CF6),
@@ -562,14 +563,14 @@ class _HomeScreenState extends State<HomeScreen>
               MaterialPageRoute(builder: (_) => const ManagerTaskBoardScreen())),
         ),
         _StripItem(
-          icon: Icons.group_rounded,
+          icon: PhosphorIconsRegular.usersThree,
           label: 'ניהול עובדים',
           color: const Color(0xFF0EA5E9),
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ManageWorkersScreen())),
         ),
         _StripItem(
-          icon: Icons.stacked_bar_chart_rounded,
+          icon: PhosphorIconsRegular.chartBar,
           label: 'דוחות',
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
@@ -581,7 +582,7 @@ class _HomeScreenState extends State<HomeScreen>
                       profileUrl: profileUrl))),
         ),
         _StripItem(
-          icon: Icons.newspaper_rounded,
+          icon: PhosphorIconsRegular.newspaper,
           label: 'לוח מודעות',
           badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
@@ -819,7 +820,7 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
                     color: const Color(0xFFEF4444).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.warning_amber_rounded,
+                  child: const Icon(PhosphorIconsRegular.warning,
                       color: Color(0xFFDC2626), size: 20),
                 ),
                 const SizedBox(width: 12),
@@ -842,7 +843,7 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded,
+                const Icon(PhosphorIconsRegular.caretRight,
                     color: Color(0xFFDC2626), size: 22),
               ],
             ),

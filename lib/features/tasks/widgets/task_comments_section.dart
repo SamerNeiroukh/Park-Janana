@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
@@ -54,7 +55,7 @@ class TaskCommentsSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ListTile(
-                leading: const Icon(Icons.comment, color: AppColors.primary),
+                leading: const Icon(PhosphorIconsRegular.chatText, color: AppColors.primary),
                 title: Text(message, textAlign: TextAlign.right),
                 subtitle: Text(
                   '$name • ${DateFormat('dd/MM/yyyy HH:mm').format(time)}',

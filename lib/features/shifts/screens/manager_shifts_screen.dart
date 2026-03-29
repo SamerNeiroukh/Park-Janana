@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -45,17 +46,17 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   IconData _getDepartmentIcon(String department) {
     switch (department) {
       case 'פיינטבול':
-        return Icons.sports_esports;
+        return PhosphorIconsRegular.gameController;
       case 'פארק חבלים':
-        return Icons.park;
+        return PhosphorIconsRegular.tree;
       case 'קרטינג':
-        return Icons.directions_car;
+        return PhosphorIconsRegular.car;
       case 'פארק מים':
-        return Icons.pool;
+        return PhosphorIconsRegular.waves;
       case 'גמבורי':
-        return Icons.child_care;
+        return PhosphorIconsRegular.baby;
       default:
-        return Icons.work;
+        return PhosphorIconsRegular.briefcase;
     }
   }
 
@@ -113,7 +114,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
       child: Row(
         children: [
           _buildNavButton(
-            icon: Icons.chevron_left,
+            icon: PhosphorIconsRegular.caretLeft,
             onTap: () => setState(() {
               _currentWeekStart =
                   _currentWeekStart.subtract(const Duration(days: 7));
@@ -143,7 +144,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
             ),
           ),
           _buildNavButton(
-            icon: Icons.chevron_right,
+            icon: PhosphorIconsRegular.caretRight,
             onTap: () => setState(() {
               _currentWeekStart =
                   _currentWeekStart.add(const Duration(days: 7));
@@ -379,7 +380,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Icon(
-                            isCancelled ? Icons.cancel_rounded : icon,
+                            isCancelled ? PhosphorIconsRegular.xCircle : icon,
                             color: isCancelled ? Colors.red.shade400 : color,
                             size: 22,
                           ),
@@ -407,7 +408,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               Row(
                                 textDirection: TextDirection.rtl,
                                 children: [
-                                  Icon(Icons.access_time_rounded,
+                                  Icon(PhosphorIconsRegular.clock,
                                       size: 14, color: Colors.grey.shade500),
                                   const SizedBox(width: 4),
                                   Text(
@@ -426,7 +427,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                             ],
                           ),
                         ),
-                        Icon(Icons.chevron_right, color: Colors.grey.shade400),
+                        Icon(PhosphorIconsRegular.caretRight, color: Colors.grey.shade400),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -450,7 +451,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               textDirection: TextDirection.rtl,
                               children: [
                                 Icon(
-                                  Icons.people,
+                                  PhosphorIconsRegular.users,
                                   size: 14,
                                   color: isFull ? AppColors.success : color,
                                 ),
@@ -481,7 +482,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                                 textDirection: TextDirection.rtl,
                                 children: [
                                   const Icon(
-                                    Icons.pending_actions,
+                                    PhosphorIconsRegular.clipboardText,
                                     size: 14,
                                     color: AppColors.warningOrange,
                                   ),
@@ -518,7 +519,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               if (isCancelled)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 4),
-                                  child: Icon(Icons.cancel, size: 14,
+                                  child: Icon(PhosphorIconsRegular.xCircle, size: 14,
                                       color: Colors.red.shade600),
                                 ),
                               Text(
@@ -565,7 +566,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   Widget _buildCreateShiftButton() {
     return FloatingActionButton.extended(
       backgroundColor: AppColors.primary,
-      icon: const Icon(Icons.add, color: Colors.white),
+      icon: const Icon(PhosphorIconsRegular.plus, color: Colors.white),
       label: const Text(
         'משמרת חדשה',
         style: TextStyle(color: Colors.white),

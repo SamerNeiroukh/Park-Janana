@@ -16,6 +16,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/services/biometric_service.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 const _kAppVersion = '1.0.0';
 
@@ -198,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: 'התנתקות',
       message: 'האם אתה בטוח שברצונך להתנתק?',
       confirmText: 'התנתק',
-      icon: Icons.logout_rounded,
+      icon: PhosphorIconsRegular.signOut,
       isDestructive: true,
     );
 
@@ -264,7 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.settings_rounded,
+                    child: const Icon(PhosphorIconsRegular.gear,
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -278,14 +279,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   _sectionHeader('חשבון'),
                   _tile(
-                    icon: Icons.lock_outline_rounded,
+                    icon: PhosphorIconsRegular.lock,
                     iconColor: TaskTheme.inProgress,
                     title: 'שינוי סיסמה',
                     onTap: _showChangePasswordSheet,
                   ),
                   if (_biometricAvailable)
                     _switchTile(
-                      icon: Icons.fingerprint_rounded,
+                      icon: PhosphorIconsRegular.fingerprint,
                       iconColor: TaskTheme.done,
                       title: 'כניסה ביומטרית',
                       subtitle: 'טביעת אצבע / זיהוי פנים',
@@ -295,7 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 20),
                   _sectionHeader('התראות'),
                   _switchTile(
-                    icon: Icons.notifications_outlined,
+                    icon: PhosphorIconsRegular.bell,
                     iconColor: TaskTheme.primary,
                     title: 'התראות פוש',
                     subtitle: 'קבלת עדכונים על משמרות ומשימות',
@@ -305,23 +306,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 20),
                   _sectionHeader('מידע'),
                   _tile(
-                    icon: Icons.privacy_tip_outlined,
+                    icon: PhosphorIconsRegular.shieldCheck,
                     iconColor: TaskTheme.done,
                     title: 'מדיניות פרטיות',
-                    trailing: const Icon(Icons.open_in_new_rounded,
+                    trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
                         size: 16, color: TaskTheme.textTertiary),
                     onTap: _openPrivacyPolicy,
                   ),
                   _tile(
-                    icon: Icons.description_outlined,
+                    icon: PhosphorIconsRegular.fileText,
                     iconColor: TaskTheme.inProgress,
                     title: 'תנאי שימוש',
-                    trailing: const Icon(Icons.open_in_new_rounded,
+                    trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
                         size: 16, color: TaskTheme.textTertiary),
                     onTap: _openTermsOfService,
                   ),
                   _switchTile(
-                    icon: Icons.bug_report_outlined,
+                    icon: PhosphorIconsRegular.bug,
                     iconColor: TaskTheme.textSecondary,
                     title: 'שלח דוחות קריסה',
                     subtitle: 'עוזר לנו לשפר את יציבות האפליקציה',
@@ -329,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: _toggleCrashlytics,
                   ),
                   _tile(
-                    icon: Icons.info_outline_rounded,
+                    icon: PhosphorIconsRegular.info,
                     iconColor: TaskTheme.textSecondary,
                     title: 'גרסת האפליקציה',
                     trailing: Text(
@@ -342,7 +343,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 20),
                   _sectionHeader('יציאה'),
                   _tile(
-                    icon: Icons.logout_rounded,
+                    icon: PhosphorIconsRegular.signOut,
                     iconColor: Colors.red.shade600,
                     title: 'התנתקות',
                     titleColor: Colors.red.shade700,
@@ -351,7 +352,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 20),
                   _sectionHeader('אזור סכנה'),
                   _tile(
-                    icon: Icons.delete_forever_rounded,
+                    icon: PhosphorIconsBold.trash,
                     iconColor: const Color(0xFFDC2626),
                     title: 'מחיקת חשבון',
                     subtitle: 'פעולה בלתי הפיכה — כל הנתונים יימחקו',
@@ -413,7 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             : null,
         trailing: trailing ??
             (onTap != null
-                ? const Icon(Icons.chevron_right_rounded,
+                ? const Icon(PhosphorIconsRegular.caretRight,
                     color: TaskTheme.textTertiary)
                 : null),
         onTap: onTap,
@@ -550,8 +551,8 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
                             BorderRadius.circular(TaskTheme.radiusM)),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureNew
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined),
+                          ? PhosphorIconsRegular.eyeSlash
+                          : PhosphorIconsRegular.eye),
                       onPressed: () =>
                           setState(() => _obscureNew = !_obscureNew),
                     ),
@@ -574,8 +575,8 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
                             BorderRadius.circular(TaskTheme.radiusM)),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureConfirm
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined),
+                          ? PhosphorIconsRegular.eyeSlash
+                          : PhosphorIconsRegular.eye),
                       onPressed: () =>
                           setState(() => _obscureConfirm = !_obscureConfirm),
                     ),
@@ -758,8 +759,8 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
                             BorderRadius.circular(TaskTheme.radiusM)),
                     suffixIcon: IconButton(
                       icon: Icon(_obscure
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined),
+                          ? PhosphorIconsRegular.eyeSlash
+                          : PhosphorIconsRegular.eye),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -864,7 +865,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
       message:
           'פעולה זו בלתי הפיכה לחלוטין.\nכל הנתונים האישיים שלך יימחקו לצמיתות.',
       confirmText: 'מחק חשבון',
-      icon: Icons.delete_forever_rounded,
+      icon: PhosphorIconsBold.trash,
       iconGradient: const [Color(0xFFEF4444), Color(0xFFDC2626)],
       isDestructive: true,
     );
@@ -931,7 +932,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                         color: const Color(0xFFFEE2E2),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.delete_forever_rounded,
+                      child: const Icon(PhosphorIconsBold.trash,
                           color: Color(0xFFDC2626), size: 22),
                     ),
                     const SizedBox(width: 12),
@@ -968,8 +969,8 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                             BorderRadius.circular(TaskTheme.radiusM)),
                     suffixIcon: IconButton(
                       icon: Icon(_obscure
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined),
+                          ? PhosphorIconsRegular.eyeSlash
+                          : PhosphorIconsRegular.eye),
                       onPressed: () =>
                           setState(() => _obscure = !_obscure),
                     ),

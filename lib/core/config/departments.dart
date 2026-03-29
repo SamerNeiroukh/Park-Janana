@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 const List<String> allDepartments = [
   "פארק חבלים",
@@ -31,18 +32,18 @@ Color getDepartmentColor(String department) {
 IconData getDepartmentIcon(String department) {
   switch (department) {
     case 'פארק חבלים':
-      return Icons.park;
+      return PhosphorIconsRegular.tree;
     case 'פיינטבול':
-      return Icons.sports_esports;
+      return PhosphorIconsRegular.gameController;
     case 'קרטינג':
-      return Icons.directions_car;
+      return PhosphorIconsRegular.car;
     case 'פארק מים':
-      return Icons.pool;
+      return PhosphorIconsRegular.waves;
     case "ג'ימבורי":
-      return Icons.child_care;
+      return PhosphorIconsRegular.baby;
     case 'תפעול':
-      return Icons.build;
+      return PhosphorIconsRegular.wrench;
     default:
-      return Icons.work;
+      return PhosphorIconsRegular.briefcase;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firebase_service.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -119,7 +120,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0)),
                         suffixIcon: IconButton(
-                          icon: const Icon(Icons.save, color: Colors.green),
+                          icon: const Icon(PhosphorIconsRegular.floppyDisk, color: Colors.green),
                           onPressed: _updateMessage,
                         ),
                       ),
@@ -142,20 +143,22 @@ class _MessageBubbleState extends State<MessageBubble> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        const Icon(PhosphorIconsRegular.clock, size: 12, color: Colors.grey),
+                        const SizedBox(width: 4),
                         Text(
-                          "🕒 $formattedTime ${messageTime.day}/${messageTime.month}/${messageTime.year}",
+                          "$formattedTime ${messageTime.day}/${messageTime.month}/${messageTime.year}",
                           style:
                               const TextStyle(fontSize: 12, color: Colors.grey),
                           textAlign: TextAlign.right,
                         ),
                         if (canEditOrDelete) ...[
                           IconButton(
-                            icon: const Icon(Icons.edit,
+                            icon: const Icon(PhosphorIconsRegular.pencilSimple,
                                 color: Colors.orange, size: 18),
                             onPressed: () => setState(() => _isEditing = true),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete,
+                            icon: const Icon(PhosphorIconsRegular.trash,
                                 color: Colors.red, size: 18),
                             onPressed: _deleteMessage,
                           ),

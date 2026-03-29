@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/features/shifts/models/shift_model.dart';
@@ -143,7 +144,7 @@ class _WeekHeader extends StatelessWidget {
             // LEFT side of screen - next week (forward)
             IconButton(
               onPressed: onNext,
-              icon: const Icon(Icons.chevron_left_rounded),
+              icon: const Icon(PhosphorIconsRegular.caretLeft),
               tooltip: 'שבוע הבא',
             ),
             Expanded(
@@ -171,7 +172,7 @@ class _WeekHeader extends StatelessWidget {
             // RIGHT side of screen - prev week (backward)
             IconButton(
               onPressed: onPrev,
-              icon: const Icon(Icons.chevron_right_rounded),
+              icon: const Icon(PhosphorIconsRegular.caretRight),
               tooltip: 'שבוע קודם',
             ),
           ],
@@ -625,7 +626,7 @@ class _ShiftPillState extends State<_ShiftPill> {
               ),
               // Arrow indicator
               Icon(
-                Icons.chevron_right_rounded,
+                PhosphorIconsRegular.caretRight,
                 color: Colors.grey.shade400,
                 size: 20,
               ),
@@ -712,7 +713,7 @@ class _ShiftDetailsSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.calendar_today_rounded,
+              Icon(PhosphorIconsRegular.calendarBlank,
                   size: 18, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
@@ -731,7 +732,7 @@ class _ShiftDetailsSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.access_time_rounded,
+              Icon(PhosphorIconsRegular.clock,
                   size: 18, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
@@ -793,7 +794,7 @@ class _ShiftDetailsSheet extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
-                            Icons.arrow_forward_rounded,
+                            PhosphorIconsRegular.arrowRight,
                             size: 18,
                             color: Colors.white,
                           ),
@@ -903,7 +904,7 @@ class _ErrorState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.error_outline_rounded,
+              PhosphorIconsRegular.warningCircle,
               size: 64,
               color: Colors.red.shade300,
             ),
@@ -920,7 +921,7 @@ class _ErrorState extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: const Icon(PhosphorIconsRegular.arrowsClockwise, size: 18),
                 label: const Text('נסה שוב'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,

@@ -9,6 +9,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
 import 'package:park_janana/core/services/firebase_service.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class WorkerShiftReport extends StatefulWidget {
   final String uid;
@@ -227,7 +228,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.schedule_rounded, color: Colors.white, size: 20),
+                    child: const Icon(PhosphorIconsRegular.clock, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
                   const Text('דו״ח משמרות', style: TaskTheme.heading2),
@@ -272,7 +273,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
+          const Icon(PhosphorIconsRegular.calendarX, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין משמרות לחודש זה',
@@ -289,7 +290,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       children: [
         Expanded(
           child: _buildStatPill(
-            icon: Icons.schedule_rounded,
+            icon: PhosphorIconsRegular.clock,
             color: TaskTheme.inProgress,
             value: '${_shifts.length}',
             label: 'סה״כ',
@@ -298,7 +299,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildStatPill(
-            icon: Icons.check_circle_rounded,
+            icon: PhosphorIconsFill.checkCircle,
             color: TaskTheme.done,
             value: '${counts['accepted']}',
             label: 'אושרו',
@@ -307,7 +308,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildStatPill(
-            icon: Icons.cancel_rounded,
+            icon: PhosphorIconsRegular.xCircle,
             color: TaskTheme.overdue,
             value: '${counts['rejected']! + counts['other']!}',
             label: 'נדחו/אחר',
@@ -403,7 +404,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(children: [
-            Icon(Icons.pie_chart_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.chartPie, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('התפלגות החלטות', style: TaskTheme.heading3),
           ]),
@@ -461,7 +462,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('פירוט משמרות', style: TaskTheme.heading3),
           ],
@@ -503,7 +504,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                 // Date + time row
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today_rounded,
+                    const Icon(PhosphorIconsRegular.calendarBlank,
                         size: 14, color: TaskTheme.textTertiary),
                     const SizedBox(width: 6),
                     Text(
@@ -512,7 +513,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                           .copyWith(color: TaskTheme.textPrimary),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.access_time_rounded,
+                    const Icon(PhosphorIconsRegular.clock,
                         size: 14, color: TaskTheme.textTertiary),
                     const SizedBox(width: 4),
                     Text(
@@ -573,8 +574,8 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                     const SizedBox(width: 4),
                     Icon(
                       isExpanded
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
+                          ? PhosphorIconsRegular.caretUp
+                          : PhosphorIconsRegular.caretDown,
                       size: 18,
                       color: TaskTheme.primary,
                     ),
@@ -716,7 +717,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                             strokeWidth: 2, color: Colors.white),
                       )
                     else
-                      const Icon(Icons.picture_as_pdf_rounded,
+                      const Icon(PhosphorIconsRegular.filePdf,
                           color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(

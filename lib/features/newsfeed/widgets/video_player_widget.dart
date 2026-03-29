@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
@@ -144,8 +145,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               ),
               child: Icon(
                 isFormatError
-                    ? Icons.video_settings_rounded
-                    : Icons.broken_image_outlined,
+                    ? PhosphorIconsRegular.videoCamera
+                    : PhosphorIconsRegular.imageBroken,
                 color: isFormatError ? Colors.orange : Colors.red.shade300,
                 size: 40,
               ),
@@ -183,7 +184,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   });
                   _initializePlayer();
                 },
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: const Icon(PhosphorIconsRegular.arrowsClockwise, size: 18),
                 label: const Text('נסה שוב'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class EmptyState extends StatelessWidget {
   final String message;
@@ -11,7 +12,7 @@ class EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.inbox, size: 64, color: Colors.grey),
+          const Icon(PhosphorIconsRegular.tray, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
             message,

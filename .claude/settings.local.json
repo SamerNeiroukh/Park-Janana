@@ -48,7 +48,10 @@
       "Bash(powershell.exe -NoProfile -Command \"& { Copy-Item -Path \"\"$env:LOCALAPPDATA\\\\Pub\\\\Cache\"\" -Destination ''C:\\\\pub-cache'' -Recurse -Force }\")",
       "Bash(powershell.exe -NoProfile -Command 'Copy-Item -Path \"\"$env:LOCALAPPDATA\\\\Pub\\\\Cache\"\" -Destination \"\"C:\\\\pub-cache\"\" -Recurse -Force')",
       "Bash(powershell.exe -NoProfile -Command 'Test-Path \"\"C:\\\\pub-cache\\\\hosted\"\"')",
-      "Bash(export PUB_CACHE=\"C:/pub-cache\")"
+      "Bash(export PUB_CACHE=\"C:/pub-cache\")",
+      "Bash(__NEW_LINE_5dca3bd0ac857055__ python3:*)",
+      "Bash(sed -n '346,360p' lib/features/attendance/widgets/clock_in_out_widget.dart)",
+      "Bash(sed -n '444,452p' lib/features/attendance/widgets/clock_in_out_widget.dart)"
     ],
     "additionalDirectories": [
       "c:\\dev\\park_janana\\android\\app"

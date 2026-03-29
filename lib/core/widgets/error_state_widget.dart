@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 
@@ -26,7 +27,7 @@ class ErrorStateWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
-                      Icons.error_outline_rounded,
+                      PhosphorIconsRegular.warningCircle,
                       size: 80,
                       color: AppColors.error,
                     ),
@@ -50,7 +51,7 @@ class ErrorStateWidget extends StatelessWidget {
                     if (onRetry != null)
                       ElevatedButton.icon(
                         onPressed: onRetry,
-                        icon: const Icon(Icons.refresh_rounded),
+                        icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
                         label: const Text('נסה שוב'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
@@ -258,7 +259,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                   color: _kGreen.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_circle_rounded,
+                child: const Icon(PhosphorIconsFill.checkCircle,
                     color: _kGreen, size: 64),
               ),
             ),
@@ -293,7 +294,7 @@ class _RegistrationFormState extends State<RegistrationForm>
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, color: _kAmber, size: 20),
+                  Icon(PhosphorIconsRegular.info, color: _kAmber, size: 20),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -403,7 +404,7 @@ class _RegistrationFormState extends State<RegistrationForm>
               // Back button — last child = LEFT in RTL
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
+                icon: const Icon(PhosphorIconsRegular.arrowLeft, size: 20),
                 color: _kAmber,
                 splashRadius: 24,
                 padding: const EdgeInsets.all(8),
@@ -421,7 +422,7 @@ class _RegistrationFormState extends State<RegistrationForm>
             color: _kRed.withValues(alpha: 0.08),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded,
+                const Icon(PhosphorIconsRegular.warningCircle,
                     color: _kRed, size: 18),
                 const SizedBox(width: 8),
                 Text(
@@ -445,7 +446,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Personal details section
-                  _sectionHeader(Icons.badge_outlined, 'פרטים אישיים'),
+                  _sectionHeader(PhosphorIconsRegular.identificationCard, 'פרטים אישיים'),
                   const SizedBox(height: 12),
                   _field(
                     key: 'name',
@@ -454,7 +455,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     nextFocus: _phoneFocus,
                     label: 'שם מלא',
                     hint: 'לדוגמה: ישראל ישראלי',
-                    icon: Icons.person_outline_rounded,
+                    icon: PhosphorIconsRegular.user,
                     autofillHints: const [AutofillHints.name],
                   ),
                   _field(
@@ -464,7 +465,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     nextFocus: _idFocus,
                     label: 'מספר טלפון',
                     hint: '05XXXXXXXX',
-                    icon: Icons.phone_outlined,
+                    icon: PhosphorIconsRegular.phone,
                     keyboardType: TextInputType.phone,
                     formatters: [IlLocalPhoneFormatter()],
                     autofillHints: const [
@@ -479,7 +480,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     nextFocus: _emailFocus,
                     label: 'תעודת זהות',
                     hint: '9 ספרות',
-                    icon: Icons.credit_card_outlined,
+                    icon: PhosphorIconsRegular.creditCard,
                     keyboardType: TextInputType.number,
                     formatters: [
                       FilteringTextInputFormatter.digitsOnly,
@@ -488,7 +489,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                   ),
 
                   const SizedBox(height: 8),
-                  _sectionHeader(Icons.lock_outline_rounded, 'פרטי כניסה'),
+                  _sectionHeader(PhosphorIconsRegular.lock, 'פרטי כניסה'),
                   const SizedBox(height: 12),
                   _field(
                     key: 'email',
@@ -497,7 +498,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     nextFocus: _passFocus,
                     label: 'כתובת אימייל',
                     hint: 'name@example.com',
-                    icon: Icons.email_outlined,
+                    icon: PhosphorIconsRegular.envelope,
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
                   ),
@@ -508,7 +509,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     nextFocus: _confirmFocus,
                     label: 'סיסמה',
                     hint: 'לפחות 6 תווים',
-                    icon: Icons.lock_outline_rounded,
+                    icon: PhosphorIconsRegular.lock,
                     obscure: !_passVisible,
                     showToggle: true,
                     toggleVisible: _passVisible,
@@ -521,7 +522,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     focus: _confirmFocus,
                     label: 'אישור סיסמה',
                     hint: 'הזן שוב את הסיסמה',
-                    icon: Icons.lock_reset_outlined,
+                    icon: PhosphorIconsRegular.lockKey,
                     obscure: !_confirmVisible,
                     showToggle: true,
                     toggleVisible: _confirmVisible,
@@ -546,7 +547,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                     child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.info_outline_rounded,
+                        Icon(PhosphorIconsRegular.info,
                             color: Color(0xFFB45309), size: 18),
                         SizedBox(width: 10),
                         Expanded(
@@ -585,7 +586,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.send_rounded, size: 18),
+                                Icon(PhosphorIconsRegular.paperPlaneTilt, size: 18),
                                 SizedBox(width: 8),
                                 Text(
                                   'שלח בקשת הצטרפות',
@@ -671,8 +672,8 @@ class _RegistrationFormState extends State<RegistrationForm>
       suffix = IconButton(
         icon: Icon(
           toggleVisible
-              ? Icons.visibility_off_outlined
-              : Icons.visibility_outlined,
+              ? PhosphorIconsRegular.eyeSlash
+              : PhosphorIconsRegular.eye,
           color: Colors.grey.shade500,
           size: 20,
         ),
@@ -682,12 +683,12 @@ class _RegistrationFormState extends State<RegistrationForm>
     } else if (isValid) {
       suffix = const Padding(
         padding: EdgeInsets.only(left: 12),
-        child: Icon(Icons.check_circle_rounded, color: _kGreen, size: 20),
+        child: Icon(PhosphorIconsFill.checkCircle, color: _kGreen, size: 20),
       );
     } else if (hasError) {
       suffix = const Padding(
         padding: EdgeInsets.only(left: 12),
-        child: Icon(Icons.cancel_rounded, color: _kRed, size: 20),
+        child: Icon(PhosphorIconsRegular.xCircle, color: _kRed, size: 20),
       );
     }
 

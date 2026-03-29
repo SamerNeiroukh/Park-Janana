@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// "מה חשוב עכשיו" — Smart Context Panel.
 ///
@@ -29,7 +30,7 @@ class SmartContextPanel extends StatelessWidget {
       return const [
         _ContextItem(
           color: Color(0xFF22C55E),
-          icon: Icons.check_circle_outline_rounded,
+          icon: PhosphorIconsRegular.checkCircle,
           text: 'הכל מעודכן — אין פריטים דחופים',
           count: 0,
         ),
@@ -42,21 +43,21 @@ class SmartContextPanel extends StatelessWidget {
           if (shiftsBadge > 0)
             _ContextItem(
               color: const Color(0xFF3B82F6),
-              icon: Icons.schedule_rounded,
+              icon: PhosphorIconsRegular.clock,
               text: 'שינויים במשמרות ממתינים',
               count: shiftsBadge,
             ),
           if (tasksBadge > 0)
             _ContextItem(
               color: const Color(0xFF8B5CF6),
-              icon: Icons.assignment_outlined,
+              icon: PhosphorIconsRegular.clipboard,
               text: 'משימות ממתינות לאישור',
               count: tasksBadge,
             ),
           if (newsfeedBadge > 0)
             _ContextItem(
               color: const Color(0xFFF59E0B),
-              icon: Icons.newspaper_rounded,
+              icon: PhosphorIconsRegular.newspaper,
               text: 'פוסטים חדשים בלוח המודעות',
               count: newsfeedBadge,
             ),
@@ -67,14 +68,14 @@ class SmartContextPanel extends StatelessWidget {
           if (newsfeedBadge > 0)
             _ContextItem(
               color: const Color(0xFF3B82F6),
-              icon: Icons.newspaper_rounded,
+              icon: PhosphorIconsRegular.newspaper,
               text: 'עדכונים חדשים בלוח המודעות',
               count: newsfeedBadge,
             ),
           if (tasksBadge > 0)
             _ContextItem(
               color: const Color(0xFFF59E0B),
-              icon: Icons.bar_chart_rounded,
+              icon: PhosphorIconsRegular.chartBar,
               text: 'פעילות עסקית חדשה לבדיקה',
               count: tasksBadge,
             ),
@@ -85,21 +86,21 @@ class SmartContextPanel extends StatelessWidget {
           if (shiftsBadge > 0)
             _ContextItem(
               color: const Color(0xFF3B82F6),
-              icon: Icons.schedule_rounded,
+              icon: PhosphorIconsRegular.clock,
               text: 'משמרות חדשות שהוקצו לך',
               count: shiftsBadge,
             ),
           if (tasksBadge > 0)
             _ContextItem(
               color: const Color(0xFF8B5CF6),
-              icon: Icons.task_outlined,
+              icon: PhosphorIconsRegular.clipboardText,
               text: 'משימות פתוחות ממתינות לך',
               count: tasksBadge,
             ),
           if (newsfeedBadge > 0)
             _ContextItem(
               color: const Color(0xFFF59E0B),
-              icon: Icons.campaign_outlined,
+              icon: PhosphorIconsRegular.megaphone,
               text: 'עדכונים חדשים בלוח המודעות',
               count: newsfeedBadge,
             ),
@@ -159,7 +160,7 @@ class SmartContextPanel extends StatelessWidget {
                         ],
                       ),
                       child: const Icon(
-                        Icons.bolt_rounded,
+                        PhosphorIconsRegular.lightning,
                         color: Colors.white,
                         size: 20,
                       ),

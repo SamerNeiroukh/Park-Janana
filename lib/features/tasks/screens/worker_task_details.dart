@@ -10,6 +10,7 @@ import 'package:park_janana/features/tasks/widgets/task_comments_section.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class WorkerTaskDetailsScreen extends StatefulWidget {
   final TaskModel task;
@@ -29,23 +30,23 @@ class _AttachmentsSection extends StatelessWidget {
 
   IconData _iconFor(String url) {
     final lower = url.toLowerCase();
-    if (lower.endsWith('.pdf')) return Icons.picture_as_pdf_rounded;
+    if (lower.endsWith('.pdf')) return PhosphorIconsRegular.filePdf;
     if (lower.endsWith('.jpg') ||
         lower.endsWith('.jpeg') ||
         lower.endsWith('.png') ||
         lower.endsWith('.gif') ||
         lower.endsWith('.webp')) {
-      return Icons.image_rounded;
+      return PhosphorIconsRegular.image;
     }
     if (lower.endsWith('.mp4') ||
         lower.endsWith('.mov') ||
         lower.endsWith('.avi')) {
-      return Icons.videocam_rounded;
+      return PhosphorIconsRegular.videoCamera;
     }
     if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
-      return Icons.description_rounded;
+      return PhosphorIconsRegular.fileText;
     }
-    return Icons.attach_file_rounded;
+    return PhosphorIconsRegular.paperclip;
   }
 
   String _labelFor(String url) {
@@ -138,7 +139,7 @@ class _AttachmentTile extends StatelessWidget {
             color: Color(0xFF374151),
           ),
         ),
-        trailing: const Icon(Icons.open_in_new_rounded,
+        trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
             size: 16, color: Color(0xFF9CA3AF)),
         onTap: onTap,
       ),
@@ -273,7 +274,14 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text("💬 שלח תגובה"),
+                            : const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(PhosphorIconsRegular.chatCircle, size: 18),
+                                  SizedBox(width: 6),
+                                  Text("שלח תגובה"),
+                                ],
+                              ),
                       ),
                       const SizedBox(height: 32),
                       if (_isWorker && currentWorkerStatus == 'pending')
@@ -281,14 +289,28 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                           onPressed: () => _updateWorkerStatus('in_progress'),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange),
-                          child: const Text("🚧 התחל משימה"),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(PhosphorIconsRegular.play, size: 18),
+                              SizedBox(width: 6),
+                              Text("התחל משימה"),
+                            ],
+                          ),
                         ),
                       if (_isWorker && currentWorkerStatus == 'in_progress')
                         ElevatedButton(
                           onPressed: () => _updateWorkerStatus('done'),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green),
-                          child: const Text("✅ סיים משימה"),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(PhosphorIconsRegular.checkCircle, size: 18),
+                              SizedBox(width: 6),
+                              Text("סיים משימה"),
+                            ],
+                          ),
                         ),
                     ],
                   ),

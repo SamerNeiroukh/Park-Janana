@@ -11,6 +11,7 @@ import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/utils/profile_image_provider.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const _kPrimary = Color(0xFF4F46E5);
@@ -158,7 +159,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               const SizedBox(height: 20),
               _OptionTile(
-                icon: Icons.camera_alt_rounded,
+                icon: PhosphorIconsRegular.camera,
                 label: 'צלם תמונה',
                 subtitle: 'השתמש במצלמה',
                 color: _kPrimary,
@@ -169,7 +170,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
               const SizedBox(height: 10),
               _OptionTile(
-                icon: Icons.photo_library_rounded,
+                icon: PhosphorIconsRegular.images,
                 label: 'בחר מהגלריה',
                 subtitle: 'העלה מהתמונות שלך',
                 color: const Color(0xFF8B5CF6),
@@ -394,7 +395,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           top: topPad + 8,
           left: 8,
           child: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios_rounded,
+            icon: const Icon(PhosphorIconsRegular.arrowRight,
                 color: Colors.white, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
@@ -511,7 +512,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 ),
               ],
             ),
-            child: const Icon(Icons.camera_alt_rounded,
+            child: const Icon(PhosphorIconsRegular.camera,
                 color: Colors.white, size: 16),
           ),
         ),
@@ -585,7 +586,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       children: [
         Expanded(
           child: _StatCard(
-            icon: Icons.verified_rounded,
+            icon: PhosphorIconsFill.sealCheck,
             value: '$licensed / $total',
             label: 'מחלקות מורשות',
             color: _kPrimary,
@@ -594,7 +595,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            icon: Icons.shield_outlined,
+            icon: PhosphorIconsRegular.shield,
             value: '$pct%',
             label: 'כיסוי הרשאות',
             color: const Color(0xFF10B981),
@@ -616,19 +617,19 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       child: Column(
         children: [
           _cardHeader(
-            icon: Icons.person_outline_rounded,
+            icon: PhosphorIconsRegular.user,
             color: _kPrimary,
             title: 'פרטים אישיים',
           ),
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
           _InfoRow(
-            icon: Icons.email_outlined,
+            icon: PhosphorIconsRegular.envelope,
             iconColor: _kPrimary,
             label: 'אימייל',
             value: user.email,
           ),
           _InfoRow(
-            icon: Icons.phone_outlined,
+            icon: PhosphorIconsRegular.phone,
             iconColor: const Color(0xFF10B981),
             label: 'מספר טלפון',
             value: user.phoneNumber,
@@ -656,7 +657,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _cardHeader(
-            icon: Icons.verified_user_rounded,
+            icon: PhosphorIconsFill.shieldCheck,
             color: _kPrimary,
             title: 'הרשאות מחלקה',
             trailing: Container(
@@ -772,19 +773,19 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       case 'worker':
         return _RoleInfo(
           label: 'עובד',
-          icon: Icons.engineering_rounded,
+          icon: PhosphorIconsRegular.hardHat,
           color: _kPrimary,
         );
       case 'manager':
         return _RoleInfo(
           label: 'מנהל',
-          icon: Icons.manage_accounts_rounded,
+          icon: PhosphorIconsRegular.userGear,
           color: const Color(0xFF059669),
         );
       default:
         return _RoleInfo(
           label: 'בעלים',
-          icon: Icons.business_center_rounded,
+          icon: PhosphorIconsRegular.briefcase,
           color: const Color(0xFFD97706),
         );
     }
@@ -983,8 +984,8 @@ class _DeptChip extends StatelessWidget {
         children: [
           Icon(
             licensed
-                ? Icons.check_circle_rounded
-                : Icons.lock_outline_rounded,
+                ? PhosphorIconsFill.checkCircle
+                : PhosphorIconsRegular.lock,
             size: 13,
             color: effectiveColor,
           ),
@@ -1068,7 +1069,7 @@ class _OptionTile extends StatelessWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right_rounded,
+                PhosphorIconsRegular.caretRight,
                 color: color.withValues(alpha: 0.4),
                 size: 20,
               ),

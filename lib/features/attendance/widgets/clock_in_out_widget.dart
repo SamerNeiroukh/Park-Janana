@@ -12,6 +12,7 @@ import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Color tokens (on the hero-card gradient background) ──────────────────────
 const _kSecondHandIdle = Color(0xFFFBBF24); // amber
@@ -273,7 +274,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                     textAlign: TextAlign.right),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.error_outline_rounded,
+              const Icon(PhosphorIconsRegular.warningCircle,
                   color: Colors.white, size: 20),
             ],
           ),
@@ -346,7 +347,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.location_disabled_rounded,
+                          child: const Icon(PhosphorIconsRegular.gpsSlash,
                               size: 38, color: Colors.white),
                         ),
                         const SizedBox(height: 22),
@@ -444,7 +445,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?',
       confirmText: 'כן',
       cancelText: 'לא',
-      icon: Icons.location_off_rounded,
+      icon: PhosphorIconsRegular.gpsSlash,
       isDestructive: true,
     );
   }

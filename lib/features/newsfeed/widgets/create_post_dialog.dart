@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 
@@ -55,28 +56,28 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     {
       'value': 'announcement',
       'label': 'הודעה',
-      'icon': Icons.campaign_rounded,
+      'icon': PhosphorIconsFill.megaphone,
       'color': AppColors.salmon,
       'description': 'הודעות חשובות לכלל העובדים',
     },
     {
       'value': 'update',
       'label': 'עדכון',
-      'icon': Icons.update_rounded,
+      'icon': PhosphorIconsRegular.arrowsClockwise,
       'color': AppColors.primaryBlue,
       'description': 'עדכונים ושינויים',
     },
     {
       'value': 'event',
       'label': 'אירוע',
-      'icon': Icons.event_rounded,
+      'icon': PhosphorIconsRegular.calendarBlank,
       'color': AppColors.success,
       'description': 'אירועים ופעילויות',
     },
     {
       'value': 'general',
       'label': 'כללי',
-      'icon': Icons.article_rounded,
+      'icon': PhosphorIconsRegular.article,
       'color': AppColors.greyMedium,
       'description': 'מידע כללי',
     },
@@ -202,7 +203,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.info_outline_rounded, color: Colors.white, size: 18),
+            const Icon(PhosphorIconsRegular.info, color: Colors.white, size: 18),
           ],
         ),
         backgroundColor: const Color(0xFF0F5398),
@@ -278,7 +279,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
             const SizedBox(height: 20),
             _buildMediaOption(
-              icon: Icons.photo_library_rounded,
+              icon: PhosphorIconsRegular.images,
               label: 'בחר תמונות',
               subtitle: 'בחר תמונות מהגלריה',
               color: AppColors.primaryBlue,
@@ -289,7 +290,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
             const SizedBox(height: 12),
             _buildMediaOption(
-              icon: Icons.videocam_rounded,
+              icon: PhosphorIconsRegular.videoCamera,
               label: 'בחר סרטון',
               subtitle: 'בחר סרטון מהגלריה',
               color: AppColors.success,
@@ -300,7 +301,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
             const SizedBox(height: 12),
             _buildMediaOption(
-              icon: Icons.camera_alt_rounded,
+              icon: PhosphorIconsRegular.camera,
               label: 'צלם תמונה',
               subtitle: 'פתח את המצלמה',
               color: AppColors.salmon,
@@ -431,7 +432,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           ),
           const Center(
             child: Icon(
-              Icons.play_circle_filled_rounded,
+              PhosphorIconsFill.playCircle,
               color: Colors.white,
               size: 28,
               shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
@@ -447,7 +448,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.videocam_rounded, color: Colors.white54, size: 28),
+          Icon(PhosphorIconsRegular.videoCamera, color: Colors.white54, size: 28),
           SizedBox(height: 4),
           Text(
             'וידאו',
@@ -543,7 +544,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             SizedBox(width: 8),
-            Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
           ],
         ),
         backgroundColor: AppColors.success,
@@ -562,7 +563,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           children: [
             Text(message, style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 8),
-            const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+            const Icon(PhosphorIconsRegular.warningCircle, color: Colors.white, size: 20),
           ],
         ),
         backgroundColor: AppColors.error,
@@ -672,7 +673,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
-                  Icons.edit_note_rounded,
+                  PhosphorIconsRegular.notePencil,
                   color: Colors.white,
                   size: 26,
                 ),
@@ -710,7 +711,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Icon(
-                  Icons.close_rounded,
+                  PhosphorIconsRegular.x,
                   color: Colors.white.withValues(alpha: _isSubmitting ? 0.4 : 1.0),
                   size: 22,
                 ),
@@ -730,7 +731,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           textDirection: TextDirection.rtl,
           children: [
             Icon(
-              Icons.category_rounded,
+              PhosphorIconsRegular.squaresFour,
               size: 18,
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
@@ -820,7 +821,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           textDirection: TextDirection.rtl,
           children: [
             Icon(
-              Icons.title_rounded,
+              PhosphorIconsRegular.textT,
               size: 18,
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
@@ -844,7 +845,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           decoration: _inputDecoration(
             hint: 'הזן כותרת לפוסט...',
-            prefixIcon: Icons.short_text_rounded,
+            prefixIcon: PhosphorIconsRegular.textAlignLeft,
           ),
           validator: (value) =>
               value == null || value.trim().isEmpty ? 'יש להזין כותרת' : null,
@@ -862,7 +863,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           textDirection: TextDirection.rtl,
           children: [
             Icon(
-              Icons.notes_rounded,
+              PhosphorIconsRegular.note,
               size: 18,
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
@@ -904,7 +905,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           textDirection: TextDirection.rtl,
           children: [
             Icon(
-              Icons.photo_library_rounded,
+              PhosphorIconsRegular.images,
               size: 18,
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
@@ -964,7 +965,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, _, _) => Container(
                                     color: AppColors.greyLight,
-                                    child: const Icon(Icons.broken_image_rounded),
+                                    child: const Icon(PhosphorIconsRegular.imageBroken),
                                   ),
                                 ),
                         ),
@@ -982,7 +983,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              Icons.close_rounded,
+                              PhosphorIconsRegular.x,
                               size: 14,
                               color: Colors.white,
                             ),
@@ -1041,7 +1042,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               textDirection: TextDirection.rtl,
               children: [
                 Icon(
-                  Icons.add_photo_alternate_rounded,
+                  PhosphorIconsRegular.images,
                   color: AppColors.primaryBlue.withValues(alpha: 0.7),
                   size: 22,
                 ),
@@ -1215,7 +1216,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                     ),
                   ),
                   SizedBox(width: 10),
-                  Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                  Icon(PhosphorIconsRegular.paperPlaneTilt, color: Colors.white, size: 22),
                 ],
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class LocationUtils {
@@ -31,7 +32,7 @@ class LocationUtils {
           'האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק.\n\nהמיקום משמש אך ורק לאימות נוכחות ואינו נשמר או משותף.',
       confirmText: 'אשר גישה',
       cancelText: 'לא עכשיו',
-      icon: Icons.location_on_rounded,
+      icon: PhosphorIconsRegular.mapPin,
       isDestructive: false,
     );
 

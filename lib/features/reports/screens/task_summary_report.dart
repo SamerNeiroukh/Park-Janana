@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
@@ -119,7 +120,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.task_alt_rounded, color: Colors.white, size: 20),
+                    child: const Icon(PhosphorIconsRegular.checkSquare, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
                   const Text('דו״ח משימות', style: TaskTheme.heading2),
@@ -169,7 +170,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.assignment_outlined, size: 64, color: TaskTheme.textTertiary),
+          const Icon(PhosphorIconsRegular.clipboard, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין משימות לחודש זה',
@@ -199,7 +200,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       children: [
         Expanded(
           child: _buildStatPill(
-            icon: Icons.assignment_rounded,
+            icon: PhosphorIconsRegular.clipboard,
             color: TaskTheme.inProgress,
             value: '$total',
             label: 'סה״כ',
@@ -208,7 +209,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildStatPill(
-            icon: Icons.check_circle_rounded,
+            icon: PhosphorIconsFill.checkCircle,
             color: TaskTheme.done,
             value: '$completed',
             label: 'הושלמו',
@@ -217,7 +218,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildStatPill(
-            icon: Icons.percent_rounded,
+            icon: PhosphorIconsRegular.percent,
             color: rateColor,
             value: '${rate.toInt()}%',
             label: 'ביצוע',
@@ -311,7 +312,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
         children: [
           const Row(
             children: [
-              Icon(Icons.pie_chart_rounded, size: 18, color: TaskTheme.primary),
+              Icon(PhosphorIconsRegular.chartPie, size: 18, color: TaskTheme.primary),
               SizedBox(width: 8),
               Text('התפלגות סטטוס', style: TaskTheme.heading3),
             ],
@@ -391,7 +392,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('פירוט משימות', style: TaskTheme.heading3),
           ],
@@ -469,7 +470,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             // Due date
             Row(
               children: [
-                const Icon(Icons.event_rounded, size: 14, color: TaskTheme.textTertiary),
+                const Icon(PhosphorIconsRegular.calendarBlank, size: 14, color: TaskTheme.textTertiary),
                 const SizedBox(width: 4),
                 Text(
                   'יעד: ${DateFormat('dd/MM/yyyy').format(dueDate)}',
@@ -568,7 +569,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                             strokeWidth: 2, color: Colors.white),
                       )
                     else
-                      const Icon(Icons.picture_as_pdf_rounded,
+                      const Icon(PhosphorIconsRegular.filePdf,
                           color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(

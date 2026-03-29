@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -158,7 +159,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
         );
         if (mounted) _isNavigating = false;
       },
-      child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+      child: const Icon(PhosphorIconsRegular.plus, color: Colors.white, size: 28),
     );
   }
 
@@ -211,11 +212,11 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                     decoration: InputDecoration(
                       hintText: 'חיפוש משימה...',
                       hintStyle: TaskTheme.body,
-                      prefixIcon: const Icon(Icons.search_rounded,
+                      prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
                           size: 20, color: TaskTheme.textTertiary),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear_rounded,
+                              icon: const Icon(PhosphorIconsRegular.x,
                                   size: 18, color: TaskTheme.textTertiary),
                               onPressed: () {
                                 _searchController.clear();
@@ -251,7 +252,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String?>(
           value: provider.departmentFilter,
-          icon: const Icon(Icons.filter_list_rounded,
+          icon: const Icon(PhosphorIconsRegular.funnel,
               size: 18, color: TaskTheme.textSecondary),
           style: TaskTheme.body.copyWith(color: TaskTheme.textPrimary),
           onChanged: provider.setDepartmentFilter,
@@ -439,7 +440,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.inbox_rounded,
+                PhosphorIconsRegular.tray,
                 size: 48,
                 color: TaskTheme.primary.withValues(alpha: 0.4),
               ),
@@ -477,7 +478,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
               color: TaskTheme.overdue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(TaskTheme.radiusL),
             ),
-            child: const Icon(Icons.delete_outline_rounded,
+            child: const Icon(PhosphorIconsRegular.trash,
                 color: TaskTheme.overdue, size: 24),
           ),
           child: TaskCard(
@@ -527,7 +528,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
             children: [
               const Row(
                 children: [
-                  Icon(Icons.hourglass_top_rounded,
+                  Icon(PhosphorIconsRegular.hourglassMedium,
                       size: 13, color: Color(0xFFB45309)),
                   SizedBox(width: 5),
                   Text(
@@ -660,7 +661,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
       title: 'מחיקת משימה',
       message: 'למחוק את "${task.title}"?',
       confirmText: 'מחק',
-      icon: Icons.delete_outline_rounded,
+      icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
 
@@ -670,7 +671,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(children: [
-              const Icon(Icons.delete_outline_rounded,
+              const Icon(PhosphorIconsRegular.trash,
                   color: Colors.white, size: 18),
               const SizedBox(width: 8),
               Text('המשימה "${task.title}" נמחקה',
@@ -772,20 +773,20 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 const SizedBox(height: 20),
 
                 if (provider.overdueTasks.isNotEmpty) ...[
-                  _buildSection('באיחור', Icons.warning_amber_rounded,
+                  _buildSection('באיחור', PhosphorIconsRegular.warning,
                       TaskTheme.overdue, provider.overdueTasks, provider),
                   const SizedBox(height: 20),
                 ],
 
                 if (provider.todayTasks.isNotEmpty) ...[
-                  _buildSection('להיום', Icons.today_rounded,
+                  _buildSection('להיום', PhosphorIconsRegular.calendarDot,
                       TaskTheme.pending, provider.todayTasks, provider,
                       showActions: true),
                   const SizedBox(height: 20),
                 ],
 
                 if (provider.upcomingTasks.isNotEmpty) ...[
-                  _buildSection('הקרובות', Icons.event_rounded,
+                  _buildSection('הקרובות', PhosphorIconsRegular.calendarBlank,
                       TaskTheme.inProgress, provider.upcomingTasks, provider),
                   const SizedBox(height: 20),
                 ],
@@ -836,7 +837,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.task_alt_rounded,
+            child: const Icon(PhosphorIconsRegular.checkSquare,
                 color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
@@ -953,7 +954,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.hourglass_top_rounded, size: 18, color: Color(0xFFF59E0B)),
+          Icon(PhosphorIconsRegular.hourglassMedium, size: 18, color: Color(0xFFF59E0B)),
           SizedBox(width: 8),
           Text(
             'ממתין לאישור מנהל',
@@ -978,7 +979,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         isStart ? const Color(0xFF818CF8) : const Color(0xFFFBBF24);
     final String label = isStart ? 'התחל משימה' : 'שלח לאישור מנהל';
     final IconData icon =
-        isStart ? Icons.play_arrow_rounded : Icons.send_rounded;
+        isStart ? PhosphorIconsRegular.play : PhosphorIconsRegular.paperPlaneTilt;
 
     return Container(
       width: double.infinity,
@@ -1052,7 +1053,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 color: TaskTheme.done.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.check_circle_outline_rounded,
+              child: const Icon(PhosphorIconsRegular.checkCircle,
                   size: 18, color: TaskTheme.done),
             ),
             const SizedBox(width: 10),
@@ -1119,7 +1120,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.task_alt_rounded,
+                PhosphorIconsRegular.checkSquare,
                 size: 56,
                 color: TaskTheme.primary.withValues(alpha: 0.4),
               ),

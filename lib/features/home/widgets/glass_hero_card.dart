@@ -12,6 +12,7 @@ import 'package:park_janana/core/services/notification_service.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/clock_service.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Clock geometry ────────────────────────────────────────────────────────────
 const double _kFace = 126.0;
@@ -315,7 +316,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     boxShadow: [BoxShadow(color: Colors.red.withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 2)],
                   ),
                   padding: const EdgeInsets.all(16),
-                  child: Icon(gpsUnavailable ? Icons.gps_off_rounded : Icons.location_off_rounded, size: 48, color: Colors.white),
+                  child: Icon(gpsUnavailable ? PhosphorIconsRegular.gpsSlash : PhosphorIconsRegular.mapPin, size: 48, color: Colors.white),
                 ),
                 const SizedBox(height: 22),
                 Text(title, textAlign: TextAlign.center,
@@ -609,8 +610,8 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                               children: [
                                 Icon(
                                   active
-                                      ? Icons.touch_app_rounded
-                                      : Icons.touch_app_rounded,
+                                      ? PhosphorIconsRegular.handTap
+                                      : PhosphorIconsRegular.handTap,
                                   size: 14,
                                   color: Colors.white.withValues(alpha: opacity),
                                 ),
@@ -657,13 +658,13 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     Row(
                       children: [
                         Expanded(child: _Stat(
-                          icon: Icons.calendar_today_rounded,
+                          icon: PhosphorIconsRegular.calendarBlank,
                           value: '${widget.daysWorked}',
                           label: 'ימים',
                         )),
                         Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.14)),
                         Expanded(child: _Stat(
-                          icon: Icons.access_time_rounded,
+                          icon: PhosphorIconsRegular.clock,
                           value: widget.hoursWorked.toStringAsFixed(1),
                           label: "שע'",
                         )),

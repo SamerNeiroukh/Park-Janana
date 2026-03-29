@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
@@ -67,7 +68,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
               borderRadius: BorderRadius.circular(14),
               boxShadow: TaskTheme.buttonShadow(const Color(0xFF7C3AED)),
             ),
-            child: const Icon(Icons.assignment_rounded,
+            child: const Icon(PhosphorIconsRegular.clipboard,
                 color: Colors.white, size: 22),
           ),
           const SizedBox(width: 14),
@@ -144,7 +145,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
           hintText: 'חיפוש משימה...',
           hintStyle: const TextStyle(
               color: TaskTheme.textTertiary, fontSize: 14),
-          prefixIcon: const Icon(Icons.search_rounded,
+          prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
               color: TaskTheme.textTertiary, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? GestureDetector(
@@ -152,7 +153,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
                     _searchCtrl.clear();
                     setState(() => _searchQuery = '');
                   },
-                  child: const Icon(Icons.close_rounded,
+                  child: const Icon(PhosphorIconsRegular.x,
                       color: TaskTheme.textTertiary, size: 18),
                 )
               : null,
@@ -255,7 +256,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.task_alt_rounded,
+          const Icon(PhosphorIconsRegular.checkSquare,
               size: 56, color: Color(0xFFCBD5E1)),
           const SizedBox(height: 16),
           Text(label,
@@ -383,8 +384,8 @@ class _TaskRow extends StatelessWidget {
                           // Due date
                           Icon(
                             isOverdue
-                                ? Icons.warning_amber_rounded
-                                : Icons.calendar_today_rounded,
+                                ? PhosphorIconsRegular.warning
+                                : PhosphorIconsRegular.calendarBlank,
                             size: 13,
                             color: isOverdue
                                 ? TaskTheme.overdue
@@ -419,7 +420,7 @@ class _TaskRow extends StatelessWidget {
                           const Spacer(),
                           // Worker count
                           if (task.assignedTo.isNotEmpty) ...[
-                            const Icon(Icons.person_rounded,
+                            const Icon(PhosphorIconsRegular.user,
                                 size: 13,
                                 color: TaskTheme.textTertiary),
                             const SizedBox(width: 3),
@@ -438,7 +439,7 @@ class _TaskRow extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsets.only(left: 12),
-                child: Icon(Icons.chevron_right_rounded,
+                child: Icon(PhosphorIconsRegular.caretRight,
                     color: TaskTheme.textTertiary, size: 20),
               ),
             ],

@@ -18,6 +18,7 @@ import 'package:park_janana/features/tasks/screens/all_tasks_screen.dart';
 import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
 import 'package:park_janana/features/newsfeed/widgets/create_post_dialog.dart';
 import 'package:park_janana/features/reports/screens/workers_hours_report.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 
 // ─── Data models ────────────────────────────────────────────────────────────
@@ -401,7 +402,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded,
+            const Icon(PhosphorIconsRegular.warningCircle,
                 size: 56, color: Color(0xFFEF4444)),
             const SizedBox(height: 16),
             const Text(
@@ -421,7 +422,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _loadKpis,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
               label: const Text('נסה שוב'),
               style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF7C3AED)),
@@ -467,7 +468,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.dashboard_rounded,
+                child: const Icon(PhosphorIconsRegular.squaresFour,
                     color: Colors.white, size: 26),
               ),
               const SizedBox(width: 14),
@@ -507,7 +508,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.calendar_today_rounded,
+                const Icon(PhosphorIconsRegular.calendarBlank,
                     color: Colors.white70, size: 14),
                 const SizedBox(width: 8),
                 Text(
@@ -545,7 +546,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.person_add_alt_1_rounded,
+              child: const Icon(PhosphorIconsRegular.userPlus,
                   color: Color(0xFFD97706), size: 20),
             ),
             const SizedBox(width: 12),
@@ -569,7 +570,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
+            const Icon(PhosphorIconsRegular.caretRight,
                 color: Color(0xFFD97706), size: 22),
           ],
         ),
@@ -597,7 +598,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 color: const Color(0xFFEF4444).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.warning_amber_rounded,
+              child: const Icon(PhosphorIconsRegular.warning,
                   color: Color(0xFFDC2626), size: 20),
             ),
             const SizedBox(width: 12),
@@ -620,7 +621,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
+            const Icon(PhosphorIconsRegular.caretRight,
                 color: Color(0xFFDC2626), size: 22),
           ],
         ),
@@ -635,25 +636,25 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       _StatPill(
         value: '${_kpi!.totalStaff}',
         label: 'צוות כולל',
-        icon: Icons.groups_rounded,
+        icon: PhosphorIconsRegular.usersThree,
         color: const Color(0xFF7C3AED),
       ),
       _StatPill(
         value: _kpi!.totalHoursMonth.toStringAsFixed(0),
         label: 'שעות החודש',
-        icon: Icons.access_time_filled_rounded,
+        icon: PhosphorIconsFill.clock,
         color: const Color(0xFF0EA5E9),
       ),
       _StatPill(
         value: '${_kpi!.openTasks}',
         label: 'משימות פתוחות',
-        icon: Icons.assignment_rounded,
+        icon: PhosphorIconsRegular.clipboard,
         color: const Color(0xFF8B5CF6),
       ),
       _StatPill(
         value: '${_kpi!.clockedInToday}',
         label: 'נוכחים היום',
-        icon: Icons.how_to_reg_rounded,
+        icon: PhosphorIconsRegular.userCheck,
         color: const Color(0xFF10B981),
       ),
     ];
@@ -725,19 +726,19 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   Widget _buildQuickActions(UserModel user) {
     final actions = [
       _QuickAction(
-        icon: Icons.add_circle_outline_rounded,
+        icon: PhosphorIconsRegular.plusCircle,
         label: 'צור משמרת',
         color: const Color(0xFF4F46E5),
         onTap: () => _go(const CreateShiftScreen()),
       ),
       _QuickAction(
-        icon: Icons.assignment_add,
+        icon: PhosphorIconsRegular.clipboardText,
         label: 'צור משימה',
         color: const Color(0xFF8B5CF6),
         onTap: () => _go(const CreateTaskFlowScreen()),
       ),
       _QuickAction(
-        icon: Icons.campaign_rounded,
+        icon: PhosphorIconsFill.megaphone,
         label: 'פרסם הודעה',
         color: const Color(0xFFF59E0B),
         onTap: () => showDialog(
@@ -751,7 +752,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         ),
       ),
       _QuickAction(
-        icon: Icons.bar_chart_rounded,
+        icon: PhosphorIconsRegular.chartBar,
         label: 'דוח שעות',
         color: const Color(0xFF0EA5E9),
         onTap: () => _go(const WorkersHoursReport()),
@@ -776,7 +777,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.bolt_rounded, color: Color(0xFF7C3AED), size: 18),
+              Icon(PhosphorIconsRegular.lightning, color: Color(0xFF7C3AED), size: 18),
               SizedBox(width: 8),
               Text(
                 'פעולות מהירות',
@@ -869,7 +870,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     color: const Color(0xFF7C3AED).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.people_alt_rounded,
+                  child: const Icon(PhosphorIconsRegular.users,
                       color: Color(0xFF7C3AED), size: 20),
                 ),
                 const SizedBox(width: 12),
@@ -904,7 +905,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(Icons.chevron_right_rounded,
+                const Icon(PhosphorIconsRegular.caretRight,
                     color: Color(0xFF94A3B8), size: 18),
                 const SizedBox(width: 4),
                 Text(
@@ -1151,7 +1152,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     color: const Color(0xFF4F46E5).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.manage_history_rounded,
+                  child: const Icon(PhosphorIconsRegular.clockCounterClockwise,
                       color: Color(0xFF4F46E5), size: 18),
                 ),
                 const SizedBox(width: 8),
@@ -1175,14 +1176,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             ),
             const SizedBox(height: 12),
             _buildMiniStat(
-              icon: Icons.today_rounded,
+              icon: PhosphorIconsRegular.calendarDot,
               label: 'היום',
               value: '${_kpi!.shiftsToday}',
               color: const Color(0xFF4F46E5),
             ),
             const SizedBox(height: 6),
             _buildMiniStat(
-              icon: Icons.date_range_rounded,
+              icon: PhosphorIconsRegular.calendarDots,
               label: 'השבוע',
               value: '${_kpi!.shiftsThisWeek}',
               color: const Color(0xFF6366F1),
@@ -1227,7 +1228,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.assignment_rounded,
+                  child: const Icon(PhosphorIconsRegular.clipboard,
                       color: Color(0xFF8B5CF6), size: 18),
                 ),
                 const SizedBox(width: 8),
@@ -1263,14 +1264,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             ),
             const SizedBox(height: 12),
             _buildMiniStat(
-              icon: Icons.pending_actions_rounded,
+              icon: PhosphorIconsRegular.clipboardText,
               label: 'פתוחות',
               value: '${_kpi!.openTasks}',
               color: const Color(0xFFF59E0B),
             ),
             const SizedBox(height: 6),
             _buildMiniStat(
-              icon: Icons.priority_high_rounded,
+              icon: PhosphorIconsBold.warning,
               label: 'דחוף',
               value: '${_kpi!.highPriorityTasks}',
               color: const Color(0xFFEF4444),
@@ -1309,7 +1310,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.emoji_events_rounded,
+              Icon(PhosphorIconsRegular.trophy,
                   color: Color(0xFFF59E0B), size: 20),
               SizedBox(width: 8),
               Text(
@@ -1425,7 +1426,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.access_time_filled_rounded,
+              child: const Icon(PhosphorIconsFill.clock,
                   color: Colors.white, size: 28),
             ),
             const SizedBox(width: 16),
@@ -1457,7 +1458,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
+            const Icon(PhosphorIconsRegular.caretRight,
                 color: Colors.white70, size: 24),
           ],
         ),

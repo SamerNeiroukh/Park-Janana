@@ -8,6 +8,7 @@ import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ShiftsButtonScreen extends StatefulWidget {
   final String uid;
@@ -285,7 +286,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                               fontSize: AppDimensions.fontL),
                         ),
                         const SizedBox(width: AppDimensions.spacingM),
-                        const Icon(Icons.calendar_today,
+                        const Icon(PhosphorIconsRegular.calendarBlank,
                             size: AppDimensions.iconS,
                             color: AppColors.primary),
                       ],

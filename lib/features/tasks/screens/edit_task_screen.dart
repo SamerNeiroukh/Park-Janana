@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -162,7 +163,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                           children: [
                             Expanded(
                               child: _buildPickerTile(
-                                icon: Icons.calendar_today_rounded,
+                                icon: PhosphorIconsRegular.calendarBlank,
                                 value: _dueDate != null
                                     ? DateFormat('dd/MM/yyyy')
                                         .format(_dueDate!)
@@ -174,7 +175,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: _buildPickerTile(
-                                icon: Icons.access_time_rounded,
+                                icon: PhosphorIconsRegular.clock,
                                 value: _dueTime != null
                                     ? '${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}'
                                     : 'שעה',
@@ -224,7 +225,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                                       onTap: () => setState(() =>
                                           _selectedWorkers.removeWhere(
                                               (u) => u.uid == w.uid)),
-                                      child: const Icon(Icons.close_rounded,
+                                      child: const Icon(PhosphorIconsRegular.x,
                                           size: 14, color: TaskTheme.primary),
                                     ),
                                   ],
@@ -251,7 +252,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                               hintText: 'חיפוש עובד...',
                               hintStyle:
                                   TextStyle(color: TaskTheme.textTertiary),
-                              prefixIcon: Icon(Icons.search_rounded,
+                              prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass,
                                   size: 20, color: TaskTheme.textTertiary),
                               border: InputBorder.none,
                               contentPadding:
@@ -318,8 +319,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                                       ),
                                       Icon(
                                         isSelected
-                                            ? Icons.check_circle_rounded
-                                            : Icons.circle_outlined,
+                                            ? PhosphorIconsFill.checkCircle
+                                            : PhosphorIconsRegular.circle,
                                         color: isSelected
                                             ? TaskTheme.primary
                                             : TaskTheme.textTertiary,
@@ -576,7 +577,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       : const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.save_rounded, color: Colors.white, size: 20),
+                            Icon(PhosphorIconsRegular.floppyDisk, color: Colors.white, size: 20),
                             SizedBox(width: 8),
                             Text(
                               'שמור שינויים',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
@@ -160,7 +161,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.bar_chart_rounded,
+                    child: const Icon(PhosphorIconsRegular.chartBar,
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -209,7 +210,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.assignment_outlined,
+          const Icon(PhosphorIconsRegular.clipboard,
               size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
@@ -236,7 +237,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
       children: [
         Expanded(
           child: _statPill(
-            icon: Icons.task_alt_rounded,
+            icon: PhosphorIconsRegular.checkSquare,
             color: TaskTheme.inProgress,
             value: '$totalTasks',
             label: 'סה"כ משימות',
@@ -245,7 +246,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _statPill(
-            icon: Icons.people_rounded,
+            icon: PhosphorIconsRegular.users,
             color: TaskTheme.done,
             value: '${_stats.length}',
             label: 'עובדים עם משימות',
@@ -254,7 +255,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _statPill(
-            icon: Icons.percent_rounded,
+            icon: PhosphorIconsRegular.percent,
             color: rateColor,
             value: '$overallRate%',
             label: 'שיעור השלמה',
@@ -317,7 +318,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
         children: [
           Row(
             children: [
-              const Icon(Icons.bar_chart_rounded,
+              const Icon(PhosphorIconsRegular.chartBar,
                   size: 18, color: TaskTheme.pending),
               const SizedBox(width: 8),
               const Text('שיעור השלמה לפי עובד', style: TaskTheme.heading3),
@@ -433,7 +434,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('פירוט עובדים', style: TaskTheme.heading3),
           ],
@@ -586,7 +587,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.picture_as_pdf_rounded,
+                          Icon(PhosphorIconsRegular.filePdf,
                               color: Colors.white, size: 20),
                           SizedBox(width: 8),
                           Text(

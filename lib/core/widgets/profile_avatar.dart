@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// A fast, synchronous avatar widget that displays profile pictures.
 ///
@@ -124,7 +125,7 @@ class _FullScreenPhotoPage extends StatelessWidget {
                     child: CircularProgressIndicator(color: Colors.white),
                   ),
                   errorWidget: (_, _, _) => const Icon(
-                    Icons.broken_image_rounded,
+                    PhosphorIconsRegular.imageBroken,
                     color: Colors.white54,
                     size: 64,
                   ),
@@ -142,7 +143,7 @@ class _FullScreenPhotoPage extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.close_rounded,
+                  child: const Icon(PhosphorIconsRegular.x,
                       color: Colors.white, size: 22),
                 ),
               ),

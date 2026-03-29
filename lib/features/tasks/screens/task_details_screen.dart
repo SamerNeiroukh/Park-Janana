@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -123,7 +124,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: PopupMenuButton<String>(
-                          icon: const Icon(Icons.more_horiz_rounded),
+                          icon: const Icon(PhosphorIconsRegular.dotsThree),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                           onSelected: (value) {
@@ -143,7 +144,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                                 value: 'edit',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.edit_rounded, size: 18),
+                                    Icon(PhosphorIconsRegular.pencilSimple, size: 18),
                                     SizedBox(width: 8),
                                     Text('ערוך משימה'),
                                   ],
@@ -152,7 +153,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.delete_outline_rounded,
+                                    Icon(PhosphorIconsRegular.trash,
                                         size: 18, color: TaskTheme.overdue),
                                     SizedBox(width: 8),
                                     Text('מחק משימה',
@@ -334,7 +335,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildInfoCard(
-            icon: Icons.description_outlined,
+            icon: PhosphorIconsRegular.fileText,
             title: 'תיאור',
             child: Text(
               _task.description.isNotEmpty
@@ -349,7 +350,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
           ),
           const SizedBox(height: 16),
           _buildInfoCard(
-            icon: Icons.info_outline_rounded,
+            icon: PhosphorIconsRegular.info,
             title: 'פרטים',
             child: Column(
               children: [
@@ -357,7 +358,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                   'תאריך יעד',
                   DateFormat('dd/MM/yyyy HH:mm')
                       .format(_task.dueDate.toDate()),
-                  Icons.calendar_today_rounded,
+                  PhosphorIconsRegular.calendarBlank,
                 ),
                 const Divider(height: 20, color: TaskTheme.divider),
                 _buildDetailRow(
@@ -370,20 +371,20 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                 _buildDetailRow(
                   'מחלקה',
                   TaskTheme.departmentLabel(_task.department),
-                  Icons.business_rounded,
+                  PhosphorIconsRegular.buildings,
                 ),
                 const Divider(height: 20, color: TaskTheme.divider),
                 _buildDetailRow(
                   'נוצרה',
                   DateFormat('dd/MM/yyyy').format(_task.createdAt.toDate()),
-                  Icons.schedule_rounded,
+                  PhosphorIconsRegular.clock,
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
           _buildInfoCard(
-            icon: Icons.group_outlined,
+            icon: PhosphorIconsRegular.usersThree,
             title: 'עובדים (${_workers.length})',
             child: Column(
               children: _workers.map((w) {
@@ -508,7 +509,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.chat_bubble_outline_rounded,
+                  Icon(PhosphorIconsRegular.chatCircle,
                       size: 48,
                       color: TaskTheme.textTertiary.withValues(alpha: 0.4)),
                   const SizedBox(height: 12),
@@ -687,7 +688,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                                     child: CircularProgressIndicator(
                                         strokeWidth: 2, color: Colors.white),
                                   )
-                                : const Icon(Icons.send_rounded,
+                                : const Icon(PhosphorIconsRegular.paperPlaneTilt,
                                     color: Colors.white, size: 20),
                           ),
                         ),
@@ -714,7 +715,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.hourglass_top_rounded, size: 18, color: Color(0xFFF59E0B)),
+          Icon(PhosphorIconsRegular.hourglassMedium, size: 18, color: Color(0xFFF59E0B)),
           SizedBox(width: 8),
           Text(
             'ממתין לאישור מנהל',
@@ -756,7 +757,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  isStart ? Icons.rocket_launch_rounded : Icons.send_rounded,
+                  isStart ? PhosphorIconsRegular.rocketLaunch : PhosphorIconsRegular.paperPlaneTilt,
                   color: Colors.white,
                   size: 22,
                 ),
@@ -822,7 +823,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
       title: 'מחיקת משימה',
       message: 'למחוק את "${_task.title}"?',
       confirmText: 'מחק',
-      icon: Icons.delete_outline_rounded,
+      icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
     if ((confirmed ?? false) && mounted) {
@@ -831,7 +832,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(children: [
-              const Icon(Icons.delete_outline_rounded,
+              const Icon(PhosphorIconsRegular.trash,
                   color: Colors.white, size: 18),
               const SizedBox(width: 8),
               Text('המשימה "${_task.title}" נמחקה',

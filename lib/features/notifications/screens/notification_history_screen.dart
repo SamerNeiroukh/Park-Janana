@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -115,7 +116,7 @@ class _NotificationHistoryScreenState
               ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.notifications_rounded,
+            child: const Icon(PhosphorIconsFill.bell,
                 color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
@@ -125,7 +126,7 @@ class _NotificationHistoryScreenState
           if (_uid != null && !_isMarkingAll)
             TextButton.icon(
               onPressed: _markAllAsRead,
-              icon: const Icon(Icons.done_all_rounded, size: 16),
+              icon: const Icon(PhosphorIconsRegular.checks, size: 16),
               label: const Text('סמן הכל כנקרא'),
               style: TextButton.styleFrom(
                 foregroundColor: TaskTheme.primary,
@@ -171,7 +172,7 @@ class _NotificationHistoryScreenState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline_rounded,
+                const Icon(PhosphorIconsRegular.warningCircle,
                     size: 48, color: TaskTheme.overdue),
                 const SizedBox(height: 12),
                 const Text('שגיאה בטעינת ההתראות', style: TaskTheme.body),
@@ -292,7 +293,7 @@ class _NotificationHistoryScreenState
               if (_isTappable(item.type))
                 const Padding(
                   padding: EdgeInsets.only(top: 4),
-                  child: Icon(Icons.chevron_right_rounded,
+                  child: Icon(PhosphorIconsRegular.caretRight,
                       size: 18, color: TaskTheme.textTertiary),
                 ),
             ],
@@ -500,13 +501,13 @@ class _NotificationHistoryScreenState
   _TypeConfig _typeConfig(String type) {
     if (type.startsWith('shift_')) {
       return const _TypeConfig(
-        icon: Icons.schedule_rounded,
+        icon: PhosphorIconsRegular.clock,
         color: Color(0xFF4F46E5),
       );
     }
     if (type.startsWith('task_')) {
       return const _TypeConfig(
-        icon: Icons.task_alt_rounded,
+        icon: PhosphorIconsRegular.checkSquare,
         color: Color(0xFF8B5CF6),
       );
     }
@@ -514,24 +515,24 @@ class _NotificationHistoryScreenState
         type == 'worker_approved' ||
         type == 'worker_rejected') {
       return const _TypeConfig(
-        icon: Icons.person_rounded,
+        icon: PhosphorIconsRegular.user,
         color: Color(0xFF059669),
       );
     }
     if (type == 'post_comment') {
       return const _TypeConfig(
-        icon: Icons.newspaper_rounded,
+        icon: PhosphorIconsRegular.newspaper,
         color: Color(0xFFF59E0B),
       );
     }
     if (type == 'clockout_missed') {
       return const _TypeConfig(
-        icon: Icons.timer_off_rounded,
+        icon: PhosphorIconsRegular.prohibit,
         color: Color(0xFFEF4444),
       );
     }
     return const _TypeConfig(
-      icon: Icons.notifications_rounded,
+      icon: PhosphorIconsFill.bell,
       color: TaskTheme.primary,
     );
   }
@@ -543,7 +544,7 @@ class _NotificationHistoryScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.notifications_none_rounded,
+          const Icon(PhosphorIconsRegular.bell,
               size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text('אין התראות',

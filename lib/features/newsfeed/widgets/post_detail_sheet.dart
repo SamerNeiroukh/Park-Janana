@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
@@ -131,13 +132,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
   IconData _getCategoryIcon(String category) {
     switch (category) {
       case 'announcement':
-        return Icons.campaign_rounded;
+        return PhosphorIconsFill.megaphone;
       case 'update':
-        return Icons.update_rounded;
+        return PhosphorIconsRegular.arrowsClockwise;
       case 'event':
-        return Icons.event_rounded;
+        return PhosphorIconsRegular.calendarBlank;
       default:
-        return Icons.article_rounded;
+        return PhosphorIconsRegular.article;
     }
   }
 
@@ -178,7 +179,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       title: 'מחיקת תגובה',
       message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
       confirmText: 'מחק',
-      icon: Icons.delete_outline_rounded,
+      icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
 
@@ -219,7 +220,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             Text(message, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(width: 10),
             Icon(
-              isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
+              isSuccess ? PhosphorIconsFill.checkCircle : PhosphorIconsRegular.warningCircle,
               color: Colors.white,
               size: 20,
             ),
@@ -315,7 +316,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
-                  Icons.article_rounded,
+                  PhosphorIconsRegular.article,
                   color: AppColors.primaryBlue,
                   size: 22,
                 ),
@@ -404,7 +405,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.push_pin_rounded,
+                Icon(PhosphorIconsFill.pushPin,
                     size: 14, color: Color(0xFFD97706)),
                 SizedBox(width: 6),
                 Text(
@@ -457,7 +458,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               Row(
                 children: [
                   Icon(
-                    Icons.access_time_rounded,
+                    PhosphorIconsRegular.clock,
                     size: 13,
                     color: Colors.grey.shade500,
                   ),
@@ -531,7 +532,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(Icons.more_horiz_rounded,
+        child: Icon(PhosphorIconsRegular.dotsThree,
             color: Colors.grey.shade600, size: 20),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -545,7 +546,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             title: 'מחיקת פוסט',
             message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
             confirmText: 'מחק',
-            icon: Icons.delete_outline_rounded,
+            icon: PhosphorIconsRegular.trash,
             isDestructive: true,
           ).then((confirmed) {
             if (!(confirmed ?? false)) return;
@@ -564,8 +565,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               children: [
                 Icon(
                   post.isPinned
-                      ? Icons.push_pin_outlined
-                      : Icons.push_pin_rounded,
+                      ? PhosphorIconsRegular.pushPin
+                      : PhosphorIconsFill.pushPin,
                   size: 18,
                   color: AppColors.primaryBlue,
                 ),
@@ -579,7 +580,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             value: 'edit',
             child: Row(
               children: [
-                Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryBlue),
+                Icon(PhosphorIconsRegular.pencilSimple, size: 18, color: AppColors.primaryBlue),
                 SizedBox(width: 12),
                 Text('ערוך פוסט'),
               ],
@@ -589,7 +590,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete_outline_rounded,
+              Icon(PhosphorIconsRegular.trash,
                   size: 18, color: Color(0xFFEF4444)),
               SizedBox(width: 12),
               Text('מחק פוסט', style: TextStyle(color: Color(0xFFEF4444))),
@@ -841,7 +842,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.videocam_rounded,
+                    PhosphorIconsRegular.videoCamera,
                     color: Colors.white54,
                     size: 48,
                   ),
@@ -865,7 +866,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.play_arrow_rounded,
+                PhosphorIconsRegular.play,
                 color: Colors.white,
                 size: 40,
               ),
@@ -890,7 +891,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         ),
         errorWidget: (_, _, _) => Container(
           color: Colors.grey.shade200,
-          child: Icon(Icons.broken_image_rounded,
+          child: Icon(PhosphorIconsRegular.imageBroken,
               color: Colors.grey.shade400, size: 48),
         ),
       ),
@@ -925,7 +926,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           ),
           Expanded(
             child: _EngagementButton(
-              icon: Icons.chat_bubble_outline_rounded,
+              icon: PhosphorIconsRegular.chatCircle,
               label: '${post.commentsCount}',
               color: Colors.grey.shade600,
               onTap: () {
@@ -954,7 +955,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              Icons.forum_rounded,
+              PhosphorIconsRegular.chats,
               color: AppColors.primaryBlue,
               size: 20,
             ),
@@ -1035,7 +1036,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.chat_bubble_outline_rounded,
+              PhosphorIconsRegular.chatCircle,
               size: 40,
               color: AppColors.primaryBlue.withValues(alpha: 0.5),
             ),
@@ -1136,7 +1137,7 @@ class _CloseButton extends StatelessWidget {
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(Icons.close_rounded, size: 22, color: Colors.grey.shade600),
+        child: Icon(PhosphorIconsRegular.x, size: 22, color: Colors.grey.shade600),
       ),
     );
   }
@@ -1517,7 +1518,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Icon(Icons.access_time_rounded,
+                        Icon(PhosphorIconsRegular.clock,
                             size: 12, color: Colors.grey.shade400),
                         const SizedBox(width: 4),
                         Text(
@@ -1541,7 +1542,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
-                      Icons.edit_outlined,
+                      PhosphorIconsRegular.pencilSimple,
                       size: 16,
                       color: AppColors.primaryBlue,
                     ),
@@ -1557,7 +1558,7 @@ class _ModernCommentCardState extends State<_ModernCommentCard> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
-                      Icons.delete_outline_rounded,
+                      PhosphorIconsRegular.trash,
                       size: 16,
                       color: Color(0xFFEF4444),
                     ),
@@ -1662,7 +1663,7 @@ class _SendButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                     strokeWidth: 2, color: Colors.white),
               )
-            : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
+            : const Icon(PhosphorIconsRegular.paperPlaneTilt, color: Colors.white, size: 22),
       ),
     );
   }
@@ -1738,7 +1739,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                               ),
                             ),
                             errorWidget: (_, _, _) => const Icon(
-                              Icons.broken_image_rounded,
+                              PhosphorIconsRegular.imageBroken,
                               color: Colors.white54,
                               size: 64,
                             ),
@@ -1760,7 +1761,7 @@ class _FullScreenMediaViewerState extends State<_FullScreenMediaViewer> {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.close_rounded,
+                    PhosphorIconsRegular.x,
                     color: Colors.white,
                     size: 24,
                   ),

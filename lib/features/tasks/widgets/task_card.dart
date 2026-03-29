@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/models/user_model.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../models/task_model.dart';
 import '../theme/task_theme.dart';
 import 'task_status_badge.dart';
@@ -224,7 +225,7 @@ class _TaskCardState extends State<TaskCard>
         child: Row(
           children: [
             const Icon(
-              Icons.check_circle_rounded,
+              PhosphorIconsFill.checkCircle,
               color: TaskTheme.done,
               size: 20,
             ),

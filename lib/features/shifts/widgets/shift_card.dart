@@ -6,6 +6,7 @@ import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/shifts/screens/shift_details_screen.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -52,7 +53,7 @@ class ShiftCardState extends State<ShiftCard> {
               _buildStatusIndicator(),
               const SizedBox(width: 14),
               Expanded(child: _buildMainInfo()),
-              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              const Icon(PhosphorIconsRegular.caretRight, color: AppColors.textSecondary),
             ],
           ),
         ),
@@ -70,14 +71,14 @@ class ShiftCardState extends State<ShiftCard> {
     final bool hasRequests = widget.shift.requestedWorkers.isNotEmpty;
 
     Color color = AppColors.primary;
-    IconData icon = Icons.event_available;
+    IconData icon = PhosphorIconsRegular.calendarCheck;
 
     if (isFull) {
       color = AppColors.success;
-      icon = Icons.check_circle;
+      icon = PhosphorIconsFill.checkCircle;
     } else if (hasRequests) {
       color = AppColors.warningOrange;
-      icon = Icons.hourglass_top;
+      icon = PhosphorIconsRegular.hourglassMedium;
     }
 
     return Container(
@@ -107,7 +108,7 @@ class ShiftCardState extends State<ShiftCard> {
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(Icons.people, size: 18, color: AppColors.textSecondary),
+            const Icon(PhosphorIconsRegular.users, size: 18, color: AppColors.textSecondary),
             const SizedBox(width: 4),
             Text(
               "${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers} עובדים",

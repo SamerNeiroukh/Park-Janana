@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
@@ -112,7 +113,7 @@ class _CommentsSheetState extends State<CommentsSheet>
       title: 'מחיקת תגובה',
       message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
       confirmText: 'מחק',
-      icon: Icons.delete_outline_rounded,
+      icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
 
@@ -136,7 +137,7 @@ class _CommentsSheetState extends State<CommentsSheet>
           children: [
             Text(message, style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 8),
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+            const Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 18),
           ],
         ),
         backgroundColor: AppColors.success,
@@ -156,7 +157,7 @@ class _CommentsSheetState extends State<CommentsSheet>
           children: [
             Text(message, style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 8),
-            const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+            const Icon(PhosphorIconsRegular.warningCircle, color: Colors.white, size: 18),
           ],
         ),
         backgroundColor: AppColors.error,
@@ -265,7 +266,7 @@ class _CommentsSheetState extends State<CommentsSheet>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
-                  Icons.chat_bubble_rounded,
+                  PhosphorIconsFill.chatCircle,
                   color: AppColors.primaryBlue,
                   size: 20,
                 ),
@@ -301,7 +302,7 @@ class _CommentsSheetState extends State<CommentsSheet>
               borderRadius: BorderRadius.circular(12),
               child: const Padding(
                 padding: EdgeInsets.all(8),
-                child: Icon(Icons.close_rounded, size: 22),
+                child: Icon(PhosphorIconsRegular.x, size: 22),
               ),
             ),
           ),
@@ -418,7 +419,7 @@ class _EmptyComments extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.chat_bubble_outline_rounded,
+              PhosphorIconsRegular.chatCircle,
               size: 56,
               color: AppColors.primaryBlue.withValues(alpha: 0.4),
             ),
@@ -534,7 +535,7 @@ class _CommentCardState extends State<_CommentCard> {
                       ),
                       const SizedBox(width: 4),
                       Icon(
-                        Icons.access_time_rounded,
+                        PhosphorIconsRegular.clock,
                         size: 11,
                         color: AppColors.greyMedium.withValues(alpha: 0.6),
                       ),
@@ -553,7 +554,7 @@ class _CommentCardState extends State<_CommentCard> {
                     child: const Padding(
                       padding: EdgeInsets.all(6),
                       child: Icon(
-                        Icons.delete_outline_rounded,
+                        PhosphorIconsRegular.trash,
                         size: 16,
                         color: Colors.red,
                       ),
@@ -662,7 +663,7 @@ class _SendButton extends StatelessWidget {
                     ),
                   )
                 : const Icon(
-                    Icons.send_rounded,
+                    PhosphorIconsRegular.paperPlaneTilt,
                     color: Colors.white,
                     size: 22,
                   ),

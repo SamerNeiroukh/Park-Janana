@@ -3,6 +3,7 @@ import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class UsersScreen extends StatefulWidget {
   final String shiftId;
@@ -144,7 +145,7 @@ class _UsersScreenState extends State<UsersScreen> {
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0)),
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass),
               ),
               onChanged: filterUsers,
             ),
@@ -192,10 +193,10 @@ class _UsersScreenState extends State<UsersScreen> {
                                 trailing: widget.draftMode
                                     ? Icon(
                                         isAssigned
-                                            ? Icons.check_circle
+                                            ? PhosphorIconsFill.checkCircle
                                             : isDraftSelected
-                                                ? Icons.check_circle
-                                                : Icons.add_circle_outline,
+                                                ? PhosphorIconsFill.checkCircle
+                                                : PhosphorIconsRegular.plusCircle,
                                         color: isAssigned
                                             ? Colors.grey
                                             : isDraftSelected
@@ -213,8 +214,8 @@ class _UsersScreenState extends State<UsersScreen> {
                                               )
                                             : Icon(
                                                 isAssigned
-                                                    ? Icons.person_remove
-                                                    : Icons.person_add,
+                                                    ? PhosphorIconsRegular.userMinus
+                                                    : PhosphorIconsRegular.userPlus,
                                                 color: isAssigned
                                                     ? Colors.red
                                                     : Colors.green,
@@ -279,7 +280,7 @@ class _UsersScreenState extends State<UsersScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         textDirection: TextDirection.rtl,
                         children: [
-                          const Icon(Icons.person_add, color: Colors.white, size: 20),
+                          const Icon(PhosphorIconsRegular.userPlus, color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             'הוסף ${_selectedDraftIds.length} עובדים',

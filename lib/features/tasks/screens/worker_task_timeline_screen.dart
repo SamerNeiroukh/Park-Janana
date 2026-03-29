@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -78,7 +79,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                           if (provider.overdueTasks.isNotEmpty) ...[
                             _buildSection(
                               title: 'באיחור',
-                              icon: Icons.warning_amber_rounded,
+                              icon: PhosphorIconsRegular.warning,
                               color: TaskTheme.overdue,
                               tasks: provider.overdueTasks,
                               provider: provider,
@@ -90,7 +91,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                           if (provider.todayTasks.isNotEmpty) ...[
                             _buildSection(
                               title: 'להיום',
-                              icon: Icons.today_rounded,
+                              icon: PhosphorIconsRegular.calendarDot,
                               color: TaskTheme.pending,
                               tasks: provider.todayTasks,
                               provider: provider,
@@ -103,7 +104,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                           if (provider.upcomingTasks.isNotEmpty) ...[
                             _buildSection(
                               title: 'הקרובות',
-                              icon: Icons.event_rounded,
+                              icon: PhosphorIconsRegular.calendarBlank,
                               color: TaskTheme.inProgress,
                               tasks: provider.upcomingTasks,
                               provider: provider,
@@ -306,7 +307,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.hourglass_top_rounded,
+          Icon(PhosphorIconsRegular.hourglassMedium,
               size: 18, color: Color(0xFFF59E0B)),
           SizedBox(width: 8),
           Text(
@@ -331,7 +332,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         isStart ? const Color(0xFF818CF8) : const Color(0xFFFBBF24);
     final String label = isStart ? 'התחל לעבוד' : 'שלח לאישור מנהל';
     final IconData icon =
-        isStart ? Icons.rocket_launch_rounded : Icons.send_rounded;
+        isStart ? PhosphorIconsRegular.rocketLaunch : PhosphorIconsRegular.paperPlaneTilt;
     final String nextStatus = isStart ? 'in_progress' : 'pending_review';
 
     return Container(
@@ -405,7 +406,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                 color: TaskTheme.done.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.check_circle_outline_rounded,
+              child: const Icon(PhosphorIconsRegular.checkCircle,
                   size: 18, color: TaskTheme.done),
             ),
             const SizedBox(width: 10),
@@ -473,7 +474,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.task_alt_rounded,
+                PhosphorIconsRegular.checkSquare,
                 size: 56,
                 color: TaskTheme.primary.withValues(alpha: 0.4),
               ),

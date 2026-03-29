@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/attendance_service.dart';
@@ -159,7 +160,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.access_time_rounded, color: Colors.white, size: 20),
+                    child: const Icon(PhosphorIconsRegular.clock, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
                   const Text('דו״ח נוכחות', style: TaskTheme.heading2),
@@ -180,7 +181,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.date_range_rounded,
+                            PhosphorIconsRegular.calendarDots,
                             size: 16,
                             color: _isRangeMode ? Colors.white : const Color(0xFF3B82F6),
                           ),
@@ -222,7 +223,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today_rounded,
+                        const Icon(PhosphorIconsRegular.calendarBlank,
                             size: 16, color: Color(0xFF3B82F6)),
                         const SizedBox(width: 8),
                         Text(
@@ -238,7 +239,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           ),
                         ),
                         const Spacer(),
-                        Icon(Icons.edit_calendar_rounded,
+                        Icon(PhosphorIconsRegular.calendarPlus,
                             size: 16, color: Colors.grey.shade400),
                       ],
                     ),
@@ -289,7 +290,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
+          const Icon(PhosphorIconsRegular.calendarX, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין נתוני נוכחות לחודש זה',
@@ -309,7 +310,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       children: [
         Expanded(
           child: _buildStatPill(
-            icon: Icons.calendar_today_rounded,
+            icon: PhosphorIconsRegular.calendarBlank,
             color: TaskTheme.inProgress,
             value: '$days',
             label: 'ימים',
@@ -318,7 +319,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildStatPill(
-            icon: Icons.access_time_rounded,
+            icon: PhosphorIconsRegular.clock,
             color: TaskTheme.done,
             value: totalHours.toStringAsFixed(1),
             label: 'שעות',
@@ -327,7 +328,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _buildStatPill(
-            icon: Icons.trending_up_rounded,
+            icon: PhosphorIconsRegular.trendUp,
             color: TaskTheme.pending,
             value: avgHours.toStringAsFixed(1),
             label: 'ממוצע/יום',
@@ -393,7 +394,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.bar_chart_rounded, size: 18, color: TaskTheme.primary),
+              Icon(PhosphorIconsRegular.chartBar, size: 18, color: TaskTheme.primary),
               SizedBox(width: 8),
               Text('שעות עבודה לפי יום', style: TaskTheme.heading3),
             ],
@@ -501,7 +502,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('פירוט נוכחות', style: TaskTheme.heading3),
           ],
@@ -557,7 +558,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.timer_off_rounded, size: 11, color: missedColor),
+                              Icon(PhosphorIconsRegular.prohibit, size: 11, color: missedColor),
                               SizedBox(width: 4),
                               Text(
                                 'יציאה חסרה',
@@ -594,14 +595,14 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                   // Clock in/out row
                   Row(
                     children: [
-                      const Icon(Icons.login_rounded, size: 16, color: TaskTheme.inProgress),
+                      const Icon(PhosphorIconsRegular.signIn, size: 16, color: TaskTheme.inProgress),
                       const SizedBox(width: 6),
                       Text(
                         'כניסה: $clockIn',
                         style: TaskTheme.body.copyWith(fontSize: 13),
                       ),
                       const SizedBox(width: 20),
-                      const Icon(Icons.logout_rounded, size: 16, color: TaskTheme.overdue),
+                      const Icon(PhosphorIconsRegular.signOut, size: 16, color: TaskTheme.overdue),
                       const SizedBox(width: 6),
                       Text(
                         'יציאה: $clockOut',
@@ -657,7 +658,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                             strokeWidth: 2, color: Colors.white),
                       )
                     else
-                      const Icon(Icons.picture_as_pdf_rounded,
+                      const Icon(PhosphorIconsRegular.filePdf,
                           color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(

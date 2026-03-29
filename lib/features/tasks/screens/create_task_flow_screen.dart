@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -223,7 +224,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                   ),
                   child: Center(
                     child: isDone
-                        ? const Icon(Icons.check_rounded,
+                        ? const Icon(PhosphorIconsRegular.check,
                             size: 16, color: Colors.white)
                         : Text(
                             '${i + 1}',
@@ -491,7 +492,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                   decoration: const InputDecoration(
                     hintText: 'חיפוש לפי שם או תפקיד...',
                     hintStyle: TextStyle(color: TaskTheme.textTertiary),
-                    prefixIcon: Icon(Icons.search_rounded,
+                    prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass,
                         size: 20, color: TaskTheme.textTertiary),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -532,7 +533,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                               onTap: () => setState(() =>
                                   _selectedWorkers
                                       .removeWhere((u) => u.uid == w.uid)),
-                              child: const Icon(Icons.close_rounded,
+                              child: const Icon(PhosphorIconsRegular.x,
                                   size: 14, color: TaskTheme.primary),
                             ),
                           ],
@@ -600,11 +601,11 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: isSelected
-                            ? const Icon(Icons.check_circle_rounded,
+                            ? const Icon(PhosphorIconsFill.checkCircle,
                                 key: ValueKey('checked'),
                                 color: TaskTheme.primary,
                                 size: 24)
-                            : const Icon(Icons.circle_outlined,
+                            : const Icon(PhosphorIconsRegular.circle,
                                 key: ValueKey('unchecked'),
                                 color: TaskTheme.textTertiary,
                                 size: 24),
@@ -635,7 +636,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
           // Date picker
           _buildPickerTile(
-            icon: Icons.calendar_today_rounded,
+            icon: PhosphorIconsRegular.calendarBlank,
             label: 'תאריך',
             value: _dueDate != null
                 ? DateFormat('dd/MM/yyyy').format(_dueDate!)
@@ -647,7 +648,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
           // Time picker
           _buildPickerTile(
-            icon: Icons.access_time_rounded,
+            icon: PhosphorIconsRegular.clock,
             label: 'שעה',
             value: _dueTime != null
                 ? '${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}'
@@ -710,7 +711,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
+            const Icon(PhosphorIconsRegular.caretRight,
                 color: TaskTheme.textTertiary, size: 24),
           ],
         ),
@@ -750,24 +751,24 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
           const Text('בדוק את הפרטים לפני יצירת המשימה', style: TaskTheme.body),
           const SizedBox(height: 24),
 
-          _buildReviewCard('כותרת', _titleController.text, Icons.title_rounded),
+          _buildReviewCard('כותרת', _titleController.text, PhosphorIconsRegular.textT),
           if (_descriptionController.text.isNotEmpty)
             _buildReviewCard('תיאור', _descriptionController.text,
-                Icons.description_outlined),
+                PhosphorIconsRegular.fileText),
           _buildReviewCard('עדיפות', TaskTheme.priorityLabel(_priority),
               TaskTheme.priorityIcon(_priority)),
           _buildReviewCard('מחלקה', TaskTheme.departmentLabel(_department),
-              Icons.business_rounded),
+              PhosphorIconsRegular.buildings),
           _buildReviewCard(
             'עובדים',
             _selectedWorkers.map((w) => w.fullName).join(', '),
-            Icons.group_outlined,
+            PhosphorIconsRegular.usersThree,
           ),
           if (_dueDate != null && _dueTime != null)
             _buildReviewCard(
               'מועד יעד',
               '${DateFormat('dd/MM/yyyy').format(_dueDate!)} ${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}',
-              Icons.calendar_today_rounded,
+              PhosphorIconsRegular.calendarBlank,
             ),
         ],
       ),
@@ -824,7 +825,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
               },
               child: const Padding(
                 padding: EdgeInsets.all(6),
-                child: Icon(Icons.edit_rounded,
+                child: Icon(PhosphorIconsRegular.pencilSimple,
                     size: 16, color: TaskTheme.textTertiary),
               ),
             ),
@@ -869,7 +870,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.arrow_back_rounded,
+                            Icon(PhosphorIconsRegular.arrowLeft,
                                 size: 18, color: TaskTheme.textSecondary),
                             SizedBox(width: 6),
                             Text(
@@ -928,7 +929,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   if (isLast)
-                                    const Icon(Icons.check_circle_rounded,
+                                    const Icon(PhosphorIconsFill.checkCircle,
                                         size: 20, color: Colors.white),
                                   if (isLast) const SizedBox(width: 8),
                                   Text(
@@ -942,7 +943,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                                   ),
                                   if (!isLast) ...[
                                     const SizedBox(width: 6),
-                                    const Icon(Icons.arrow_forward_rounded,
+                                    const Icon(PhosphorIconsRegular.arrowRight,
                                         size: 18, color: Colors.white),
                                   ],
                                 ],

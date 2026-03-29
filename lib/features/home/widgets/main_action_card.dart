@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Primary Focus Card — the single dominant action card on the home screen.
 ///
@@ -118,7 +119,7 @@ class _MainActionCardState extends State<MainActionCard> {
                               ),
                               const SizedBox(width: 4),
                               Icon(
-                                Icons.arrow_back_ios_rounded,
+                                PhosphorIconsRegular.arrowLeft,
                                 size: 11,
                                 color: widget.gradient.first,
                               ),

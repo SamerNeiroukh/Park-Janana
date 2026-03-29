@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../theme/task_theme.dart';
 
 class TaskDeadlineText extends StatelessWidget {
@@ -33,23 +34,23 @@ class TaskDeadlineText extends StatelessWidget {
     if (diff < 0) {
       text = 'באיחור ${diff.abs()} ${diff.abs() == 1 ? "יום" : "ימים"}';
       color = TaskTheme.overdue;
-      icon = Icons.warning_amber_rounded;
+      icon = PhosphorIconsRegular.warning;
     } else if (diff == 0) {
       text = 'היום, ${DateFormat('HH:mm').format(dueDate)}';
       color = (!isDone && dueDate.isBefore(now)) ? TaskTheme.overdue : TaskTheme.pending;
-      icon = Icons.today_rounded;
+      icon = PhosphorIconsRegular.calendarDot;
     } else if (diff == 1) {
       text = 'מחר, ${DateFormat('HH:mm').format(dueDate)}';
       color = TaskTheme.textSecondary;
-      icon = Icons.event_rounded;
+      icon = PhosphorIconsRegular.calendarBlank;
     } else if (diff <= 7) {
       text = 'בעוד $diff ימים';
       color = TaskTheme.textSecondary;
-      icon = Icons.event_rounded;
+      icon = PhosphorIconsRegular.calendarBlank;
     } else {
       text = DateFormat('dd/MM/yyyy').format(dueDate);
       color = TaskTheme.textTertiary;
-      icon = Icons.calendar_today_rounded;
+      icon = PhosphorIconsRegular.calendarBlank;
     }
 
     return Row(

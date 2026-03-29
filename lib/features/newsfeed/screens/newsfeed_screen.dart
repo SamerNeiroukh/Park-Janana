@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,11 +48,11 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
   Stream<List<PostModel>>? _postsStream;
 
   static const List<Map<String, dynamic>> _categories = [
-    {'value': 'all', 'label': 'הכל', 'icon': Icons.all_inbox_rounded},
-    {'value': 'announcement', 'label': 'הודעות', 'icon': Icons.campaign_rounded},
-    {'value': 'update', 'label': 'עדכונים', 'icon': Icons.update_rounded},
-    {'value': 'event', 'label': 'אירועים', 'icon': Icons.event_rounded},
-    {'value': 'general', 'label': 'כללי', 'icon': Icons.article_rounded},
+    {'value': 'all', 'label': 'הכל', 'icon': PhosphorIconsRegular.tray},
+    {'value': 'announcement', 'label': 'הודעות', 'icon': PhosphorIconsFill.megaphone},
+    {'value': 'update', 'label': 'עדכונים', 'icon': PhosphorIconsRegular.arrowsClockwise},
+    {'value': 'event', 'label': 'אירועים', 'icon': PhosphorIconsRegular.calendarBlank},
+    {'value': 'general', 'label': 'כללי', 'icon': PhosphorIconsRegular.article},
   ];
 
   @override
@@ -294,7 +295,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         title: 'מחיקת פוסט',
         message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
         confirmText: 'מחק',
-        icon: Icons.delete_outline_rounded,
+        icon: PhosphorIconsRegular.trash,
         isDestructive: true,
       );
 
@@ -306,7 +307,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           children: [
             Text(message, style: const TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(width: 8),
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
           ],
         ),
         backgroundColor: AppColors.success,
@@ -331,7 +332,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+            const Icon(PhosphorIconsRegular.warningCircle, color: Colors.white, size: 20),
           ],
         ),
         backgroundColor: AppColors.error,
@@ -447,10 +448,10 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
           onChanged: (value) => setState(() => _searchQuery = value.trim().toLowerCase()),
           decoration: InputDecoration(
             hintText: 'חיפוש פוסט...',
-            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryBlue),
+            prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.primaryBlue),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18),
+                    icon: const Icon(PhosphorIconsRegular.x, size: 18),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _searchQuery = '');
@@ -575,7 +576,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              Icons.newspaper_rounded,
+              PhosphorIconsRegular.newspaper,
               color: AppColors.primaryBlue,
               size: 24,
             ),
@@ -747,7 +748,7 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
         backgroundColor: AppColors.primaryBlue,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
+        icon: const Icon(PhosphorIconsRegular.notePencil, color: Colors.white),
         label: const Text(
           'פוסט חדש',
           style: TextStyle(
@@ -784,7 +785,7 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.article_outlined,
+              PhosphorIconsRegular.article,
               size: 64,
               color: AppColors.primaryBlue.withValues(alpha: 0.5),
             ),
@@ -837,7 +838,7 @@ class _ErrorState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.cloud_off_rounded,
+              PhosphorIconsRegular.cloudSlash,
               size: 56,
               color: Colors.red.withValues(alpha: 0.6),
             ),
@@ -860,7 +861,7 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
               label: const Text('נסה שוב'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/screens/attendance_correction_screen.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
@@ -92,7 +93,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.login_rounded,
+                    child: const Icon(PhosphorIconsRegular.signIn,
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -144,7 +145,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
               color: TaskTheme.done.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.check_circle_outline_rounded,
+            child: const Icon(PhosphorIconsRegular.checkCircle,
                 size: 56, color: TaskTheme.done),
           ),
           const SizedBox(height: 16),
@@ -168,7 +169,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
         _entries.fold(0, (s, e) => s + e.missingSessions.length);
 
     return _statPill(
-      icon: Icons.login_rounded,
+      icon: PhosphorIconsRegular.signIn,
       color: TaskTheme.overdue,
       value: '$totalMissing',
       label: 'יציאות חסרות',
@@ -219,7 +220,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded,
+            Icon(PhosphorIconsRegular.listBullets,
                 size: 18, color: TaskTheme.overdue),
             SizedBox(width: 8),
             Text('פירוט לפי עובד',
@@ -259,7 +260,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                     color: const Color(0xFFEF4444).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.person_outline_rounded,
+                  child: const Icon(PhosphorIconsRegular.user,
                       size: 20, color: Color(0xFFEF4444)),
                 ),
                 const SizedBox(width: 12),
@@ -276,7 +277,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.warning_amber_rounded,
+                      const Icon(PhosphorIconsRegular.warning,
                           size: 13, color: Color(0xFFDC2626)),
                       const SizedBox(width: 4),
                       Text(
@@ -327,7 +328,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.login_rounded,
+                        const Icon(PhosphorIconsRegular.signIn,
                             size: 12, color: Color(0xFFEF4444)),
                         const SizedBox(width: 4),
                         Text(
@@ -339,7 +340,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward_ios_rounded,
+                        const Icon(PhosphorIconsRegular.arrowRight,
                             size: 10, color: Color(0xFFEF4444)),
                       ],
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Centralized design system for the task management feature.
 class TaskTheme {
@@ -73,13 +74,13 @@ class TaskTheme {
   static IconData statusIcon(String status) {
     switch (status) {
       case 'in_progress':
-        return Icons.play_circle_outline_rounded;
+        return PhosphorIconsRegular.playCircle;
       case 'pending_review':
-        return Icons.hourglass_top_rounded;
+        return PhosphorIconsRegular.hourglassMedium;
       case 'done':
-        return Icons.check_circle_outline_rounded;
+        return PhosphorIconsRegular.checkCircle;
       default:
-        return Icons.schedule_rounded;
+        return PhosphorIconsRegular.clock;
     }
   }
 
@@ -109,11 +110,11 @@ class TaskTheme {
   static IconData priorityIcon(String priority) {
     switch (priority) {
       case 'high':
-        return Icons.keyboard_double_arrow_up_rounded;
+        return PhosphorIconsRegular.caretDoubleUp;
       case 'medium':
-        return Icons.remove_rounded;
+        return PhosphorIconsRegular.minus;
       default:
-        return Icons.keyboard_double_arrow_down_rounded;
+        return PhosphorIconsRegular.caretDoubleDown;
     }
   }
 

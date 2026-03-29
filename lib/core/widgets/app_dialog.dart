@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Displays a modern, polished confirmation dialog with an icon, title,
 /// message and two action buttons (cancel + confirm).
@@ -12,7 +13,7 @@ Future<bool?> showAppDialog(
   String cancelText = 'ביטול',
 
   /// Icon shown inside the coloured circle.
-  IconData icon = Icons.help_outline_rounded,
+  IconData icon = PhosphorIconsRegular.question,
 
   /// Gradient colours for the icon circle.
   /// Defaults to a blue gradient. Pass a red pair for destructive actions.

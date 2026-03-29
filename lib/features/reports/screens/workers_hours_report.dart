@@ -6,6 +6,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/reports/services/pdf_export_service.dart';
 import 'package:park_janana/features/reports/services/report_service.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class WorkersHoursReport extends StatefulWidget {
   const WorkersHoursReport({super.key});
@@ -87,7 +88,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.people_alt_rounded,
+                    child: const Icon(PhosphorIconsRegular.users,
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -136,7 +137,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.event_busy_rounded, size: 64, color: TaskTheme.textTertiary),
+          const Icon(PhosphorIconsRegular.calendarX, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
             'אין נתוני נוכחות לחודש זה',
@@ -155,7 +156,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
       children: [
         Expanded(
           child: _statPill(
-            icon: Icons.group_rounded,
+            icon: PhosphorIconsRegular.usersThree,
             color: TaskTheme.inProgress,
             value: '${_records.length}',
             label: 'עובדים פעילים',
@@ -164,7 +165,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _statPill(
-            icon: Icons.access_time_rounded,
+            icon: PhosphorIconsRegular.clock,
             color: TaskTheme.done,
             value: totalHours.toStringAsFixed(1),
             label: 'סה״כ שעות',
@@ -173,7 +174,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _statPill(
-            icon: Icons.trending_up_rounded,
+            icon: PhosphorIconsRegular.trendUp,
             color: TaskTheme.pending,
             value: avgHours.toStringAsFixed(1),
             label: 'ממוצע לעובד',
@@ -241,7 +242,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
         children: [
           Row(
             children: [
-              const Icon(Icons.bar_chart_rounded, size: 18, color: TaskTheme.primary),
+              const Icon(PhosphorIconsRegular.chartBar, size: 18, color: TaskTheme.primary),
               const SizedBox(width: 8),
               const Text('שעות לפי עובד', style: TaskTheme.heading3),
               if (_records.length > 10) ...[
@@ -354,7 +355,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('פירוט עובדים', style: TaskTheme.heading3),
           ],
@@ -480,7 +481,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.picture_as_pdf_rounded,
+                          Icon(PhosphorIconsRegular.filePdf,
                               color: Colors.white, size: 20),
                           SizedBox(width: 8),
                           Text(

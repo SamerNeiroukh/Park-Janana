@@ -10,6 +10,7 @@ import 'package:park_janana/core/widgets/message_bubble.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class WorkerShiftCard extends StatefulWidget {
   final ShiftModel shift;
@@ -59,17 +60,17 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
   IconData get _departmentIcon {
     switch (widget.shift.department) {
       case 'פיינטבול':
-        return Icons.sports_esports;
+        return PhosphorIconsRegular.gameController;
       case 'פארק חבלים':
-        return Icons.park;
+        return PhosphorIconsRegular.tree;
       case 'קרטינג':
-        return Icons.directions_car;
+        return PhosphorIconsRegular.car;
       case 'פארק מים':
-        return Icons.pool;
+        return PhosphorIconsRegular.waves;
       case 'גמבורי':
-        return Icons.child_care;
+        return PhosphorIconsRegular.baby;
       default:
-        return Icons.work;
+        return PhosphorIconsRegular.briefcase;
     }
   }
 
@@ -174,7 +175,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Row(children: [
-                Icon(Icons.cancel_outlined, color: Colors.white, size: 18),
+                Icon(PhosphorIconsRegular.xCircle, color: Colors.white, size: 18),
                 SizedBox(width: 8),
                 Text('הבקשה למשמרת בוטלה',
                     style: TextStyle(fontWeight: FontWeight.w600)),
@@ -199,7 +200,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
               child: AlertDialog(
                 title: const Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                    Icon(PhosphorIconsRegular.warning, color: Colors.orange),
                     SizedBox(width: 8),
                     Text('התנגשות משמרות'),
                   ],
@@ -323,7 +324,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
-                              _isCancelled ? Icons.cancel_rounded : _departmentIcon,
+                              _isCancelled ? PhosphorIconsRegular.xCircle : _departmentIcon,
                               color: _isCancelled ? Colors.red.shade400 : _departmentColor,
                               size: 22,
                             ),
@@ -353,7 +354,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                                   textDirection: TextDirection.rtl,
                                   children: [
                                     Icon(
-                                      Icons.access_time_rounded,
+                                      PhosphorIconsRegular.clock,
                                       size: 16,
                                       color: Colors.grey.shade500,
                                     ),
@@ -380,7 +381,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                         textDirection: TextDirection.rtl,
                         children: [
                           Icon(
-                            Icons.people,
+                            PhosphorIconsRegular.users,
                             size: 16,
                             color: Colors.grey.shade500,
                           ),
@@ -428,7 +429,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       return _buildStatusButton(
         label: 'בוטלה',
         color: Colors.red.shade400,
-        icon: Icons.cancel,
+        icon: PhosphorIconsRegular.xCircle,
       );
     }
 
@@ -436,7 +437,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       return _buildStatusButton(
         label: _isAssigned ? 'עבדת' : 'הסתיים',
         color: Colors.grey,
-        icon: _isAssigned ? Icons.check_circle : Icons.history,
+        icon: _isAssigned ? PhosphorIconsFill.checkCircle : PhosphorIconsRegular.clockCounterClockwise,
       );
     }
 
@@ -444,7 +445,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       return _buildStatusButton(
         label: 'משובץ',
         color: AppColors.success,
-        icon: Icons.check_circle,
+        icon: PhosphorIconsFill.checkCircle,
       );
     }
 
@@ -452,7 +453,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       return _buildStatusButton(
         label: 'מלא',
         color: Colors.red.shade400,
-        icon: Icons.block,
+        icon: PhosphorIconsRegular.prohibit,
       );
     }
 
@@ -493,7 +494,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                       ),
                       const SizedBox(width: 6),
                       Icon(
-                        _hasRequested ? Icons.close_rounded : Icons.add_rounded,
+                        _hasRequested ? PhosphorIconsRegular.x : PhosphorIconsRegular.plus,
                         size: 18,
                         color: _hasRequested
                             ? Colors.red.shade600
@@ -539,21 +540,21 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
   Widget _buildStatusChip(bool isOutdated) {
     if (_isCancelled) {
-      return _buildChip('המשמרת בוטלה', Colors.red.shade400, Icons.cancel);
+      return _buildChip('המשמרת בוטלה', Colors.red.shade400, PhosphorIconsRegular.xCircle);
     }
     if (isOutdated) {
-      return _buildChip('עבר התאריך', Colors.grey, Icons.history);
+      return _buildChip('עבר התאריך', Colors.grey, PhosphorIconsRegular.clockCounterClockwise);
     }
     if (_isAssigned) {
-      return _buildChip('אתה משובץ', AppColors.success, Icons.check);
+      return _buildChip('אתה משובץ', AppColors.success, PhosphorIconsRegular.check);
     }
     if (_hasRequested) {
-      return _buildChip('ממתין לאישור', AppColors.warningOrange, Icons.hourglass_top);
+      return _buildChip('ממתין לאישור', AppColors.warningOrange, PhosphorIconsRegular.hourglassMedium);
     }
     if (_isShiftFull) {
-      return _buildChip('המשמרת מלאה', Colors.red.shade400, Icons.block);
+      return _buildChip('המשמרת מלאה', Colors.red.shade400, PhosphorIconsRegular.prohibit);
     }
-    return _buildChip('פתוח להרשמה', _departmentColor, Icons.event_available);
+    return _buildChip('פתוח להרשמה', _departmentColor, PhosphorIconsRegular.calendarCheck);
   }
 
   Widget _buildChip(String text, Color color, IconData icon) {
@@ -711,7 +712,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.info_outline,
+                    child: const Icon(PhosphorIconsRegular.info,
                         color: Colors.white, size: 22),
                   ),
                   const SizedBox(width: 12),
@@ -748,7 +749,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   // Workers section
-                  _buildSectionTitle('עובדים משובצים', Icons.people),
+                  _buildSectionTitle('עובדים משובצים', PhosphorIconsRegular.users),
                   const SizedBox(height: 12),
                   isLoadingWorkers
                       ? Center(
@@ -764,7 +765,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                           : _buildWorkersGrid(),
                   const SizedBox(height: 24),
                   // Messages section
-                  _buildSectionTitle('הודעות', Icons.chat_bubble_outline),
+                  _buildSectionTitle('הודעות', PhosphorIconsRegular.chatCircle),
                   const SizedBox(height: 12),
                   _buildMessagesSection(),
                   const SizedBox(height: 20),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
@@ -197,7 +198,7 @@ class _LikersSheetState extends State<LikersSheet>
               borderRadius: BorderRadius.circular(12),
               child: const Padding(
                 padding: EdgeInsets.all(8),
-                child: Icon(Icons.close_rounded, size: 22),
+                child: Icon(PhosphorIconsRegular.x, size: 22),
               ),
             ),
           ),
@@ -224,7 +225,7 @@ class _LikersSheetState extends State<LikersSheet>
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.error_outline_rounded,
+                PhosphorIconsRegular.warningCircle,
                 size: 48,
                 color: AppColors.greyMedium.withValues(alpha: 0.5),
               ),
@@ -281,7 +282,7 @@ class _EmptyLikers extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.favorite_border_rounded,
+              PhosphorIconsRegular.heart,
               size: 40,
               color: AppColors.greyMedium.withValues(alpha: 0.6),
             ),

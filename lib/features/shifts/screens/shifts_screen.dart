@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -131,7 +132,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
       child: Row(
         children: [
           _buildNavButton(
-            icon: Icons.chevron_left,
+            icon: PhosphorIconsRegular.caretLeft,
             onTap: () => setState(() {
               _currentWeekStart =
                   _currentWeekStart.subtract(const Duration(days: 7));
@@ -161,7 +162,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
             ),
           ),
           _buildNavButton(
-            icon: Icons.chevron_right,
+            icon: PhosphorIconsRegular.caretRight,
             onTap: () => setState(() {
               _currentWeekStart =
                   _currentWeekStart.add(const Duration(days: 7));
@@ -354,7 +355,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.event_busy_rounded,
+                PhosphorIconsRegular.calendarX,
                 size: 56,
                 color: AppColors.primary.withValues(alpha: 0.5),
               ),

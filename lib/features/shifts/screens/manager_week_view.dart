@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -101,7 +102,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(PhosphorIconsRegular.arrowLeft),
             color: AppColors.primary,
             iconSize: 28,
             onPressed: () => setState(() {
@@ -114,7 +115,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
             style: AppTheme.sectionTitle,
           ),
           IconButton(
-            icon: const Icon(Icons.arrow_forward),
+            icon: const Icon(PhosphorIconsRegular.arrowRight),
             color: AppColors.primary,
             iconSize: 28,
             onPressed: () => setState(() {

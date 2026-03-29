@@ -6,6 +6,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ApproveWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -60,7 +61,7 @@ class ApproveWorkerScreen extends StatelessWidget {
       title: title,
       message: content,
       confirmText: 'אישור',
-      icon: Icons.check_circle_outline_rounded,
+      icon: PhosphorIconsRegular.checkCircle,
       iconGradient: const [Color(0xFF4CAF50), Color(0xFF2E7D32)],
     ).then((confirmed) {
       if (confirmed ?? false) onConfirm();
@@ -213,7 +214,7 @@ class ApproveWorkerScreen extends StatelessWidget {
         _buildFullWidthButton(
           context,
           label: "אשר עובד",
-          icon: Icons.check_circle_outline,
+          icon: PhosphorIconsRegular.checkCircle,
           color: AppColors.success,
           onPressed: () => _showConfirmationDialog(
             context: context,
@@ -226,7 +227,7 @@ class ApproveWorkerScreen extends StatelessWidget {
         _buildFullWidthButton(
           context,
           label: "דחה בקשה",
-          icon: Icons.cancel_outlined,
+          icon: PhosphorIconsRegular.xCircle,
           color: AppColors.error,
           onPressed: () => _showConfirmationDialog(
             context: context,

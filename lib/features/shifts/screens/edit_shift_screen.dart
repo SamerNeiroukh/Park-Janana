@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
@@ -42,17 +43,17 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
   bool _hasChanges = false;
 
   final List<Map<String, dynamic>> departments = [
-    {'name': 'פארק חבלים', 'icon': Icons.park, 'color': const Color(0xFF43A047)},
-    {'name': 'פיינטבול', 'icon': Icons.sports_esports, 'color': const Color(0xFFE53935)},
-    {'name': 'קרטינג', 'icon': Icons.directions_car, 'color': const Color(0xFFFF9800)},
-    {'name': 'פארק מים', 'icon': Icons.pool, 'color': const Color(0xFF1E88E5)},
-    {'name': 'גמבורי', 'icon': Icons.child_care, 'color': const Color(0xFF8E24AA)},
+    {'name': 'פארק חבלים', 'icon': PhosphorIconsRegular.tree, 'color': const Color(0xFF43A047)},
+    {'name': 'פיינטבול', 'icon': PhosphorIconsRegular.gameController, 'color': const Color(0xFFE53935)},
+    {'name': 'קרטינג', 'icon': PhosphorIconsRegular.car, 'color': const Color(0xFFFF9800)},
+    {'name': 'פארק מים', 'icon': PhosphorIconsRegular.waves, 'color': const Color(0xFF1E88E5)},
+    {'name': 'גמבורי', 'icon': PhosphorIconsRegular.baby, 'color': const Color(0xFF8E24AA)},
   ];
 
   final List<Map<String, dynamic>> statusOptions = [
-    {'value': 'active', 'label': 'פעיל', 'color': AppColors.success, 'icon': Icons.check_circle},
-    {'value': 'cancelled', 'label': 'בוטל', 'color': Colors.red, 'icon': Icons.cancel},
-    {'value': 'completed', 'label': 'הושלם', 'color': Colors.blue, 'icon': Icons.done_all},
+    {'value': 'active', 'label': 'פעיל', 'color': AppColors.success, 'icon': PhosphorIconsFill.checkCircle},
+    {'value': 'cancelled', 'label': 'בוטל', 'color': Colors.red, 'icon': PhosphorIconsRegular.xCircle},
+    {'value': 'completed', 'label': 'הושלם', 'color': Colors.blue, 'icon': PhosphorIconsRegular.checks},
   ];
 
   Color get _selectedColor {
@@ -160,7 +161,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   color: _selectedColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.save, color: _selectedColor),
+                child: Icon(PhosphorIconsRegular.floppyDisk, color: _selectedColor),
               ),
               const SizedBox(width: 12),
               const Text('שמירת שינויים'),
@@ -181,7 +182,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   textDirection: TextDirection.rtl,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.arrow_back, size: 16, color: _selectedColor),
+                    Icon(PhosphorIconsRegular.arrowLeft, size: 16, color: _selectedColor),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -205,7 +206,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 child: Row(
                   textDirection: TextDirection.rtl,
                   children: [
-                    const Icon(Icons.notifications_active,
+                    const Icon(PhosphorIconsFill.bellRinging,
                         size: 20, color: AppColors.warningOrange),
                     const SizedBox(width: 8),
                     Expanded(
@@ -274,7 +275,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             content: const Row(
               textDirection: TextDirection.rtl,
               children: [
-                Icon(Icons.check_circle, color: Colors.white),
+                Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -367,7 +368,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       message: 'יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
       confirmText: 'צא ללא שמירה',
       cancelText: 'המשך לערוך',
-      icon: Icons.warning_amber_rounded,
+      icon: PhosphorIconsRegular.warning,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
       isDestructive: true,
     );
@@ -461,7 +462,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.edit, color: Colors.white, size: 28),
+            child: const Icon(PhosphorIconsRegular.pencilSimple, color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -496,7 +497,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 color: Colors.yellow.shade200,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.edit, color: _selectedColor, size: 20),
+              child: Icon(PhosphorIconsRegular.pencilSimple, color: _selectedColor, size: 20),
             ),
         ],
       ),
@@ -566,7 +567,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_rounded,
+                Icon(PhosphorIconsRegular.calendarBlank,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
                     size: 22),
                 const SizedBox(width: 12),
@@ -604,7 +605,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     ),
                   ),
                 const SizedBox(width: 8),
-                Icon(Icons.edit_calendar,
+                Icon(PhosphorIconsRegular.calendarPlus,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
                     size: 22),
               ],
@@ -699,7 +700,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_forward, color: Colors.grey.shade500, size: 18),
+              child: Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(child: _buildTimeButton('סיום', _endTime, false)),
@@ -743,7 +744,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.access_time,
+                Icon(PhosphorIconsRegular.clock,
                     color: isChanged ? AppColors.warningOrange : _selectedColor,
                     size: 18),
                 const SizedBox(width: 6),
@@ -774,7 +775,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           children: [
             Row(
               children: [
-                _buildWorkerCountButton(Icons.add, () {
+                _buildWorkerCountButton(PhosphorIconsRegular.plus, () {
                   setState(() => _maxWorkers++);
                   _checkForChanges();
                 }),
@@ -797,7 +798,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.people,
+                        Icon(PhosphorIconsRegular.users,
                             color: isChanged ? AppColors.warningOrange : _selectedColor,
                             size: 28),
                         const SizedBox(width: 8),
@@ -813,7 +814,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     ),
                   ),
                 ),
-                _buildWorkerCountButton(Icons.remove, () {
+                _buildWorkerCountButton(PhosphorIconsRegular.minus, () {
                   if (_maxWorkers > 1) {
                     setState(() => _maxWorkers--);
                     _checkForChanges();
@@ -833,7 +834,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning, size: 20, color: Colors.red),
+                      const Icon(PhosphorIconsRegular.warning, size: 20, color: Colors.red),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -975,7 +976,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    _hasChanges ? Icons.save : Icons.check,
+                    _hasChanges ? PhosphorIconsRegular.floppyDisk : PhosphorIconsRegular.check,
                     size: 22,
                     color: _hasChanges ? Colors.white : Colors.grey.shade500,
                   ),
@@ -1008,7 +1009,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
+          Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),
           Text(
             'ביטול',

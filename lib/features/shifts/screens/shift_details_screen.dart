@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/constants/app_colors.dart';
@@ -195,7 +196,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             content: const Row(
               textDirection: TextDirection.rtl,
               children: [
-                Icon(Icons.check_circle, color: Colors.white),
+                Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -247,7 +248,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.save, color: AppColors.success),
+                child: const Icon(PhosphorIconsRegular.floppyDisk, color: AppColors.success),
               ),
               const SizedBox(width: 12),
               const Text('שמירת שינויים'),
@@ -308,7 +309,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          Icon(Icons.arrow_back, size: 16, color: color),
+          Icon(PhosphorIconsRegular.arrowLeft, size: 16, color: color),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -330,7 +331,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       message: 'יש לך $_pendingChangesCount שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
       confirmText: 'צא ללא שמירה',
       cancelText: 'המשך לערוך',
-      icon: Icons.warning_amber_rounded,
+      icon: PhosphorIconsRegular.warning,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
       isDestructive: true,
     );
@@ -358,17 +359,17 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   IconData _getDepartmentIcon(String department) {
     switch (department) {
       case 'פיינטבול':
-        return Icons.sports_esports;
+        return PhosphorIconsRegular.gameController;
       case 'פארק חבלים':
-        return Icons.park;
+        return PhosphorIconsRegular.tree;
       case 'קרטינג':
-        return Icons.directions_car;
+        return PhosphorIconsRegular.car;
       case 'פארק מים':
-        return Icons.pool;
+        return PhosphorIconsRegular.waves;
       case 'גמבורי':
-        return Icons.child_care;
+        return PhosphorIconsRegular.baby;
       default:
-        return Icons.work;
+        return PhosphorIconsRegular.briefcase;
     }
   }
 
@@ -461,7 +462,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       color: AppColors.warningOrange.withValues(alpha: 0.1),
       child: Row(
         children: [
-          const Icon(Icons.edit_note, size: 20, color: AppColors.warningOrange),
+          const Icon(PhosphorIconsRegular.notePencil, size: 20, color: AppColors.warningOrange),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -540,7 +541,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.save, color: Colors.white, size: 22),
+                        const Icon(PhosphorIconsRegular.floppyDisk, color: Colors.white, size: 22),
                         const SizedBox(width: 10),
                         Text(
                           'שמור שינויים ($_pendingChangesCount)',
@@ -624,7 +625,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.pending_actions,
+                      const Icon(PhosphorIconsRegular.clipboardText,
                           size: 14, color: AppColors.warningOrange),
                       const SizedBox(width: 4),
                       Text(
@@ -665,7 +666,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                             children: [
                               Text('המשמרת עודכנה בהצלחה'),
                               SizedBox(width: 8),
-                              Icon(Icons.check_circle, color: Colors.white),
+                              Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
                             ],
                           ),
                           backgroundColor: AppColors.success,
@@ -681,7 +682,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Icon(
-                      Icons.edit,
+                      PhosphorIconsRegular.pencilSimple,
                       size: 18,
                       color: departmentColor,
                     ),
@@ -696,7 +697,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             children: [
               Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded,
+                  Icon(PhosphorIconsRegular.calendarBlank,
                       size: 18, color: Colors.grey.shade500),
                   const SizedBox(width: 8),
                   Text(
@@ -712,7 +713,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.access_time_rounded,
+                  Icon(PhosphorIconsRegular.clock,
                       size: 18, color: Colors.grey.shade500),
                   const SizedBox(width: 8),
                   Text(
@@ -796,11 +797,11 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
 
   Widget _buildTabBar(ShiftModel shift, Color departmentColor) {
     final tabs = [
-      _TabItem(Icons.pending_actions_outlined, 'בקשות',
+      _TabItem(PhosphorIconsRegular.clipboardText, 'בקשות',
           shift.requestedWorkers.length),
-      _TabItem(Icons.group_outlined, 'מאושרים', shift.assignedWorkers.length),
-      _TabItem(Icons.chat_bubble_outline, 'הודעות', shift.messages.length),
-      _TabItem(Icons.info_outline, 'פרטים', 0),
+      _TabItem(PhosphorIconsRegular.usersThree, 'מאושרים', shift.assignedWorkers.length),
+      _TabItem(PhosphorIconsRegular.chatCircle, 'הודעות', shift.messages.length),
+      _TabItem(PhosphorIconsRegular.info, 'פרטים', 0),
     ];
 
     return Container(
@@ -896,7 +897,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   Widget _buildRequestsTab(ShiftModel shift, Color departmentColor) {
     return _buildWorkerList(
       workerIds: shift.requestedWorkers,
-      emptyIcon: Icons.hourglass_empty_rounded,
+      emptyIcon: PhosphorIconsRegular.hourglass,
       emptyText: 'אין בקשות ממתינות',
       emptySubtext: 'בקשות חדשות יופיעו כאן',
       departmentColor: departmentColor,
@@ -923,13 +924,13 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildActionButton(
-              icon: Icons.close_rounded,
+              icon: PhosphorIconsRegular.x,
               color: const Color(0xFFE53935),
               onTap: () => _rejectWorker(user.uid),
             ),
             const SizedBox(width: 8),
             _buildActionButton(
-              icon: Icons.check_rounded,
+              icon: PhosphorIconsRegular.check,
               color: AppColors.success,
               onTap: () => _approveWorker(user.uid),
             ),
@@ -987,7 +988,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      isFull ? Icons.check_circle : Icons.person_add_rounded,
+                      isFull ? PhosphorIconsFill.checkCircle : PhosphorIconsRegular.userPlus,
                       size: 20,
                       color: isFull ? Colors.grey.shade600 : departmentColor,
                     ),
@@ -1022,7 +1023,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
 
     if (allWorkerIds.isEmpty) {
       return _buildEmptyState(
-        Icons.group_off_outlined,
+        PhosphorIconsRegular.prohibit,
         'אין עובדים משובצים',
         'לחץ על "הוסף עובדים" להוספה ידנית',
         departmentColor,
@@ -1072,13 +1073,13 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildActionButton(
-                    icon: Icons.undo_rounded,
+                    icon: PhosphorIconsRegular.arrowCounterClockwise,
                     color: AppColors.warningOrange,
                     onTap: () => _undoWorker(user.uid),
                   ),
                   const SizedBox(width: 8),
                   _buildActionButton(
-                    icon: Icons.person_remove_rounded,
+                    icon: PhosphorIconsRegular.userMinus,
                     color: const Color(0xFFE53935),
                     onTap: () => _removeWorker(user.uid),
                   ),
@@ -1218,7 +1219,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.schedule, size: 14, color: color),
+          Icon(PhosphorIconsRegular.clock, size: 14, color: color),
           const SizedBox(width: 4),
           Text(
             text,
@@ -1231,7 +1232,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           const SizedBox(width: 6),
           GestureDetector(
             onTap: onCancel,
-            child: Icon(Icons.close, size: 16, color: color),
+            child: Icon(PhosphorIconsRegular.x, size: 16, color: color),
           ),
         ],
       ),
@@ -1248,7 +1249,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         Expanded(
           child: shift.messages.isEmpty
               ? _buildEmptyState(
-                  Icons.chat_bubble_outline_rounded,
+                  PhosphorIconsRegular.chatCircle,
                   'אין הודעות עדיין',
                   'שלח הודעה ראשונה',
                   departmentColor,
@@ -1304,7 +1305,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               },
               child: const Padding(
                 padding: EdgeInsets.all(12),
-                child: Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                child: Icon(PhosphorIconsRegular.paperPlaneTilt, color: Colors.white, size: 22),
               ),
             ),
           ),
@@ -1338,21 +1339,21 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       physics: const BouncingScrollPhysics(),
       children: [
         _buildInfoCard(
-          icon: Icons.flag_rounded,
+          icon: PhosphorIconsRegular.flag,
           label: 'סטטוס',
           value: shift.status == 'active' ? 'פעיל' : shift.status,
           valueColor: shift.status == 'active' ? AppColors.success : null,
           departmentColor: departmentColor,
         ),
         _buildInfoCard(
-          icon: Icons.person_outline_rounded,
+          icon: PhosphorIconsRegular.user,
           label: 'נוצר על ידי',
           value: shift.createdBy,
           isUserId: true,
           departmentColor: departmentColor,
         ),
         _buildInfoCard(
-          icon: Icons.calendar_today_rounded,
+          icon: PhosphorIconsRegular.calendarBlank,
           label: 'תאריך יצירה',
           value: shift.createdAt == null
               ? '-'
@@ -1361,7 +1362,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           departmentColor: departmentColor,
         ),
         _buildInfoCard(
-          icon: Icons.edit_outlined,
+          icon: PhosphorIconsRegular.pencilSimple,
           label: 'עודכן לאחרונה על ידי',
           value: shift.lastUpdatedBy,
           isUserId: true,
@@ -1369,7 +1370,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ),
         if (shift.shiftManager.isNotEmpty)
           _buildInfoCard(
-            icon: Icons.admin_panel_settings_outlined,
+            icon: PhosphorIconsRegular.shieldStar,
             label: 'אחראי משמרת',
             value: shift.shiftManager,
             isUserId: true,

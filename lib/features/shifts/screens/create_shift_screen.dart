@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -41,23 +42,23 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   final List<Map<String, dynamic>> departments = [
     {
       'name': 'פארק חבלים',
-      'icon': Icons.park,
+      'icon': PhosphorIconsRegular.tree,
       'color': const Color(0xFF43A047)
     },
     {
       'name': 'פיינטבול',
-      'icon': Icons.sports_esports,
+      'icon': PhosphorIconsRegular.gameController,
       'color': const Color(0xFFE53935)
     },
     {
       'name': 'קרטינג',
-      'icon': Icons.directions_car,
+      'icon': PhosphorIconsRegular.car,
       'color': const Color(0xFFFF9800)
     },
-    {'name': 'פארק מים', 'icon': Icons.pool, 'color': const Color(0xFF1E88E5)},
+    {'name': 'פארק מים', 'icon': PhosphorIconsRegular.waves, 'color': const Color(0xFF1E88E5)},
     {
       'name': 'גמבורי',
-      'icon': Icons.child_care,
+      'icon': PhosphorIconsRegular.baby,
       'color': const Color(0xFF8E24AA)
     },
   ];
@@ -104,7 +105,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           SnackBar(
             content: const Row(
               children: [
-                Icon(Icons.restore_rounded, color: Colors.white, size: 18),
+                Icon(PhosphorIconsRegular.arrowCounterClockwise, color: Colors.white, size: 18),
                 SizedBox(width: 8),
                 Text('טיוטה שוחזרה', style: TextStyle(fontWeight: FontWeight.w600)),
               ],
@@ -187,7 +188,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               children: [
                 Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(width: 8),
-                const Icon(Icons.check_circle, color: Colors.white),
+                const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
               ],
             ),
             backgroundColor: AppColors.success,
@@ -335,7 +336,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.add_circle_outline,
+            child: const Icon(PhosphorIconsRegular.plusCircle,
                 color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
@@ -421,7 +422,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_rounded,
+                Icon(PhosphorIconsRegular.calendarBlank,
                     color: _selectedColor, size: 22),
                 const SizedBox(width: 12),
                 Text(
@@ -441,7 +442,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                   ),
                 ),
                 const Spacer(),
-                Icon(Icons.edit_calendar, color: _selectedColor, size: 22),
+                Icon(PhosphorIconsRegular.calendarPlus, color: _selectedColor, size: 22),
               ],
             ),
           ),
@@ -532,7 +533,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child:
-                  Icon(Icons.arrow_forward, color: Colors.grey.shade500, size: 18),
+                  Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(child: _buildTimeButton('סיום', _endTime, false)),
@@ -565,7 +566,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.access_time, color: _selectedColor, size: 18),
+                Icon(PhosphorIconsRegular.clock, color: _selectedColor, size: 18),
                 const SizedBox(width: 6),
                 Text(
                   time.format(context),
@@ -590,7 +591,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
           children: [
-            _buildWorkerCountButton(Icons.add, () {
+            _buildWorkerCountButton(PhosphorIconsRegular.plus, () {
               setState(() => _maxWorkers++);
               _saveDraft();
             }),
@@ -605,7 +606,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.people, color: _selectedColor, size: 28),
+                    Icon(PhosphorIconsRegular.users, color: _selectedColor, size: 28),
                     const SizedBox(width: 8),
                     Text(
                       '$_maxWorkers',
@@ -619,7 +620,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 ),
               ),
             ),
-            _buildWorkerCountButton(Icons.remove, () {
+            _buildWorkerCountButton(PhosphorIconsRegular.minus, () {
               if (_maxWorkers > 1) {
                 setState(() => _maxWorkers--);
                 _saveDraft();
@@ -700,7 +701,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                             color: Colors.grey.shade700)),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
+                      icon: const Icon(PhosphorIconsRegular.minusCircle),
                       color: _selectedColor,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -717,7 +718,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                               color: _selectedColor)),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
+                      icon: const Icon(PhosphorIconsRegular.plusCircle),
                       color: _selectedColor,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -823,7 +824,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle, size: 22),
+                  Icon(PhosphorIconsFill.checkCircle, size: 22),
                   SizedBox(width: 8),
                   Text(
                     'צור משמרת',
@@ -848,7 +849,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 18),
+          Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),
           Text(
             'ביטול',

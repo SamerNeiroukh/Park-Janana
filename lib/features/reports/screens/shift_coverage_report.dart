@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/reports/services/pdf_export_service.dart';
@@ -154,7 +155,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.domain_rounded,
+                    child: const Icon(PhosphorIconsRegular.buildings,
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -203,7 +204,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.calendar_month_outlined,
+          const Icon(PhosphorIconsRegular.calendarBlank,
               size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
@@ -225,7 +226,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
       children: [
         Expanded(
           child: _statPill(
-            icon: Icons.calendar_today_rounded,
+            icon: PhosphorIconsRegular.calendarBlank,
             color: TaskTheme.inProgress,
             value: '$_totalShifts',
             label: 'סה"כ משמרות',
@@ -234,7 +235,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _statPill(
-            icon: Icons.check_circle_rounded,
+            icon: PhosphorIconsFill.checkCircle,
             color: TaskTheme.done,
             value: '$fillRate%',
             label: 'מילוי משרות',
@@ -243,7 +244,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
         const SizedBox(width: 10),
         Expanded(
           child: _statPill(
-            icon: Icons.store_rounded,
+            icon: PhosphorIconsRegular.storefront,
             color: TaskTheme.pending,
             value: '${_deptStats.length}',
             label: 'מחלקות פעילות',
@@ -311,7 +312,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
         children: [
           const Row(
             children: [
-              Icon(Icons.bar_chart_rounded,
+              Icon(PhosphorIconsRegular.chartBar,
                   size: 18, color: TaskTheme.done),
               SizedBox(width: 8),
               Text('משמרות לפי מחלקה', style: TaskTheme.heading3),
@@ -419,7 +420,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
       children: [
         const Row(
           children: [
-            Icon(Icons.list_alt_rounded, size: 18, color: TaskTheme.primary),
+            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
             SizedBox(width: 8),
             Text('פירוט מחלקות', style: TaskTheme.heading3),
           ],
@@ -451,7 +452,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                       color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(Icons.domain_rounded, color: color, size: 22),
+                    child: Icon(PhosphorIconsRegular.buildings, color: color, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -529,7 +530,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.picture_as_pdf_rounded,
+                          Icon(PhosphorIconsRegular.filePdf,
                               color: Colors.white, size: 20),
                           SizedBox(width: 8),
                           Text(

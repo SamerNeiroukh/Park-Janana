@@ -4,6 +4,7 @@ import 'package:park_janana/core/config/departments.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class EditWorkerLicensesScreen extends StatefulWidget {
   final String uid;
@@ -112,7 +113,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
           SnackBar(
             content: const Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
                 SizedBox(width: 10),
                 Text('ההרשאות עודכנו בהצלחה'),
               ],
@@ -210,7 +211,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.manage_accounts_rounded,
+            child: const Icon(PhosphorIconsRegular.userGear,
                 color: Colors.white, size: 28),
           ),
           const SizedBox(width: 14),
@@ -268,7 +269,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                   color: const Color(0xFF6366F1).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.badge_rounded,
+                child: const Icon(PhosphorIconsFill.identificationCard,
                     color: Color(0xFF6366F1), size: 20),
               ),
               const SizedBox(width: 12),
@@ -289,7 +290,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 child: _buildRoleTile(
                   role: 'worker',
                   label: 'עובד',
-                  icon: Icons.person_rounded,
+                  icon: PhosphorIconsRegular.user,
                   color: const Color(0xFF3B82F6),
                 ),
               ),
@@ -298,7 +299,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 child: _buildRoleTile(
                   role: 'manager',
                   label: 'מנהל',
-                  icon: Icons.supervisor_account_rounded,
+                  icon: PhosphorIconsRegular.users,
                   color: const Color(0xFF6366F1),
                   lockedForNonOwner: widget.currentUserRole != 'owner' &&
                       widget.currentUserRole != 'co_owner',
@@ -310,7 +311,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                   child: _buildRoleTile(
                     role: 'co_owner',
                     label: 'בעלים משותף',
-                    icon: Icons.star_rounded,
+                    icon: PhosphorIconsRegular.star,
                     color: const Color(0xFFF59E0B),
                   ),
                 ),
@@ -321,7 +322,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
             const SizedBox(height: 10),
             const Row(
               children: [
-                Icon(Icons.lock_outline_rounded,
+                Icon(PhosphorIconsRegular.lock,
                     size: 13, color: Color(0xFF94A3B8)),
                 SizedBox(width: 6),
                 Text(
@@ -370,7 +371,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
         child: Column(
           children: [
             Icon(
-              isLocked ? Icons.lock_outline_rounded : icon,
+              isLocked ? PhosphorIconsRegular.lock : icon,
               color: isLocked
                   ? const Color(0xFFCBD5E1)
                   : isSelected
@@ -433,7 +434,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.domain_rounded,
+                child: const Icon(PhosphorIconsRegular.buildings,
                     color: AppColors.primary, size: 20),
               ),
               const SizedBox(width: 12),
@@ -540,7 +541,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check_rounded,
+                  ? const Icon(PhosphorIconsRegular.check,
                       color: Colors.white, size: 16)
                   : null,
             ),
@@ -589,7 +590,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle_rounded,
+                    Icon(PhosphorIconsFill.checkCircle,
                         color: Colors.white, size: 20),
                     SizedBox(width: 8),
                     Text(

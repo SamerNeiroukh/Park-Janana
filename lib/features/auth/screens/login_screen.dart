@@ -9,6 +9,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/auth/screens/forgot_password_screen.dart';
 import 'package:park_janana/core/services/biometric_service.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const _kHeroBg = Colors.white;
@@ -132,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
       message: 'האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?',
       confirmText: 'אפשר',
       cancelText: 'לא, תודה',
-      icon: Icons.fingerprint_rounded,
+      icon: PhosphorIconsRegular.fingerprint,
       iconGradient: const [Color(0xFF6366F1), Color(0xFF4338CA)],
     );
     if (enable ?? false) {
@@ -202,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
       message: 'בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.',
       confirmText: 'שלח בקשה מחדש',
       cancelText: 'ביטול',
-      icon: Icons.cancel_outlined,
+      icon: PhosphorIconsRegular.xCircle,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
     ).then((confirmed) async {
       if (confirmed ?? false) {
@@ -331,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         child: const Icon(
-                          Icons.arrow_forward_ios_rounded,
+                          PhosphorIconsRegular.arrowLeft,
                           color: AppColors.primary,
                           size: 18,
                         ),
@@ -408,7 +409,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: _inputDecoration(
                               label: 'אימייל',
                               hint: 'הכנס את כתובת האימייל שלך',
-                              icon: Icons.email_outlined,
+                              icon: PhosphorIconsRegular.envelope,
                               errorText: _emailError,
                             ),
                             validator: (value) {
@@ -433,13 +434,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: _inputDecoration(
                               label: 'סיסמה',
                               hint: 'הכנס את הסיסמה שלך',
-                              icon: Icons.lock_outline_rounded,
+                              icon: PhosphorIconsRegular.lock,
                               errorText: _passwordError,
                               suffix: IconButton(
                                 icon: Icon(
                                   _obscurePassword
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
+                                      ? PhosphorIconsRegular.eye
+                                      : PhosphorIconsRegular.eyeSlash,
                                   color: AppColors.textSecondary,
                                   size: 20,
                                 ),
@@ -524,7 +525,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 onPressed:
                                     _isLoading ? null : _loginWithBiometrics,
-                                icon: const Icon(Icons.fingerprint_rounded,
+                                icon: const Icon(PhosphorIconsRegular.fingerprint,
                                     color: AppColors.primary, size: 22),
                                 label: const Text(
                                   'כניסה ביומטרית',
@@ -633,9 +634,9 @@ class _StatusBanner extends StatelessWidget {
       };
 
   IconData get _icon => switch (type) {
-        _BannerType.error => Icons.error_outline_rounded,
-        _BannerType.warning => Icons.warning_amber_rounded,
-        _BannerType.success => Icons.check_circle_outline_rounded,
+        _BannerType.error => PhosphorIconsRegular.warningCircle,
+        _BannerType.warning => PhosphorIconsRegular.warning,
+        _BannerType.success => PhosphorIconsRegular.checkCircle,
       };
 
   @override
@@ -673,7 +674,7 @@ class _StatusBanner extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(top: 1, right: 2),
                 child: Icon(
-                  Icons.close_rounded,
+                  PhosphorIconsRegular.x,
                   color: _fg.withValues(alpha: 0.55),
                   size: 18,
                 ),

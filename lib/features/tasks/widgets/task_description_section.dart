@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 
@@ -39,13 +40,25 @@ class TaskDescriptionSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "🕒 $time",
-                style: AppTheme.bodyText.copyWith(fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Icon(PhosphorIconsRegular.clock, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    time,
+                    style: AppTheme.bodyText.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              Text(
-                "📅 $dateFormatted",
-                style: AppTheme.bodyText.copyWith(fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Icon(PhosphorIconsRegular.calendarBlank, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    dateFormatted,
+                    style: AppTheme.bodyText.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ],
           ),

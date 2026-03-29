@@ -13,6 +13,7 @@ import 'package:park_janana/features/attendance/screens/attendance_correction_sc
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ReviewWorkerScreen extends StatelessWidget {
   final QueryDocumentSnapshot userData;
@@ -78,9 +79,9 @@ class ReviewWorkerScreen extends StatelessWidget {
                     _buildSpiritualProfile(context, data),
                     const SizedBox(height: AppDimensions.spacingXXXXL),
                     _buildSoftCard("🧾 פרטי העובד", [
-                      _buildInfoRow(Icons.email_rounded, "אימייל", email),
+                      _buildInfoRow(PhosphorIconsRegular.envelope, "אימייל", email),
                       _buildInfoRow(
-                        Icons.phone,
+                        PhosphorIconsRegular.phone,
                         "טלפון",
                         phone,
                         onTap: phone.isNotEmpty
@@ -91,7 +92,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                     const SizedBox(height: AppDimensions.spacingXXXL),
                     _buildSoftCard("🧭 פעולות מנהל", [
                       _buildActionCard(
-                        icon: Icons.calendar_today_outlined,
+                        icon: PhosphorIconsRegular.calendarBlank,
                         label: "הצג משמרות",
                         color: Colors.teal,
                         onTap: () {
@@ -108,7 +109,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                         },
                       ),
                       _buildActionCard(
-                        icon: Icons.task_alt,
+                        icon: PhosphorIconsRegular.checkSquare,
                         label: "שייך משימה",
                         color: Colors.indigo,
                         onTap: () {
@@ -123,7 +124,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                         },
                       ),
                       _buildActionCard(
-                        icon: Icons.show_chart,
+                        icon: PhosphorIconsRegular.trendUp,
                         label: "הצג ביצועים",
                         color: AppColors.deepOrange,
                         onTap: () => Navigator.push(
@@ -138,7 +139,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                         ),
                       ),
                       _buildActionCard(
-                        icon: Icons.edit_calendar_outlined,
+                        icon: PhosphorIconsRegular.calendarPlus,
                         label: "תיקון נוכחות",
                         color: Colors.teal,
                         onTap: () => Navigator.push(
@@ -158,7 +159,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                         _buildFullWidthButton(
                           context,
                           label: "ניהול הרשאות ותפקיד",
-                          icon: Icons.security_rounded,
+                          icon: PhosphorIconsRegular.shield,
                           color: AppColors.primary,
                           onPressed: () {
                             Navigator.push(
@@ -179,7 +180,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                           _buildFullWidthButton(
                             context,
                             label: "בטל אישור עובד",
-                            icon: Icons.person_off_rounded,
+                            icon: PhosphorIconsRegular.userMinus,
                             color: AppColors.redLight,
                             onPressed: () => _unapproveWorker(context, uid),
                           ),
@@ -190,7 +191,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.lock_outline_rounded,
+                              Icon(PhosphorIconsRegular.lock,
                                   size: 16, color: Colors.grey.shade400),
                               const SizedBox(width: 8),
                               Text(
@@ -310,7 +311,7 @@ class ReviewWorkerScreen extends StatelessWidget {
                 overflow: TextOverflow.ellipsis),
           ),
           if (onTap != null)
-            const Icon(Icons.phone_forwarded_rounded,
+            const Icon(PhosphorIconsRegular.phoneOutgoing,
                 size: 16, color: AppColors.accent),
         ],
       ),
@@ -392,7 +393,7 @@ class ReviewWorkerScreen extends StatelessWidget {
       title: 'ביטול אישור עובד',
       message: 'העובד יועבר חזרה לרשימת הממתינים לאישור. הפעולה ניתנת לביטול.',
       confirmText: 'אשר',
-      icon: Icons.person_remove_rounded,
+      icon: PhosphorIconsRegular.userMinus,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
     );
 

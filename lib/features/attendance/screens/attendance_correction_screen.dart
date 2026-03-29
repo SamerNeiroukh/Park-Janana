@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 const _kIndigo = Color(0xFF6366F1);
 const _kIndigoDark = Color(0xFF4F46E5);
@@ -143,7 +144,7 @@ class _AttendanceCorrectionScreenState
       if (mounted) {
         _showBanner(
           message: 'הנוכחות נשמרה בהצלחה',
-          icon: Icons.check_circle_outline_rounded,
+          icon: PhosphorIconsRegular.checkCircle,
           color: _kGreen,
         );
         Navigator.pop(context);
@@ -152,7 +153,7 @@ class _AttendanceCorrectionScreenState
       if (mounted) {
         _showBanner(
           message: 'שגיאה בשמירת הנוכחות',
-          icon: Icons.error_outline_rounded,
+          icon: PhosphorIconsRegular.warningCircle,
           color: _kRed,
         );
       }
@@ -195,7 +196,7 @@ class _AttendanceCorrectionScreenState
     });
     _showBanner(
       message: 'שעת יציאה נרשמה — זכור לשמור',
-      icon: Icons.stop_circle_rounded,
+      icon: PhosphorIconsRegular.stop,
       color: _kRed,
     );
   }
@@ -227,7 +228,7 @@ class _AttendanceCorrectionScreenState
     });
     _showBanner(
       message: 'הרשומה עודכנה — זכור לשמור',
-      icon: Icons.edit_rounded,
+      icon: PhosphorIconsRegular.pencilSimple,
       color: _kIndigo,
     );
   }
@@ -264,7 +265,7 @@ class _AttendanceCorrectionScreenState
     });
     _showBanner(
       message: 'רשומה נוספה — זכור לשמור',
-      icon: Icons.add_circle_outline_rounded,
+      icon: PhosphorIconsRegular.plusCircle,
       color: _kGreen,
     );
   }
@@ -281,7 +282,7 @@ class _AttendanceCorrectionScreenState
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.delete_outline_rounded,
+            const Icon(PhosphorIconsRegular.trash,
                 color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Text('רשומה מס׳ ${index + 1} נמחקה',
@@ -425,7 +426,7 @@ class _AttendanceCorrectionScreenState
       child: Row(
         children: [
           _navButton(
-            icon: Icons.chevron_left,
+            icon: PhosphorIconsRegular.caretLeft,
             onTap: () {
               final minYear = DateTime.now().year - 2;
               if (_selectedYear > minYear) {
@@ -468,7 +469,7 @@ class _AttendanceCorrectionScreenState
             ),
           ),
           _navButton(
-            icon: Icons.chevron_right,
+            icon: PhosphorIconsRegular.caretRight,
             onTap: () {
               final maxYear = DateTime.now().year;
               if (_selectedYear < maxYear) {
@@ -636,26 +637,26 @@ class _AttendanceCorrectionScreenState
             child: Row(
               children: [
                 _statItem(
-                  icon: Icons.calendar_today_rounded,
+                  icon: PhosphorIconsRegular.calendarBlank,
                   value: '$uniqueDays',
                   label: 'ימי עבודה',
                 ),
                 _statDivider(),
                 _statItem(
-                  icon: Icons.access_time_rounded,
+                  icon: PhosphorIconsRegular.clock,
                   value: totalHours.toStringAsFixed(1),
                   label: 'שעות',
                 ),
                 _statDivider(),
                 _statItem(
-                  icon: Icons.receipt_long_rounded,
+                  icon: PhosphorIconsRegular.receipt,
                   value: '${_sessions.length}',
                   label: 'רשומות',
                 ),
                 if (openSessions > 0) ...[
                   _statDivider(),
                   _statItem(
-                    icon: Icons.timer_off_rounded,
+                    icon: PhosphorIconsRegular.timer,
                     value: '$openSessions',
                     label: 'חסר יציאה',
                     highlight: true,
@@ -724,7 +725,7 @@ class _AttendanceCorrectionScreenState
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.event_busy_rounded,
+                PhosphorIconsRegular.calendarX,
                 size: 52,
                 color: _kIndigo.withValues(alpha: 0.4),
               ),
@@ -746,7 +747,7 @@ class _AttendanceCorrectionScreenState
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _addSession,
-              icon: const Icon(Icons.add_rounded, size: 18),
+              icon: const Icon(PhosphorIconsRegular.plus, size: 18),
               label: const Text('הוסף רשומה'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kIndigo,
@@ -797,7 +798,7 @@ class _AttendanceCorrectionScreenState
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
-        child: const Icon(Icons.delete_sweep_rounded,
+        child: const Icon(PhosphorIconsRegular.trash,
             color: Colors.white, size: 28),
       ),
       onDismissed: (_) => _deleteSession(index),
@@ -897,7 +898,7 @@ class _AttendanceCorrectionScreenState
                       children: [
                         // Clock In
                         _timeChip(
-                          icon: Icons.login_rounded,
+                          icon: PhosphorIconsRegular.signIn,
                           time: timeFmt.format(s.clockIn),
                           date: dateFmt.format(s.clockIn),
                           color: _kGreen,
@@ -905,12 +906,12 @@ class _AttendanceCorrectionScreenState
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 6),
-                          child: Icon(Icons.arrow_forward_rounded,
+                          child: Icon(PhosphorIconsRegular.arrowRight,
                               size: 16, color: Color(0xFFCBD5E1)),
                         ),
                         // Clock Out
                         _timeChip(
-                          icon: Icons.logout_rounded,
+                          icon: PhosphorIconsRegular.signOut,
                           time: isOngoing ? '...' : timeFmt.format(s.clockOut),
                           date: isOngoing ? '' : dateFmt.format(s.clockOut),
                           color: isMissedClockout
@@ -939,12 +940,12 @@ class _AttendanceCorrectionScreenState
                           color: _kRed.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.stop_circle_rounded,
+                        child: const Icon(PhosphorIconsRegular.stop,
                             size: 18, color: _kRed),
                       ),
                     )
                   else
-                    Icon(Icons.edit_outlined,
+                    Icon(PhosphorIconsRegular.pencilSimple,
                         size: 18,
                         color: _kIndigo.withValues(alpha: 0.4)),
                 ],
@@ -1037,7 +1038,7 @@ class _AttendanceCorrectionScreenState
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _addSession,
-                icon: const Icon(Icons.add_rounded, size: 18, color: _kIndigo),
+                icon: const Icon(PhosphorIconsRegular.plus, size: 18, color: _kIndigo),
                 label: const Text(
                   'הוסף רשומה',
                   style: TextStyle(
@@ -1078,7 +1079,7 @@ class _AttendanceCorrectionScreenState
                             : const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.save_rounded,
+                                  Icon(PhosphorIconsRegular.floppyDisk,
                                       color: Colors.white, size: 20),
                                   SizedBox(width: 8),
                                   Text(
@@ -1192,7 +1193,7 @@ class _EditSessionDialogState extends State<_EditSessionDialog> {
               ),
               const SizedBox(height: 20),
               _DialogTimeRow(
-                icon: Icons.login_rounded,
+                icon: PhosphorIconsRegular.signIn,
                 color: _kGreen,
                 label: 'כניסה',
                 date: fmt.format(_clockIn),
@@ -1201,7 +1202,7 @@ class _EditSessionDialogState extends State<_EditSessionDialog> {
               ),
               const SizedBox(height: 12),
               _DialogTimeRow(
-                icon: Icons.logout_rounded,
+                icon: PhosphorIconsRegular.signOut,
                 color: _kRed,
                 label: 'יציאה',
                 date: fmt.format(_clockOut),

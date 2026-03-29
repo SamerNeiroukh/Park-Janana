@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Global network status banner.
 ///
@@ -133,7 +134,7 @@ class _NetworkBannerState extends State<NetworkBanner>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
+                isOffline ? PhosphorIconsRegular.wifiSlash : PhosphorIconsRegular.wifiHigh,
                 color: Colors.white,
                 size: 17,
               ),
