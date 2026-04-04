@@ -6,6 +6,7 @@ import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
 import 'package:park_janana/features/auth/screens/welcome_screen.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const _kYellow = Color(0xFFF6C34C);
@@ -55,7 +56,9 @@ class _RegistrationFormState extends State<RegistrationForm>
   AnimationController? _successCtrl;
   Animation<double>? _successScale;
 
-  static final _hebrewRx = RegExp(r'^[א-ת\s]+$');
+  late AppLocalizations _l10n;
+
+  static final _nameRx = RegExp(r'^[\p{L}\s]+$', unicode: true);
   static final _phoneRx = RegExp(r'^\d{10}$');
   static final _idRx = RegExp(r'^\d{9}$');
   static final _emailRx = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$');
@@ -68,6 +71,12 @@ class _RegistrationFormState extends State<RegistrationForm>
       sum += step;
     }
     return sum % 10 == 0;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
   }
 
   @override
@@ -129,39 +138,39 @@ class _RegistrationFormState extends State<RegistrationForm>
     switch (key) {
       case 'name':
         final v = _nameCtrl.text.trim();
-        if (v.isEmpty) return 'יש להזין שם מלא';
-        if (!_hebrewRx.hasMatch(v)) return 'יש להזין שם בעברית בלבד';
+        if (v.isEmpty) return _l10n.nameRequiredValidation;
+        if (!_nameRx.hasMatch(v)) return _l10n.nameInvalidCharsValidation;
         return null;
       case 'phone':
         final phone = _phoneCtrl.text.trim();
         if (!_phoneRx.hasMatch(phone)) {
-          return 'מספר טלפון חייב להכיל בדיוק 10 ספרות';
+          return _l10n.phoneDigitsValidation;
         }
         if (!phone.startsWith('05')) {
-          return 'מספר טלפון ישראלי חייב להתחיל ב-05';
+          return _l10n.phoneFormatValidation;
         }
         return null;
       case 'id':
         final id = _idCtrl.text.trim();
         if (!_idRx.hasMatch(id)) {
-          return 'תעודת זהות חייבת להכיל בדיוק 9 ספרות';
+          return _l10n.idDigitsValidation;
         }
         if (!_isValidIsraeliId(id)) {
-          return 'מספר תעודת הזהות אינו תקין';
+          return _l10n.idCheckDigitValidation;
         }
         return null;
       case 'email':
         if (!_emailRx.hasMatch(_emailCtrl.text.trim())) {
-          return 'כתובת אימייל אינה תקינה';
+          return _l10n.emailInvalidValidation;
         }
         return null;
       case 'pass':
         if (_passCtrl.text.length < 6) {
-          return 'הסיסמה חייבת להכיל לפחות 6 תווים';
+          return _l10n.passwordMinLengthValidation;
         }
         return null;
       case 'confirm':
-        if (_confirmCtrl.text != _passCtrl.text) return 'הסיסמאות אינן תואמות';
+        if (_confirmCtrl.text != _passCtrl.text) return _l10n.passwordMismatchValidation;
         return null;
       default:
         return null;
@@ -217,7 +226,6 @@ class _RegistrationFormState extends State<RegistrationForm>
             _touched.add(entry.key);
           }
         } else {
-          // Fallback for single-message errors (e.g. Firebase Auth)
           final String field;
           if (e.message.contains('טלפון')) {
             field = 'phone';
@@ -241,18 +249,16 @@ class _RegistrationFormState extends State<RegistrationForm>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: _kBg,
-        body: _submitted ? _buildSuccess() : _buildForm(context),
-      ),
+    return Scaffold(
+      backgroundColor: _kBg,
+      body: _submitted ? _buildSuccess() : _buildForm(context),
     );
   }
 
   // ── Success view ─────────────────────────────────────────────────────────────
 
   Widget _buildSuccess() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -273,9 +279,9 @@ class _RegistrationFormState extends State<RegistrationForm>
               ),
             ),
             const SizedBox(height: 28),
-            const Text(
-              'הבקשה נשלחה בהצלחה!',
-              style: TextStyle(
+            Text(
+              l10n.registrationSuccessTitle,
+              style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF111827),
@@ -284,9 +290,9 @@ class _RegistrationFormState extends State<RegistrationForm>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            const Text(
-              'הנהלת הפארק תבדוק את פרטיך ותיצור איתך קשר בהקדם האפשרי.',
-              style: TextStyle(
+            Text(
+              l10n.registrationSuccessMessage,
+              style: const TextStyle(
                 fontSize: 15,
                 color: Color(0xFF6B7280),
                 height: 1.5,
@@ -301,14 +307,14 @@ class _RegistrationFormState extends State<RegistrationForm>
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: _kYellow.withValues(alpha: 0.25)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(PhosphorIconsRegular.info, color: _kAmber, size: 20),
-                  SizedBox(width: 10),
+                  const Icon(PhosphorIconsRegular.info, color: _kAmber, size: 20),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'לאחר אישור ההנהלה תקבל גישה לאפליקציה ותוכל להתחבר.',
-                      style: TextStyle(
+                      l10n.registrationApprovalInfo,
+                      style: const TextStyle(
                         fontSize: 13,
                         color: _kAmber,
                         height: 1.4,
@@ -338,9 +344,9 @@ class _RegistrationFormState extends State<RegistrationForm>
                     (_) => false,
                   );
                 },
-                child: const Text(
-                  'חזור לדף הראשי',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                child: Text(
+                  l10n.backToHomeButton,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -353,6 +359,7 @@ class _RegistrationFormState extends State<RegistrationForm>
   // ── Form view ────────────────────────────────────────────────────────────────
 
   Widget _buildForm(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final topPad = MediaQuery.of(context).padding.top;
     final hasErrors = _touched.isNotEmpty && _errorCount > 0;
 
@@ -377,22 +384,20 @@ class _RegistrationFormState extends State<RegistrationForm>
               top: topPad + 4, bottom: 14, left: 8, right: 16),
           child: Row(
             children: [
-              // Park logo — first child = RIGHT in RTL
               Image.asset(
                 AppConstants.parkLogo,
                 height: 40,
                 fit: BoxFit.contain,
               ),
               const SizedBox(width: 12),
-              // Title + subtitle
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'הרשמה לפארק גננה',
-                      style: TextStyle(
+                    Text(
+                      l10n.registrationTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF111827),
@@ -400,7 +405,7 @@ class _RegistrationFormState extends State<RegistrationForm>
                       ),
                     ),
                     Text(
-                      'מלא את הפרטים לשליחת בקשת הצטרפות',
+                      l10n.registrationSubtitle,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,
@@ -410,7 +415,6 @@ class _RegistrationFormState extends State<RegistrationForm>
                 ),
               ),
               const SizedBox(width: 4),
-              // Back button — last child = LEFT in RTL
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(PhosphorIconsRegular.arrowRight, size: 20),
@@ -435,7 +439,12 @@ class _RegistrationFormState extends State<RegistrationForm>
                     color: _kRed, size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  'יש לתקן $_errorCount ${_errorCount == 1 ? 'שגיאה' : 'שגיאות'} לפני שליחה',
+                  l10n.validationErrorsBanner(
+                    _errorCount,
+                    _errorCount == 1
+                        ? l10n.validationErrorSingular
+                        : l10n.validationErrorPlural,
+                  ),
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -454,16 +463,15 @@ class _RegistrationFormState extends State<RegistrationForm>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Personal details section
-                  _sectionHeader(PhosphorIconsRegular.identificationCard, 'פרטים אישיים'),
+                  _sectionHeader(PhosphorIconsRegular.identificationCard, l10n.personalDetailsSection),
                   const SizedBox(height: 12),
                   _field(
                     key: 'name',
                     ctrl: _nameCtrl,
                     focus: _nameFocus,
                     nextFocus: _phoneFocus,
-                    label: 'שם מלא',
-                    hint: 'לדוגמה: ישראל ישראלי',
+                    label: l10n.fullNameLabel,
+                    hint: l10n.fullNameHint,
                     icon: PhosphorIconsRegular.user,
                     autofillHints: const [AutofillHints.name],
                   ),
@@ -472,8 +480,8 @@ class _RegistrationFormState extends State<RegistrationForm>
                     ctrl: _phoneCtrl,
                     focus: _phoneFocus,
                     nextFocus: _idFocus,
-                    label: 'מספר טלפון',
-                    hint: '05XXXXXXXX',
+                    label: l10n.phoneLabel,
+                    hint: l10n.phoneHint,
                     icon: PhosphorIconsRegular.phone,
                     keyboardType: TextInputType.phone,
                     formatters: [IlLocalPhoneFormatter()],
@@ -487,8 +495,8 @@ class _RegistrationFormState extends State<RegistrationForm>
                     ctrl: _idCtrl,
                     focus: _idFocus,
                     nextFocus: _emailFocus,
-                    label: 'תעודת זהות',
-                    hint: '9 ספרות',
+                    label: l10n.idLabel,
+                    hint: l10n.idHint,
                     icon: PhosphorIconsRegular.creditCard,
                     keyboardType: TextInputType.number,
                     formatters: [
@@ -498,15 +506,15 @@ class _RegistrationFormState extends State<RegistrationForm>
                   ),
 
                   const SizedBox(height: 8),
-                  _sectionHeader(PhosphorIconsRegular.lock, 'פרטי כניסה'),
+                  _sectionHeader(PhosphorIconsRegular.lock, l10n.loginDetailsSection),
                   const SizedBox(height: 12),
                   _field(
                     key: 'email',
                     ctrl: _emailCtrl,
                     focus: _emailFocus,
                     nextFocus: _passFocus,
-                    label: 'כתובת אימייל',
-                    hint: 'name@example.com',
+                    label: l10n.emailLabel,
+                    hint: l10n.emailHint,
                     icon: PhosphorIconsRegular.envelope,
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
@@ -516,8 +524,8 @@ class _RegistrationFormState extends State<RegistrationForm>
                     ctrl: _passCtrl,
                     focus: _passFocus,
                     nextFocus: _confirmFocus,
-                    label: 'סיסמה',
-                    hint: 'לפחות 6 תווים',
+                    label: l10n.passwordLabel,
+                    hint: l10n.passwordHint,
                     icon: PhosphorIconsRegular.lock,
                     obscure: !_passVisible,
                     showToggle: true,
@@ -529,8 +537,8 @@ class _RegistrationFormState extends State<RegistrationForm>
                     key: 'confirm',
                     ctrl: _confirmCtrl,
                     focus: _confirmFocus,
-                    label: 'אישור סיסמה',
-                    hint: 'הזן שוב את הסיסמה',
+                    label: l10n.confirmPasswordLabel,
+                    hint: l10n.confirmPasswordHint,
                     icon: PhosphorIconsRegular.lockKey,
                     obscure: !_confirmVisible,
                     showToggle: true,
@@ -544,7 +552,6 @@ class _RegistrationFormState extends State<RegistrationForm>
 
                   const SizedBox(height: 8),
 
-                  // Info notice
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -553,16 +560,16 @@ class _RegistrationFormState extends State<RegistrationForm>
                       border: Border.all(
                           color: _kYellow.withValues(alpha: 0.4), width: 1),
                     ),
-                    child: const Row(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(PhosphorIconsRegular.info,
+                        const Icon(PhosphorIconsRegular.info,
                             color: Color(0xFFB45309), size: 18),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'לאחר שליחת הבקשה, ההנהלה תאשר את חשבונך ותוכל להתחבר לאפליקציה.',
-                            style: TextStyle(
+                            l10n.registrationApprovalNotice,
+                            style: const TextStyle(
                               fontSize: 13,
                               color: Color(0xFF92400E),
                               height: 1.4,
@@ -684,7 +691,6 @@ class _RegistrationFormState extends State<RegistrationForm>
 
                   const SizedBox(height: 20),
 
-                  // Submit button
                   SizedBox(
                     width: double.infinity,
                     child: _isLoading
@@ -701,14 +707,14 @@ class _RegistrationFormState extends State<RegistrationForm>
                               ),
                             ),
                             onPressed: _submit,
-                            child: const Row(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(PhosphorIconsRegular.paperPlaneTilt, size: 18),
-                                SizedBox(width: 8),
+                                const Icon(PhosphorIconsRegular.paperPlaneTilt, size: 18),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'שלח בקשת הצטרפות',
-                                  style: TextStyle(
+                                  l10n.submitRegistrationButton,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),

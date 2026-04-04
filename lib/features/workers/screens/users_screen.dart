@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -94,7 +95,7 @@ class _UsersScreenState extends State<UsersScreen> {
       await _workerService.assignWorkerToShift(widget.shiftId, workerId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✔️ עובד נוסף למשמרת בהצלחה")),
+          SnackBar(content: Text(AppLocalizations.of(context).workerAddedToShift)),
         );
         setState(() {
           widget.assignedWorkerIds.add(workerId);
@@ -113,7 +114,7 @@ class _UsersScreenState extends State<UsersScreen> {
       await _workerService.removeWorkerFromShift(widget.shiftId, workerId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("❌ עובד הוסר מהמשמרת")),
+          SnackBar(content: Text(AppLocalizations.of(context).workerRemovedFromShift)),
         );
         setState(() {
           widget.assignedWorkerIds.remove(workerId);
@@ -126,21 +127,17 @@ class _UsersScreenState extends State<UsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      body: Column(
+        children: [
+          const UserHeader(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                labelText: " חיפוש לפי שם או תפקיד",
+                labelText: l10n.searchByNameOrRoleHint,
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
@@ -157,7 +154,7 @@ class _UsersScreenState extends State<UsersScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : filteredUsers.isEmpty
-                      ? const Center(child: Text("⚠️ לא נמצאו עובדים"))
+                      ? Center(child: Text(l10n.noWorkersFound))
                       : ListView.builder(
                           itemCount: filteredUsers.length,
                           itemBuilder: (context, index) {
@@ -278,12 +275,11 @@ class _UsersScreenState extends State<UsersScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        textDirection: TextDirection.rtl,
                         children: [
                           const Icon(PhosphorIconsRegular.userPlus, color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'הוסף ${_selectedDraftIds.length} עובדים',
+                            l10n.addWorkersCount(_selectedDraftIds.length),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -299,7 +295,6 @@ class _UsersScreenState extends State<UsersScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }

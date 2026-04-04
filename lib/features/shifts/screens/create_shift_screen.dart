@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/config/departments.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/utils/datetime_utils.dart';
@@ -17,6 +19,7 @@ class CreateShiftScreen extends StatefulWidget {
 }
 
 class _CreateShiftScreenState extends State<CreateShiftScreen> {
+  late AppLocalizations _l10n;
   final ShiftService _shiftService = ShiftService();
 
   DateTime _selectedDate = DateTime.now();
@@ -72,6 +75,12 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
+
+  @override
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate ?? DateTime.now();
@@ -103,11 +112,11 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(PhosphorIconsRegular.arrowCounterClockwise, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text('טיוטה שוחזרה', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Icon(PhosphorIconsRegular.arrowCounterClockwise, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(_l10n.draftRestoredSnackbar, style: const TextStyle(fontWeight: FontWeight.w600)),
               ],
             ),
             backgroundColor: const Color(0xFF6366F1),
@@ -116,7 +125,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             margin: const EdgeInsets.all(16),
             duration: const Duration(seconds: 3),
             action: SnackBarAction(
-              label: 'נקה',
+              label: _l10n.clearButton,
               textColor: Colors.white,
               onPressed: () async {
                 await _clearDraft();
@@ -179,8 +188,8 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       if (mounted) {
         Navigator.pop(context);
         final label = _recurringEnabled && _repeatWeeks > 1
-            ? '$_repeatWeeks משמרות נוצרו בהצלחה!'
-            : 'משמרת נוצרה בהצלחה!';
+            ? _l10n.shiftsCreatedSuccess(_repeatWeeks)
+            : _l10n.shiftCreatedSuccess;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -202,7 +211,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('שגיאה ביצירת משמרת: $e'),
+            content: Text(_l10n.createShiftError(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -262,16 +271,11 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: const Color(0xFFF8F9FB),
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -305,7 +309,6 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -340,22 +343,22 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 color: Colors.white, size: 28),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'יצירת משמרת חדשה',
-                  style: TextStyle(
+                  _l10n.createNewShiftTitle,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'מלא את הפרטים ליצירת משמרת',
-                  style: TextStyle(
+                  _l10n.createShiftSubtitle,
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
                   ),
@@ -408,7 +411,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
   Widget _buildDateSection() {
     return _buildSectionCard(
-      title: 'תאריך',
+      title: _l10n.dateLabel,
       child: InkWell(
         onTap: _selectDate,
         child: Padding(
@@ -435,7 +438,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  DateTimeUtils.getHebrewWeekdayName(_selectedDate.weekday),
+                  DateTimeUtils.getLocalizedWeekdayName(_selectedDate.weekday, Localizations.localeOf(context).languageCode),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -453,7 +456,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
   Widget _buildDepartmentSection() {
     return _buildSectionCard(
-      title: 'מחלקה',
+      title: _l10n.departmentLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Wrap(
@@ -500,7 +503,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      dept['name'] as String,
+                      getLocalizedDepartmentName(dept['name'] as String, _l10n),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -519,12 +522,12 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
   Widget _buildTimeSection() {
     return _buildSectionCard(
-      title: 'שעות',
+      title: _l10n.hoursLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
           children: [
-            Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
+            Expanded(child: _buildTimeButton(_l10n.startTimeLabel, _startTime, true)),
             const SizedBox(width: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -536,7 +539,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                   Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
-            Expanded(child: _buildTimeButton('סיום', _endTime, false)),
+            Expanded(child: _buildTimeButton(_l10n.endTimeLabel, _endTime, false)),
           ],
         ),
       ),
@@ -586,7 +589,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
   Widget _buildWorkersSection() {
     return _buildSectionCard(
-      title: 'מספר עובדים מקסימלי',
+      title: _l10n.maxWorkersLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
@@ -654,7 +657,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
     );
 
     return _buildSectionCard(
-      title: 'חזרה שבועית',
+      title: _l10n.weeklyRecurrenceLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
@@ -671,8 +674,8 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 Expanded(
                   child: Text(
                     _recurringEnabled
-                        ? 'משמרת חוזרת כל שבוע'
-                        : 'צור משמרת חוזרת',
+                        ? _l10n.shiftRepeatsWeekly
+                        : _l10n.createRecurringShift,
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -694,7 +697,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                 ),
                 child: Row(
                   children: [
-                    Text('מספר שבועות:',
+                    Text(_l10n.numberOfWeeksLabel,
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -732,7 +735,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
               const SizedBox(height: 12),
               // Date preview list
               Text(
-                'משמרות שייווצרו:',
+                _l10n.shiftsToBeCreatedLabel,
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -765,7 +768,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        DateTimeUtils.getHebrewWeekdayName(date.weekday),
+                        DateTimeUtils.getLocalizedWeekdayName(date.weekday, Localizations.localeOf(context).languageCode),
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -821,14 +824,14 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                   strokeWidth: 2.5,
                 ),
               )
-            : const Row(
+            : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(PhosphorIconsFill.checkCircle, size: 22),
-                  SizedBox(width: 8),
+                  const Icon(PhosphorIconsFill.checkCircle, size: 22),
+                  const SizedBox(width: 8),
                   Text(
-                    'צור משמרת',
-                    style: TextStyle(
+                    _l10n.createShiftButton,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -852,7 +855,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
           Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),
           Text(
-            'ביטול',
+            _l10n.cancelButton,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,

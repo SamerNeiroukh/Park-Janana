@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import '../models/task_model.dart';
@@ -34,6 +35,13 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   final GlobalKey _highlightedCardKey = GlobalKey();
   bool _scrolledToHighlight = false;
   int _highlightColumnIndex = -1;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -59,7 +67,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   }
 
   Widget _buildTopTabBar() {
-    const labels = ['משימות שיצרתי', 'המשימות שלי'];
+    final labels = [_l10n.createdByMeTabLabel, _l10n.myTasksTabLabel];
     const colors = [TaskTheme.primary, Color(0xFF8B5CF6)];
 
     return Padding(
@@ -106,17 +114,12 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _provider,
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
+      child: Scaffold(
           backgroundColor: TaskTheme.background,
           floatingActionButton: _tabIndex == 0 ? _buildFab() : null,
           body: Column(
             children: [
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: UserHeader(),
-              ),
+              const UserHeader(),
               _buildTopTabBar(),
               Expanded(
                 child: TabBarView(
@@ -141,7 +144,6 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
               ),
             ],
           ),
-        ),
       ),
     );
   }
@@ -174,10 +176,10 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('ניהול משימות', style: TaskTheme.heading1),
+                    Text(_l10n.taskManagementTitle, style: TaskTheme.heading1),
                     const SizedBox(height: 4),
                     Text(
-                      '${provider.totalCount} משימות • ${provider.overdueCount} באיחור',
+                      _l10n.tasksOverdueCount(provider.totalCount, provider.overdueCount),
                       style: TaskTheme.body,
                     ),
                   ],
@@ -210,7 +212,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                     onChanged: provider.setSearch,
                     style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'חיפוש משימה...',
+                      hintText: _l10n.searchTaskHint,
                       hintStyle: TaskTheme.body,
                       prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
                           size: 20, color: TaskTheme.textTertiary),
@@ -257,10 +259,10 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           style: TaskTheme.body.copyWith(color: TaskTheme.textPrimary),
           onChanged: provider.setDepartmentFilter,
           items: [
-            const DropdownMenuItem(value: null, child: Text('הכל')),
+            DropdownMenuItem(value: null, child: Text(_l10n.filterAll)),
             ...['general', 'paintball', 'ropes', 'carting', 'water_park', 'jimbory']
                 .map((d) => DropdownMenuItem(
-                    value: d, child: Text(TaskTheme.departmentLabel(d)))),
+                    value: d, child: Text(TaskTheme.departmentLabel(d, _l10n)))),
           ],
         ),
       ),
@@ -269,9 +271,9 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
 
   Widget _buildColumnTabs() {
     final columns = [
-      {'label': 'ממתין', 'status': 'pending', 'color': TaskTheme.pending},
-      {'label': 'בביצוע', 'status': 'in_progress', 'color': TaskTheme.inProgress},
-      {'label': 'הושלם', 'status': 'done', 'color': TaskTheme.done},
+      {'label': _l10n.filterStatusPending, 'status': 'pending', 'color': TaskTheme.pending},
+      {'label': _l10n.filterStatusInProgress, 'status': 'in_progress', 'color': TaskTheme.inProgress},
+      {'label': _l10n.taskStatusDone, 'status': 'done', 'color': TaskTheme.done},
     ];
 
     return Consumer<TaskBoardProvider>(
@@ -447,7 +449,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'אין משימות',
+              _l10n.noTasksEmpty,
               style: TaskTheme.heading3.copyWith(color: TaskTheme.textTertiary),
             ),
           ],
@@ -526,14 +528,14 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(PhosphorIconsRegular.hourglassMedium,
+                  const Icon(PhosphorIconsRegular.hourglassMedium,
                       size: 13, color: Color(0xFFB45309)),
-                  SizedBox(width: 5),
+                  const SizedBox(width: 5),
                   Text(
-                    'ממתינים לאישור:',
-                    style: TextStyle(
+                    _l10n.pendingApprovalLabel,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFFB45309),
@@ -583,7 +585,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                   textStyle: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w700),
                 ),
-                child: const Text('אשר'),
+                child: Text(_l10n.approveButton),
               ),
             ),
             const SizedBox(width: 8),
@@ -600,7 +602,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
                   textStyle: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w700),
                 ),
-                child: const Text('דחה'),
+                child: Text(_l10n.rejectButton),
               ),
             ),
           ],
@@ -621,7 +623,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('המשימה אושרה בהצלחה'),
+          content: Text(_l10n.taskApprovedSnackbar),
           backgroundColor: TaskTheme.done,
           behavior: SnackBarBehavior.floating,
           shape:
@@ -644,7 +646,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('המשימה הוחזרה לביצוע'),
+          content: Text(_l10n.taskReturnedSnackbar),
           backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
           shape:
@@ -658,9 +660,9 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
   Future<bool> _confirmDelete(TaskModel task) async {
     final result = await showAppDialog(
       context,
-      title: 'מחיקת משימה',
-      message: 'למחוק את "${task.title}"?',
-      confirmText: 'מחק',
+      title: _l10n.deleteTaskTitle,
+      message: _l10n.deleteTaskConfirmation(task.title),
+      confirmText: _l10n.deleteTaskButton,
       icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
@@ -674,7 +676,7 @@ class _ManagerTaskBoardScreenState extends State<ManagerTaskBoardScreen>
               const Icon(PhosphorIconsRegular.trash,
                   color: Colors.white, size: 18),
               const SizedBox(width: 8),
-              Text('המשימה "${task.title}" נמחקה',
+              Text(_l10n.taskDeletedSnackbar(task.title),
                   style: const TextStyle(fontWeight: FontWeight.w600)),
             ]),
             backgroundColor: const Color(0xFFEF4444),
@@ -734,6 +736,13 @@ class _MyTasksTab extends StatefulWidget {
 class _MyTasksTabState extends State<_MyTasksTab> {
   late final TaskTimelineProvider _provider;
   bool _showAllCompleted = false;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -773,20 +782,20 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 const SizedBox(height: 20),
 
                 if (provider.overdueTasks.isNotEmpty) ...[
-                  _buildSection('באיחור', PhosphorIconsRegular.warning,
+                  _buildSection(_l10n.taskOverdueSection, PhosphorIconsRegular.warning,
                       TaskTheme.overdue, provider.overdueTasks, provider),
                   const SizedBox(height: 20),
                 ],
 
                 if (provider.todayTasks.isNotEmpty) ...[
-                  _buildSection('להיום', PhosphorIconsRegular.calendarDot,
+                  _buildSection(_l10n.taskTodaySection, PhosphorIconsRegular.calendarDot,
                       TaskTheme.pending, provider.todayTasks, provider,
                       showActions: true),
                   const SizedBox(height: 20),
                 ],
 
                 if (provider.upcomingTasks.isNotEmpty) ...[
-                  _buildSection('הקרובות', PhosphorIconsRegular.calendarBlank,
+                  _buildSection(_l10n.taskUpcomingSection, PhosphorIconsRegular.calendarBlank,
                       TaskTheme.inProgress, provider.upcomingTasks, provider),
                   const SizedBox(height: 20),
                 ],
@@ -845,9 +854,9 @@ class _MyTasksTabState extends State<_MyTasksTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'המשימות שלי',
-                  style: TextStyle(
+                Text(
+                  _l10n.myTasksTitle,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -856,8 +865,8 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 const SizedBox(height: 4),
                 Text(
                   total == 0
-                      ? 'אין משימות להיום'
-                      : '$completed מתוך $total הושלמו היום',
+                      ? _l10n.noTasksToday
+                      : _l10n.todayTasksProgress(completed, total),
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.85),
@@ -951,14 +960,14 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIconsRegular.hourglassMedium, size: 18, color: Color(0xFFF59E0B)),
-          SizedBox(width: 8),
+          const Icon(PhosphorIconsRegular.hourglassMedium, size: 18, color: Color(0xFFF59E0B)),
+          const SizedBox(width: 8),
           Text(
-            'ממתין לאישור מנהל',
-            style: TextStyle(
+            _l10n.pendingManagerApproval,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFFB45309),
@@ -977,7 +986,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
         isStart ? const Color(0xFF6366F1) : const Color(0xFFF59E0B);
     final Color toColor =
         isStart ? const Color(0xFF818CF8) : const Color(0xFFFBBF24);
-    final String label = isStart ? 'התחל משימה' : 'שלח לאישור מנהל';
+    final String label = isStart ? _l10n.startTaskAction : _l10n.submitForApprovalButton;
     final IconData icon =
         isStart ? PhosphorIconsRegular.play : PhosphorIconsRegular.paperPlaneTilt;
 
@@ -1057,7 +1066,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                   size: 18, color: TaskTheme.done),
             ),
             const SizedBox(width: 10),
-            Text('הושלמו',
+            Text(_l10n.taskCompletedSection,
                 style: TaskTheme.heading3.copyWith(color: TaskTheme.done)),
             const SizedBox(width: 8),
             Container(
@@ -1082,7 +1091,7 @@ class _MyTasksTabState extends State<_MyTasksTab> {
                 onTap: () =>
                     setState(() => _showAllCompleted = !_showAllCompleted),
                 child: Text(
-                  _showAllCompleted ? 'הצג פחות' : 'הצג הכל',
+                  _showAllCompleted ? _l10n.showLessButton : _l10n.showAllButton,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -1127,12 +1136,11 @@ class _MyTasksTabState extends State<_MyTasksTab> {
             ),
             const SizedBox(height: 20),
             Text(
-              'אין משימות כרגע',
-              style:
-                  TaskTheme.heading3.copyWith(color: TaskTheme.textTertiary),
+              _l10n.noTasksNow,
+              style: TaskTheme.heading3.copyWith(color: TaskTheme.textTertiary),
             ),
             const SizedBox(height: 8),
-            const Text('משימות חדשות יופיעו כאן', style: TaskTheme.body),
+            Text(_l10n.newTasksWillAppear, style: TaskTheme.body),
           ],
         ),
       ),

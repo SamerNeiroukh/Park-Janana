@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 /// Displays a modern, polished confirmation dialog with an icon, title,
 /// message and two action buttons (cancel + confirm).
@@ -10,7 +11,9 @@ Future<bool?> showAppDialog(
   required String title,
   required String message,
   required String confirmText,
-  String cancelText = 'ביטול',
+
+  /// Falls back to the localized "Cancel" string when omitted.
+  String? cancelText,
 
   /// Icon shown inside the coloured circle.
   IconData icon = PhosphorIconsRegular.question,
@@ -36,9 +39,10 @@ Future<bool?> showAppDialog(
     barrierLabel: title,
     barrierColor: Colors.black.withValues(alpha: 0.55),
     transitionDuration: const Duration(milliseconds: 280),
-    pageBuilder: (ctx, _, _) => Directionality(
-      textDirection: TextDirection.rtl,
-      child: Center(
+    pageBuilder: (ctx, _, _) {
+      final resolvedCancelText =
+          cancelText ?? AppLocalizations.of(ctx).cancelButton;
+      return Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -123,7 +127,7 @@ Future<bool?> showAppDialog(
                 IntrinsicHeight(
                   child: Row(
                     children: [
-                      // Cancel (appears on RIGHT in RTL)
+                      // Cancel
                       Expanded(
                         child: TextButton(
                           style: TextButton.styleFrom(
@@ -133,7 +137,7 @@ Future<bool?> showAppDialog(
                           ),
                           onPressed: () => Navigator.of(ctx).pop(false),
                           child: Text(
-                            cancelText,
+                            resolvedCancelText,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -148,7 +152,7 @@ Future<bool?> showAppDialog(
                         color: const Color(0xFFEEEEEE),
                       ),
 
-                      // Confirm (appears on LEFT in RTL)
+                      // Confirm
                       Expanded(
                         child: TextButton(
                           style: TextButton.styleFrom(
@@ -173,8 +177,8 @@ Future<bool?> showAppDialog(
             ),
           ),
         ),
-      ),
-    ),
+      );
+    },
     transitionBuilder: (_, anim, _, child) {
       final clamped = anim.value.clamp(0.0, 1.0);
       final curve = Curves.easeOutBack.transform(clamped);

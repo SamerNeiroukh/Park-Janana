@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -17,9 +18,16 @@ class WorkersHoursReport extends StatefulWidget {
 
 class _WorkersHoursReportState extends State<WorkersHoursReport> {
   late DateTime _selectedMonth;
+  late AppLocalizations _l10n;
   bool _isLoading = true;
   bool _isExporting = false;
   List<AttendanceModel> _records = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -63,16 +71,14 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: UserHeader(),
+          ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -92,7 +98,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('שעות עבודה', style: TaskTheme.heading2),
+                  Text(_l10n.workersHoursTitle, style: TaskTheme.heading2),
                 ],
               ),
             ),
@@ -128,7 +134,6 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             if (!_isLoading && _records.isNotEmpty) _buildBottomBar(),
           ],
         ),
-      ),
     );
   }
 
@@ -140,7 +145,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
           const Icon(PhosphorIconsRegular.calendarX, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
-            'אין נתוני נוכחות לחודש זה',
+            _l10n.noAttendanceDataMonth,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -159,7 +164,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             icon: PhosphorIconsRegular.usersThree,
             color: TaskTheme.inProgress,
             value: '${_records.length}',
-            label: 'עובדים פעילים',
+            label: _l10n.activeWorkersLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -168,7 +173,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             icon: PhosphorIconsRegular.clock,
             color: TaskTheme.done,
             value: totalHours.toStringAsFixed(1),
-            label: 'סה״כ שעות',
+            label: _l10n.totalHoursLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -177,7 +182,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             icon: PhosphorIconsRegular.trendUp,
             color: TaskTheme.pending,
             value: avgHours.toStringAsFixed(1),
-            label: 'ממוצע לעובד',
+            label: _l10n.avgPerWorkerLabel,
           ),
         ),
       ],
@@ -244,13 +249,14 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
             children: [
               const Icon(PhosphorIconsRegular.chartBar, size: 18, color: TaskTheme.primary),
               const SizedBox(width: 8),
-              const Text('שעות לפי עובד', style: TaskTheme.heading3),
+              Text(_l10n.hoursByWorkerTitle, style: TaskTheme.heading3),
               if (_records.length > 10) ...[
                 const Spacer(),
-                const Text('(10 מובילים)', style: TaskTheme.caption),
+                Text(_l10n.topTenLabel, style: TaskTheme.caption),
               ],
             ],
           ),
+
           const SizedBox(height: 16),
           SizedBox(
             height: 200,
@@ -265,7 +271,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                       getTooltipItem: (group, _, rod, _) {
                         final name = displayed[group.x].userName;
                         return BarTooltipItem(
-                          '$name\n${rod.toY.toStringAsFixed(1)} ש׳',
+                          '$name\n${_l10n.hoursAbbrFormat(rod.toY.toStringAsFixed(1))}',
                           const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -353,11 +359,11 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('פירוט עובדים', style: TaskTheme.heading3),
+            const Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.workerDetailsTitle, style: TaskTheme.heading3),
           ],
         ),
         const SizedBox(height: 10),
@@ -413,7 +419,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                         Text(rec.userName, style: TaskTheme.heading3),
                         const SizedBox(height: 3),
                         Text(
-                          '${rec.daysWorked} ימים · ממוצע ${avg.toStringAsFixed(1)} ש׳/יום',
+                          _l10n.workerDaysAndAvgFormat(rec.daysWorked, avg.toStringAsFixed(1)),
                           style: TaskTheme.caption,
                         ),
                       ],
@@ -427,7 +433,7 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${rec.totalHoursWorked.toStringAsFixed(1)} ש׳',
+                      _l10n.hoursAbbrFormat(rec.totalHoursWorked.toStringAsFixed(1)),
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -478,15 +484,15 @@ class _WorkersHoursReportState extends State<WorkersHoursReport> {
                         width: 22,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2.5))
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(PhosphorIconsRegular.filePdf,
+                          const Icon(PhosphorIconsRegular.filePdf,
                               color: Colors.white, size: 20),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'ייצוא PDF',
-                            style: TextStyle(
+                            _l10n.exportPdfButton,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white),

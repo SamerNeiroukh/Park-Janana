@@ -6,6 +6,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import '../models/task_model.dart';
@@ -38,6 +39,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   List<UserModel> _filteredUsers = [];
   final List<UserModel> _selectedWorkers = [];
   bool _isSubmitting = false;
+
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -105,243 +114,237 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ─── Basic Info ─────────────────────
+                    Text(_l10n.taskBasicInfoTitle, style: TaskTheme.heading2),
+                    const SizedBox(height: 16),
+
+                    _buildLabel(_l10n.taskTitleLabel),
+                    const SizedBox(height: 8),
+                    _buildTextField(
+                      controller: _titleController,
+                      hint: _l10n.taskTitleHint,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? _l10n.taskFieldRequired : null,
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildLabel(_l10n.taskDescriptionFieldLabel),
+                    const SizedBox(height: 8),
+                    _buildTextField(
+                      controller: _descriptionController,
+                      hint: _l10n.taskDescriptionHint,
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildLabel(_l10n.taskPriorityLabel),
+                    const SizedBox(height: 8),
+                    _buildPrioritySelector(),
+                    const SizedBox(height: 16),
+
+                    _buildLabel(_l10n.taskDepartmentLabel),
+                    const SizedBox(height: 8),
+                    _buildDepartmentSelector(),
+                    const SizedBox(height: 24),
+
+                    // ─── Deadline ───────────────────────
+                    Text(_l10n.taskDeadlineSectionTitle, style: TaskTheme.heading2),
+                    const SizedBox(height: 16),
+                    Row(
                       children: [
-                        // ─── Basic Info ─────────────────────
-                        const Text('פרטי המשימה', style: TaskTheme.heading2),
-                        const SizedBox(height: 16),
-
-                        _buildLabel('כותרת'),
-                        const SizedBox(height: 8),
-                        _buildTextField(
-                          controller: _titleController,
-                          hint: 'שם המשימה',
-                          validator: (v) =>
-                              v == null || v.isEmpty ? 'שדה חובה' : null,
-                        ),
-                        const SizedBox(height: 16),
-
-                        _buildLabel('תיאור'),
-                        const SizedBox(height: 8),
-                        _buildTextField(
-                          controller: _descriptionController,
-                          hint: 'תיאור מפורט',
-                          maxLines: 4,
-                        ),
-                        const SizedBox(height: 16),
-
-                        _buildLabel('עדיפות'),
-                        const SizedBox(height: 8),
-                        _buildPrioritySelector(),
-                        const SizedBox(height: 16),
-
-                        _buildLabel('מחלקה'),
-                        const SizedBox(height: 8),
-                        _buildDepartmentSelector(),
-                        const SizedBox(height: 24),
-
-                        // ─── Deadline ───────────────────────
-                        const Text('מועד יעד', style: TaskTheme.heading2),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildPickerTile(
-                                icon: PhosphorIconsRegular.calendarBlank,
-                                value: _dueDate != null
-                                    ? DateFormat('dd/MM/yyyy')
-                                        .format(_dueDate!)
-                                    : 'תאריך',
-                                onTap: _pickDate,
-                                isSet: _dueDate != null,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildPickerTile(
-                                icon: PhosphorIconsRegular.clock,
-                                value: _dueTime != null
-                                    ? '${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}'
-                                    : 'שעה',
-                                onTap: _pickTime,
-                                isSet: _dueTime != null,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-
-                        // ─── Workers ────────────────────────
-                        const Text('עובדים משובצים', style: TaskTheme.heading2),
-                        const SizedBox(height: 12),
-
-                        // Selected chips
-                        if (_selectedWorkers.isNotEmpty) ...[
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _selectedWorkers.map((w) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: TaskTheme.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ProfileAvatar(
-                                      imageUrl: w.profilePicture,
-                                      radius: 12,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      w.fullName,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: TaskTheme.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    GestureDetector(
-                                      onTap: () => setState(() =>
-                                          _selectedWorkers.removeWhere(
-                                              (u) => u.uid == w.uid)),
-                                      child: const Icon(PhosphorIconsRegular.x,
-                                          size: 14, color: TaskTheme.primary),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-
-                        // Search
-                        Container(
-                          decoration: BoxDecoration(
-                            color: TaskTheme.surface,
-                            borderRadius:
-                                BorderRadius.circular(TaskTheme.radiusM),
-                            border: Border.all(color: TaskTheme.border),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: _filterUsers,
-                            style: const TextStyle(fontSize: 14),
-                            decoration: const InputDecoration(
-                              hintText: 'חיפוש עובד...',
-                              hintStyle:
-                                  TextStyle(color: TaskTheme.textTertiary),
-                              prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass,
-                                  size: 20, color: TaskTheme.textTertiary),
-                              border: InputBorder.none,
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 12),
-                            ),
+                        Expanded(
+                          child: _buildPickerTile(
+                            icon: PhosphorIconsRegular.calendarBlank,
+                            value: _dueDate != null
+                                ? DateFormat('dd/MM/yyyy')
+                                    .format(_dueDate!)
+                                : _l10n.taskDateLabel,
+                            onTap: _pickDate,
+                            isSet: _dueDate != null,
                           ),
                         ),
-                        const SizedBox(height: 8),
-
-                        // Worker list (limited height)
-                        SizedBox(
-                          height: 200,
-                          child: ListView.builder(
-                            itemCount: _filteredUsers.length,
-                            itemBuilder: (context, i) {
-                              final user = _filteredUsers[i];
-                              final isSelected = _selectedWorkers
-                                  .any((u) => u.uid == user.uid);
-
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      _selectedWorkers
-                                          .removeWhere((u) => u.uid == user.uid);
-                                    } else {
-                                      _selectedWorkers.add(user);
-                                    }
-                                  });
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 6),
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? TaskTheme.primary.withValues(alpha: 0.06)
-                                        : TaskTheme.surface,
-                                    borderRadius: BorderRadius.circular(
-                                        TaskTheme.radiusM),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? TaskTheme.primary
-                                          : TaskTheme.border,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      ProfileAvatar(
-                                        imageUrl: user.profilePicture,
-                                        radius: 16,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(user.fullName,
-                                                style: TaskTheme.label),
-                                            Text(user.role,
-                                                style: TaskTheme.caption),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(
-                                        isSelected
-                                            ? PhosphorIconsFill.checkCircle
-                                            : PhosphorIconsRegular.circle,
-                                        color: isSelected
-                                            ? TaskTheme.primary
-                                            : TaskTheme.textTertiary,
-                                        size: 22,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildPickerTile(
+                            icon: PhosphorIconsRegular.clock,
+                            value: _dueTime != null
+                                ? '${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}'
+                                : _l10n.taskTimeLabel,
+                            onTap: _pickTime,
+                            isSet: _dueTime != null,
                           ),
                         ),
-                        const SizedBox(height: 80),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 24),
+
+                    // ─── Workers ────────────────────────
+                    Text(_l10n.taskWorkersSectionTitle, style: TaskTheme.heading2),
+                    const SizedBox(height: 12),
+
+                    // Selected chips
+                    if (_selectedWorkers.isNotEmpty) ...[
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _selectedWorkers.map((w) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: TaskTheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ProfileAvatar(
+                                  imageUrl: w.profilePicture,
+                                  radius: 12,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  w.fullName,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: TaskTheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () => setState(() =>
+                                      _selectedWorkers.removeWhere(
+                                          (u) => u.uid == w.uid)),
+                                  child: const Icon(PhosphorIconsRegular.x,
+                                      size: 14, color: TaskTheme.primary),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    // Search
+                    Container(
+                      decoration: BoxDecoration(
+                        color: TaskTheme.surface,
+                        borderRadius:
+                            BorderRadius.circular(TaskTheme.radiusM),
+                        border: Border.all(color: TaskTheme.border),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _filterUsers,
+                        style: const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: _l10n.taskSearchWorkerHint,
+                          hintStyle:
+                              const TextStyle(color: TaskTheme.textTertiary),
+                          prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
+                              size: 20, color: TaskTheme.textTertiary),
+                          border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Worker list (limited height)
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        itemCount: _filteredUsers.length,
+                        itemBuilder: (context, i) {
+                          final user = _filteredUsers[i];
+                          final isSelected = _selectedWorkers
+                              .any((u) => u.uid == user.uid);
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedWorkers
+                                      .removeWhere((u) => u.uid == user.uid);
+                                } else {
+                                  _selectedWorkers.add(user);
+                                }
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? TaskTheme.primary.withValues(alpha: 0.06)
+                                    : TaskTheme.surface,
+                                borderRadius: BorderRadius.circular(
+                                    TaskTheme.radiusM),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? TaskTheme.primary
+                                      : TaskTheme.border,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  ProfileAvatar(
+                                    imageUrl: user.profilePicture,
+                                    radius: 16,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(user.fullName,
+                                            style: TaskTheme.label),
+                                        Text(user.role,
+                                            style: TaskTheme.caption),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    isSelected
+                                        ? PhosphorIconsFill.checkCircle
+                                        : PhosphorIconsRegular.circle,
+                                    color: isSelected
+                                        ? TaskTheme.primary
+                                        : TaskTheme.textTertiary,
+                                    size: 22,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 80),
+                  ],
                 ),
               ),
-            _buildBottomBar(),
-          ],
-        ),
+            ),
+          ),
+          _buildBottomBar(),
+        ],
       ),
     );
   }
@@ -390,9 +393,9 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
 
   Widget _buildPrioritySelector() {
     final items = [
-      {'value': 'low', 'label': 'נמוכה', 'color': TaskTheme.lowPriority},
-      {'value': 'medium', 'label': 'בינונית', 'color': TaskTheme.mediumPriority},
-      {'value': 'high', 'label': 'גבוהה', 'color': TaskTheme.highPriority},
+      {'value': 'low', 'label': _l10n.taskPriorityLow, 'color': TaskTheme.lowPriority},
+      {'value': 'medium', 'label': _l10n.taskPriorityMedium, 'color': TaskTheme.mediumPriority},
+      {'value': 'high', 'label': _l10n.taskPriorityHigh, 'color': TaskTheme.highPriority},
     ];
 
     return Row(
@@ -469,7 +472,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               ),
             ),
             child: Text(
-              TaskTheme.departmentLabel(d),
+              TaskTheme.departmentLabel(d, _l10n),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -574,14 +577,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(PhosphorIconsRegular.floppyDisk, color: Colors.white, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(PhosphorIconsRegular.floppyDisk, color: Colors.white, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              'שמור שינויים',
-                              style: TextStyle(
+                              _l10n.saveChangesTaskButton,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -605,7 +608,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         _dueDate == null ||
         _dueTime == null ||
         _selectedWorkers.isEmpty) {
-      _showError('יש למלא את כל השדות ולבחור עובדים');
+      _showError(_l10n.taskFillAllFields);
       return;
     }
 
@@ -652,12 +655,12 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           widget.task.id,
           action: 'edited',
           by: uid,
-          details: 'המשימה עודכנה',
+          details: _l10n.taskLogEdited,
         );
       }
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      _showError('שגיאה בעדכון המשימה');
+      _showError(_l10n.taskUpdateError);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

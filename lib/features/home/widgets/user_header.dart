@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
@@ -21,7 +22,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: onProfileTap != null
           ? IconButton(
               icon: const Icon(PhosphorIconsRegular.user),
-              tooltip: 'פרופיל',
+              tooltip: AppLocalizations.of(context).profileTooltip,
               onPressed: onProfileTap,
             )
           : null,
@@ -36,13 +37,14 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
           ? [
               IconButton(
               icon: const Icon(PhosphorIconsRegular.signOut),
-              tooltip: 'התנתקות',
+              tooltip: AppLocalizations.of(context).logoutLabel,
               onPressed: () async {
+                final l10n = AppLocalizations.of(context);
                 final shouldLogout = await showAppDialog(
                   context,
-                  title: 'התנתקות',
-                  message: 'האם אתה בטוח שברצונך להתנתק?',
-                  confirmText: 'התנתק',
+                  title: l10n.logoutTitle,
+                  message: l10n.logoutConfirmation,
+                  confirmText: l10n.logoutLabel,
                   icon: PhosphorIconsRegular.signOut,
                   isDestructive: true,
                 );

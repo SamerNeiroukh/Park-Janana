@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/config/departments.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
@@ -122,7 +123,8 @@ class _ManagerWeeklyScheduleScreenState
   }
 
   Widget _buildTabBar() {
-    const labels = ['כל המשמרות', 'המשמרות שלי'];
+    final l10n = AppLocalizations.of(context);
+    final labels = [l10n.allShiftsTabLabel, l10n.myShiftsTitle];
     const colors = [AppColors.primaryBlue, Color(0xFF8B5CF6)];
 
     return Padding(
@@ -170,47 +172,44 @@ class _ManagerWeeklyScheduleScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F9),
       appBar: const UserHeader(),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
-          children: [
-            _WeekHeader(
-              start: _weekStart,
-              onPrev: _prevWeek,
-              onNext: _nextWeek,
+      body: Column(
+        children: [
+          _WeekHeader(
+            start: _weekStart,
+            onPrev: _prevWeek,
+            onNext: _nextWeek,
+          ),
+          _buildTabBar(),
+          if (_tabIndex == 0) ...[
+            _DepartmentFilter(
+              selected: _selectedDepartment,
+              onChanged: (dept) {
+                setState(() => _selectedDepartment = dept);
+              },
             ),
-            _buildTabBar(),
-            if (_tabIndex == 0) ...[
-              _DepartmentFilter(
-                selected: _selectedDepartment,
-                onChanged: (dept) {
-                  setState(() => _selectedDepartment = dept);
-                },
-              ),
-              const SizedBox(height: 4),
-            ],
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  // ── Tab 0: All shifts ──────────────────────────────
-                  _buildAllShiftsContent(),
-                  // ── Tab 1: My shifts ───────────────────────────────
-                  _currentUid != null
-                      ? _MyShiftsTab(
-                          key: ValueKey('my_shifts_$_weekStart'),
-                          weekStart: _weekStart,
-                          shiftService: _shiftService,
-                          workerService: _workerService,
-                          uid: _currentUid!,
-                        )
-                      : const Center(child: CircularProgressIndicator()),
-                ],
-              ),
-            ),
+            const SizedBox(height: 4),
           ],
-        ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                // ── Tab 0: All shifts ──────────────────────────────
+                _buildAllShiftsContent(),
+                // ── Tab 1: My shifts ───────────────────────────────
+                _currentUid != null
+                    ? _MyShiftsTab(
+                        key: ValueKey('my_shifts_$_weekStart'),
+                        weekStart: _weekStart,
+                        shiftService: _shiftService,
+                        workerService: _workerService,
+                        uid: _currentUid!,
+                      )
+                    : const Center(child: CircularProgressIndicator()),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -335,6 +334,7 @@ class _WeekHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final end = start.add(const Duration(days: 6));
     final range =
         '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
@@ -349,14 +349,14 @@ class _WeekHeader extends StatelessWidget {
             IconButton(
               onPressed: onNext,
               icon: const Icon(PhosphorIconsRegular.caretLeft, size: 28),
-              tooltip: 'שבוע הבא',
+              tooltip: l10n.nextWeekTooltip,
             ),
             Expanded(
               child: Column(
                 children: [
-                  const Text(
-                    'סידור עבודה שבועי',
-                    style: TextStyle(
+                  Text(
+                    l10n.weeklyScheduleTitle,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.6,
@@ -377,7 +377,7 @@ class _WeekHeader extends StatelessWidget {
             IconButton(
               onPressed: onPrev,
               icon: const Icon(PhosphorIconsRegular.caretRight, size: 28),
-              tooltip: 'שבוע קודם',
+              tooltip: l10n.prevWeekTooltip,
             ),
           ],
         ),
@@ -401,7 +401,8 @@ class _DepartmentFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final departments = ['הכל', ...allDepartments];
+    final l10n = AppLocalizations.of(context);
+    final departments = [l10n.filterAll, ...allDepartments];
 
     return SizedBox(
       height: 46,
@@ -411,7 +412,7 @@ class _DepartmentFilter extends StatelessWidget {
         itemCount: departments.length,
         itemBuilder: (context, index) {
           final dept = departments[index];
-          final isAll = dept == 'הכל';
+          final isAll = index == 0;
           final isSelected = isAll ? selected == null : selected == dept;
           final color =
               isAll ? AppColors.primaryBlue : getDepartmentColor(dept);
@@ -433,7 +434,7 @@ class _DepartmentFilter extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  dept,
+                  isAll ? dept : getLocalizedDepartmentName(dept, l10n),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -482,6 +483,7 @@ class _DaySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final thisDay = DateTime(date.year, date.month, date.day);
@@ -521,7 +523,7 @@ class _DaySection extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      DateFormat('EEE', 'he').format(date),
+                      DateFormat('EEE', Localizations.localeOf(context).languageCode).format(date),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -561,9 +563,9 @@ class _DaySection extends StatelessWidget {
                             color: AppColors.primaryBlue,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'היום',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.todayLabel,
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -575,7 +577,7 @@ class _DaySection extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          'עבר',
+                          l10n.pastLabel,
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.grey.shade500,
@@ -636,6 +638,7 @@ class _EmptyDayPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -653,7 +656,7 @@ class _EmptyDayPlaceholder extends StatelessWidget {
           Icon(PhosphorIconsRegular.calendarX, size: 18, color: Colors.grey.shade400),
           const SizedBox(width: 8),
           Text(
-            'אין משמרות',
+            l10n.noShiftsDay,
             style: TextStyle(
               fontSize: 13,
               color: Colors.grey.shade500,
@@ -846,7 +849,7 @@ class _ShiftCardState extends State<_ShiftCard> {
                       _buildAvatarShimmer()
                     else if (workers.isEmpty)
                       Text(
-                        'לא שובצו עובדים',
+                        AppLocalizations.of(context).noWorkersAssigned,
                         style: TextStyle(
                             fontSize: 12, color: Colors.grey.shade500),
                       )
@@ -981,6 +984,7 @@ class _ShiftDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final workers = shift.assignedWorkers
         .where((id) => workerMap.containsKey(id))
         .map((id) => workerMap[id]!)
@@ -1047,7 +1051,7 @@ class _ShiftDetailSheet extends StatelessWidget {
                   size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
-                DateFormat('EEEE, d בMMMM', 'he').format(date),
+                DateFormat.MMMMEEEEd(Localizations.localeOf(context).languageCode).format(date),
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
               ),
             ],
@@ -1080,7 +1084,7 @@ class _ShiftDetailSheet extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'עובדים משובצים',
+                      l10n.assignedWorkersSection,
                       style: TextStyle(
                           fontSize: 13, color: Colors.grey.shade600),
                     ),
@@ -1122,7 +1126,7 @@ class _ShiftDetailSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                'לא שובצו עובדים למשמרת זו',
+                l10n.noWorkersAssignedForShift,
                 style: TextStyle(
                     fontSize: 14, color: Colors.grey.shade500),
               ),
@@ -1160,8 +1164,8 @@ class _ShiftDetailSheet extends StatelessWidget {
                             ),
                             Text(
                               worker.role == 'manager'
-                                  ? 'מנהל'
-                                  : 'עובד',
+                                  ? l10n.managerRole
+                                  : l10n.workerRoleLabel,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,
@@ -1233,9 +1237,9 @@ class _ShiftDetailSheet extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'צפה בפרטי המשמרת',
-                          style: TextStyle(
+                        Text(
+                          l10n.viewShiftDetailsButton,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -1362,6 +1366,7 @@ class _MyShiftsTabState extends State<_MyShiftsTab> {
             .toList();
 
         if (myShifts.isEmpty) {
+          final l10n = AppLocalizations.of(context);
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1370,7 +1375,7 @@ class _MyShiftsTabState extends State<_MyShiftsTab> {
                     size: 64, color: Colors.grey.shade300),
                 const SizedBox(height: 12),
                 Text(
-                  'אין משמרות השבוע',
+                  l10n.noShiftsThisWeek,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey.shade500,
@@ -1379,7 +1384,7 @@ class _MyShiftsTabState extends State<_MyShiftsTab> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'לא שובצת למשמרות בשבוע זה',
+                  l10n.notAssignedThisWeek,
                   style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
                 ),
               ],
@@ -1492,6 +1497,7 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -1502,7 +1508,7 @@ class _ErrorState extends StatelessWidget {
                 size: 64, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(
-              'שגיאה בטעינת המשמרות',
+              l10n.loadShiftsError,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
             ),
@@ -1511,7 +1517,7 @@ class _ErrorState extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(PhosphorIconsRegular.arrowsClockwise, size: 18),
-                label: const Text('נסה שוב'),
+                label: Text(l10n.retryButton),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,

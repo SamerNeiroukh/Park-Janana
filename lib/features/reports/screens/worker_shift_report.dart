@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
@@ -30,6 +31,7 @@ class WorkerShiftReport extends StatefulWidget {
 class _WorkerShiftReportState extends State<WorkerShiftReport> {
   final FirebaseService _firebaseService = FirebaseService();
   late DateTime _selectedMonth;
+  late AppLocalizations _l10n;
   bool _isLoading = true;
   bool _isExporting = false;
   List<ShiftModel> _shifts = [];
@@ -38,26 +40,40 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
   // Track which cards are expanded
   final Set<int> _expandedCards = {};
 
-  static const Map<String, String> _statusTranslations = {
-    'active': 'פעילה',
-    'cancelled': 'מבוטלת',
-    'pending': 'ממתינה',
-  };
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
-  static const Map<String, String> _roleTranslations = {
-    'worker': 'עובד',
-    'shift_manager': 'מנהל משמרת',
-    'department_manager': 'מנהל מחלקה',
-    'manager': 'מנהל',
-    'owner': 'בעלים',
-  };
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'active': return _l10n.shiftStatusActiveFem;
+      case 'cancelled': return _l10n.shiftStatusCancelledFem;
+      case 'pending': return _l10n.shiftStatusPendingFem;
+      default: return status;
+    }
+  }
 
-  static const Map<String, String> _decisionTranslations = {
-    'accepted': 'מאושר',
-    'rejected': 'נדחה',
-    'removed': 'הוסר',
-    '': 'ממתין',
-  };
+  String _roleLabel(String role) {
+    switch (role) {
+      case 'worker': return _l10n.workerRoleLabel;
+      case 'shift_manager': return _l10n.shiftManagerRoleLabel;
+      case 'department_manager': return _l10n.deptManagerRoleLabel;
+      case 'manager': return _l10n.managerRole;
+      case 'owner': return _l10n.ownerRoleLabel;
+      default: return role;
+    }
+  }
+
+  String _decisionLabel(String decision) {
+    switch (decision) {
+      case 'accepted': return _l10n.decisionAcceptedLabel;
+      case 'rejected': return _l10n.decisionRejectedLabel;
+      case 'removed': return _l10n.decisionRemovedLabel;
+      default: return _l10n.decisionPendingLabel;
+    }
+  }
 
   @override
   void initState() {
@@ -231,7 +247,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                     child: const Icon(PhosphorIconsRegular.clock, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('דו״ח משמרות', style: TaskTheme.heading2),
+                  Text(_l10n.shiftReportTitle, style: TaskTheme.heading2),
                 ],
               ),
             ),
@@ -276,7 +292,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
           const Icon(PhosphorIconsRegular.calendarX, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
-            'אין משמרות לחודש זה',
+            _l10n.noShiftsMonth,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -293,7 +309,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             icon: PhosphorIconsRegular.clock,
             color: TaskTheme.inProgress,
             value: '${_shifts.length}',
-            label: 'סה״כ',
+            label: _l10n.totalLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -302,7 +318,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             icon: PhosphorIconsFill.checkCircle,
             color: TaskTheme.done,
             value: '${counts['accepted']}',
-            label: 'אושרו',
+            label: _l10n.approvedLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -311,7 +327,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             icon: PhosphorIconsRegular.xCircle,
             color: TaskTheme.overdue,
             value: '${counts['rejected']! + counts['other']!}',
-            label: 'נדחו/אחר',
+            label: _l10n.rejectedOtherLabel,
           ),
         ),
       ],
@@ -403,10 +419,10 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(PhosphorIconsRegular.chartPie, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('התפלגות החלטות', style: TaskTheme.heading3),
+          Row(children: [
+            const Icon(PhosphorIconsRegular.chartPie, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.decisionsDistributionTitle, style: TaskTheme.heading3),
           ]),
           const SizedBox(height: 16),
           SizedBox(
@@ -427,11 +443,11 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _legend(const Color(0xFF10B981), 'מאושר ($accepted)'),
+                    _legend(const Color(0xFF10B981), _l10n.shiftDecisionApproved(accepted)),
                     const SizedBox(height: 8),
-                    _legend(const Color(0xFFEF4444), 'נדחה ($rejected)'),
+                    _legend(const Color(0xFFEF4444), _l10n.shiftDecisionRejected(rejected)),
                     const SizedBox(height: 8),
-                    _legend(const Color(0xFFF59E0B), 'אחר ($other)'),
+                    _legend(const Color(0xFFF59E0B), _l10n.shiftDecisionOther(other)),
                   ],
                 ),
               ],
@@ -460,11 +476,11 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('פירוט משמרות', style: TaskTheme.heading3),
+            const Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.shiftsDetailsTitle, style: TaskTheme.heading3),
           ],
         ),
         const SizedBox(height: 10),
@@ -478,8 +494,8 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
     final userData = _getUserData(shift);
     final decision = userData['decision'] ?? '';
     final decColor = _decisionColor(decision);
-    final hebrewDecision = _decisionTranslations[decision] ?? decision;
-    final shiftStatus = _statusTranslations[shift.status] ?? shift.status;
+    final hebrewDecision = _decisionLabel(decision);
+    final shiftStatus = _statusLabel(shift.status);
     final deptColor = _departmentColor(shift.department);
     final isExpanded = _expandedCards.contains(index);
 
@@ -529,7 +545,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                   runSpacing: 6,
                   children: [
                     _buildChip(
-                      TaskTheme.departmentLabel(shift.department),
+                      TaskTheme.departmentLabel(shift.department, _l10n),
                       deptColor,
                     ),
                     _buildChip(shiftStatus, TaskTheme.inProgress),
@@ -565,7 +581,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      isExpanded ? 'הסתר פרטים' : 'הצג פרטים',
+                      isExpanded ? _l10n.hideDetailsLabel : _l10n.showDetailsLabel,
                       style: TaskTheme.caption.copyWith(
                         color: TaskTheme.primary,
                         fontWeight: FontWeight.w600,
@@ -601,31 +617,30 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                   const SizedBox(height: 10),
                   if (userData['decisionBy'] != null)
                     _buildDetailRow(
-                        'אושר ע״י', _resolveName(userData['decisionBy'])),
+                        _l10n.approvedByLabel, _resolveName(userData['decisionBy'])),
                   if (userData['decisionAt'] != null)
                     _buildDetailRow(
-                        'בתאריך', _formatTimestamp(userData['decisionAt'])),
+                        _l10n.dateLabel, _formatTimestamp(userData['decisionAt'])),
                   if (userData['roleAtAssignment'] != null)
                     _buildDetailRow(
-                      'תפקיד בעת השיבוץ',
-                      _roleTranslations[userData['roleAtAssignment']] ??
-                          userData['roleAtAssignment'],
+                      _l10n.roleAtAssignmentLabel,
+                      _roleLabel(userData['roleAtAssignment'] as String? ?? ''),
                     ),
                   if (userData['requestedAt'] != null)
                     _buildDetailRow(
-                        'זמן בקשה', _formatTimestamp(userData['requestedAt'])),
+                        _l10n.requestTimeLabel, _formatTimestamp(userData['requestedAt'])),
                   if (userData['removedBy'] != null)
                     _buildDetailRow(
-                        'הוסר ע״י', _resolveName(userData['removedBy'])),
+                        _l10n.removedByLabel, _resolveName(userData['removedBy'])),
                   if (userData['removedAt'] != null)
                     _buildDetailRow(
-                        'זמן הסרה', _formatTimestamp(userData['removedAt'])),
+                        _l10n.removalTimeLabel, _formatTimestamp(userData['removedAt'])),
                   if (userData['undoBy'] != null)
                     _buildDetailRow(
-                        'בוטל ע״י', _resolveName(userData['undoBy'])),
+                        _l10n.cancelledByLabel, _resolveName(userData['undoBy'])),
                   if (userData['undoAt'] != null)
                     _buildDetailRow(
-                        'זמן ביטול', _formatTimestamp(userData['undoAt'])),
+                        _l10n.cancellationTimeLabel, _formatTimestamp(userData['undoAt'])),
                 ],
               ),
             ),
@@ -721,7 +736,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
                           color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      _isExporting ? 'מייצא...' : 'ייצוא PDF',
+                      _isExporting ? _l10n.exportingLabel : _l10n.exportPdfButton,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

@@ -10,6 +10,7 @@ import 'package:park_janana/core/widgets/message_bubble.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class WorkerShiftCard extends StatefulWidget {
@@ -30,6 +31,7 @@ class WorkerShiftCard extends StatefulWidget {
 
 class _WorkerShiftCardState extends State<WorkerShiftCard>
     with SingleTickerProviderStateMixin {
+  late AppLocalizations _l10n;
   StreamSubscription<DocumentSnapshot>? _shiftSubscription;
   bool _hasRequested = false;
   bool _isShiftFull = false;
@@ -72,6 +74,12 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
       default:
         return PhosphorIconsRegular.briefcase;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
   }
 
   @override
@@ -174,11 +182,11 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(children: [
-                Icon(PhosphorIconsRegular.xCircle, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text('הבקשה למשמרת בוטלה',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
+              content: Row(children: [
+                const Icon(PhosphorIconsRegular.xCircle, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(_l10n.shiftRequestCancelledSnackbar,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
               ]),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
@@ -198,29 +206,30 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
             builder: (ctx) => Directionality(
               textDirection: TextDirection.rtl,
               child: AlertDialog(
-                title: const Row(
+                title: Row(
                   children: [
-                    Icon(PhosphorIconsRegular.warning, color: Colors.orange),
-                    SizedBox(width: 8),
-                    Text('התנגשות משמרות'),
+                    const Icon(PhosphorIconsRegular.warning, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    Text(_l10n.shiftConflictTitle),
                   ],
                 ),
                 content: Text(
-                  'כבר משובץ למשמרת בתאריך זה בשעות החופפות '
-                  '(${widget.shift.startTime}–${widget.shift.endTime}). '
-                  'האם להמשיך בכל זאת?',
+                  _l10n.shiftConflictMessage(
+                    widget.shift.startTime,
+                    widget.shift.endTime,
+                  ),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('ביטול'),
+                    child: Text(_l10n.cancelButton),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange),
-                    child: const Text('המשך בכל זאת',
-                        style: TextStyle(color: Colors.white)),
+                    child: Text(_l10n.proceedAnywayButton,
+                        style: const TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -427,7 +436,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
   Widget _buildActionButton(bool isOutdated) {
     if (_isCancelled) {
       return _buildStatusButton(
-        label: 'בוטלה',
+        label: _l10n.shiftStatusCancelled,
         color: Colors.red.shade400,
         icon: PhosphorIconsRegular.xCircle,
       );
@@ -435,7 +444,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
     if (isOutdated) {
       return _buildStatusButton(
-        label: _isAssigned ? 'עבדת' : 'הסתיים',
+        label: _isAssigned ? _l10n.shiftWorkedLabel : _l10n.shiftEndedLabel,
         color: Colors.grey,
         icon: _isAssigned ? PhosphorIconsFill.checkCircle : PhosphorIconsRegular.clockCounterClockwise,
       );
@@ -443,7 +452,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
     if (_isAssigned) {
       return _buildStatusButton(
-        label: 'משובץ',
+        label: _l10n.shiftAssignedLabel,
         color: AppColors.success,
         icon: PhosphorIconsFill.checkCircle,
       );
@@ -451,7 +460,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
     if (_isShiftFull && !_hasRequested) {
       return _buildStatusButton(
-        label: 'מלא',
+        label: _l10n.shiftFullLabel,
         color: Colors.red.shade400,
         icon: PhosphorIconsRegular.prohibit,
       );
@@ -459,7 +468,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
     return Semantics(
       button: true,
-      label: _hasRequested ? 'בטל בקשה למשמרת' : 'הצטרף למשמרת',
+      label: _hasRequested ? _l10n.cancelShiftRequestLabel : _l10n.joinShiftLabel,
       child: Material(
         color: _hasRequested
             ? Colors.red.shade50
@@ -483,7 +492,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _hasRequested ? 'ביטול' : 'הצטרף',
+                        _hasRequested ? _l10n.cancelButton : _l10n.joinButton,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -540,21 +549,21 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
 
   Widget _buildStatusChip(bool isOutdated) {
     if (_isCancelled) {
-      return _buildChip('המשמרת בוטלה', Colors.red.shade400, PhosphorIconsRegular.xCircle);
+      return _buildChip(_l10n.shiftCancelledChip, Colors.red.shade400, PhosphorIconsRegular.xCircle);
     }
     if (isOutdated) {
-      return _buildChip('עבר התאריך', Colors.grey, PhosphorIconsRegular.clockCounterClockwise);
+      return _buildChip(_l10n.shiftOutdatedChip, Colors.grey, PhosphorIconsRegular.clockCounterClockwise);
     }
     if (_isAssigned) {
-      return _buildChip('אתה משובץ', AppColors.success, PhosphorIconsRegular.check);
+      return _buildChip(_l10n.youAreAssignedChip, AppColors.success, PhosphorIconsRegular.check);
     }
     if (_hasRequested) {
-      return _buildChip('ממתין לאישור', AppColors.warningOrange, PhosphorIconsRegular.hourglassMedium);
+      return _buildChip(_l10n.waitingApprovalChip, AppColors.warningOrange, PhosphorIconsRegular.hourglassMedium);
     }
     if (_isShiftFull) {
-      return _buildChip('המשמרת מלאה', Colors.red.shade400, PhosphorIconsRegular.prohibit);
+      return _buildChip(_l10n.shiftFullChip, Colors.red.shade400, PhosphorIconsRegular.prohibit);
     }
-    return _buildChip('פתוח להרשמה', _departmentColor, PhosphorIconsRegular.calendarCheck);
+    return _buildChip(_l10n.openForRegistrationChip, _departmentColor, PhosphorIconsRegular.calendarCheck);
   }
 
   Widget _buildChip(String text, Color color, IconData icon) {
@@ -605,9 +614,16 @@ class ShiftDetailsPopup extends StatefulWidget {
 
 class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
   static final Map<String, UserModel> _workerCache = {};
+  late AppLocalizations _l10n;
 
   late List<UserModel> assignedWorkers = [];
   bool isLoadingWorkers = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -749,7 +765,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   // Workers section
-                  _buildSectionTitle('עובדים משובצים', PhosphorIconsRegular.users),
+                  _buildSectionTitle(_l10n.assignedWorkersSection, PhosphorIconsRegular.users),
                   const SizedBox(height: 12),
                   isLoadingWorkers
                       ? Center(
@@ -761,11 +777,11 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
                           ),
                         )
                       : assignedWorkers.isEmpty
-                          ? _buildEmptyCard('אין עובדים משובצים עדיין')
+                          ? _buildEmptyCard(_l10n.noAssignedWorkersYet)
                           : _buildWorkersGrid(),
                   const SizedBox(height: 24),
                   // Messages section
-                  _buildSectionTitle('הודעות', PhosphorIconsRegular.chatCircle),
+                  _buildSectionTitle(_l10n.messagesSection, PhosphorIconsRegular.chatCircle),
                   const SizedBox(height: 12),
                   _buildMessagesSection(),
                   const SizedBox(height: 20),
@@ -871,7 +887,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return _buildEmptyCard('טוען הודעות...');
+          return _buildEmptyCard(_l10n.loadingMessages);
         }
 
         final data = snapshot.data!.data() as Map<String, dynamic>;
@@ -879,7 +895,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
             List<Map<String, dynamic>>.from(data['messages'] ?? []);
 
         if (messages.isEmpty) {
-          return _buildEmptyCard('אין הודעות עדיין');
+          return _buildEmptyCard(_l10n.noMessagesYet);
         }
 
         return Container(

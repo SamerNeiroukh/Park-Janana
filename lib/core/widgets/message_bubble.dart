@@ -6,6 +6,7 @@ import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class MessageBubble extends StatefulWidget {
   final String message;
@@ -34,7 +35,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   String? _currentUserId;
   String? _currentUserRole;
 
-  String senderName = "מנהל";
+  String senderName = '';
   String? profilePictureUrl;
 
   @override
@@ -71,7 +72,7 @@ class _MessageBubbleState extends State<MessageBubble> {
       final userDoc = await FirebaseService().getUser(widget.senderId);
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
-        senderName = userData['fullName'] ?? "מנהל";
+        senderName = userData['fullName'] ?? '';
         profilePictureUrl = userData['profile_picture'];
       }
       if (mounted) setState(() {});
@@ -82,6 +83,7 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final DateTime messageTime =
         DateTime.fromMillisecondsSinceEpoch(widget.timestamp);
     final String formattedTime =
@@ -90,87 +92,86 @@ class _MessageBubbleState extends State<MessageBubble> {
     final bool canEditOrDelete =
         (_currentUserId == widget.senderId) || (_currentUserRole == "owner");
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4.0),
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ProfileAvatar(
-              imageUrl: profilePictureUrl,
-              radius: 25.0,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    senderName,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14),
-                    textAlign: TextAlign.right,
+    final displayName = senderName.isEmpty ? l10n.managerRole : senderName;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ProfileAvatar(
+            imageUrl: profilePictureUrl,
+            radius: 25.0,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
+                  textAlign: TextAlign.right,
+                ),
+                if (_isEditing)
+                  TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0)),
+                      suffixIcon: IconButton(
+                        icon: const Icon(PhosphorIconsRegular.floppyDisk, color: Colors.green),
+                        onPressed: _updateMessage,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Text(
+                      widget.message,
+                      style: const TextStyle(fontSize: 14),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
-                  if (_isEditing)
-                    TextField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        suffixIcon: IconButton(
-                          icon: const Icon(PhosphorIconsRegular.floppyDisk, color: Colors.green),
-                          onPressed: _updateMessage,
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      padding: const EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: Text(
-                        widget.message,
-                        style: const TextStyle(fontSize: 14),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(PhosphorIconsRegular.clock, size: 12, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        "$formattedTime ${messageTime.day}/${messageTime.month}/${messageTime.year}",
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                         textAlign: TextAlign.right,
                       ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(PhosphorIconsRegular.clock, size: 12, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          "$formattedTime ${messageTime.day}/${messageTime.month}/${messageTime.year}",
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.grey),
-                          textAlign: TextAlign.right,
+                      if (canEditOrDelete) ...[
+                        IconButton(
+                          icon: const Icon(PhosphorIconsRegular.pencilSimple,
+                              color: Colors.orange, size: 18),
+                          onPressed: () => setState(() => _isEditing = true),
                         ),
-                        if (canEditOrDelete) ...[
-                          IconButton(
-                            icon: const Icon(PhosphorIconsRegular.pencilSimple,
-                                color: Colors.orange, size: 18),
-                            onPressed: () => setState(() => _isEditing = true),
-                          ),
-                          IconButton(
-                            icon: const Icon(PhosphorIconsRegular.trash,
-                                color: Colors.red, size: 18),
-                            onPressed: _deleteMessage,
-                          ),
-                        ]
-                      ],
-                    ),
+                        IconButton(
+                          icon: const Icon(PhosphorIconsRegular.trash,
+                              color: Colors.red, size: 18),
+                          onPressed: _deleteMessage,
+                        ),
+                      ]
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -186,7 +187,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה בעדכון ההודעה')),
+          SnackBar(content: Text(AppLocalizations.of(context).messageUpdateError)),
         );
       }
     }
@@ -198,7 +199,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה במחיקת ההודעה')),
+          SnackBar(content: Text(AppLocalizations.of(context).messageDeletionError)),
         );
       }
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/reports/screens/attendance_summary_report.dart';
 import 'package:park_janana/features/reports/screens/task_summary_report.dart';
 import 'package:park_janana/features/reports/screens/worker_shift_report.dart';
@@ -29,6 +30,13 @@ class ManagerReportsScreen extends StatefulWidget {
 class _ManagerReportsScreenState extends State<ManagerReportsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -71,9 +79,9 @@ class _ManagerReportsScreenState extends State<ManagerReportsScreen>
                 indicatorColor: TaskTheme.inProgress,
                 indicatorWeight: 3,
                 indicatorSize: TabBarIndicatorSize.tab,
-                tabs: const [
-                  Tab(text: 'הדוחות שלי'),
-                  Tab(text: 'דוחות כלליים'),
+                tabs: [
+                  Tab(text: _l10n.myReportsTitle),
+                  Tab(text: _l10n.generalReportsTabLabel),
                 ],
               ),
             ),
@@ -121,6 +129,13 @@ class _PersonalReportsTab extends StatefulWidget {
 class _PersonalReportsTabState extends State<_PersonalReportsTab>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -144,18 +159,18 @@ class _PersonalReportsTabState extends State<_PersonalReportsTab>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('הדוחות שלי', style: TaskTheme.heading1),
+          Text(_l10n.myReportsTitle, style: TaskTheme.heading1),
           const SizedBox(height: 4),
           Text(
-            'צפייה בנתוני נוכחות, משימות ומשמרות אישיים',
+            _l10n.personalReportsSubtitle,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
           const SizedBox(height: 24),
           _buildCard(
             index: 0,
             icon: PhosphorIconsRegular.clock,
-            title: 'דו״ח נוכחות',
-            description: 'שעות עבודה, ימי נוכחות וסיכום חודשי',
+            title: _l10n.attendanceReportTitle,
+            description: _l10n.attendanceReportDescription,
             gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
             onTap: () => Navigator.push(
               context,
@@ -172,8 +187,8 @@ class _PersonalReportsTabState extends State<_PersonalReportsTab>
           _buildCard(
             index: 1,
             icon: PhosphorIconsRegular.checkSquare,
-            title: 'דו״ח משימות',
-            description: 'סטטוס משימות, התקדמות ואחוזי ביצוע',
+            title: _l10n.taskReportCard,
+            description: _l10n.taskReportDescription,
             gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
             onTap: () => Navigator.push(
               context,
@@ -190,8 +205,8 @@ class _PersonalReportsTabState extends State<_PersonalReportsTab>
           _buildCard(
             index: 2,
             icon: PhosphorIconsRegular.clock,
-            title: 'דו״ח משמרות',
-            description: 'היסטוריית משמרות, אישורים והחלטות',
+            title: _l10n.shiftReportTitle,
+            description: _l10n.shiftReportDescription,
             gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
             onTap: () => Navigator.push(
               context,
@@ -264,6 +279,13 @@ class _GeneralReportsTab extends StatefulWidget {
 class _GeneralReportsTabState extends State<_GeneralReportsTab>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -287,18 +309,18 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('דוחות כלליים', style: TaskTheme.heading1),
+          Text(_l10n.generalReportsTabLabel, style: TaskTheme.heading1),
           const SizedBox(height: 4),
           Text(
-            'נתונים מצטברים על כלל העובדים',
+            _l10n.generalReportsSubtitle,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
           const SizedBox(height: 24),
           _buildCard(
             index: 0,
             icon: PhosphorIconsRegular.users,
-            title: 'שעות עבודה',
-            description: 'סיכום שעות עבודה חודשי לפי עובד',
+            title: _l10n.workersHoursTitle,
+            description: _l10n.workersHoursDescription,
             gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
             onTap: () => Navigator.push(
               context,
@@ -309,8 +331,8 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           _buildCard(
             index: 1,
             icon: PhosphorIconsRegular.chartBar,
-            title: 'התפלגות משימות',
-            description: 'משימות לפי עובד, אחוזי ביצוע ודירוג',
+            title: _l10n.taskDistributionTitle,
+            description: _l10n.taskDistributionDescription,
             gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
             onTap: () => Navigator.push(
               context,
@@ -322,8 +344,8 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           _buildCard(
             index: 2,
             icon: PhosphorIconsRegular.buildings,
-            title: 'כיסוי משמרות',
-            description: 'משמרות לפי מחלקה, אחוז מילוי ופירוט',
+            title: _l10n.shiftCoverageTitle,
+            description: _l10n.shiftCoverageDescription,
             gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
             onTap: () => Navigator.push(
               context,
@@ -334,8 +356,8 @@ class _GeneralReportsTabState extends State<_GeneralReportsTab>
           _buildCard(
             index: 3,
             icon: PhosphorIconsRegular.signIn,
-            title: 'יציאות חסרות',
-            description: 'עובדים שלא שכחו לצאת לפי חודש',
+            title: _l10n.missingCheckoutsTitle,
+            description: _l10n.missingClockoutsDescription,
             gradientColors: const [Color(0xFFEF4444), Color(0xFFDC2626)],
             onTap: () => Navigator.push(
               context,

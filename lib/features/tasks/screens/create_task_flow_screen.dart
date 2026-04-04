@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import '../models/task_model.dart';
@@ -46,6 +47,14 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
   bool _isSubmitting = false;
 
   final TaskService _taskService = TaskService();
+
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -114,7 +123,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
   bool _validateStep1() {
     if (_titleController.text.trim().isEmpty) {
-      _showError('נא להזין כותרת למשימה');
+      _showError(_l10n.tasksTitleValidation);
       return false;
     }
     return true;
@@ -122,7 +131,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
   bool _validateStep2() {
     if (_selectedWorkers.isEmpty) {
-      _showError('נא לבחור לפחות עובד אחד');
+      _showError(_l10n.tasksWorkersValidation);
       return false;
     }
     return true;
@@ -130,7 +139,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
   bool _validateStep3() {
     if (_dueDate == null || _dueTime == null) {
-      _showError('נא לבחור תאריך ושעה');
+      _showError(_l10n.tasksDeadlineValidation);
       return false;
     }
     return true;
@@ -149,38 +158,37 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
+          _buildStepIndicator(),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildStep1(),
+                _buildStep2(),
+                _buildStep3(),
+                _buildStep4(),
+              ],
             ),
-              _buildStepIndicator(),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildStep1(),
-                    _buildStep2(),
-                    _buildStep3(),
-                    _buildStep4(),
-                  ],
-                ),
-              ),
-            _buildBottomButtons(),
-          ],
-        ),
+          ),
+          _buildBottomButtons(),
+        ],
       ),
     );
   }
 
   Widget _buildStepIndicator() {
-    final labels = ['פרטים', 'עובדים', 'מועד', 'סיכום'];
+    final labels = [
+      _l10n.taskStepDetails,
+      _l10n.taskStepWorkers,
+      _l10n.taskStepDeadline,
+      _l10n.taskStepSummary,
+    ];
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 12, 20, 8),
@@ -282,41 +290,40 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('פרטי המשימה', style: TaskTheme.heading2),
+            Text(_l10n.taskBasicInfoTitle, style: TaskTheme.heading2),
             const SizedBox(height: 8),
-            const Text('מלא את הפרטים הבסיסיים של המשימה',
-                style: TaskTheme.body),
+            Text(_l10n.taskBasicInfoSubtitle, style: TaskTheme.body),
             const SizedBox(height: 24),
 
             // Title
-            _buildLabel('כותרת'),
+            _buildLabel(_l10n.taskTitleLabel),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _titleController,
-              hint: 'שם המשימה',
+              hint: _l10n.taskTitleHint,
               validator: (v) =>
-                  v == null || v.isEmpty ? 'שדה חובה' : null,
+                  v == null || v.isEmpty ? _l10n.taskFieldRequired : null,
             ),
             const SizedBox(height: 20),
 
             // Description
-            _buildLabel('תיאור'),
+            _buildLabel(_l10n.taskDescriptionFieldLabel),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _descriptionController,
-              hint: 'תיאור מפורט (אופציונלי)',
+              hint: _l10n.taskDescriptionOptionalHint,
               maxLines: 4,
             ),
             const SizedBox(height: 20),
 
             // Priority
-            _buildLabel('עדיפות'),
+            _buildLabel(_l10n.taskPriorityLabel),
             const SizedBox(height: 8),
             _buildPrioritySelector(),
             const SizedBox(height: 20),
 
             // Department
-            _buildLabel('מחלקה'),
+            _buildLabel(_l10n.taskDepartmentLabel),
             const SizedBox(height: 8),
             _buildDepartmentSelector(),
           ],
@@ -369,9 +376,9 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
 
   Widget _buildPrioritySelector() {
     final items = [
-      {'value': 'low', 'label': 'נמוכה', 'color': TaskTheme.lowPriority},
-      {'value': 'medium', 'label': 'בינונית', 'color': TaskTheme.mediumPriority},
-      {'value': 'high', 'label': 'גבוהה', 'color': TaskTheme.highPriority},
+      {'value': 'low', 'label': _l10n.taskPriorityLow, 'color': TaskTheme.lowPriority},
+      {'value': 'medium', 'label': _l10n.taskPriorityMedium, 'color': TaskTheme.mediumPriority},
+      {'value': 'high', 'label': _l10n.taskPriorityHigh, 'color': TaskTheme.highPriority},
     ];
 
     return Row(
@@ -447,7 +454,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
               ),
             ),
             child: Text(
-              TaskTheme.departmentLabel(d),
+              TaskTheme.departmentLabel(d, _l10n),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -471,10 +478,10 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('שיבוץ עובדים', style: TaskTheme.heading2),
+              Text(_l10n.taskAssignWorkersTitle, style: TaskTheme.heading2),
               const SizedBox(height: 8),
               Text(
-                'בחר ${_selectedWorkers.length} עובדים',
+                _l10n.taskSelectedWorkersCount(_selectedWorkers.length),
                 style: TaskTheme.body,
               ),
               const SizedBox(height: 16),
@@ -489,13 +496,13 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                   controller: _searchController,
                   onChanged: _filterUsers,
                   style: const TextStyle(fontSize: 14),
-                  decoration: const InputDecoration(
-                    hintText: 'חיפוש לפי שם או תפקיד...',
-                    hintStyle: TextStyle(color: TaskTheme.textTertiary),
-                    prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass,
+                  decoration: InputDecoration(
+                    hintText: _l10n.taskSearchWorkerByNameHint,
+                    hintStyle: const TextStyle(color: TaskTheme.textTertiary),
+                    prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
                         size: 20, color: TaskTheme.textTertiary),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -629,18 +636,18 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('מועד יעד', style: TaskTheme.heading2),
+          Text(_l10n.taskDeadlineSectionTitle, style: TaskTheme.heading2),
           const SizedBox(height: 8),
-          const Text('הגדר תאריך ושעת סיום למשימה', style: TaskTheme.body),
+          Text(_l10n.taskDeadlineHint, style: TaskTheme.body),
           const SizedBox(height: 32),
 
           // Date picker
           _buildPickerTile(
             icon: PhosphorIconsRegular.calendarBlank,
-            label: 'תאריך',
+            label: _l10n.taskDateLabel,
             value: _dueDate != null
                 ? DateFormat('dd/MM/yyyy').format(_dueDate!)
-                : 'בחר תאריך',
+                : _l10n.taskSelectDate,
             onTap: _pickDate,
             isSet: _dueDate != null,
           ),
@@ -649,10 +656,10 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
           // Time picker
           _buildPickerTile(
             icon: PhosphorIconsRegular.clock,
-            label: 'שעה',
+            label: _l10n.taskTimeLabel,
             value: _dueTime != null
                 ? '${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}'
-                : 'בחר שעה',
+                : _l10n.taskSelectTime,
             onTap: _pickTime,
             isSet: _dueTime != null,
           ),
@@ -746,27 +753,27 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('סיכום ויצירה', style: TaskTheme.heading2),
+          Text(_l10n.taskSummaryTitle, style: TaskTheme.heading2),
           const SizedBox(height: 8),
-          const Text('בדוק את הפרטים לפני יצירת המשימה', style: TaskTheme.body),
+          Text(_l10n.taskSummarySubtitle, style: TaskTheme.body),
           const SizedBox(height: 24),
 
-          _buildReviewCard('כותרת', _titleController.text, PhosphorIconsRegular.textT),
+          _buildReviewCard(_l10n.taskTitleLabel, _titleController.text, PhosphorIconsRegular.textT),
           if (_descriptionController.text.isNotEmpty)
-            _buildReviewCard('תיאור', _descriptionController.text,
+            _buildReviewCard(_l10n.taskDescriptionFieldLabel, _descriptionController.text,
                 PhosphorIconsRegular.fileText),
-          _buildReviewCard('עדיפות', TaskTheme.priorityLabel(_priority),
+          _buildReviewCard(_l10n.taskPriorityLabel, TaskTheme.priorityLabel(_priority, _l10n),
               TaskTheme.priorityIcon(_priority)),
-          _buildReviewCard('מחלקה', TaskTheme.departmentLabel(_department),
+          _buildReviewCard(_l10n.taskDepartmentLabel, TaskTheme.departmentLabel(_department, _l10n),
               PhosphorIconsRegular.buildings),
           _buildReviewCard(
-            'עובדים',
+            _l10n.taskReviewWorkersLabel,
             _selectedWorkers.map((w) => w.fullName).join(', '),
             PhosphorIconsRegular.usersThree,
           ),
           if (_dueDate != null && _dueTime != null)
             _buildReviewCard(
-              'מועד יעד',
+              _l10n.taskReviewDeadlineLabel,
               '${DateFormat('dd/MM/yyyy').format(_dueDate!)} ${_dueTime!.hour.toString().padLeft(2, '0')}:${_dueTime!.minute.toString().padLeft(2, '0')}',
               PhosphorIconsRegular.calendarBlank,
             ),
@@ -815,9 +822,9 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: () {
-                if (label == 'עובדים') {
+                if (label == _l10n.taskReviewWorkersLabel) {
                   _goToStep(1);
-                } else if (label == 'מועד יעד') {
+                } else if (label == _l10n.taskReviewDeadlineLabel) {
                   _goToStep(2);
                 } else {
                   _goToStep(0);
@@ -865,17 +872,17 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(TaskTheme.radiusM),
                       onTap: () => _goToStep(_currentStep - 1),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(PhosphorIconsRegular.arrowLeft,
+                            const Icon(PhosphorIconsRegular.arrowLeft,
                                 size: 18, color: TaskTheme.textSecondary),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Text(
-                              'חזור',
-                              style: TextStyle(
+                              _l10n.backStepButton,
+                              style: const TextStyle(
                                 fontSize: 15,
                                 color: TaskTheme.textSecondary,
                                 fontWeight: FontWeight.w600,
@@ -933,7 +940,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
                                         size: 20, color: Colors.white),
                                   if (isLast) const SizedBox(width: 8),
                                   Text(
-                                    isLast ? 'צור משימה' : 'המשך',
+                                    isLast ? _l10n.createTaskActionButton : _l10n.nextButton,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -1011,7 +1018,7 @@ class _CreateTaskFlowScreenState extends State<CreateTaskFlowScreen> {
       await _taskService.createTask(newTask);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      _showError('שגיאה ביצירת המשימה');
+      _showError(_l10n.taskCreateError);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

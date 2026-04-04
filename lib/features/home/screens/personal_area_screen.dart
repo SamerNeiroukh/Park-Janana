@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -55,6 +56,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     if (_isUploading) return;
+    final l10n = AppLocalizations.of(context);
     final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile == null) return;
 
@@ -65,12 +67,12 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'חתוך תמונה',
+          toolbarTitle: l10n.cropImageTitle,
           toolbarColor: _kPrimary,
           toolbarWidgetColor: Colors.white,
           lockAspectRatio: true,
         ),
-        IOSUiSettings(title: 'חתוך תמונה', aspectRatioLockEnabled: true),
+        IOSUiSettings(title: l10n.cropImageTitle, aspectRatioLockEnabled: true),
       ],
     );
 
@@ -102,9 +104,10 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
       if (mounted) await context.read<UserProvider>().refresh();
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('תמונת הפרופיל עודכנה בהצלחה'),
+            content: Text(l10n.profilePictureUpdated),
             backgroundColor: Colors.green.shade600,
             behavior: SnackBarBehavior.floating,
             shape:
@@ -115,8 +118,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('שגיאה: $e')));
+            .showSnackBar(SnackBar(content: Text(l10n.uploadError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -125,62 +129,60 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   void _showImageOptions() {
     if (_isUploading) return;
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'עדכון תמונת פרופיל',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'בחר מקור לתמונה',
-                style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
-              ),
-              const SizedBox(height: 20),
-              _OptionTile(
-                icon: PhosphorIconsRegular.camera,
-                label: 'צלם תמונה',
-                subtitle: 'השתמש במצלמה',
-                color: _kPrimary,
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              const SizedBox(height: 10),
-              _OptionTile(
-                icon: PhosphorIconsRegular.images,
-                label: 'בחר מהגלריה',
-                subtitle: 'העלה מהתמונות שלך',
-                color: const Color(0xFF8B5CF6),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.updateProfilePictureTitle,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.chooseImageSourceTitle,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+            ),
+            const SizedBox(height: 20),
+            _OptionTile(
+              icon: PhosphorIconsRegular.camera,
+              label: l10n.takePhotoAction,
+              subtitle: l10n.takePhrotoSubtitle,
+              color: _kPrimary,
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            const SizedBox(height: 10),
+            _OptionTile(
+              icon: PhosphorIconsRegular.images,
+              label: l10n.chooseFromGalleryAction,
+              subtitle: l10n.uploadFromGallerySubtitle,
+              color: const Color(0xFF8B5CF6),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -193,9 +195,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
       barrierLabel: 'profile',
       barrierColor: Colors.black.withValues(alpha: 0.55),
       transitionDuration: const Duration(milliseconds: 280),
-      pageBuilder: (ctx, _, _) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Center(
+      pageBuilder: (ctx, _, _) {
+        final l10n = AppLocalizations.of(ctx);
+        return Center(
           child: Material(
             color: Colors.transparent,
             child: Container(
@@ -230,19 +232,19 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Text(
-                          'עדכון תמונת פרופיל',
-                          style: TextStyle(
+                        Text(
+                          l10n.updateProfilePictureTitle,
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                             color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'להגדיר תמונה זו כתמונת הפרופיל שלך?',
+                        Text(
+                          l10n.setAsProfilePictureConfirm,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                             height: 1.4,
@@ -264,8 +266,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                               shape: const RoundedRectangleBorder(),
                             ),
                             onPressed: () => Navigator.pop(ctx),
-                            child: const Text('ביטול',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            child: Text(l10n.cancelButton,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           ),
                         ),
                         Container(width: 1, color: const Color(0xFFEEEEEE)),
@@ -280,8 +282,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                               Navigator.pop(ctx);
                               _uploadImage();
                             },
-                            child: const Text('אישור',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                            child: Text(l10n.confirmButton,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                           ),
                         ),
                       ],
@@ -291,8 +293,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
       transitionBuilder: (_, anim, _, child) {
         final clamped = anim.value.clamp(0.0, 1.0);
         final curve = Curves.easeOutBack.transform(clamped);
@@ -308,38 +310,36 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final userProvider = context.watch<UserProvider>();
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: _kBg,
-        body: Builder(builder: (context) {
-          if (userProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return Scaffold(
+      backgroundColor: _kBg,
+      body: Builder(builder: (context) {
+        if (userProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          UserModel? userData;
-          if (userProvider.currentUser?.uid == widget.uid) {
-            userData = userProvider.currentUser;
-          }
+        UserModel? userData;
+        if (userProvider.currentUser?.uid == widget.uid) {
+          userData = userProvider.currentUser;
+        }
 
-          if (userData == null) {
-            return FutureBuilder<UserModel?>(
-              future: _userFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.data == null) {
-                  return const Center(child: Text('לא נמצאו נתונים'));
-                }
-                return _buildContent(snapshot.data!);
-              },
-            );
-          }
-          return _buildContent(userData);
-        }),
-      ),
+        if (userData == null) {
+          return FutureBuilder<UserModel?>(
+            future: _userFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.data == null) {
+                return Center(child: Text(l10n.noDataFound));
+              }
+              return _buildContent(snapshot.data!);
+            },
+          );
+        }
+        return _buildContent(userData);
+      }),
     );
   }
 
@@ -405,10 +405,10 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           top: topPad + 14,
           left: 0,
           right: 0,
-          child: const Center(
+          child: Center(
             child: Text(
-              'הפרופיל שלי',
-              style: TextStyle(
+              AppLocalizations.of(context).myProfileTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -523,7 +523,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   // ── Name + Role section ────────────────────────────────────────────────────
 
   Widget _buildNameSection(UserModel user) {
-    final role = _roleInfo(user.role);
+    final role = _roleInfo(user.role, AppLocalizations.of(context));
     return Column(
       children: [
         Text(
@@ -579,6 +579,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   // ── Stats row ──────────────────────────────────────────────────────────────
 
   Widget _buildStatsRow(UserModel user) {
+    final l10n = AppLocalizations.of(context);
     final licensed = user.licensedDepartments.length;
     final total = allDepartments.length;
     final pct = total == 0 ? 0 : ((licensed / total) * 100).round();
@@ -588,7 +589,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           child: _StatCard(
             icon: PhosphorIconsFill.sealCheck,
             value: '$licensed / $total',
-            label: 'מחלקות מורשות',
+            label: l10n.authorizedDepartmentsLabel,
             color: _kPrimary,
           ),
         ),
@@ -597,7 +598,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           child: _StatCard(
             icon: PhosphorIconsRegular.shield,
             value: '$pct%',
-            label: 'כיסוי הרשאות',
+            label: l10n.permissionsCoverageLabel,
             color: const Color(0xFF10B981),
           ),
         ),
@@ -608,6 +609,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   // ── Info card ──────────────────────────────────────────────────────────────
 
   Widget _buildInfoCard(UserModel user) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -619,19 +621,19 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           _cardHeader(
             icon: PhosphorIconsRegular.user,
             color: _kPrimary,
-            title: 'פרטים אישיים',
+            title: l10n.personalDetailsSection,
           ),
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
           _InfoRow(
             icon: PhosphorIconsRegular.envelope,
             iconColor: _kPrimary,
-            label: 'אימייל',
+            label: l10n.emailFieldLabel,
             value: user.email,
           ),
           _InfoRow(
             icon: PhosphorIconsRegular.phone,
             iconColor: const Color(0xFF10B981),
-            label: 'מספר טלפון',
+            label: l10n.phoneLabel,
             value: user.phoneNumber,
             isLast: true,
           ),
@@ -643,6 +645,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
   // ── Departments card ───────────────────────────────────────────────────────
 
   Widget _buildDepartmentsCard(UserModel user) {
+    final l10n = AppLocalizations.of(context);
     final licensed = user.licensedDepartments;
     final ratio =
         allDepartments.isEmpty ? 0.0 : licensed.length / allDepartments.length;
@@ -659,7 +662,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
           _cardHeader(
             icon: PhosphorIconsFill.shieldCheck,
             color: _kPrimary,
-            title: 'הרשאות מחלקה',
+            title: l10n.departmentPermissionsSection,
             trailing: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -696,8 +699,8 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
                 const SizedBox(height: 5),
                 Text(
                   licensed.isEmpty
-                      ? 'אין הרשאות פעילות'
-                      : '${(ratio * 100).round()}% מהמחלקות פעילות',
+                      ? l10n.noActivePermissions
+                      : l10n.activeDepartmentsPercent((ratio * 100).round()),
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF94A3B8),
@@ -714,8 +717,9 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
               spacing: 8,
               runSpacing: 8,
               children: allDepartments.map((dept) {
+                final l10n = AppLocalizations.of(context);
                 return _DeptChip(
-                  label: dept,
+                  label: getLocalizedDepartmentName(dept, l10n),
                   icon: getDepartmentIcon(dept),
                   color: getDepartmentColor(dept),
                   licensed: licensed.contains(dept),
@@ -768,23 +772,23 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   // ── Role helper ────────────────────────────────────────────────────────────
 
-  _RoleInfo _roleInfo(String role) {
+  _RoleInfo _roleInfo(String role, AppLocalizations l10n) {
     switch (role) {
       case 'worker':
         return _RoleInfo(
-          label: 'עובד',
+          label: l10n.workerRoleLabel,
           icon: PhosphorIconsRegular.hardHat,
           color: _kPrimary,
         );
       case 'manager':
         return _RoleInfo(
-          label: 'מנהל',
+          label: l10n.managerRole,
           icon: PhosphorIconsRegular.userGear,
           color: const Color(0xFF059669),
         );
       default:
         return _RoleInfo(
-          label: 'בעלים',
+          label: l10n.ownerRoleLabel,
           icon: PhosphorIconsRegular.briefcase,
           color: const Color(0xFFD97706),
         );

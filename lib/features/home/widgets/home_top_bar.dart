@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/main.dart' show navigatorKey;
@@ -32,11 +33,12 @@ class HomeTopBar extends StatelessWidget {
   });
 
   Future<void> _logout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final ok = await showAppDialog(
       context,
-      title: 'התנתקות',
-      message: 'האם אתה בטוח שברצונך להתנתק?',
-      confirmText: 'התנתק',
+      title: l10n.logoutTitle,
+      message: l10n.logoutConfirmation,
+      confirmText: l10n.logoutLabel,
       icon: PhosphorIconsRegular.signOut,
       isDestructive: true,
     );
@@ -114,7 +116,7 @@ class HomeTopBar extends StatelessWidget {
                 color: Color(0xFF374151),
                 size: 22,
               ),
-              tooltip: 'אפשרויות',
+              tooltip: AppLocalizations.of(context).optionsTooltip,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
               elevation: 4,
@@ -122,38 +124,35 @@ class HomeTopBar extends StatelessWidget {
                 if (v == 'settings') onSettingsTap();
                 if (v == 'logout') await _logout(context);
               },
-              itemBuilder: (_) => [
-                const PopupMenuItem<String>(
-                  value: 'settings',
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
+              itemBuilder: (ctx) {
+                final l10n = AppLocalizations.of(ctx);
+                return [
+                  PopupMenuItem<String>(
+                    value: 'settings',
                     child: Row(
                       children: [
-                        Icon(PhosphorIconsRegular.gear,
+                        const Icon(PhosphorIconsRegular.gear,
                             size: 19, color: Color(0xFF374151)),
-                        SizedBox(width: 10),
-                        Text('הגדרות',
-                            style: TextStyle(color: Color(0xFF111827))),
+                        const SizedBox(width: 10),
+                        Text(l10n.settingsMenu,
+                            style: const TextStyle(color: Color(0xFF111827))),
                       ],
                     ),
                   ),
-                ),
-                const PopupMenuDivider(),
-                const PopupMenuItem<String>(
-                  value: 'logout',
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
+                  const PopupMenuDivider(),
+                  PopupMenuItem<String>(
+                    value: 'logout',
                     child: Row(
                       children: [
-                        Icon(PhosphorIconsRegular.signOut, color: Colors.red, size: 19),
-                        SizedBox(width: 10),
-                        Text('התנתקות',
-                            style: TextStyle(color: Colors.red)),
+                        const Icon(PhosphorIconsRegular.signOut, color: Colors.red, size: 19),
+                        const SizedBox(width: 10),
+                        Text(l10n.logoutLabel,
+                            style: const TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),
-                ),
-              ],
+                ];
+              },
             ),
           ],
         ),
@@ -213,7 +212,7 @@ class _NotificationBellState extends State<_NotificationBell> {
                 color: Color(0xFF374151),
                 size: 24,
               ),
-              tooltip: 'התראות',
+              tooltip: AppLocalizations.of(context).notificationsTooltip,
               onPressed: widget.onTap,
             ),
             if (count > 0)

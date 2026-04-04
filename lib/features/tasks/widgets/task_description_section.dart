@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 
 class TaskDescriptionSection extends StatelessWidget {
@@ -21,18 +22,20 @@ class TaskDescriptionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text(
-            'תיאור המשימה',
+          Text(
+            l10n.taskDescriptionSectionTitle,
             style: AppTheme.sectionTitle,
           ),
           const SizedBox(height: 8.0),
           Text(
-            description.isNotEmpty ? description : 'אין תיאור זמין.',
+            description.isNotEmpty ? description : l10n.noTaskDescription,
             style: AppTheme.bodyText,
             textAlign: TextAlign.right,
           ),
@@ -65,7 +68,7 @@ class TaskDescriptionSection extends StatelessWidget {
           const SizedBox(height: 12.0),
           if (isManager)
             Text(
-              "משימה נוצרה על ידי: ${task.createdBy}",
+              "${l10n.taskCreatedAtLabel}: ${task.createdBy}",
               style: AppTheme.bodyText,
               textAlign: TextAlign.right,
             ),

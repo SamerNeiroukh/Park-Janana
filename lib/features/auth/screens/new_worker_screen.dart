@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'registration_form.dart';
 
@@ -13,186 +14,177 @@ class NewWorkerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final size = MediaQuery.of(context).size;
     final topPad = MediaQuery.of(context).padding.top;
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: _kBg,
-        body: Column(
-          children: [
-            // ── Hero image ────────────────────────────────────────────────────
-            SizedBox(
-              height: size.height * 0.32,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset(
-                    AppConstants.teamImage,
-                    fit: BoxFit.cover,
+    return Scaffold(
+      backgroundColor: _kBg,
+      body: Column(
+        children: [
+          // ── Hero image ────────────────────────────────────────────────────
+          SizedBox(
+            height: size.height * 0.32,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  AppConstants.teamImage,
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  top: 0, left: 0, right: 0,
+                  height: 100,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x88000000), Colors.transparent],
+                      ),
+                    ),
                   ),
-                  // Light top fade for back button readability
-                  Positioned(
-                    top: 0, left: 0, right: 0,
-                    height: 100,
+                ),
+                Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  height: 80,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [Colors.white, Colors.transparent],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: topPad + 8,
+                  left: 16,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0x88000000), Colors.transparent],
-                        ),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      child: const Icon(PhosphorIconsRegular.arrowRight,
+                          color: Colors.white, size: 18),
                     ),
                   ),
-                  // Bottom fade into white card
-                  Positioned(
-                    bottom: 0, left: 0, right: 0,
-                    height: 80,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [Colors.white, Colors.transparent],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Back button — top left
-                  Positioned(
-                    top: topPad + 8,
-                    left: 16,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(PhosphorIconsRegular.arrowRight,
-                            color: Colors.white, size: 18),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            // ── Content card ─────────────────────────────────────────────────
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                color: Colors.white,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPad + 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Logo + title
-                      Center(
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              AppConstants.parkLogo,
-                              height: 64,
-                              fit: BoxFit.contain,
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'עובד חדש? ברוך הבא!',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF111827),
-                                letterSpacing: -0.4,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'הצטרף לצוות פארק גננה בכמה צעדים פשוטים',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Section title
-                      const Text(
-                        'איך זה עובד?',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF374151),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Steps
-                      _buildStep(
-                        number: '1',
-                        icon: PhosphorIconsRegular.notePencil,
-                        title: 'מלא טופס הרשמה',
-                        subtitle: 'הזן את פרטיך האישיים ובחר סיסמה',
-                      ),
-                      _buildStep(
-                        number: '2',
-                        icon: PhosphorIconsRegular.shieldStar,
-                        title: 'אישור ההנהלה',
-                        subtitle: 'הנהלת הפארק תבדוק את פרטיך ותאשר את חשבונך',
-                      ),
-                      _buildStep(
-                        number: '3',
-                        icon: PhosphorIconsRegular.confetti,
-                        title: 'הצטרף לצוות',
-                        subtitle: 'לאחר האישור תוכל להתחבר ולהתחיל לעבוד',
-                        isLast: true,
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      // CTA button
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _kYellow,
-                          foregroundColor: Colors.black87,
-                          elevation: 0,
-                          minimumSize: const Size(double.infinity, 54),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+          // ── Content card ─────────────────────────────────────────────────
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              color: Colors.white,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPad + 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            AppConstants.parkLogo,
+                            height: 64,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                        onPressed: () => _openRegistrationForm(context),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(PhosphorIconsRegular.paperPlaneTilt, size: 18),
-                            SizedBox(width: 8),
-                            Text(
-                              'שלח בקשת הצטרפות',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.newWorkerWelcomeTitle,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF111827),
+                              letterSpacing: -0.4,
                             ),
-                          ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.registrationStepsSubtitle,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    Text(
+                      l10n.howItWorksSection,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF374151),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    _buildStep(
+                      number: '1',
+                      icon: PhosphorIconsRegular.notePencil,
+                      title: l10n.step1Title,
+                      subtitle: l10n.step1Subtitle,
+                    ),
+                    _buildStep(
+                      number: '2',
+                      icon: PhosphorIconsRegular.shieldStar,
+                      title: l10n.step2Title,
+                      subtitle: l10n.step2Subtitle,
+                    ),
+                    _buildStep(
+                      number: '3',
+                      icon: PhosphorIconsRegular.confetti,
+                      title: l10n.step3Title,
+                      subtitle: l10n.step3Subtitle,
+                      isLast: true,
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _kYellow,
+                        foregroundColor: Colors.black87,
+                        elevation: 0,
+                        minimumSize: const Size(double.infinity, 54),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                    ],
-                  ),
+                      onPressed: () => _openRegistrationForm(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(PhosphorIconsRegular.paperPlaneTilt, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.submitRegistrationButton,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -207,7 +199,6 @@ class NewWorkerScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Number + connector line
         Column(
           children: [
             Container(
@@ -237,7 +228,6 @@ class NewWorkerScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 14),
-        // Content
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(top: 6, bottom: 16),

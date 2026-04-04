@@ -4,6 +4,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/constants/app_strings.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SplashScreen
@@ -255,7 +256,7 @@ class _SplashScreenState extends State<SplashScreen>
                 FadeTransition(
                   opacity: _subtitleFade,
                   child: Text(
-                    'מערכת ניהול עובדים',
+                    AppLocalizations.of(context).employeeManagementSystem,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15,

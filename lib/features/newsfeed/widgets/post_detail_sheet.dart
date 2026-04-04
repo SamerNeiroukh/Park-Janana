@@ -10,6 +10,7 @@ import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import 'video_player_widget.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class PostDetailSheet extends StatefulWidget {
   final PostModel post;
@@ -58,6 +59,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
   String? _resolvedProfileUrl;
   bool _isLoadingProfilePic = true;
   int _currentMediaIndex = 0;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -109,10 +117,10 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     final date = timestamp.toDate();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'עכשיו';
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דק׳';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
-    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    if (diff.inMinutes < 1) return _l10n.nowLabel;
+    if (diff.inMinutes < 60) return _l10n.minutesAgoLabel(diff.inMinutes);
+    if (diff.inHours < 24) return _l10n.hoursAgoLabel(diff.inHours);
+    if (diff.inDays < 7) return _l10n.daysAgoLabel(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
   }
 
@@ -164,9 +172,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       );
       _commentController.clear();
       _focusNode.unfocus();
-      if (mounted) _showSnackbar('התגובה נוספה', isSuccess: true);
+      if (mounted) _showSnackbar(_l10n.commentAddedSuccess, isSuccess: true);
     } catch (e) {
-      if (mounted) _showSnackbar('שגיאה בהוספת תגובה', isSuccess: false);
+      if (mounted) _showSnackbar(_l10n.commentAddError, isSuccess: false);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -176,9 +184,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     HapticFeedback.mediumImpact();
     final confirm = await showAppDialog(
       context,
-      title: 'מחיקת תגובה',
-      message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
-      confirmText: 'מחק',
+      title: _l10n.deleteCommentTitle,
+      message: _l10n.deleteCommentMessage,
+      confirmText: _l10n.deleteLabel,
       icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
@@ -187,9 +195,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
 
     try {
       await _newsfeedService.deleteComment(widget.post.id, comment);
-      if (mounted) _showSnackbar('התגובה נמחקה', isSuccess: true);
+      if (mounted) _showSnackbar(_l10n.commentDeletedSuccess, isSuccess: true);
     } catch (e) {
-      if (mounted) _showSnackbar('שגיאה במחיקת תגובה', isSuccess: false);
+      if (mounted) _showSnackbar(_l10n.commentDeleteError, isSuccess: false);
     }
   }
 
@@ -205,9 +213,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
     if (newContent == null || newContent.isEmpty || newContent == comment.content) return;
     try {
       await _newsfeedService.editComment(widget.post.id, comment, newContent);
-      if (mounted) _showSnackbar('התגובה עודכנה', isSuccess: true);
+      if (mounted) _showSnackbar(_l10n.commentUpdatedSuccess, isSuccess: true);
     } catch (e) {
-      if (mounted) _showSnackbar('שגיאה בעדכון תגובה', isSuccess: false);
+      if (mounted) _showSnackbar(_l10n.commentUpdateError, isSuccess: false);
     }
   }
 
@@ -322,9 +330,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'פרטי הפוסט',
-                style: TextStyle(
+              Text(
+                _l10n.postDetailTitle,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -402,15 +410,15 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(PhosphorIconsFill.pushPin,
+                const Icon(PhosphorIconsFill.pushPin,
                     size: 14, color: Color(0xFFD97706)),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'פוסט נעוץ',
-                  style: TextStyle(
+                  _l10n.pinnedPostLabel,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFD97706),
@@ -448,7 +456,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                   ),
                   const SizedBox(width: 10),
                   _CategoryChip(
-                    label: post.categoryDisplayName,
+                    label: post.categoryDisplayName(_l10n),
                     color: categoryColor,
                     icon: _getCategoryIcon(post.category),
                   ),
@@ -543,9 +551,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           final navigator = Navigator.of(context);
           showAppDialog(
             context,
-            title: 'מחיקת פוסט',
-            message: 'האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.',
-            confirmText: 'מחק',
+            title: _l10n.deletePostTitle,
+            message: _l10n.deletePostMessage,
+            confirmText: _l10n.deleteLabel,
             icon: PhosphorIconsRegular.trash,
             isDestructive: true,
           ).then((confirmed) {
@@ -571,29 +579,29 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                   color: AppColors.primaryBlue,
                 ),
                 const SizedBox(width: 12),
-                Text(post.isPinned ? 'בטל נעיצה' : 'נעץ פוסט'),
+                Text(post.isPinned ? _l10n.unpinPostAction : _l10n.pinPostAction),
               ],
             ),
           ),
         if (post.authorId == widget.currentUserId || widget.isManager)
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'edit',
             child: Row(
               children: [
-                Icon(PhosphorIconsRegular.pencilSimple, size: 18, color: AppColors.primaryBlue),
-                SizedBox(width: 12),
-                Text('ערוך פוסט'),
+                const Icon(PhosphorIconsRegular.pencilSimple, size: 18, color: AppColors.primaryBlue),
+                const SizedBox(width: 12),
+                Text(_l10n.editPostAction),
               ],
             ),
           ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
-              Icon(PhosphorIconsRegular.trash,
+              const Icon(PhosphorIconsRegular.trash,
                   size: 18, color: Color(0xFFEF4444)),
-              SizedBox(width: 12),
-              Text('מחק פוסט', style: TextStyle(color: Color(0xFFEF4444))),
+              const SizedBox(width: 12),
+              Text(_l10n.deletePostAction, style: const TextStyle(color: Color(0xFFEF4444))),
             ],
           ),
         ),
@@ -632,13 +640,13 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('עריכת פוסט',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                Text(_l10n.editPostTitle,
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: titleCtrl,
                   decoration: InputDecoration(
-                    labelText: 'כותרת',
+                    labelText: _l10n.postTitleLabel,
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(
@@ -653,7 +661,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                   maxLines: 5,
                   minLines: 3,
                   decoration: InputDecoration(
-                    labelText: 'תוכן',
+                    labelText: _l10n.postContentLabel,
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(
@@ -668,7 +676,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(ctx).pop(false),
-                        child: const Text('ביטול'),
+                        child: Text(_l10n.cancelButton),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -677,8 +685,8 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                         onPressed: () => Navigator.of(ctx).pop(true),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryBlue),
-                        child: const Text('שמור',
-                            style: TextStyle(color: Colors.white)),
+                        child: Text(_l10n.saveButton,
+                            style: const TextStyle(color: Colors.white)),
                       ),
                     ),
                   ],
@@ -697,9 +705,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
         'title': titleCtrl.text.trim(),
         'content': contentCtrl.text.trim(),
       });
-      if (mounted) _showSnackbar('הפוסט עודכן', isSuccess: true);
+      if (mounted) _showSnackbar(_l10n.postUpdatedSuccess, isSuccess: true);
     } catch (e) {
-      if (mounted) _showSnackbar('שגיאה בעדכון הפוסט', isSuccess: false);
+      if (mounted) _showSnackbar(_l10n.postUpdateError, isSuccess: false);
     }
   }
 
@@ -837,19 +845,19 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               fit: BoxFit.contain,
             )
           else
-            const Center(
+            Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     PhosphorIconsRegular.videoCamera,
                     color: Colors.white54,
                     size: 48,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'הקש לצפייה בסרטון',
-                    style: TextStyle(
+                    _l10n.tapToWatchVideo,
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
                     ),
@@ -961,9 +969,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ),
           ),
           const SizedBox(width: 12),
-          const Text(
-            'תגובות',
-            style: TextStyle(
+          Text(
+            _l10n.commentsTitle,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -1042,9 +1050,9 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'אין תגובות עדיין',
-            style: TextStyle(
+          Text(
+            _l10n.noCommentsEmpty,
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1052,7 +1060,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
           ),
           const SizedBox(height: 6),
           Text(
-            'היה הראשון להגיב על הפוסט!',
+            _l10n.beFirstToCommentOnPost,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade500,
@@ -1099,7 +1107,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
                 maxLines: null,
                 style: const TextStyle(fontSize: 15),
                 decoration: InputDecoration(
-                  hintText: 'הוסף תגובה...',
+                  hintText: _l10n.addCommentHint,
                   hintStyle: TextStyle(color: Colors.grey.shade500),
                   border: InputBorder.none,
                   contentPadding:
@@ -1817,6 +1825,13 @@ class _EditCommentSheet extends StatefulWidget {
 
 class _EditCommentSheetState extends State<_EditCommentSheet> {
   late final TextEditingController _ctrl;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -1857,9 +1872,9 @@ class _EditCommentSheetState extends State<_EditCommentSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'עריכת תגובה',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              Text(
+                _l10n.editCommentTitle,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -1868,7 +1883,7 @@ class _EditCommentSheetState extends State<_EditCommentSheet> {
                 maxLines: 4,
                 minLines: 2,
                 decoration: InputDecoration(
-                  hintText: 'ערוך את תגובתך...',
+                  hintText: _l10n.editCommentHint,
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
                   border: OutlineInputBorder(
@@ -1883,7 +1898,7 @@ class _EditCommentSheetState extends State<_EditCommentSheet> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('ביטול'),
+                      child: Text(_l10n.cancelButton),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1892,9 +1907,9 @@ class _EditCommentSheetState extends State<_EditCommentSheet> {
                       onPressed: () => Navigator.of(context).pop(_ctrl.text.trim()),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryBlue),
-                      child: const Text(
-                        'שמור',
-                        style: TextStyle(color: Colors.white),
+                      child: Text(
+                        _l10n.saveButton,
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -18,7 +19,7 @@ class ApproveWorkerScreen extends StatelessWidget {
     this.currentUserRole = 'manager',
   });
 
-  Future<void> _approveWorker(BuildContext context) async {
+  Future<void> _approveWorker(BuildContext context, AppLocalizations l10n) async {
     final String uid = userData['uid'];
     await FirebaseFirestore.instance.collection(AppConstants.usersCollection).doc(uid).update({
       'approved': true,
@@ -27,11 +28,11 @@ class ApproveWorkerScreen extends StatelessWidget {
     if (!context.mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('העובד אושר בהצלחה')),
+      SnackBar(content: Text(l10n.workerApproved)),
     );
   }
 
-  Future<void> _rejectWorker(BuildContext context) async {
+  Future<void> _rejectWorker(BuildContext context, AppLocalizations l10n) async {
     final String uid = userData['uid'];
     // Write rejectedAt (triggers Cloud Function notification) + rejected:true
     // so the pending workers query can filter this user out client-side.
@@ -46,12 +47,13 @@ class ApproveWorkerScreen extends StatelessWidget {
     if (!context.mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('הבקשה נדחתה. העובד קיבל הודעה.')),
+      SnackBar(content: Text(l10n.applicationRejectedSnackbar)),
     );
   }
 
   void _showConfirmationDialog({
     required BuildContext context,
+    required AppLocalizations l10n,
     required String title,
     required String content,
     required VoidCallback onConfirm,
@@ -60,7 +62,7 @@ class ApproveWorkerScreen extends StatelessWidget {
       context,
       title: title,
       message: content,
-      confirmText: 'אישור',
+      confirmText: l10n.confirmButton,
       icon: PhosphorIconsRegular.checkCircle,
       iconGradient: const [Color(0xFF4CAF50), Color(0xFF2E7D32)],
     ).then((confirmed) {
@@ -70,6 +72,7 @@ class ApproveWorkerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final data = userData.data() as Map<String, dynamic>;
 
     final String fullName = data['fullName'] ?? '';
@@ -83,29 +86,27 @@ class ApproveWorkerScreen extends StatelessWidget {
         children: [
           const UserHeader(),
           Expanded(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.paddingXL,
-                    vertical: AppDimensions.paddingXXL),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildProfileHeader(
-                      profilePictureUrl,
-                      fullName,
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXXXL),
-                    _buildInfoCard("🧾 פרטי העובד", [
-                      _buildInfoRow("דוא\"ל", email),
-                      _buildInfoRow("טלפון", phone),
-                    ]),
-                    const SizedBox(height: AppDimensions.spacingXXXXL),
-                    _buildActionButtons(context),
-                    const SizedBox(height: AppDimensions.spacingXXXXL),
-                  ],
-                ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingXL,
+                  vertical: AppDimensions.paddingXXL),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildProfileHeader(
+                    profilePictureUrl,
+                    fullName,
+                    l10n,
+                  ),
+                  const SizedBox(height: AppDimensions.spacingXXXL),
+                  _buildInfoCard(l10n.workerDetailsCardTitle, [
+                    _buildInfoRow(l10n.approveEmailLabel, email),
+                    _buildInfoRow(l10n.workerPhoneInfoLabel, phone),
+                  ]),
+                  const SizedBox(height: AppDimensions.spacingXXXXL),
+                  _buildActionButtons(context, l10n),
+                  const SizedBox(height: AppDimensions.spacingXXXXL),
+                ],
               ),
             ),
           ),
@@ -117,6 +118,7 @@ class ApproveWorkerScreen extends StatelessWidget {
   Widget _buildProfileHeader(
     String imageUrl,
     String name,
+    AppLocalizations l10n,
   ) {
     return Column(
       children: [
@@ -146,9 +148,9 @@ class ApproveWorkerScreen extends StatelessWidget {
               color: AppColors.textPrimary),
         ),
         const SizedBox(height: AppDimensions.spacingS),
-        const Text(
-          "עובד חדש ממתין לאישור",
-          style: TextStyle(fontSize: AppDimensions.fontM, color: Colors.grey),
+        Text(
+          l10n.newWorkerPendingApproval,
+          style: const TextStyle(fontSize: AppDimensions.fontM, color: Colors.grey),
         ),
       ],
     );
@@ -208,32 +210,34 @@ class ApproveWorkerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, AppLocalizations l10n) {
     return Column(
       children: [
         _buildFullWidthButton(
           context,
-          label: "אשר עובד",
+          label: l10n.approveWorkerButton,
           icon: PhosphorIconsRegular.checkCircle,
           color: AppColors.success,
           onPressed: () => _showConfirmationDialog(
             context: context,
-            title: "אישור עובד",
-            content: "האם אתה בטוח שברצונך לאשר את העובד הזה?",
-            onConfirm: () => _approveWorker(context),
+            l10n: l10n,
+            title: l10n.approveWorkerTitle,
+            content: l10n.approveConfirmContent,
+            onConfirm: () => _approveWorker(context, l10n),
           ),
         ),
         const SizedBox(height: AppDimensions.spacingL),
         _buildFullWidthButton(
           context,
-          label: "דחה בקשה",
+          label: l10n.rejectApplicationButton,
           icon: PhosphorIconsRegular.xCircle,
           color: AppColors.error,
           onPressed: () => _showConfirmationDialog(
             context: context,
-            title: "דחיית בקשה",
-            content: "העובד ישאר בהמתנה ויוכל להגיש בקשה שוב. האם לדחות?",
-            onConfirm: () => _rejectWorker(context),
+            l10n: l10n,
+            title: l10n.rejectApplicationTitle,
+            content: l10n.rejectConfirmContent,
+            onConfirm: () => _rejectWorker(context, l10n),
           ),
         ),
       ],

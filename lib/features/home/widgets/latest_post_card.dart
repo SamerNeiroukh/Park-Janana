@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/features/newsfeed/models/post_model.dart';
 import 'package:park_janana/features/newsfeed/services/newsfeed_service.dart';
@@ -46,13 +47,14 @@ class _PostPreview extends StatefulWidget {
 class _PostPreviewState extends State<_PostPreview> {
   bool _pressed = false;
 
-  String _timeAgo(Timestamp ts) {
+  String _timeAgo(BuildContext context, Timestamp ts) {
+    final l10n = AppLocalizations.of(context);
     final diff = DateTime.now().difference(ts.toDate());
-    if (diff.inMinutes < 1) return 'עכשיו';
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דק\'';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שע\'';
-    if (diff.inDays == 1) return 'אתמול';
-    return 'לפני ${diff.inDays} ימים';
+    if (diff.inMinutes < 1) return l10n.nowLabel;
+    if (diff.inMinutes < 60) return l10n.minutesAgoLabel(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgoLabel(diff.inHours);
+    if (diff.inDays == 1) return l10n.yesterdayLabel;
+    return l10n.daysAgoLabel(diff.inDays);
   }
 
   Color _categoryColor(String cat) {
@@ -71,6 +73,7 @@ class _PostPreviewState extends State<_PostPreview> {
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
+    final l10n = AppLocalizations.of(context);
     final thumbUrl = post.allMedia.isNotEmpty ? post.allMedia.first.url : null;
     final catColor = _categoryColor(post.category);
 
@@ -80,40 +83,37 @@ class _PostPreviewState extends State<_PostPreview> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Section label ────────────────────────────────────
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 10, right: 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10, right: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
                     ),
-                    child: const Icon(
-                      PhosphorIconsRegular.newspaper,
-                      color: Colors.white,
-                      size: 15,
-                    ),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'עדכון אחרון',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF374151),
-                    ),
+                  child: const Icon(
+                    PhosphorIconsRegular.newspaper,
+                    color: Colors.white,
+                    size: 15,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  AppLocalizations.of(context).latestUpdateLabel,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -190,7 +190,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        _timeAgo(post.createdAt),
+                                        _timeAgo(context, post.createdAt),
                                         style: const TextStyle(
                                           fontSize: 11,
                                           color: Color(0xFF9CA3AF),
@@ -212,7 +212,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                         color: catColor.withValues(alpha: 0.25)),
                                   ),
                                   child: Text(
-                                    post.categoryDisplayName,
+                                    post.categoryDisplayName(l10n),
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
@@ -298,7 +298,7 @@ class _PostPreviewState extends State<_PostPreview> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'קרא עוד',
+                                      AppLocalizations.of(context).readMoreLabel,
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,

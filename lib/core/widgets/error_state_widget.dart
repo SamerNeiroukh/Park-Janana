@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String errorMessage;
@@ -15,70 +16,68 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-          backgroundColor: AppColors.background,
-          body: SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      size: 80,
-                      color: AppColors.error,
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    PhosphorIconsRegular.warningCircle,
+                    size: 80,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.appInitializationError,
+                    style: AppTheme.screenTitle.copyWith(
+                      color: AppColors.textPrimary,
                     ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'שגיאה באתחול האפליקציה',
-                      style: AppTheme.screenTitle.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      textAlign: TextAlign.center,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    errorMessage,
+                    style: AppTheme.bodyText.copyWith(
+                      color: AppColors.textSecondary,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      errorMessage,
-                      style: AppTheme.bodyText.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    if (onRetry != null)
-                      ElevatedButton.icon(
-                        onPressed: onRetry,
-                        icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
-                        label: const Text('נסה שוב'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  if (onRetry != null)
+                    ElevatedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
+                      label: Text(l10n.retryButton),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'אם הבעיה נמשכת, אנא צור קשר עם התמיכה',
-                      style: AppTheme.hintTextStyle.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
                     ),
-                  ],
-                ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.contactSupportMessage,
+                    style: AppTheme.hintTextStyle.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
         ),
-    );
+      );
   }
 }

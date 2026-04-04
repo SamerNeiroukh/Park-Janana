@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -28,9 +29,16 @@ class TaskSummaryReport extends StatefulWidget {
 
 class _TaskSummaryReportState extends State<TaskSummaryReport> {
   late DateTime selectedMonth;
+  late AppLocalizations _l10n;
   bool isLoading = true;
   bool _isExporting = false;
   List<TaskModel> tasks = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -95,16 +103,14 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: UserHeader(),
+          ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -123,7 +129,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                     child: const Icon(PhosphorIconsRegular.checkSquare, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('דו״ח משימות', style: TaskTheme.heading2),
+                  Text(_l10n.taskReportCard, style: TaskTheme.heading2),
                 ],
               ),
             ),
@@ -161,7 +167,6 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             if (!isLoading && tasks.isNotEmpty) _buildBottomBar(),
           ],
         ),
-      ),
     );
   }
 
@@ -173,7 +178,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
           const Icon(PhosphorIconsRegular.clipboard, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
-            'אין משימות לחודש זה',
+            _l10n.noTasksMonth,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -203,7 +208,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             icon: PhosphorIconsRegular.clipboard,
             color: TaskTheme.inProgress,
             value: '$total',
-            label: 'סה״כ',
+            label: _l10n.totalLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -212,7 +217,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             icon: PhosphorIconsFill.checkCircle,
             color: TaskTheme.done,
             value: '$completed',
-            label: 'הושלמו',
+            label: _l10n.completedLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -221,7 +226,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
             icon: PhosphorIconsRegular.percent,
             color: rateColor,
             value: '${rate.toInt()}%',
-            label: 'ביצוע',
+            label: _l10n.executionLabel,
           ),
         ),
       ],
@@ -310,11 +315,11 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
       ),
       child: Column(
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(PhosphorIconsRegular.chartPie, size: 18, color: TaskTheme.primary),
-              SizedBox(width: 8),
-              Text('התפלגות סטטוס', style: TaskTheme.heading3),
+              const Icon(PhosphorIconsRegular.chartPie, size: 18, color: TaskTheme.primary),
+              const SizedBox(width: 8),
+              Text(_l10n.statusDistributionTitle, style: TaskTheme.heading3),
             ],
           ),
           const SizedBox(height: 16),
@@ -341,7 +346,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                         color: TaskTheme.done,
                       ),
                     ),
-                    const Text('ביצוע', style: TaskTheme.caption),
+                    Text(_l10n.executionLabel, style: TaskTheme.caption),
                   ],
                 ),
               ],
@@ -352,9 +357,9 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildLegendItem('ממתין', pendingCount, TaskTheme.pending),
-              _buildLegendItem('בביצוע', inProgressCount, TaskTheme.inProgress),
-              _buildLegendItem('הושלם', doneCount, TaskTheme.done),
+              _buildLegendItem(_l10n.taskStatusPending, pendingCount, TaskTheme.pending),
+              _buildLegendItem(_l10n.taskStatusInProgress, inProgressCount, TaskTheme.inProgress),
+              _buildLegendItem(_l10n.taskStatusDone, doneCount, TaskTheme.done),
             ],
           ),
         ],
@@ -390,11 +395,11 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('פירוט משימות', style: TaskTheme.heading3),
+            const Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.taskDetailsListTitle, style: TaskTheme.heading3),
           ],
         ),
         const SizedBox(height: 10),
@@ -447,7 +452,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    TaskTheme.statusLabel(workerStatus),
+                    TaskTheme.statusLabel(workerStatus, _l10n),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -473,7 +478,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                 const Icon(PhosphorIconsRegular.calendarBlank, size: 14, color: TaskTheme.textTertiary),
                 const SizedBox(width: 4),
                 Text(
-                  'יעד: ${DateFormat('dd/MM/yyyy').format(dueDate)}',
+                  _l10n.taskGoalPrefix(DateFormat('dd/MM/yyyy').format(dueDate)),
                   style: TaskTheme.caption,
                 ),
               ],
@@ -484,19 +489,19 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
               const Divider(height: 1, color: TaskTheme.divider),
               const SizedBox(height: 10),
               _buildTimelineRow(
-                'הוגשה',
+                _l10n.taskTimelineSubmitted,
                 _formatTimestamp(entry['submittedAt']),
                 TaskTheme.textTertiary,
               ),
               if (entry['startedAt'] != null)
                 _buildTimelineRow(
-                  'התחילה',
+                  _l10n.taskTimelineStarted,
                   _formatTimestamp(entry['startedAt']),
                   TaskTheme.inProgress,
                 ),
               if (entry['endedAt'] != null)
                 _buildTimelineRow(
-                  'הסתיימה',
+                  _l10n.taskTimelineEnded,
                   _formatTimestamp(entry['endedAt']),
                   TaskTheme.done,
                 ),
@@ -573,7 +578,7 @@ class _TaskSummaryReportState extends State<TaskSummaryReport> {
                           color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      _isExporting ? 'מייצא...' : 'ייצוא PDF',
+                      _isExporting ? _l10n.exportingLabel : _l10n.exportPdfButton,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

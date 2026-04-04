@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/features/tasks/services/task_service.dart';
 import 'package:park_janana/features/tasks/widgets/task_description_section.dart';
@@ -49,23 +50,24 @@ class _AttachmentsSection extends StatelessWidget {
     return PhosphorIconsRegular.paperclip;
   }
 
-  String _labelFor(String url) {
+  String _labelFor(String url, String fallback) {
     try {
       final name = Uri.parse(url).pathSegments.last;
       return Uri.decodeComponent(name).split('?').first;
     } catch (_) {
-      return 'קובץ מצורף';
+      return fallback;
     }
   }
 
   Future<void> _open(BuildContext context, String url) async {
+    final l10n = AppLocalizations.of(context);
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('לא ניתן לפתוח את הקובץ')),
+          SnackBar(content: Text(l10n.cannotOpenFile)),
         );
       }
     }
@@ -73,27 +75,26 @@ class _AttachmentsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'קבצים מצורפים',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF374151),
-            ),
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.attachedFilesTitle,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF374151),
           ),
-          const SizedBox(height: 8),
-          ...attachments.map((url) => _AttachmentTile(
-                label: _labelFor(url),
-                icon: _iconFor(url),
-                onTap: () => _open(context, url),
-              )),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        ...attachments.map((url) => _AttachmentTile(
+              label: _labelFor(url, l10n.attachedFileDefault),
+              icon: _iconFor(url),
+              onTap: () => _open(context, url),
+            )),
+      ],
     );
   }
 }
@@ -157,7 +158,15 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   late TaskModel task;
   bool _isSubmitting = false;
 
+  late AppLocalizations _l10n;
+
   String? get _currentUid => context.read<AppAuthProvider>().uid;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void dispose() {
@@ -207,7 +216,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
       debugPrint("Failed to submit comment: $e");
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("שגיאה בשליחת תגובה")),
+        SnackBar(content: Text(_l10n.commentSendError)),
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -259,7 +268,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                       TextField(
                         controller: _commentController,
                         decoration:
-                            AppTheme.inputDecoration(hintText: "הוסף תגובה..."),
+                            AppTheme.inputDecoration(hintText: _l10n.addCommentHintTask),
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton(
@@ -274,12 +283,12 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(PhosphorIconsRegular.chatCircle, size: 18),
-                                  SizedBox(width: 6),
-                                  Text("שלח תגובה"),
+                                  const Icon(PhosphorIconsRegular.chatCircle, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text(_l10n.sendCommentButton),
                                 ],
                               ),
                       ),
@@ -289,12 +298,12 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                           onPressed: () => _updateWorkerStatus('in_progress'),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(PhosphorIconsRegular.play, size: 18),
-                              SizedBox(width: 6),
-                              Text("התחל משימה"),
+                              const Icon(PhosphorIconsRegular.play, size: 18),
+                              const SizedBox(width: 6),
+                              Text(_l10n.startTaskAction),
                             ],
                           ),
                         ),
@@ -303,12 +312,12 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
                           onPressed: () => _updateWorkerStatus('done'),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(PhosphorIconsRegular.checkCircle, size: 18),
-                              SizedBox(width: 6),
-                              Text("סיים משימה"),
+                              const Icon(PhosphorIconsRegular.checkCircle, size: 18),
+                              const SizedBox(width: 6),
+                              Text(_l10n.finishTaskButton),
                             ],
                           ),
                         ),

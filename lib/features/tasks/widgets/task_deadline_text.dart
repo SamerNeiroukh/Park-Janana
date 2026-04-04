@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import '../theme/task_theme.dart';
 
 class TaskDeadlineText extends StatelessWidget {
@@ -19,6 +20,7 @@ class TaskDeadlineText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final due = DateTime(dueDate.year, dueDate.month, dueDate.day);
@@ -32,19 +34,21 @@ class TaskDeadlineText extends StatelessWidget {
     if (diff < 0 && isDone) return const SizedBox.shrink();
 
     if (diff < 0) {
-      text = 'באיחור ${diff.abs()} ${diff.abs() == 1 ? "יום" : "ימים"}';
+      final days = diff.abs();
+      final unit = days == 1 ? l10n.dayUnit : l10n.daysUnit;
+      text = l10n.taskDeadlineOverdue(days, unit);
       color = TaskTheme.overdue;
       icon = PhosphorIconsRegular.warning;
     } else if (diff == 0) {
-      text = 'היום, ${DateFormat('HH:mm').format(dueDate)}';
+      text = l10n.taskDeadlineToday(DateFormat('HH:mm').format(dueDate));
       color = (!isDone && dueDate.isBefore(now)) ? TaskTheme.overdue : TaskTheme.pending;
       icon = PhosphorIconsRegular.calendarDot;
     } else if (diff == 1) {
-      text = 'מחר, ${DateFormat('HH:mm').format(dueDate)}';
+      text = l10n.taskDeadlineTomorrow(DateFormat('HH:mm').format(dueDate));
       color = TaskTheme.textSecondary;
       icon = PhosphorIconsRegular.calendarBlank;
     } else if (diff <= 7) {
-      text = 'בעוד $diff ימים';
+      text = l10n.taskDeadlineInDays(diff);
       color = TaskTheme.textSecondary;
       icon = PhosphorIconsRegular.calendarBlank;
     } else {

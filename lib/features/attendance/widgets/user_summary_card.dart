@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class UserSummaryCard extends StatelessWidget {
@@ -73,14 +74,14 @@ class UserSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '$daysWorked ימים',
+                      '$daysWorked ${AppLocalizations.of(context).daysLabel}',
                       style: AppTheme.bodyText.copyWith(
                         fontSize: 14,
                         color: Colors.black,
                       ),
                     ),
                     Text(
-                      '${totalHours.toStringAsFixed(1)} שעות',
+                      '${totalHours.toStringAsFixed(1)} ${AppLocalizations.of(context).hoursLabel}',
                       style: AppTheme.bodyText.copyWith(
                         fontSize: 14,
                         color: Colors.black,

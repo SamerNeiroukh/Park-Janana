@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/workers/screens/edit_worker_licenses_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -31,6 +32,7 @@ class ReviewWorkerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final Map<String, dynamic> data = userData.data() as Map<String, dynamic>;
 
     final String fullName = data['fullName'] ?? '';
@@ -69,143 +71,140 @@ class ReviewWorkerScreen extends StatelessWidget {
         children: [
           const UserHeader(),
           Expanded(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingXXL),
-                child: Column(
-                  children: [
-                    _buildSpiritualProfile(context, data),
-                    const SizedBox(height: AppDimensions.spacingXXXXL),
-                    _buildSoftCard("🧾 פרטי העובד", [
-                      _buildInfoRow(PhosphorIconsRegular.envelope, "אימייל", email),
-                      _buildInfoRow(
-                        PhosphorIconsRegular.phone,
-                        "טלפון",
-                        phone,
-                        onTap: phone.isNotEmpty
-                            ? () => launchUrl(Uri(scheme: 'tel', path: phone))
-                            : null,
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXL, vertical: AppDimensions.paddingXXL),
+              child: Column(
+                children: [
+                  _buildSpiritualProfile(context, data, l10n),
+                  const SizedBox(height: AppDimensions.spacingXXXXL),
+                  _buildSoftCard(l10n.workerDetailsCardTitle, [
+                    _buildInfoRow(PhosphorIconsRegular.envelope, l10n.workerEmailInfoLabel, email),
+                    _buildInfoRow(
+                      PhosphorIconsRegular.phone,
+                      l10n.workerPhoneInfoLabel,
+                      phone,
+                      onTap: phone.isNotEmpty
+                          ? () => launchUrl(Uri(scheme: 'tel', path: phone))
+                          : null,
+                    ),
+                  ]),
+                  const SizedBox(height: AppDimensions.spacingXXXL),
+                  _buildSoftCard(l10n.adminActionsCardTitle, [
+                    _buildActionCard(
+                      icon: PhosphorIconsRegular.calendarBlank,
+                      label: l10n.showShiftsButton,
+                      color: Colors.teal,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ShiftsButtonScreen(
+                              uid: uid,
+                              fullName: fullName,
+                              profilePicture: data['profile_picture'] ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildActionCard(
+                      icon: PhosphorIconsRegular.checkSquare,
+                      label: l10n.assignTaskButton,
+                      color: Colors.indigo,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CreateTaskFlowScreen(
+                              initialSelectedUsers: [worker],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildActionCard(
+                      icon: PhosphorIconsRegular.trendUp,
+                      label: l10n.viewPerformanceButton,
+                      color: AppColors.deepOrange,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WorkerReportsScreen(
+                            userId: uid,
+                            userName: fullName,
+                            profileUrl: data['profile_picture'] ?? '',
+                          ),
+                        ),
                       ),
-                    ]),
-                    const SizedBox(height: AppDimensions.spacingXXXL),
-                    _buildSoftCard("🧭 פעולות מנהל", [
-                      _buildActionCard(
-                        icon: PhosphorIconsRegular.calendarBlank,
-                        label: "הצג משמרות",
-                        color: Colors.teal,
-                        onTap: () {
+                    ),
+                    _buildActionCard(
+                      icon: PhosphorIconsRegular.calendarPlus,
+                      label: l10n.correctAttendanceButton,
+                      color: Colors.teal,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AttendanceCorrectionScreen(
+                            userId: uid,
+                            userName: fullName,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: AppDimensions.spacingXXXL),
+                  _buildSoftCard(l10n.manageLicensesCardTitle, [
+                    if (canManageCertificates) ...[
+                      _buildFullWidthButton(
+                        context,
+                        label: l10n.managePermissionsButton,
+                        icon: PhosphorIconsRegular.shield,
+                        color: AppColors.primary,
+                        onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ShiftsButtonScreen(
+                              builder: (context) => EditWorkerLicensesScreen(
                                 uid: uid,
                                 fullName: fullName,
-                                profilePicture: data['profile_picture'] ?? '',
+                                currentUserRole: currentUserRole,
+                                currentUserId: currentUserId,
                               ),
                             ),
                           );
                         },
                       ),
-                      _buildActionCard(
-                        icon: PhosphorIconsRegular.checkSquare,
-                        label: "שייך משימה",
-                        color: Colors.indigo,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CreateTaskFlowScreen(
-                                initialSelectedUsers: [worker],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      _buildActionCard(
-                        icon: PhosphorIconsRegular.trendUp,
-                        label: "הצג ביצועים",
-                        color: AppColors.deepOrange,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WorkerReportsScreen(
-                              userId: uid,
-                              userName: fullName,
-                              profileUrl: data['profile_picture'] ?? '',
-                            ),
-                          ),
-                        ),
-                      ),
-                      _buildActionCard(
-                        icon: PhosphorIconsRegular.calendarPlus,
-                        label: "תיקון נוכחות",
-                        color: Colors.teal,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AttendanceCorrectionScreen(
-                              userId: uid,
-                              userName: fullName,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ]),
-                    const SizedBox(height: AppDimensions.spacingXXXL),
-                    _buildSoftCard("🛠 ניהול משא", [
-                      if (canManageCertificates) ...[
+                      if (canManageRole) ...[
+                        const SizedBox(height: AppDimensions.spacingL),
                         _buildFullWidthButton(
                           context,
-                          label: "ניהול הרשאות ותפקיד",
-                          icon: PhosphorIconsRegular.shield,
-                          color: AppColors.primary,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditWorkerLicensesScreen(
-                                  uid: uid,
-                                  fullName: fullName,
-                                  currentUserRole: currentUserRole,
-                                  currentUserId: currentUserId,
-                                ),
-                              ),
-                            );
-                          },
+                          label: l10n.revokeApprovalButton,
+                          icon: PhosphorIconsRegular.userMinus,
+                          color: AppColors.redLight,
+                          onPressed: () => _unapproveWorker(context, uid, l10n),
                         ),
-                        if (canManageRole) ...[
-                          const SizedBox(height: AppDimensions.spacingL),
-                          _buildFullWidthButton(
-                            context,
-                            label: "בטל אישור עובד",
-                            icon: PhosphorIconsRegular.userMinus,
-                            color: AppColors.redLight,
-                            onPressed: () => _unapproveWorker(context, uid),
-                          ),
-                        ],
-                      ] else
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(PhosphorIconsRegular.lock,
-                                  size: 16, color: Colors.grey.shade400),
-                              const SizedBox(width: 8),
-                              Text(
-                                'אין הרשאה לניהול משתמש זה',
-                                style: TextStyle(
-                                    color: Colors.grey.shade500, fontSize: 13),
-                              ),
-                            ],
-                          ),
+                      ],
+                    ] else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(PhosphorIconsRegular.lock,
+                                size: 16, color: Colors.grey.shade400),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.noPermissionForUser,
+                              style: TextStyle(
+                                  color: Colors.grey.shade500, fontSize: 13),
+                            ),
+                          ],
                         ),
-                    ]),
-                    const SizedBox(height: AppDimensions.spacingHuge),
-                  ],
-                ),
+                      ),
+                  ]),
+                  const SizedBox(height: AppDimensions.spacingHuge),
+                ],
               ),
             ),
           ),
@@ -214,7 +213,7 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpiritualProfile(BuildContext context, Map<String, dynamic> data) {
+  Widget _buildSpiritualProfile(BuildContext context, Map<String, dynamic> data, AppLocalizations l10n) {
     return Column(
       children: [
         GestureDetector(
@@ -248,9 +247,9 @@ class ReviewWorkerScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppDimensions.spacingS),
-        const Text(
-          "עובד בפארק ג׳ננה",
-          style: TextStyle(color: Colors.grey, fontSize: AppDimensions.fontM),
+        Text(
+          l10n.workerSubtitleInPark,
+          style: const TextStyle(color: Colors.grey, fontSize: AppDimensions.fontM),
         ),
       ],
     );
@@ -387,12 +386,12 @@ class ReviewWorkerScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _unapproveWorker(BuildContext context, String uid) async {
+  Future<void> _unapproveWorker(BuildContext context, String uid, AppLocalizations l10n) async {
     final confirm = await showAppDialog(
       context,
-      title: 'ביטול אישור עובד',
-      message: 'העובד יועבר חזרה לרשימת הממתינים לאישור. הפעולה ניתנת לביטול.',
-      confirmText: 'אשר',
+      title: l10n.revokeApprovalTitle,
+      message: l10n.revokeApprovalMessage,
+      confirmText: l10n.confirmButton,
       icon: PhosphorIconsRegular.userMinus,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
     );
@@ -405,7 +404,7 @@ class ReviewWorkerScreen extends StatelessWidget {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("אישור העובד בוטל")),
+          SnackBar(content: Text(l10n.approvalRevoked)),
         );
       }
     }

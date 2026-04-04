@@ -4,6 +4,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -25,11 +26,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<void> _sendPasswordResetEmail() async {
+    final l10n = AppLocalizations.of(context);
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("אנא הכנס כתובת אימייל"),
+        SnackBar(
+          content: Text(l10n.emailRequiredValidation),
           backgroundColor: Colors.red,
         ),
       );
@@ -38,8 +40,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     if (!_emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("אנא הכנס כתובת אימייל תקינה"),
+        SnackBar(
+          content: Text(l10n.emailInvalidValidation),
           backgroundColor: Colors.red,
         ),
       );
@@ -54,12 +56,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       await _authService.sendPasswordResetEmail(email);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("קישור לאיפוס הסיסמה נשלח למייל שלך"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).resetLinkSent),
             backgroundColor: Colors.green,
           ),
         );
-        // Clear the email field to prevent multiple sends
         _emailController.clear();
       }
     } on CustomException catch (e) {
@@ -74,8 +75,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("שגיאה בשליחת קישור לאיפוס סיסמה"),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).resetLinkError),
             backgroundColor: Colors.red,
           ),
         );
@@ -91,9 +92,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -101,14 +101,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'שחזור סיסמה',
+                l10n.passwordRecoveryTitle,
                 style: AppTheme.titleStyle.copyWith(color: AppColors.primary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32.0),
-              const Text(
-                'אנא הזן את כתובת האימייל שלך',
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              Text(
+                l10n.enterEmailAddressPrompt,
+                style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16.0),
@@ -137,16 +137,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   : ElevatedButton(
                       style: AppTheme.primaryButtonStyle,
                       onPressed: _sendPasswordResetEmail,
-                      child: const Text(
-                        'שלח קישור לאיפוס',
+                      child: Text(
+                        l10n.sendResetLinkButton,
                         style: AppTheme.buttonTextStyle,
                       ),
                     ),
               const SizedBox(height: 16.0),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'חזור',
+                child: Text(
+                  l10n.backButton,
                   style: AppTheme.secondaryButtonTextStyle,
                 ),
               ),
@@ -154,7 +154,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
       ),
-    ),
     );
   }
 }

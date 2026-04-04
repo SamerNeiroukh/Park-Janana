@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../models/task_model.dart';
@@ -113,7 +114,7 @@ class _TaskCardState extends State<TaskCard>
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          TaskTheme.departmentLabel(task.department),
+                          TaskTheme.departmentLabel(task.department, AppLocalizations.of(context)),
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,

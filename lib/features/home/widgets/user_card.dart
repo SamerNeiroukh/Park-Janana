@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/features/home/screens/personal_area_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,6 +35,7 @@ class UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final String emoji = _mapDescriptionToEmoji(weatherDescription ?? '');
 
     return Column(
@@ -177,8 +179,8 @@ class UserCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatItem('', 'ימים שעבדת', daysWorked.toString()),
-              _buildStatItem('', 'שעות שעבדת', hoursWorked.toStringAsFixed(1)),
+              _buildStatItem('', l10n.daysWorkedLabel, daysWorked.toString()),
+              _buildStatItem('', l10n.hoursWorkedLabel, hoursWorked.toStringAsFixed(1)),
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
@@ -91,7 +92,7 @@ class _LikersSheetState extends State<LikersSheet>
       debugPrint('Error fetching likers: $e');
       if (mounted) {
         setState(() {
-          _error = 'שגיאה בטעינת הנתונים';
+          _error = AppLocalizations.of(context).loadDataError;
           _isLoading = false;
         });
       }
@@ -168,24 +169,29 @@ class _LikersSheetState extends State<LikersSheet>
                 child: const Text('❤️ 👍 🎉', style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'תגובות לפוסט',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '$_totalReactors אנשים',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.greyMedium.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ],
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.likersTitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        l10n.reactorsPeopleCount(_totalReactors),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.greyMedium.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -289,7 +295,7 @@ class _EmptyLikers extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'עדיין אין לייקים',
+            AppLocalizations.of(context).noLikersEmpty,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -298,7 +304,7 @@ class _EmptyLikers extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'היה הראשון לאהוב את הפוסט!',
+            AppLocalizations.of(context).beFirstToLike,
             style: TextStyle(
               fontSize: 13,
               color: AppColors.greyMedium.withValues(alpha: 0.6),
@@ -327,14 +333,14 @@ class _LikerCard extends StatelessWidget {
     return emojis.join(' ');
   }
 
-  String _getRoleDisplayName(String role) {
+  String _getRoleDisplayName(String role, AppLocalizations l10n) {
     switch (role.toLowerCase()) {
       case 'manager':
-        return 'מנהל';
+        return l10n.managerRole;
       case 'worker':
-        return 'עובד';
+        return l10n.workerRoleLabel;
       case 'admin':
-        return 'מנהל מערכת';
+        return l10n.adminRoleLabel;
       default:
         return role;
     }
@@ -342,6 +348,7 @@ class _LikerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -384,7 +391,7 @@ class _LikerCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _getRoleDisplayName(user.role),
+                  _getRoleDisplayName(user.role, l10n),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.greyMedium.withValues(alpha: 0.7),

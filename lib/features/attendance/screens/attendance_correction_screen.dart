@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -47,6 +48,15 @@ class _AttendanceCorrectionScreenState
   final ScrollController _scrollCtrl = ScrollController();
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
+  late AppLocalizations _l10n;
+  late String _localeCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+    _localeCode = Localizations.localeOf(context).languageCode;
+  }
 
   String get _docId =>
       '${widget.userId}_${_selectedYear}_'
@@ -143,7 +153,7 @@ class _AttendanceCorrectionScreenState
       });
       if (mounted) {
         _showBanner(
-          message: 'הנוכחות נשמרה בהצלחה',
+          message: _l10n.attendanceSaved,
           icon: PhosphorIconsRegular.checkCircle,
           color: _kGreen,
         );
@@ -152,7 +162,7 @@ class _AttendanceCorrectionScreenState
     } catch (e) {
       if (mounted) {
         _showBanner(
-          message: 'שגיאה בשמירת הנוכחות',
+          message: _l10n.attendanceSaveError,
           icon: PhosphorIconsRegular.warningCircle,
           color: _kRed,
         );
@@ -165,25 +175,22 @@ class _AttendanceCorrectionScreenState
   Future<void> _clockOutNow(int index) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('סיום משמרת',
-              style: TextStyle(fontWeight: FontWeight.w800)),
-          content: const Text('לרשום יציאה עכשיו עבור משמרת זו?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('ביטול'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              style: TextButton.styleFrom(foregroundColor: _kRed),
-              child: const Text('סיים משמרת'),
-            ),
-          ],
-        ),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(_l10n.endShiftDialogTitle,
+            style: const TextStyle(fontWeight: FontWeight.w800)),
+        content: Text(_l10n.recordCheckoutConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(_l10n.cancelButton),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: _kRed),
+            child: Text(_l10n.endShiftButton),
+          ),
+        ],
       ),
     );
     if (confirmed != true) return;
@@ -195,7 +202,7 @@ class _AttendanceCorrectionScreenState
       _isDirty = true;
     });
     _showBanner(
-      message: 'שעת יציאה נרשמה — זכור לשמור',
+      message: _l10n.checkoutRecordedReminder,
       icon: PhosphorIconsRegular.stop,
       color: _kRed,
     );
@@ -227,7 +234,7 @@ class _AttendanceCorrectionScreenState
       _isDirty = true;
     });
     _showBanner(
-      message: 'הרשומה עודכנה — זכור לשמור',
+      message: _l10n.recordUpdatedReminder,
       icon: PhosphorIconsRegular.pencilSimple,
       color: _kIndigo,
     );
@@ -264,7 +271,7 @@ class _AttendanceCorrectionScreenState
       _isDirty = true;
     });
     _showBanner(
-      message: 'רשומה נוספה — זכור לשמור',
+      message: _l10n.recordAddedReminder,
       icon: PhosphorIconsRegular.plusCircle,
       color: _kGreen,
     );
@@ -285,7 +292,7 @@ class _AttendanceCorrectionScreenState
             const Icon(PhosphorIconsRegular.trash,
                 color: Colors.white, size: 18),
             const SizedBox(width: 8),
-            Text('רשומה מס׳ ${index + 1} נמחקה',
+            Text(_l10n.recordDeleted(index + 1),
                 style: const TextStyle(fontWeight: FontWeight.w600)),
           ],
         ),
@@ -295,7 +302,7 @@ class _AttendanceCorrectionScreenState
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 4),
         action: SnackBarAction(
-          label: 'בטל',
+          label: _l10n.undoButton,
           textColor: Colors.white,
           onPressed: () {
             setState(() {
@@ -338,50 +345,40 @@ class _AttendanceCorrectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: PopScope(
-        canPop: !_isDirty,
-        onPopInvokedWithResult: (didPop, _) async {
-          if (didPop) return;
-          final leave = await showDialog<bool>(
-            context: context,
-            builder: (ctx) => Directionality(
-              textDirection: TextDirection.rtl,
-              child: AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                title: const Text('שינויים לא נשמרו',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
-                content: const Text(
-                    'יש שינויים שלא נשמרו. האם לצאת בלי לשמור?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('הישאר'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    style: TextButton.styleFrom(
-                        foregroundColor: _kRed),
-                    child: const Text('צא בלי לשמור'),
-                  ),
-                ],
+    return PopScope(
+      canPop: !_isDirty,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final leave = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
+            title: Text(_l10n.unsavedChangesTitle,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+            content: Text(_l10n.unsavedChangesMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(_l10n.stayButton),
               ),
-            ),
-          );
-          if (leave == true && context.mounted) {
-            Navigator.of(context).pop();
-          }
-        },
-        child: Scaffold(
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                style: TextButton.styleFrom(foregroundColor: _kRed),
+                child: Text(_l10n.exitWithoutSavingButton),
+              ),
+            ],
+          ),
+        );
+        if (leave == true && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
         backgroundColor: const Color(0xFFF1F5F9),
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             // ── Gradient section ──
             Container(
               decoration: const BoxDecoration(
@@ -413,7 +410,6 @@ class _AttendanceCorrectionScreenState
             if (!_isLoading) _buildBottomBar(),
           ],
         ),
-        ),
       ),
     );
   }
@@ -439,7 +435,7 @@ class _AttendanceCorrectionScreenState
             child: Column(
               children: [
                 Text(
-                  'תיקון נוכחות',
+                  _l10n.correctAttendanceButton,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -559,7 +555,7 @@ class _AttendanceCorrectionScreenState
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      DateFormat('MMM', 'he').format(monthDate),
+                      DateFormat('MMM', _localeCode).format(monthDate),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -639,26 +635,26 @@ class _AttendanceCorrectionScreenState
                 _statItem(
                   icon: PhosphorIconsRegular.calendarBlank,
                   value: '$uniqueDays',
-                  label: 'ימי עבודה',
+                  label: _l10n.workDaysLabel,
                 ),
                 _statDivider(),
                 _statItem(
                   icon: PhosphorIconsRegular.clock,
                   value: totalHours.toStringAsFixed(1),
-                  label: 'שעות',
+                  label: _l10n.hoursLabel,
                 ),
                 _statDivider(),
                 _statItem(
                   icon: PhosphorIconsRegular.receipt,
                   value: '${_sessions.length}',
-                  label: 'רשומות',
+                  label: _l10n.recordsLabel,
                 ),
                 if (openSessions > 0) ...[
                   _statDivider(),
                   _statItem(
                     icon: PhosphorIconsRegular.timer,
                     value: '$openSessions',
-                    label: 'חסר יציאה',
+                    label: _l10n.missingCheckoutLabel,
                     highlight: true,
                   ),
                 ],
@@ -731,24 +727,24 @@ class _AttendanceCorrectionScreenState
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'אין רשומות נוכחות לחודש זה',
-              style: TextStyle(
+            Text(
+              _l10n.noAttendanceRecords,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'הוסף רשומה ידנית או בחר חודש אחר',
-              style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+            Text(
+              _l10n.addManualRecordHint,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _addSession,
               icon: const Icon(PhosphorIconsRegular.plus, size: 18),
-              label: const Text('הוסף רשומה'),
+              label: Text(_l10n.addRecordButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kIndigo,
                 foregroundColor: Colors.white,
@@ -902,7 +898,7 @@ class _AttendanceCorrectionScreenState
                           time: timeFmt.format(s.clockIn),
                           date: dateFmt.format(s.clockIn),
                           color: _kGreen,
-                          label: 'כניסה',
+                          label: _l10n.checkInFieldLabel,
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 6),
@@ -920,10 +916,10 @@ class _AttendanceCorrectionScreenState
                                   ? _kGreen.withValues(alpha: 0.7)
                                   : _kRed,
                           label: isMissedClockout
-                              ? 'חסר'
+                              ? _l10n.missingLabel
                               : isOngoing
-                                  ? 'פעיל'
-                                  : 'יציאה',
+                                  ? _l10n.activeLabel
+                                  : _l10n.checkOutFieldLabel,
                           isAlert: isMissedClockout,
                         ),
                       ],
@@ -1039,9 +1035,9 @@ class _AttendanceCorrectionScreenState
               child: OutlinedButton.icon(
                 onPressed: _addSession,
                 icon: const Icon(PhosphorIconsRegular.plus, size: 18, color: _kIndigo),
-                label: const Text(
-                  'הוסף רשומה',
-                  style: TextStyle(
+                label: Text(
+                  _l10n.addRecordButton,
+                  style: const TextStyle(
                       color: _kIndigo, fontWeight: FontWeight.w700),
                 ),
                 style: OutlinedButton.styleFrom(
@@ -1076,15 +1072,15 @@ class _AttendanceCorrectionScreenState
                                 height: 22,
                                 child: CircularProgressIndicator(
                                     color: Colors.white, strokeWidth: 2.5))
-                            : const Row(
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(PhosphorIconsRegular.floppyDisk,
+                                  const Icon(PhosphorIconsRegular.floppyDisk,
                                       color: Colors.white, size: 20),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'שמור שינויים',
-                                    style: TextStyle(
+                                    _l10n.saveChangesButton,
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
@@ -1171,80 +1167,78 @@ class _EditSessionDialogState extends State<_EditSessionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('EEEE, dd/MM/yyyy', 'he');
+    final l10n = AppLocalizations.of(context);
+    final fmt = DateFormat('EEEE, dd/MM/yyyy', Localizations.localeOf(context).languageCode);
     final timeFmt = DateFormat('HH:mm');
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'עריכת רשומת נוכחות',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: _kSlate,
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.editAttendanceRecordTitle,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: _kSlate,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _DialogTimeRow(
+              icon: PhosphorIconsRegular.signIn,
+              color: _kGreen,
+              label: l10n.checkInFieldLabel,
+              date: fmt.format(_clockIn),
+              time: timeFmt.format(_clockIn),
+              onTap: () => _pickDateTime(true),
+            ),
+            const SizedBox(height: 12),
+            _DialogTimeRow(
+              icon: PhosphorIconsRegular.signOut,
+              color: _kRed,
+              label: l10n.checkOutFieldLabel,
+              date: fmt.format(_clockOut),
+              time: timeFmt.format(_clockOut),
+              onTap: () => _pickDateTime(false),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(l10n.cancelButton),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              _DialogTimeRow(
-                icon: PhosphorIconsRegular.signIn,
-                color: _kGreen,
-                label: 'כניסה',
-                date: fmt.format(_clockIn),
-                time: timeFmt.format(_clockIn),
-                onTap: () => _pickDateTime(true),
-              ),
-              const SizedBox(height: 12),
-              _DialogTimeRow(
-                icon: PhosphorIconsRegular.signOut,
-                color: _kRed,
-                label: 'יציאה',
-                date: fmt.format(_clockOut),
-                time: timeFmt.format(_clockOut),
-                onTap: () => _pickDateTime(false),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text('ביטול'),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _kIndigo,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      l10n.saveButton,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _kIndigo,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'שמור',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
