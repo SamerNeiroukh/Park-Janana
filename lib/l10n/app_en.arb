@@ -1,0 +1,1473 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Park Janana",
+  "loginButton": "Login",
+  "newWorkerButton": "New worker?",
+  "logoutLabel": "Logout",
+  "logoutTitle": "Logout",
+  "logoutConfirmation": "Are you sure you want to logout?",
+  "errorGeneral": "An error occurred, please try again",
+  "retryButton": "Try again",
+  "profileScreenTitle": "Your Personal Area",
+  "forgotPassword": "Forgot password",
+  "shiftsTitle": "Available Shifts",
+  "managerDashboardTitle": "Shift Management Dashboard",
+  "newShiftButton": "Create New Shift",
+  "profileUpdateSuccess": "Profile picture updated successfully",
+  "shiftRequestSuccess": "Your shift request was sent",
+  "shiftCancelSuccess": "Shift request cancelled",
+  "confirmButton": "Confirm",
+  "cancelButton": "Cancel",
+  "saveButton": "Save",
+  "closeButton": "Close",
+  "noInternetError": "Cannot connect to app servers. Please check your internet connection and try again.",
+  "languageLabel": "Language",
+  "languageHebrew": "עברית",
+  "languageEnglish": "English",
+  "languageArabic": "العربية",
+  "appInitializationError": "App initialization error",
+  "contactSupportMessage": "If the problem persists, please contact support",
+  "offlineStatusText": "No internet connection",
+  "onlineStatusText": "Internet connection restored ✓",
+  "offlineModeLabel": "Working offline",
+  "managerRole": "Manager",
+  "messageUpdateError": "Error updating message",
+  "messageDeletionError": "Error deleting message",
+  "passwordRecoveryTitle": "Password Recovery",
+  "enterEmailAddressPrompt": "Please enter your email address",
+  "emailRequiredValidation": "Please enter an email address",
+  "emailInvalidValidation": "Please enter a valid email address",
+  "resetLinkSent": "Password reset link sent to your email",
+  "resetLinkError": "Error sending password reset link",
+  "sendResetLinkButton": "Send Reset Link",
+  "backButton": "Back",
+  "welcomeTitle": "Hello, Welcome",
+  "loginCredentialsPrompt": "Please enter your login credentials",
+  "emailFieldLabel": "Email",
+  "emailFieldHint": "Enter your email address",
+  "passwordFieldLabel": "Password",
+  "passwordFieldHint": "Enter your password",
+  "passwordRequiredError": "Please enter a password",
+  "passwordLengthError": "Password must be at least 6 characters",
+  "orDividerText": "or",
+  "biometricLoginTitle": "Biometric Login",
+  "biometricSetupPrompt": "Allow future login using fingerprint / face recognition?",
+  "enableBiometricButton": "Enable",
+  "declineBiometricButton": "No, thanks",
+  "biometricAuthFailed": "Biometric authentication failed. Please try again.",
+  "noBiometricCredentials": "No saved credentials found. Please login with email and password.",
+  "applicationRejectedTitle": "Application Rejected",
+  "applicationRejectedMessage": "Your approval request was rejected by management.\nYou can submit a new approval request.",
+  "reApplyButton": "Re-apply",
+  "reApplySuccess": "Request re-submitted. Management will update you on their decision.",
+  "registrationTitle": "Register for Park Janana",
+  "registrationSubtitle": "Fill in your details to submit a join request",
+  "nameRequiredValidation": "Please enter your full name",
+  "nameInvalidCharsValidation": "Please enter a name with valid characters only",
+  "fullNameLabel": "Full Name",
+  "fullNameHint": "e.g. John Smith",
+  "phoneDigitsValidation": "Phone number must contain exactly 10 digits",
+  "phoneFormatValidation": "Israeli phone number must start with 05",
+  "phoneLabel": "Phone Number",
+  "phoneHint": "05XXXXXXXX",
+  "idDigitsValidation": "ID number must contain exactly 9 digits",
+  "idCheckDigitValidation": "ID number is not valid",
+  "idLabel": "ID Number",
+  "idHint": "9 digits",
+  "emailLabel": "Email Address",
+  "emailHint": "name@example.com",
+  "passwordMinLengthValidation": "Password must be at least 6 characters",
+  "passwordLabel": "Password",
+  "passwordHint": "At least 6 characters",
+  "passwordMismatchValidation": "Passwords do not match",
+  "confirmPasswordLabel": "Confirm Password",
+  "confirmPasswordHint": "Enter your password again",
+  "personalDetailsSection": "Personal Details",
+  "loginDetailsSection": "Login Details",
+  "validationErrorsBanner": "Fix {count} {noun} before submitting",
+  "validationErrorSingular": "error",
+  "validationErrorPlural": "errors",
+  "registrationApprovalNotice": "After submitting your request, management will approve your account and you can login to the app.",
+  "submitRegistrationButton": "Submit Join Request",
+  "registrationSuccessTitle": "Request Submitted Successfully!",
+  "registrationSuccessMessage": "Park management will review your details and contact you as soon as possible.",
+  "registrationApprovalInfo": "After management approval you will get access to the app and can login.",
+  "backToHomeButton": "Back to Home",
+  "newWorkerWelcomeTitle": "New Worker? Welcome!",
+  "registrationStepsSubtitle": "Join the Park Janana team in a few simple steps",
+  "howItWorksSection": "How does it work?",
+  "step1Title": "Fill out registration form",
+  "step1Subtitle": "Enter your personal details and choose a password",
+  "step2Title": "Management approval",
+  "step2Subtitle": "Park management will review your details and approve your account",
+  "step3Title": "Join the team",
+  "step3Subtitle": "After approval you can login and start working",
+  "welcomeSubtitle": "Welcome",
+  "shiftsNavLabel": "Shifts",
+  "weeklyScheduleNavLabel": "Work Schedule",
+  "tasksNavLabel": "Tasks",
+  "reportsNavLabel": "Reports",
+  "newsfeedNavLabel": "Bulletin Board",
+  "manageWorkersNavLabel": "Manage Workers",
+  "weeklySchedulingNavLabel": "Weekly Schedule",
+  "dashboardNavLabel": "Dashboard",
+  "totalTeamLabel": "Total Team",
+  "monthlyHoursLabel": "Monthly Hours",
+  "openTasksLabel": "Open Tasks",
+  "presentTodayLabel": "Present Today",
+  "createShiftAction": "Create Shift",
+  "createTaskAction": "Create Task",
+  "publishPostAction": "Publish Post",
+  "hoursReportAction": "Hours Report",
+  "workersTabLabel": "Workers",
+  "managersTabLabel": "Managers",
+  "todayTabLabel": "Today",
+  "thisWeekTabLabel": "This Week",
+  "openTasksTabLabel": "Open",
+  "urgentTasksTabLabel": "Urgent",
+  "cropImageTitle": "Crop Image",
+  "profilePictureUpdated": "Profile picture updated successfully",
+  "uploadError": "Error: {error}",
+  "takePhotoAction": "Take Photo",
+  "takePhrotoSubtitle": "Use the camera",
+  "chooseFromGalleryAction": "Choose from Gallery",
+  "uploadFromGallerySubtitle": "Upload from your photos",
+  "noDataFound": "No data found",
+  "authorizedDepartmentsLabel": "Authorized Departments",
+  "departmentPermissionsSection": "Department Permissions",
+  "workerRoleLabel": "Worker",
+  "ownerRoleLabel": "Owner",
+  "coOwnerRoleLabel": "Co-owner",
+  "attendanceSaved": "Attendance saved successfully",
+  "attendanceSaveError": "Error saving attendance",
+  "endShiftDialogTitle": "End Shift",
+  "recordCheckoutConfirmation": "Record checkout now for this shift?",
+  "endShiftButton": "End Shift",
+  "checkoutRecordedReminder": "Checkout time recorded — remember to save",
+  "recordUpdatedReminder": "Record updated — remember to save",
+  "recordAddedReminder": "Record added — remember to save",
+  "recordDeleted": "Record #{recordNumber} deleted",
+  "undoButton": "Undo",
+  "unsavedChangesTitle": "Unsaved Changes",
+  "stayButton": "Stay",
+  "exitWithoutSavingButton": "Exit without saving",
+  "workDaysLabel": "Work Days",
+  "hoursLabel": "Hours",
+  "hoursShortLabel": "hrs",
+  "recordsLabel": "Records",
+  "missingCheckoutLabel": "Missing Checkout",
+  "addRecordButton": "Add Record",
+  "checkInFieldLabel": "Check In",
+  "checkOutFieldLabel": "Check Out",
+  "attendanceReportError": "Attendance report error: {error}",
+  "outsideParkBoundsMessage": "You are not within the park boundaries",
+  "draftRestoredSnackbar": "Draft restored",
+  "clearDraftAction": "Clear",
+  "taskTitleRequiredValidation": "Please enter a task title",
+  "selectAtLeastOneWorkerValidation": "Please select at least one worker",
+  "selectDeadlineValidation": "Please select a date and time",
+  "noCommentsEmpty": "No comments yet",
+  "callDialogTitle": "Outgoing Call",
+  "callConfirmation": "Call {name}?\n{phone}",
+  "dialFailed": "Cannot dial {phone}",
+  "noPendingWorkersEmpty": "No workers waiting for approval",
+  "callTooltip": "Call",
+  "noActiveWorkersEmpty": "No active workers in the system",
+  "workerApproved": "Worker approved successfully",
+  "applicationRejectedSnackbar": "Application rejected. Worker has been notified.",
+  "approveWorkerButton": "Approve Worker",
+  "approveWorkerTitle": "Approve Worker",
+  "rejectApplicationButton": "Reject Application",
+  "rejectApplicationTitle": "Reject Application",
+  "showShiftsButton": "Show Shifts",
+  "assignTaskButton": "Assign Task",
+  "viewPerformanceButton": "View Performance",
+  "correctAttendanceButton": "Correct Attendance",
+  "managePermissionsButton": "Manage Permissions & Role",
+  "revokeApprovalButton": "Revoke Worker Approval",
+  "revokeApprovalTitle": "Revoke Worker Approval",
+  "revokeApprovalMessage": "Worker will be moved back to the pending approval list. This action can be undone.",
+  "approvalRevoked": "Worker approval revoked",
+  "licensesUpdated": "Permissions updated successfully",
+  "saveLicensesError": "Error saving data",
+  "attendanceReportTitle": "Attendance Report",
+  "daysLabel": "Days",
+  "averagePerDayLabel": "Avg/Day",
+  "hoursPerDayChartTitle": "Work Hours by Day",
+  "attendanceDetailsTitle": "Attendance Details",
+  "shiftReportTitle": "Shift Report",
+  "totalLabel": "Total",
+  "approvedLabel": "Approved",
+  "rejectedOtherLabel": "Rejected/Other",
+  "decisionsDistributionTitle": "Decision Distribution",
+  "shiftsDetailsTitle": "Shift Details",
+  "shiftCoverageTitle": "Shift Coverage",
+  "totalShiftsLabel": "Total Shifts",
+  "staffingRateLabel": "Staffing Rate",
+  "activeDepartmentsLabel": "Active Departments",
+  "shiftsByDepartmentTitle": "Shifts by Department",
+  "departmentDetailsTitle": "Department Details",
+  "missingCheckoutsTitle": "Missing Checkouts",
+  "noMissingCheckoutsEmpty": "No missing checkouts",
+  "detailsByWorkerTitle": "Details by Worker",
+  "myReportsTitle": "My Reports",
+  "taskReportCard": "Task Report",
+  "selectPhotosAction": "Select Photos",
+  "selectPhotosFromGallery": "Select photos from gallery",
+  "selectVideoAction": "Select Video",
+  "selectVideoFromGallery": "Select video from gallery",
+  "openCameraSubtitle": "Open the camera",
+  "postTitleHint": "Enter a post title...",
+  "postContentHint": "What would you like to share?",
+  "deleteCommentTitle": "Delete Comment",
+  "deleteCommentConfirmation": "Are you sure you want to delete this comment?",
+  "deletePostTitle": "Delete Post",
+  "deletePostConfirmation": "Are you sure you want to delete this post?\nThis action cannot be undone.",
+  "editPostAction": "Edit Post",
+  "deletePostAction": "Delete Post",
+  "editingPostTitle": "Editing Post",
+  "notificationsTitle": "Notifications",
+  "markAllAsReadButton": "Mark all as read",
+  "loadNotificationsError": "Error loading notifications",
+  "openShiftError": "Error opening shift",
+  "openTaskError": "Error opening task",
+  "noNotificationsEmpty": "No notifications",
+  "newNotificationsWillAppear": "New notifications will appear here",
+  "cannotOpenLink": "Cannot open link",
+  "settingsTitle": "Settings",
+  "changePasswordTitle": "Change Password",
+  "biometricMethodsSubtitle": "Fingerprint / Face Recognition",
+  "pushNotificationsTitle": "Push Notifications",
+  "pushNotificationsSubtitle": "Receive updates about shifts and tasks",
+  "privacyPolicyTitle": "Privacy Policy",
+  "termsOfServiceTitle": "Terms of Service",
+  "crashReportsTitle": "Send Crash Reports",
+  "crashReportsSubtitle": "Helps us improve app stability",
+  "appVersionTitle": "App Version",
+  "deleteAccountTitle": "Delete Account",
+  "deleteAccountSubtitle": "Irreversible action — all data will be deleted",
+  "passwordChanged": "Password updated successfully",
+  "biometricAuthFailedSnackbar": "Biometric authentication failed",
+  "enableBiometricError": "Error enabling biometric login",
+  "enableBiometricTitle": "Enable Biometric Login",
+  "permanentDeletionTitle": "Permanent Deletion",
+  "optionsTooltip": "Options",
+  "settingsMenu": "Settings",
+  "noButton": "No",
+  "yesButton": "Yes",
+  "longPressHint": "Long press",
+  "weatherLabel": "Weather",
+  "loadDataError": "Cannot load data. Check connection or index.",
+  "noShiftsEmpty": "No shifts to display",
+  "shiftHoursFormat": "Hours: {startTime} - {endTime}",
+  "departmentPrefix": "Department: {department}",
+  "unsavedChangesMessage": "You have unsaved changes. Exit without saving?",
+  "noAttendanceRecords": "No attendance records for this month",
+  "addManualRecordHint": "Add a manual record or select another month",
+  "missingLabel": "Missing",
+  "activeLabel": "Active",
+  "saveChangesButton": "Save Changes",
+  "editAttendanceRecordTitle": "Edit Attendance Record",
+  "locationPermissionTitle": "Location Access Required",
+  "locationPermissionMessage": "To report clock-in or clock-out, location services must be enabled on your device.",
+  "enableLocationButton": "Enable Location",
+  "clockInOutsideParkMessage": "You are trying to clock in outside the permitted area. Do you want to continue anyway?",
+  "clockOutOutsideParkMessage": "You are trying to clock out outside the permitted area. Do you want to continue anyway?",
+  "longPressToEndShift": "Long press to end shift",
+  "longPressToStartShift": "Long press to start shift",
+  "clockedInSince": "Since {time}",
+  "datePrefix": "Date: {date}",
+  "clockInTimePrefix": "Clock-in: {time}",
+  "clockOutTimePrefix": "Clock-out: {time}",
+  "workDurationLabel": "Duration: {hours}h {minutes}m",
+  "greetingNight": "Good night,",
+  "greetingMorning": "Good morning,",
+  "greetingAfternoon": "Good afternoon,",
+  "greetingEvening": "Good evening,",
+  "motivationalMsg1": "You are an important part of our team 💪",
+  "motivationalMsg2": "Every shift is an opportunity to make an impact ✨",
+  "motivationalMsg3": "Keep smiling – it's contagious 😄",
+  "thisMonthLabel": "This Month",
+  "nowLabel": "Now",
+  "minutesAgoLabel": "{n} min ago",
+  "hoursAgoLabel": "{n} hr ago",
+  "yesterdayLabel": "Yesterday",
+  "daysAgoLabel": "{n} days ago",
+  "latestUpdateLabel": "Latest Update",
+  "readMoreLabel": "Read More",
+  "whatIsImportantNow": "What matters now",
+  "allUpToDate": "All up to date — no urgent items",
+  "shiftChangesWaiting": "Shift changes pending",
+  "tasksWaitingApproval": "Tasks awaiting approval",
+  "newPostsInBoard": "New posts on the bulletin board",
+  "newUpdatesInBoard": "New updates on the bulletin board",
+  "newBusinessActivity": "New business activity to review",
+  "newShiftsAssigned": "New shifts assigned to you",
+  "openTasksWaiting": "Open tasks waiting for you",
+  "clickToResetClockOut": "Tap to reset clock-out",
+  "clickToRegisterClockIn": "Tap to register clock-in",
+  "completedLabel": "Completed",
+  "presentNowLabel": "Present Now",
+  "noWorkersConnected": "No workers currently connected",
+  "topWorkersThisMonth": "Top Workers This Month",
+  "workHoursThisMonth": "Work Hours — This Month",
+  "averageHoursPerWorker": "Average {hours} hours per worker",
+  "ownerDashboardTitle": "Owner Dashboard",
+  "helloName": "Hello, {name}",
+  "quickActionsLabel": "Quick Actions",
+  "staffLabel": "Staff",
+  "staffCountSummary": "Total {count} team members • Tap to manage",
+  "employeeManagementSystem": "Employee Management System",
+  "myProfileTitle": "My Profile",
+  "gpsUnavailableTitle": "Cannot Verify Location",
+  "gpsUnavailableMessage": "Location service is unavailable or GPS permissions were not granted. Do you want to continue anyway?",
+  "searchingLocationLabel": "Locating...",
+  "networkErrorLoadMessage": "Unable to load data.\nCheck your connection and try again.",
+  "profileTooltip": "Profile",
+  "notificationsTooltip": "Notifications",
+  "permissionsCoverageLabel": "Permissions Coverage",
+  "noActivePermissions": "No active permissions",
+  "updateProfilePictureTitle": "Update Profile Picture",
+  "chooseImageSourceTitle": "Choose image source",
+  "setAsProfilePictureConfirm": "Set this image as your profile picture?",
+  "ctaOpenButton": "Open",
+  "clickForWeeklySchedule": "Tap for weekly schedule",
+  "clickForManageWorkers": "Tap to manage workers",
+  "daysWorkedLabel": "Days Worked",
+  "hoursWorkedLabel": "Hours Worked",
+  "clockInFromLabel": "From {clockIn} · {duration}",
+
+  "accountSectionHeader": "Account",
+  "languageSectionHeader": "Language",
+  "languageSubtitle": "Choose the interface language",
+  "notificationsSectionHeader": "Notifications",
+  "infoSectionHeader": "Information",
+  "signOutSectionHeader": "Sign Out",
+  "dangerZoneSectionHeader": "Danger Zone",
+  "requiresRecentLoginError": "Please re-login before changing the password",
+  "updatePasswordError": "Error updating password",
+  "newPasswordLabel": "New Password",
+  "passwordRequiredValidator": "Please enter a password",
+  "updatePasswordButton": "Update Password",
+  "biometricEnableDescription": "Enter your current password to enable fingerprint / face login.",
+  "currentPasswordLabel": "Current Password",
+  "biometricVerifyReason": "Verify your identity to enable biometric login",
+  "activateBiometricButton": "Enable Biometric Login",
+  "permanentDeletionMessage": "This action is completely irreversible.\nAll your personal data will be permanently deleted.",
+  "deleteAccountButton": "Delete Account",
+  "wrongPasswordError": "Wrong password. Please try again.",
+  "requiresRecentLoginDeleteError": "Re-login required before deleting the account",
+  "deleteAccountError": "Error deleting account. Please try again.",
+  "deleteAccountWarning": "This will permanently delete all your personal data and cannot be undone.\nPlease enter your password to confirm.",
+  "deleteMyAccountButton": "Delete My Account Permanently",
+  "newBadgeLabel": "New",
+
+  "newWorkersTabLabel": "New Workers",
+  "activeWorkersTabLabel": "Active Workers",
+  "searchWorkerHint": "Search worker by name...",
+  "noSearchResultsEmpty": "No results found",
+  "workersMissingClockOutBanner": "{count} {workers} with missing clock-out this month",
+  "@workersMissingClockOutBanner": {
+    "description": "Banner shown when workers have missing clock-out",
+    "placeholders": {
+      "count": { "type": "int" },
+      "workers": { "type": "String" }
+    }
+  },
+  "workerLabelSingular": "worker",
+  "workerLabelPlural": "workers",
+  "missingClockOutWarning": "Missing clock-out — tap to fix",
+  "workerSubtitleInPark": "Worker at Park Janana",
+  "workerEmailInfoLabel": "Email",
+  "workerPhoneInfoLabel": "Phone",
+  "workerDetailsCardTitle": "🧾 Worker Details",
+  "adminActionsCardTitle": "🧭 Manager Actions",
+  "manageLicensesCardTitle": "🛠 Manage Licenses",
+  "noPermissionForUser": "No permission to manage this user",
+  "newWorkerPendingApproval": "New worker pending approval",
+  "approveEmailLabel": "Email",
+  "approveConfirmContent": "Are you sure you want to approve this worker?",
+  "rejectConfirmContent": "The worker will remain on hold and can reapply. Reject?",
+  "roleSectionTitle": "Role",
+  "managerRoleUpgradeNote": "Upgrading to manager role is for owners only",
+  "departmentsSectionHint": "Select the departments this worker is authorized to work in",
+  "roleChangedTitle": "Your role has been updated",
+  "roleChangedBody": "Your role was changed from {fromRole} to {toRole}",
+  "@roleChangedBody": {
+    "description": "In-app notification body for role change",
+    "placeholders": {
+      "fromRole": { "type": "String" },
+      "toRole": { "type": "String" }
+    }
+  },
+  "searchByNameOrRoleHint": "Search by name or role",
+  "workerAddedToShift": "Worker added to shift successfully",
+  "workerRemovedFromShift": "Worker removed from shift",
+  "noWorkersFound": "No workers found",
+  "addWorkersCount": "Add {count} workers",
+  "@addWorkersCount": {
+    "description": "Add N workers button label in draft mode",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "workerShiftsListSubtitle": "Worker's shift list",
+  "filterAll": "All",
+  "filterUpcoming": "Upcoming",
+  "filterPast": "Past",
+  "filterToday": "Today",
+  "filterThisWeek": "This Week",
+  "shiftNoteLabel": "Note: {note}",
+  "@shiftNoteLabel": {
+    "description": "Shift note label with content",
+    "placeholders": {
+      "note": { "type": "String" }
+    }
+  },
+  "ownerRoleShort": "Owner",
+  "coOwnerRoleShort": "Partner",
+
+  "newsfeedTitle": "Notice Board",
+  "newPostButton": "New Post",
+  "searchPostHint": "Search post...",
+  "categoryAll": "All",
+  "categoryAnnouncements": "Announcements",
+  "categoryUpdates": "Updates",
+  "categoryEvents": "Events",
+  "categoryGeneral": "General",
+  "categoryLabelAnnouncement": "Announcement",
+  "categoryLabelUpdate": "Update",
+  "categoryLabelEvent": "Event",
+  "categoryLabelGeneral": "General",
+  "pinnedPostLabel": "Pinned Post",
+  "readMoreLabel": "Read more",
+  "pinPostAction": "Pin Post",
+  "unpinPostAction": "Unpin",
+  "deletePostAction": "Delete Post",
+  "editPostAction": "Edit Post",
+  "deletePostTitle": "Delete Post",
+  "deletePostMessage": "Are you sure you want to delete this post?\nThis action cannot be undone.",
+  "deleteCommentTitle": "Delete Comment",
+  "deleteCommentMessage": "Are you sure you want to delete this comment?",
+  "deleteLabel": "Delete",
+  "postDeletedSuccess": "Post deleted successfully",
+  "postDeleteError": "Error deleting post: {error}",
+  "@postDeleteError": {
+    "description": "Error snackbar when post deletion fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "postPinnedSuccess": "Post pinned",
+  "postUnpinnedSuccess": "Post unpinned",
+  "errorPrefix": "Error: {error}",
+  "@errorPrefix": {
+    "description": "Generic error snackbar with error details",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "noPostsEmpty": "No posts yet",
+  "noPostsManagerHint": "Tap \"New Post\" to publish the first post",
+  "noPostsWorkerHint": "Managers will post updates here soon",
+  "noPostsSearchEmpty": "No posts found matching your search",
+  "noPostsCategoryEmpty": "No posts in this category",
+  "feedLoadError": "Error loading posts",
+  "checkConnectionHint": "Check your internet connection and try again",
+  "defaultUserName": "User",
+  "createPostTitle": "New Post",
+  "createPostSubtitle": "Share updates with your team",
+  "selectCategoryLabel": "Select a category",
+  "postTitleLabel": "Title",
+  "postTitleHint": "Enter post title...",
+  "postTitleRequired": "Please enter a title",
+  "postContentLabel": "Post Content",
+  "postContentHint": "What do you want to share?",
+  "postContentRequired": "Please enter content",
+  "mediaLabel": "Media ({count}/{max})",
+  "@mediaLabel": {
+    "description": "Media section label showing current and max count",
+    "placeholders": {
+      "count": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "addMediaButton": "Add photos or videos",
+  "addMoreMediaButton": "Add more",
+  "mediaPickerTitle": "Add Media",
+  "pickImagesOption": "Choose Photos",
+  "pickImagesSubtitle": "Select photos from gallery",
+  "pickVideoOption": "Choose Video",
+  "pickVideoSubtitle": "Select video from gallery",
+  "takePhotoOption": "Take Photo",
+  "takePhotoSubtitle": "Open camera",
+  "maxMediaError": "You can upload up to {max} files",
+  "@maxMediaError": {
+    "description": "Error when user tries to add more than max media",
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
+  "videoLabel": "Video",
+  "publishPostButton": "Publish Post",
+  "publishingPostStatus": "Publishing post...",
+  "preparingUploadStatus": "Preparing upload...",
+  "postPublishedSuccess": "Post published successfully",
+  "postPublishError": "Error publishing post: {error}",
+  "@postPublishError": {
+    "description": "Error snackbar when post publishing fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "movWarningMessage": "iPhone .MOV videos may use Dolby Vision format unsupported on some devices. Consider uploading MP4.",
+  "postDetailTitle": "Post Details",
+  "tapToWatchVideo": "Tap to watch video",
+  "commentsTitle": "Comments",
+  "noCommentsEmpty": "No comments yet",
+  "beFirstToComment": "Be the first to comment!",
+  "beFirstToCommentOnPost": "Be the first to comment on this post!",
+  "addCommentHint": "Add a comment...",
+  "writeCommentHint": "Write a comment...",
+  "commentAddedSuccess": "Comment added",
+  "commentAddError": "Error adding comment",
+  "commentDeletedSuccess": "Comment deleted",
+  "commentDeleteError": "Error deleting comment",
+  "commentUpdatedSuccess": "Comment updated",
+  "commentUpdateError": "Error updating comment",
+  "editPostTitle": "Edit Post",
+  "postUpdatedSuccess": "Post updated",
+  "postUpdateError": "Error updating post",
+  "likersTitle": "Post Reactions",
+  "likersCount": "{count} people",
+  "@likersCount": {
+    "description": "Number of people who reacted to a post",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noLikersEmpty": "No likes yet",
+  "beFirstToLike": "Be the first to like this post!",
+  "likersLoadError": "Error loading data",
+  "roleManager": "Manager",
+  "roleWorker": "Worker",
+  "roleAdmin": "System Admin",
+  "videoFormatNotSupported": "Video format not supported",
+  "videoLoadError": "Error loading video",
+  "videoFormatErrorDetail": "The video is encoded in Dolby Vision / HEVC format not supported\non this device. Try uploading an H.264 video (standard MP4).",
+  "videoPlaybackErrorDetail": "An error occurred playing the video.\nCheck your connection and try again.",
+  "videoLoadingLabel": "Loading video...",
+
+  "noPostsMatchSearch": "No posts match your search",
+  "noPostsInCategory": "No posts in this category",
+  "noPostsYet": "No posts yet",
+  "loadPostsError": "Error loading posts",
+  "deletePostError": "Error deleting post: {error}",
+  "@deletePostError": {
+    "description": "Error snackbar when post deletion fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "genericError": "Error: {error}",
+  "@genericError": {
+    "description": "Generic error message with details",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "taskStatusPending": "Not Started",
+  "taskStatusInProgress": "In Progress",
+  "taskStatusDone": "Completed",
+  "taskStatusPendingReview": "Pending Approval",
+  "taskPriorityHigh": "High",
+  "taskPriorityMedium": "Medium",
+  "taskPriorityLow": "Low",
+  "noTasksEmpty": "No tasks",
+  "noTasksForDay": "No tasks for this day",
+  "noTasksNow": "No tasks right now",
+  "newTasksWillAppear": "New tasks will appear here",
+  "useCreateTaskButton": "Use the 'Create Task' button to add a new one",
+  "taskManagementTitle": "Task Management",
+  "allTasksTitle": "All Tasks",
+  "allTasksSubtitle": "Overview of all tasks",
+  "myTasksTitle": "My Tasks",
+  "myTasksTabLabel": "My Tasks",
+  "createdByMeTabLabel": "Tasks I Created",
+  "taskDetailsTitle": "Task Details",
+  "taskDescriptionLabel": "Description",
+  "taskDescriptionSectionTitle": "Task Description",
+  "noTaskDescription": "No description for this task",
+  "taskInfoSectionTitle": "Details",
+  "taskDeadlineLabel": "Due Date",
+  "taskPriorityLabel": "Priority",
+  "taskDepartmentLabel": "Department",
+  "taskCreatedAtLabel": "Created",
+  "taskAssigneesLabel": "Workers",
+  "taskAssigneesCount": "Workers ({count})",
+  "@taskAssigneesCount": {
+    "description": "Assignees section label with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "taskOverviewTabLabel": "Overview",
+  "taskDiscussionTabLabel": "Discussion",
+  "editTaskMenuItem": "Edit Task",
+  "deleteTaskMenuItem": "Delete Task",
+  "createTaskButton": "Create Task",
+  "deleteTaskTitle": "Delete Task",
+  "deleteTaskConfirmation": "Delete \"{title}\"?",
+  "@deleteTaskConfirmation": {
+    "description": "Delete task confirmation message",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "deleteTaskButton": "Delete",
+  "taskDeletedSnackbar": "Task \"{title}\" deleted",
+  "@taskDeletedSnackbar": {
+    "description": "Snackbar shown after task deletion",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "confirmDeleteTitle": "Confirm Delete",
+  "confirmDeleteTaskMessage": "Are you sure you want to delete the task '{title}'?",
+  "@confirmDeleteTaskMessage": {
+    "description": "Confirm delete task message",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "taskOverdueSection": "Overdue",
+  "taskTodaySection": "Today",
+  "taskUpcomingSection": "Upcoming",
+  "taskCompletedSection": "Completed",
+  "taskDeadlineOverdue": "Overdue {days} {unit}",
+  "@taskDeadlineOverdue": {
+    "description": "Task overdue by N days",
+    "placeholders": {
+      "days": { "type": "int" },
+      "unit": { "type": "String" }
+    }
+  },
+  "taskDeadlineToday": "Today, {time}",
+  "@taskDeadlineToday": {
+    "description": "Task due today with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "taskDeadlineTomorrow": "Tomorrow, {time}",
+  "@taskDeadlineTomorrow": {
+    "description": "Task due tomorrow with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "taskDeadlineInDays": "In {days} days",
+  "@taskDeadlineInDays": {
+    "description": "Task due in N days",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "dayUnit": "day",
+  "daysUnit": "days",
+  "todayTasksProgress": "{completed} of {total} completed today",
+  "@todayTasksProgress": {
+    "description": "Today tasks progress",
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "noTasksToday": "No tasks for today",
+  "taskCountOverdue": "{count} tasks • {overdue} overdue",
+  "@taskCountOverdue": {
+    "description": "Task board header showing total and overdue counts",
+    "placeholders": {
+      "count": { "type": "int" },
+      "overdue": { "type": "int" }
+    }
+  },
+  "pendingManagerApproval": "Pending manager approval",
+  "pendingApprovalLabel": "Waiting for approval:",
+  "startTaskButton": "Start Working",
+  "startTaskAction": "Start Task",
+  "finishTaskButton": "Finish Task",
+  "submitForApprovalButton": "Submit for Manager Approval",
+  "approveButton": "Approve",
+  "rejectButton": "Reject",
+  "taskApprovedSnackbar": "Task approved successfully",
+  "taskRejectedSnackbar": "Task returned to in-progress",
+  "startWorkButton": "Start Working",
+  "sendCommentButton": "Send Comment",
+  "addCommentHintTask": "Add a comment...",
+  "writeCommentHintTask": "Write a comment...",
+  "commentSendError": "Error sending comment",
+  "attachedFilesTitle": "Attached Files",
+  "attachedFileDefault": "Attachment",
+  "cannotOpenFile": "Cannot open the file",
+  "filterAll": "All",
+  "filterStatusPending": "Pending",
+  "filterStatusInProgress": "In Progress",
+  "filterStatusDone": "Done",
+  "searchTaskHint": "Search task...",
+  "searchTaskByNameHint": "Search task by name...",
+  "taskErrorPrefix": "Error: {error}",
+  "@taskErrorPrefix": {
+    "description": "Error prefix with details in task list",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "taskTitleLabel": "Title",
+  "taskTitleHint": "Task name",
+  "taskDescriptionFieldLabel": "Description",
+  "taskDescriptionHint": "Detailed description",
+  "taskDescriptionOptionalHint": "Detailed description (optional)",
+  "taskFieldRequired": "Required field",
+  "taskFillAllFields": "Please fill in all fields and select workers",
+  "taskDateLabel": "Date",
+  "taskTimeLabel": "Time",
+  "taskSelectDate": "Select date",
+  "taskSelectTime": "Select time",
+  "taskDeadlineSectionTitle": "Deadline",
+  "taskDeadlineHint": "Set a due date and time for the task",
+  "taskWorkersSectionTitle": "Assigned Workers",
+  "taskAssignWorkersTitle": "Assign Workers",
+  "taskSelectedWorkersCount": "Select {count} workers",
+  "@taskSelectedWorkersCount": {
+    "description": "How many workers are selected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "taskSearchWorkerHint": "Search worker...",
+  "taskSearchWorkerByNameHint": "Search by name or role...",
+  "taskSummaryTitle": "Summary & Create",
+  "taskSummarySubtitle": "Review details before creating the task",
+  "taskBasicInfoTitle": "Task Details",
+  "taskBasicInfoSubtitle": "Fill in the basic details of the task",
+  "taskStepDetails": "Details",
+  "taskStepWorkers": "Workers",
+  "taskStepDeadline": "Deadline",
+  "taskStepSummary": "Summary",
+  "taskReviewWorkersLabel": "Workers",
+  "taskReviewDeadlineLabel": "Due Date",
+  "createTaskActionButton": "Create Task",
+  "nextButton": "Next",
+  "backStepButton": "Back",
+  "saveChangesTaskButton": "Save Changes",
+  "taskCreateError": "Error creating task",
+  "taskUpdateError": "Error updating task",
+  "taskLogEdited": "Task updated",
+  "userFallbackName": "User",
+  "showLessButton": "Show less",
+  "showAllButton": "Show all",
+  "tasksTitleValidation": "Please enter a task title",
+  "tasksWorkersValidation": "Please select at least one worker",
+  "tasksDeadlineValidation": "Please select a date and time",
+  "userIdentificationError": "Error identifying user.",
+
+  "taskReturnedSnackbar": "Task returned to in-progress",
+  "tasksOverdueCount": "{total} tasks • {overdue} overdue",
+  "@tasksOverdueCount": {
+    "description": "Task count summary with overdue count",
+    "placeholders": {
+      "total": { "type": "int" },
+      "overdue": { "type": "int" }
+    }
+  },
+
+  "noShiftsAvailableEmpty": "No shifts available right now",
+  "shiftsComingSoonSubtitle": "New shifts will be added soon",
+  "noShiftsForDay": "No shifts for this day",
+  "selectOtherDayHint": "Select another day or wait for new shifts",
+  "tryReconnectHint": "Try reconnecting",
+  "shiftStatusActive": "Active",
+  "shiftStatusCancelled": "Cancelled",
+  "pendingRequestsCount": "{count} requests",
+  "@pendingRequestsCount": {
+    "description": "Number of pending shift requests",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "newShiftFab": "New Shift",
+  "managerShiftDashboardTitle": "Shift Management",
+
+  "shiftRequestCancelledSnackbar": "Shift request cancelled",
+  "shiftConflictTitle": "Shift Conflict",
+  "shiftConflictMessage": "Already assigned to a shift on this date with overlapping hours ({startTime}–{endTime}). Continue anyway?",
+  "@shiftConflictMessage": {
+    "description": "Message shown when shift times conflict",
+    "placeholders": {
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+  "proceedAnywayButton": "Continue Anyway",
+  "cancelShiftRequestLabel": "Cancel shift request",
+  "joinShiftLabel": "Join shift",
+  "joinButton": "Join",
+  "shiftWorkedLabel": "Worked",
+  "shiftEndedLabel": "Ended",
+  "shiftAssignedLabel": "Assigned",
+  "shiftFullLabel": "Full",
+  "shiftCancelledChip": "Shift Cancelled",
+  "shiftOutdatedChip": "Date Passed",
+  "youAreAssignedChip": "You are assigned",
+  "waitingApprovalChip": "Waiting Approval",
+  "shiftFullChip": "Shift Full",
+  "openForRegistrationChip": "Open for Registration",
+  "assignedWorkersSection": "Assigned Workers",
+  "noAssignedWorkersYet": "No assigned workers yet",
+  "messagesSection": "Messages",
+  "loadingMessages": "Loading messages...",
+  "noMessagesYet": "No messages yet",
+  "createNewShiftTitle": "Create New Shift",
+  "createShiftSubtitle": "Fill in the details to create a shift",
+  "dateLabel": "Date",
+  "departmentLabel": "Department",
+  "startTimeLabel": "Start",
+  "endTimeLabel": "End",
+  "maxWorkersLabel": "Maximum Workers",
+  "weeklyRecurrenceLabel": "Weekly Recurrence",
+  "shiftRepeatsWeekly": "Shift repeats every week",
+  "createRecurringShift": "Create recurring shift",
+  "numberOfWeeksLabel": "Number of weeks:",
+  "shiftsToBeCreatedLabel": "Shifts to be created:",
+  "createShiftButton": "Create Shift",
+  "shiftsCreatedSuccess": "{count} shifts created successfully!",
+  "@shiftsCreatedSuccess": {
+    "description": "Snackbar shown when multiple shifts are created",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shiftCreatedSuccess": "Shift created successfully!",
+  "createShiftError": "Error creating shift: {error}",
+  "@createShiftError": {
+    "description": "Error snackbar when shift creation fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "clearButton": "Clear",
+  "editShiftTitle": "Edit Shift",
+  "unsavedChangesHeaderSubtitle": "There are unsaved changes",
+  "updateShiftDetailsSubtitle": "Update shift details",
+  "saveChangesDialogTitle": "Save Changes",
+  "followingChangesSavedLabel": "The following changes will be saved:",
+  "workersNotifiedOfChanges": "All assigned and pending workers will be notified of the changes",
+  "shiftUpdatedSuccess": "Shift updated successfully!",
+  "updateShiftError": "Error updating shift: {error}",
+  "@updateShiftError": {
+    "description": "Error snackbar when shift update fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "unsavedChangesMessage": "You have unsaved changes. Are you sure you want to exit?",
+  "continueEditingButton": "Continue Editing",
+  "exitWithoutSavingButton": "Exit Without Saving",
+  "departmentChangedLabel": "Department (changed)",
+  "hoursChangedLabel": "Hours (changed)",
+  "maxWorkersChangedLabel": "Maximum Workers (changed)",
+  "changedBadge": "Changed",
+  "tooManyWorkersWarning": "There are currently {count} assigned workers, more than the new maximum",
+  "@tooManyWorkersWarning": {
+    "description": "Warning when assigned workers exceed new max",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statusLabel": "Status",
+  "statusChangedLabel": "Status (changed)",
+  "shiftStatusCancelledMasc": "Cancelled",
+  "shiftStatusCompleted": "Completed",
+  "noChangesLabel": "No Changes",
+  "weekRangeLabel": "Week {start} - {end}",
+  "@weekRangeLabel": {
+    "description": "Week range label in manager week view",
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "myShiftsTitle": "My Shifts",
+  "nextWeekTooltip": "Next week",
+  "prevWeekTooltip": "Previous week",
+  "loadShiftsError": "Error loading shifts",
+  "todayLabel": "Today",
+  "pastLabel": "Past",
+  "noShiftsDay": "No shifts",
+  "loadingShifts": "Loading shifts...",
+  "loginToViewShifts": "Please log in to view shifts",
+  "viewShiftDetailsButton": "View Shift Details",
+  "allShiftsTabLabel": "All Shifts",
+  "weeklyScheduleTitle": "Weekly Work Schedule",
+  "noWorkersAssigned": "No workers assigned",
+  "noWorkersAssignedForShift": "No workers assigned for this shift",
+  "managerRoleShort": "Manager",
+  "workerRoleShort": "Worker",
+  "noShiftsThisWeek": "No shifts this week",
+  "notAssignedThisWeek": "You are not assigned to shifts this week",
+  "changesSavedSuccess": "Changes saved successfully!",
+  "saveChangesError": "Error saving changes: {error}",
+  "@saveChangesError": {
+    "description": "Error snackbar when saving changes fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "unsavedChangesCountMessage": "You have {count} unsaved changes. Are you sure you want to exit?",
+  "@unsavedChangesCountMessage": {
+    "description": "Unsaved changes dialog message with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cancelAllButton": "Cancel All",
+  "saveChangesWithCount": "Save Changes ({count})",
+  "@saveChangesWithCount": {
+    "description": "Save changes button with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "workersLabel": "Workers",
+  "requestsTabLabel": "Requests",
+  "approvedTabLabel": "Approved",
+  "messagesTabLabel": "Messages",
+  "detailsTabLabel": "Details",
+  "noPendingRequests": "No pending requests",
+  "newRequestsWillAppear": "New requests will appear here",
+  "willBeApprovedLabel": "Will be approved",
+  "willBeRejectedLabel": "Will be rejected",
+  "addWorkersButton": "Add Workers",
+  "noAssignedWorkersEmpty": "No assigned workers",
+  "clickAddWorkersHint": "Click \"Add Workers\" to add manually",
+  "willBeAddedLabel": "Will be added",
+  "willBeRemovedLabel": "Will be removed",
+  "willBeRestoredLabel": "Will be restored",
+  "sendFirstMessage": "Send first message",
+  "writeMessageHint": "Write a message...",
+  "createdByLabel": "Created by",
+  "creationDateLabel": "Creation date",
+  "lastUpdatedByLabel": "Last updated by",
+  "shiftManagerLabel": "Shift manager",
+
+  "pendingChangesBanner": "{count} changes pending save",
+  "@pendingChangesBanner": {
+    "description": "Banner showing count of unsaved changes",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeApproved": "{count} workers will be approved",
+  "@workersWillBeApproved": {
+    "description": "Change summary: workers will be approved",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "requestsWillBeRejected": "{count} requests will be rejected",
+  "@requestsWillBeRejected": {
+    "description": "Change summary: requests will be rejected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeRemoved": "{count} workers will be removed",
+  "@workersWillBeRemoved": {
+    "description": "Change summary: workers will be removed",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeRestored": "{count} workers will be returned to pending list",
+  "@workersWillBeRestored": {
+    "description": "Change summary: workers will be restored to pending list",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeAdded": "{count} workers will be added",
+  "@workersWillBeAdded": {
+    "description": "Change summary: workers will be added",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "commentsCountLabel": "{count} comments",
+  "@commentsCountLabel": {
+    "description": "Comment count label shown in comments sheet header",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "editCommentTitle": "Edit comment",
+  "@editCommentTitle": { "description": "Title of the edit comment bottom sheet" },
+
+  "editCommentHint": "Edit your comment...",
+  "@editCommentHint": { "description": "Hint text for the edit comment text field" },
+
+  "postTypeAnnouncementDesc": "Important announcements for all workers",
+  "@postTypeAnnouncementDesc": { "description": "Description for announcement post type" },
+
+  "postTypeUpdateDesc": "Updates and changes",
+  "@postTypeUpdateDesc": { "description": "Description for update post type" },
+
+  "postTypeEventDesc": "Events and activities",
+  "@postTypeEventDesc": { "description": "Description for event post type" },
+
+  "postTypeGeneralDesc": "General information",
+  "@postTypeGeneralDesc": { "description": "Description for general post type" },
+
+  "dateRangeButton": "Date Range",
+  "@dateRangeButton": { "description": "Date range toggle button label" },
+
+  "selectDateRange": "Select date range",
+  "@selectDateRange": { "description": "Placeholder for date range picker" },
+
+  "noAttendanceDataMonth": "No attendance data for this month",
+  "@noAttendanceDataMonth": { "description": "Empty state when no attendance data for month" },
+
+  "chartTooltipDayHours": "Day {day}\n{hours} hours",
+  "@chartTooltipDayHours": {
+    "description": "Bar chart tooltip showing day number and hours",
+    "placeholders": {
+      "day": { "type": "int" },
+      "hours": { "type": "String" }
+    }
+  },
+
+  "missingClockOutLabel": "Missing clock-out",
+  "@missingClockOutLabel": { "description": "Badge label for missing clock-out on attendance card" },
+
+  "durationHoursMinutes": "{hours}h {minutes}m",
+  "@durationHoursMinutes": {
+    "description": "Duration badge showing hours and minutes",
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "clockInPrefix": "Clock-in: {time}",
+  "@clockInPrefix": {
+    "description": "Clock-in time row label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "clockOutPrefix": "Clock-out: {time}",
+  "@clockOutPrefix": {
+    "description": "Clock-out time row label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "exportingLabel": "Exporting...",
+  "@exportingLabel": { "description": "Exporting progress label on PDF export button" },
+
+  "exportPdfButton": "Export PDF",
+  "@exportPdfButton": { "description": "Export to PDF button label" },
+
+  "allWorkersValidClockout": "All workers clocked out correctly this month",
+  "@allWorkersValidClockout": { "description": "Empty state subtitle for missing clockout report" },
+
+  "noShiftsMonth": "No shifts for this month",
+  "@noShiftsMonth": { "description": "Empty state when no shifts for the selected month" },
+
+  "shiftCountAndSlotsFormat": "{count} shifts · {filled}/{total} slots filled",
+  "@shiftCountAndSlotsFormat": {
+    "description": "Shift count and filled slots text in department card",
+    "placeholders": {
+      "count": { "type": "int" },
+      "filled": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "shiftCountTooltip": "{count} shifts",
+  "@shiftCountTooltip": {
+    "description": "Bar chart tooltip for shift count per department",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "taskDistributionTitle": "Task Distribution",
+  "@taskDistributionTitle": { "description": "Task distribution report screen title" },
+
+  "noTasksMonth": "No tasks for this month",
+  "@noTasksMonth": { "description": "Empty state when no tasks for the selected month" },
+
+  "totalTasksLabel": "Total Tasks",
+  "@totalTasksLabel": { "description": "Total tasks stat pill label" },
+
+  "workersWithTasksLabel": "Workers with Tasks",
+  "@workersWithTasksLabel": { "description": "Workers with tasks stat pill label" },
+
+  "completionRateLabel": "Completion Rate",
+  "@completionRateLabel": { "description": "Completion rate stat pill label" },
+
+  "completionRateByWorkerTitle": "Completion Rate by Worker",
+  "@completionRateByWorkerTitle": { "description": "Completion rate by worker bar chart title" },
+
+  "topTenLabel": "(Top 10)",
+  "@topTenLabel": { "description": "Top ten workers caption shown next to chart title" },
+
+  "workerDetailsTitle": "Worker Details",
+  "@workerDetailsTitle": { "description": "Worker details section title" },
+
+  "taskStatusDone": "Done",
+  "@taskStatusDone": { "description": "Task status chip: done" },
+
+  "taskStatusInProgress": "In Progress",
+  "@taskStatusInProgress": { "description": "Task status chip: in progress" },
+
+  "taskStatusPending": "Pending",
+  "@taskStatusPending": { "description": "Task status chip: pending" },
+
+  "executionLabel": "Completion",
+  "@executionLabel": { "description": "Execution percentage label in pie chart center" },
+
+  "statusDistributionTitle": "Status Distribution",
+  "@statusDistributionTitle": { "description": "Status distribution pie chart title" },
+
+  "taskDetailsListTitle": "Task Details",
+  "@taskDetailsListTitle": { "description": "Task details list section title" },
+
+  "taskGoalPrefix": "Due: {date}",
+  "@taskGoalPrefix": {
+    "description": "Task goal / due date row label",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "taskTimelineSubmitted": "Submitted",
+  "@taskTimelineSubmitted": { "description": "Timeline row label: task submitted" },
+
+  "taskTimelineStarted": "Started",
+  "@taskTimelineStarted": { "description": "Timeline row label: task started" },
+
+  "taskTimelineEnded": "Ended",
+  "@taskTimelineEnded": { "description": "Timeline row label: task ended" },
+
+  "workersHoursTitle": "Work Hours",
+  "@workersHoursTitle": { "description": "Workers hours report screen title" },
+
+  "activeWorkersLabel": "Active Workers",
+  "@activeWorkersLabel": { "description": "Active workers stat pill label" },
+
+  "totalHoursLabel": "Total Hours",
+  "@totalHoursLabel": { "description": "Total hours stat pill label" },
+
+  "avgPerWorkerLabel": "Avg per Worker",
+  "@avgPerWorkerLabel": { "description": "Average per worker stat pill label" },
+
+  "hoursByWorkerTitle": "Hours by Worker",
+  "@hoursByWorkerTitle": { "description": "Hours by worker bar chart title" },
+
+  "workerDaysAndAvgFormat": "{days} days · avg {avg} h/day",
+  "@workerDaysAndAvgFormat": {
+    "description": "Worker card subtitle showing days worked and average hours per day",
+    "placeholders": {
+      "days": { "type": "int" },
+      "avg": { "type": "String" }
+    }
+  },
+
+  "generalReportsTabLabel": "General Reports",
+  "@generalReportsTabLabel": { "description": "General reports tab label" },
+
+  "personalReportsSubtitle": "View personal attendance, task, and shift data",
+  "@personalReportsSubtitle": { "description": "Personal reports tab subtitle" },
+
+  "attendanceReportDescription": "Work hours, days worked, and monthly summary",
+  "@attendanceReportDescription": { "description": "Attendance report card description" },
+
+  "taskReportDescription": "Task status, progress, and completion rates",
+  "@taskReportDescription": { "description": "Task report card description" },
+
+  "shiftReportDescription": "Shift history, approvals, and decisions",
+  "@shiftReportDescription": { "description": "Shift report card description" },
+
+  "generalReportsTitle": "General Reports",
+  "@generalReportsTitle": { "description": "General reports section heading" },
+
+  "generalReportsSubtitle": "Aggregated data across all workers",
+  "@generalReportsSubtitle": { "description": "General reports tab subtitle" },
+
+  "workersHoursDescription": "Monthly work hours summary by worker",
+  "@workersHoursDescription": { "description": "Workers hours report card description" },
+
+  "taskDistributionDescription": "Tasks by worker, completion rates, and ranking",
+  "@taskDistributionDescription": { "description": "Task distribution report card description" },
+
+  "shiftCoverageDescription": "Shifts by department, fill rate, and details",
+  "@shiftCoverageDescription": { "description": "Shift coverage report card description" },
+
+  "missingClockoutsDescription": "Workers who forgot to clock out by month",
+  "@missingClockoutsDescription": { "description": "Missing clockouts report card description" },
+
+  "reportsOfWorker": "{name}'s Reports",
+  "@reportsOfWorker": {
+    "description": "Worker reports screen heading with worker name",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "workerReportsSubtitle": "View attendance, task, and shift data",
+  "@workerReportsSubtitle": { "description": "Worker reports screen subtitle" },
+
+  "performanceSummaryTitle": "Performance Summary — This Month",
+  "@performanceSummaryTitle": { "description": "Performance summary card title" },
+
+  "hoursWithValue": "{hours} hours",
+  "@hoursWithValue": {
+    "description": "Performance metric: hours this month",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "daysWithValue": "{days} days",
+  "@daysWithValue": {
+    "description": "Performance metric: days this month",
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "presenceLabel": "Presence",
+  "@presenceLabel": { "description": "Performance metric label: presence" },
+
+  "atWorkLabel": "At Work",
+  "@atWorkLabel": { "description": "Performance metric label: at work" },
+
+  "tasksCompletedLabel": "Tasks Completed",
+  "@tasksCompletedLabel": { "description": "Performance metric label: tasks completed" },
+
+  "shiftDecisionApproved": "Approved ({count})",
+  "@shiftDecisionApproved": {
+    "description": "Pie chart legend for approved shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftDecisionRejected": "Rejected ({count})",
+  "@shiftDecisionRejected": {
+    "description": "Pie chart legend for rejected shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftDecisionOther": "Other ({count})",
+  "@shiftDecisionOther": {
+    "description": "Pie chart legend for other/pending shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "showDetailsLabel": "Show Details",
+  "@showDetailsLabel": { "description": "Show details expand button label" },
+
+  "hideDetailsLabel": "Hide Details",
+  "@hideDetailsLabel": { "description": "Hide details collapse button label" },
+
+  "approvedByLabel": "Approved by",
+  "@approvedByLabel": { "description": "Shift detail row label: approved by" },
+
+  "dateLabel": "Date",
+  "@dateLabel": { "description": "Shift detail row label: date" },
+
+  "roleAtAssignmentLabel": "Role at Assignment",
+  "@roleAtAssignmentLabel": { "description": "Shift detail row label: role at time of assignment" },
+
+  "requestTimeLabel": "Request Time",
+  "@requestTimeLabel": { "description": "Shift detail row label: request time" },
+
+  "removedByLabel": "Removed by",
+  "@removedByLabel": { "description": "Shift detail row label: removed by" },
+
+  "removalTimeLabel": "Removal Time",
+  "@removalTimeLabel": { "description": "Shift detail row label: removal time" },
+
+  "cancelledByLabel": "Cancelled by",
+  "@cancelledByLabel": { "description": "Shift detail row label: cancelled by" },
+
+  "cancellationTimeLabel": "Cancellation Time",
+  "@cancellationTimeLabel": { "description": "Shift detail row label: cancellation time" },
+
+  "shiftStatusActiveFem": "Active",
+  "@shiftStatusActiveFem": { "description": "Shift status: active (feminine)" },
+
+  "shiftStatusCancelledFem": "Cancelled",
+  "@shiftStatusCancelledFem": { "description": "Shift status: cancelled (feminine)" },
+
+  "shiftStatusPendingFem": "Pending",
+  "@shiftStatusPendingFem": { "description": "Shift status: pending (feminine)" },
+
+  "decisionAcceptedLabel": "Approved",
+  "@decisionAcceptedLabel": { "description": "Shift decision label: accepted" },
+
+  "decisionRejectedLabel": "Rejected",
+  "@decisionRejectedLabel": { "description": "Shift decision label: rejected" },
+
+  "decisionRemovedLabel": "Removed",
+  "@decisionRemovedLabel": { "description": "Shift decision label: removed" },
+
+  "decisionPendingLabel": "Pending",
+  "@decisionPendingLabel": { "description": "Shift decision label: pending (empty decision)" },
+
+  "shiftManagerRoleLabel": "Shift Manager",
+  "@shiftManagerRoleLabel": { "description": "Role label: shift manager" },
+
+  "deptManagerRoleLabel": "Department Manager",
+  "@deptManagerRoleLabel": { "description": "Role label: department manager" },
+
+  "hoursAbbrFormat": "{hours} hr",
+  "@hoursAbbrFormat": {
+    "description": "Hours value with abbreviated hours unit",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "pickPhotoOption": "Choose photos",
+  "@pickPhotoOption": { "description": "Media picker option: pick photos from gallery" },
+
+  "pickPhotoSubtitle": "Choose photos from gallery",
+  "@pickPhotoSubtitle": { "description": "Media picker option subtitle: pick photos" },
+
+  "adminRoleLabel": "Admin",
+  "@adminRoleLabel": { "description": "Admin role label in likers sheet" },
+
+  "reactorsPeopleCount": "{count} people",
+  "@reactorsPeopleCount": {
+    "description": "Number of people who reacted to a post",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "deptGeneral": "General",
+  "@deptGeneral": { "description": "Task department: general" },
+
+  "deptPaintball": "Paintball",
+  "@deptPaintball": { "description": "Task department: paintball" },
+
+  "deptRopes": "Ropes Park",
+  "@deptRopes": { "description": "Task department: ropes park" },
+
+  "deptCarting": "Carting",
+  "@deptCarting": { "description": "Task department: carting" },
+
+  "deptWaterPark": "Water Park",
+  "@deptWaterPark": { "description": "Task department: water park" },
+
+  "deptJimbory": "Jimbory",
+  "@deptJimbory": { "description": "Task department: jimbory" },
+
+  "deptOperations": "Operations",
+  "@deptOperations": { "description": "Shift department: operations/general" },
+
+  "preparingUploadShort": "Preparing...",
+  "@preparingUploadShort": { "description": "Short upload preparation status shown on button" },
+
+  "clockReminder10hTitle": "Forgot to clock out? ⏰",
+  "@clockReminder10hTitle": { "description": "Local notification title: 10h shift reminder" },
+
+  "clockReminder10hBody": "You've been on shift for 10 hours. Remember to report clock out.",
+  "@clockReminder10hBody": { "description": "Local notification body: 10h shift reminder" },
+
+  "clockReminder12hTitle": "Very long shift! 🚨",
+  "@clockReminder12hTitle": { "description": "Local notification title: 12h shift reminder" },
+
+  "clockReminder12hBody": "You've been on shift for 12 hours. Report clock out soon.",
+  "@clockReminder12hBody": { "description": "Local notification body: 12h shift reminder" },
+
+  "taskDeadlineReminderTitle": "Task Reminder ⏰",
+  "@taskDeadlineReminderTitle": { "description": "Local notification title: task deadline reminder" },
+
+  "taskDeadlineReminderBody": "{title} — less than 24 hours remaining to complete",
+  "@taskDeadlineReminderBody": {
+    "description": "Local notification body: task deadline reminder",
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "pendingApprovalCount": "{count} workers pending approval",
+  "@pendingApprovalCount": {
+    "description": "Dashboard: N workers awaiting manager approval",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "understaffedShiftsCount": "{count} shifts today are understaffed",
+  "@understaffedShiftsCount": {
+    "description": "Dashboard: N shifts today lack enough workers",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "hoursAbbreviation": "hr",
+  "@hoursAbbreviation": { "description": "Short abbreviation for hours (e.g. '2:30 hr')" },
+
+  "minutesAbbreviation": "min",
+  "@minutesAbbreviation": { "description": "Short abbreviation for minutes (e.g. '45 min')" },
+
+  "daysThisMonth": "{count} days this month",
+  "@daysThisMonth": {
+    "description": "Worker stat: number of days worked this month",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "totalHoursCount": "{count} hours",
+  "@totalHoursCount": {
+    "description": "Total hours label with value (e.g. '120.5 hours')",
+    "placeholders": { "count": { "type": "String" } }
+  },
+
+  "activeDepartmentsPercent": "{percent}% of departments active",
+  "@activeDepartmentsPercent": {
+    "description": "Personal area: percentage of departments the worker is licensed for",
+    "placeholders": { "percent": { "type": "int" } }
+  },
+
+  "autoClockoutTitle": "Auto clock-out from shift",
+  "@autoClockoutTitle": { "description": "In-app notification title when system auto clocks out a worker" },
+
+  "autoClockoutBody": "You didn't report clock-out after 16 hours – the system ended the shift automatically. Contact your manager.",
+  "@autoClockoutBody": { "description": "In-app notification body when system auto clocks out a worker" },
+
+  "postCategoryAnnouncement": "Announcement",
+  "@postCategoryAnnouncement": { "description": "Newsfeed post category: announcement" },
+
+  "postCategoryUpdate": "Update",
+  "@postCategoryUpdate": { "description": "Newsfeed post category: update" },
+
+  "postCategoryEvent": "Event",
+  "@postCategoryEvent": { "description": "Newsfeed post category: event" },
+
+  "postCategoryGeneral": "General",
+  "@postCategoryGeneral": { "description": "Newsfeed post category: general" },
+
+  "locationRationaleTitle": "Location Access",
+  "@locationRationaleTitle": { "description": "Location permission rationale dialog title" },
+
+  "locationRationaleMessage": "The app needs access to your location to allow clock-in and clock-out within the park area.\n\nLocation is used only to verify attendance and is never stored or shared.",
+  "@locationRationaleMessage": { "description": "Location permission rationale dialog message" },
+
+  "locationRationaleConfirm": "Allow Access",
+  "@locationRationaleConfirm": { "description": "Location permission rationale confirm button" },
+
+  "locationRationaleCancel": "Not Now",
+  "@locationRationaleCancel": { "description": "Location permission rationale cancel button" },
+
+  "biometricLoginReason": "Verify your identity to log in to the app",
+  "@biometricLoginReason": { "description": "Reason shown in OS biometric prompt when logging in" },
+
+  "shiftApprovedTitle": "Your shift request was approved",
+  "@shiftApprovedTitle": { "description": "In-app notification title: worker approved for shift" },
+
+  "shiftApprovedBody": "You were assigned to the shift on {date}, {startTime}–{endTime}",
+  "@shiftApprovedBody": {
+    "description": "In-app notification body: worker approved for shift",
+    "placeholders": {
+      "date": { "type": "String" },
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "shiftRejectedTitle": "Your shift request was rejected",
+  "@shiftRejectedTitle": { "description": "In-app notification title: worker rejected from shift" },
+
+  "shiftRejectedBody": "Your request for the shift on {date}, {startTime}–{endTime} was not approved",
+  "@shiftRejectedBody": {
+    "description": "In-app notification body: worker rejected from shift",
+    "placeholders": {
+      "date": { "type": "String" },
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "uploadingVideoProgress": "Uploading video {current} of {total}...",
+  "@uploadingVideoProgress": {
+    "description": "Upload progress: uploading video N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "uploadingImageProgress": "Uploading image {current} of {total}...",
+  "@uploadingImageProgress": {
+    "description": "Upload progress: uploading image N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "uploadingProgress": "Uploading {current} of {total}...",
+  "@uploadingProgress": {
+    "description": "Upload progress: uploading file N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "generatingThumbnailStatus": "Generating thumbnail...",
+  "@generatingThumbnailStatus": { "description": "Upload progress: generating video thumbnail" },
+
+  "fileUploadedStatus": "File {current} uploaded",
+  "@fileUploadedStatus": {
+    "description": "Upload progress: file N uploaded successfully",
+    "placeholders": { "current": { "type": "int" } }
+  }
+}

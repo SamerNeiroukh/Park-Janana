@@ -9,7 +9,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/l10n/app_localizations.dart';
 import 'firebase_options.dart';
+import 'core/providers/locale_provider.dart';
 import 'features/home/screens/splash_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/home/screens/personal_area_screen.dart';
@@ -80,6 +82,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AppAuthProvider()),
         ChangeNotifierProvider(create: (_) => AppStateProvider()),
@@ -135,30 +138,31 @@ class _MyAppState extends State<MyApp> {
       );
     }
 
+    final locale = context.watch<LocaleProvider>().locale;
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      locale: locale,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('he'), Locale('en')],
+      supportedLocales: LocaleProvider.supportedLocales,
       builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: [
-              child!,
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: NetworkBanner(),
-              ),
-            ],
-          ),
+        return Stack(
+          children: [
+            child!,
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: NetworkBanner(),
+            ),
+          ],
         );
       },
       home: _showSplashScreen

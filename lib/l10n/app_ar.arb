@@ -1,0 +1,1473 @@
+{
+  "@@locale": "ar",
+
+  "appTitle": "بارك جنانة",
+  "loginButton": "تسجيل الدخول",
+  "newWorkerButton": "موظف جديد؟",
+  "logoutLabel": "تسجيل الخروج",
+  "logoutTitle": "تسجيل الخروج",
+  "logoutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "errorGeneral": "حدث خطأ، يرجى المحاولة مرة أخرى",
+  "retryButton": "حاول مجدداً",
+  "profileScreenTitle": "منطقتك الشخصية",
+  "forgotPassword": "نسيت كلمة المرور",
+  "shiftsTitle": "الورديات المتاحة",
+  "managerDashboardTitle": "لوحة إدارة الورديات",
+  "newShiftButton": "إنشاء وردية جديدة",
+  "profileUpdateSuccess": "تم تحديث صورة الملف الشخصي بنجاح",
+  "shiftRequestSuccess": "تم إرسال طلب الوردية",
+  "shiftCancelSuccess": "تم إلغاء طلب الوردية",
+  "confirmButton": "تأكيد",
+  "cancelButton": "إلغاء",
+  "saveButton": "حفظ",
+  "closeButton": "إغلاق",
+  "noInternetError": "تعذر الاتصال بخوادم التطبيق. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+  "languageLabel": "اللغة",
+  "languageHebrew": "עברית",
+  "languageEnglish": "English",
+  "languageArabic": "العربية",
+  "appInitializationError": "خطأ في تهيئة التطبيق",
+  "contactSupportMessage": "إذا استمرت المشكلة، يرجى التواصل مع الدعم",
+  "offlineStatusText": "لا يوجد اتصال بالإنترنت",
+  "onlineStatusText": "تمت استعادة الاتصال بالإنترنت ✓",
+  "offlineModeLabel": "يعمل بدون اتصال",
+  "managerRole": "مدير",
+  "messageUpdateError": "خطأ في تحديث الرسالة",
+  "messageDeletionError": "خطأ في حذف الرسالة",
+  "passwordRecoveryTitle": "استعادة كلمة المرور",
+  "enterEmailAddressPrompt": "يرجى إدخال عنوان بريدك الإلكتروني",
+  "emailRequiredValidation": "يرجى إدخال عنوان بريد إلكتروني",
+  "emailInvalidValidation": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+  "resetLinkSent": "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
+  "resetLinkError": "خطأ في إرسال رابط إعادة تعيين كلمة المرور",
+  "sendResetLinkButton": "إرسال رابط الإعادة",
+  "backButton": "رجوع",
+  "welcomeTitle": "مرحباً، أهلاً وسهلاً",
+  "loginCredentialsPrompt": "يرجى إدخال بيانات تسجيل الدخول",
+  "emailFieldLabel": "البريد الإلكتروني",
+  "emailFieldHint": "أدخل عنوان بريدك الإلكتروني",
+  "passwordFieldLabel": "كلمة المرور",
+  "passwordFieldHint": "أدخل كلمة المرور",
+  "passwordRequiredError": "يرجى إدخال كلمة المرور",
+  "passwordLengthError": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+  "orDividerText": "أو",
+  "biometricLoginTitle": "تسجيل الدخول البيومتري",
+  "biometricSetupPrompt": "هل تسمح بتسجيل الدخول مستقبلاً عبر بصمة الإصبع / التعرف على الوجه؟",
+  "enableBiometricButton": "تفعيل",
+  "declineBiometricButton": "لا، شكراً",
+  "biometricAuthFailed": "فشل المصادقة البيومترية. يرجى المحاولة مجدداً.",
+  "noBiometricCredentials": "لم يتم العثور على بيانات محفوظة. يرجى تسجيل الدخول بالبريد الإلكتروني وكلمة المرور.",
+  "applicationRejectedTitle": "تم رفض الطلب",
+  "applicationRejectedMessage": "تم رفض طلب الموافقة من قِبل الإدارة.\nيمكنك إرسال طلب موافقة جديد.",
+  "reApplyButton": "إعادة التقديم",
+  "reApplySuccess": "تمت إعادة إرسال الطلب. ستقوم الإدارة بإخطارك بقرارها.",
+  "registrationTitle": "التسجيل في بارك جنانة",
+  "registrationSubtitle": "أكمل بياناتك لإرسال طلب الانضمام",
+  "nameRequiredValidation": "يرجى إدخال الاسم الكامل",
+  "nameInvalidCharsValidation": "يرجى إدخال اسم يحتوي على أحرف صحيحة فقط",
+  "fullNameLabel": "الاسم الكامل",
+  "fullNameHint": "مثال: محمد أحمد",
+  "phoneDigitsValidation": "يجب أن يحتوي رقم الهاتف على 10 أرقام بالضبط",
+  "phoneFormatValidation": "يجب أن يبدأ رقم الهاتف الإسرائيلي بـ 05",
+  "phoneLabel": "رقم الهاتف",
+  "phoneHint": "05XXXXXXXX",
+  "idDigitsValidation": "يجب أن يحتوي رقم الهوية على 9 أرقام بالضبط",
+  "idCheckDigitValidation": "رقم الهوية غير صحيح",
+  "idLabel": "رقم الهوية",
+  "idHint": "9 أرقام",
+  "emailLabel": "عنوان البريد الإلكتروني",
+  "emailHint": "name@example.com",
+  "passwordMinLengthValidation": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+  "passwordLabel": "كلمة المرور",
+  "passwordHint": "6 أحرف على الأقل",
+  "passwordMismatchValidation": "كلمتا المرور غير متطابقتين",
+  "confirmPasswordLabel": "تأكيد كلمة المرور",
+  "confirmPasswordHint": "أدخل كلمة المرور مرة أخرى",
+  "personalDetailsSection": "البيانات الشخصية",
+  "loginDetailsSection": "بيانات تسجيل الدخول",
+  "validationErrorsBanner": "يرجى تصحيح {count} {noun} قبل الإرسال",
+  "validationErrorSingular": "خطأ",
+  "validationErrorPlural": "أخطاء",
+  "registrationApprovalNotice": "بعد إرسال طلبك، ستوافق الإدارة على حسابك وستتمكن من تسجيل الدخول.",
+  "submitRegistrationButton": "إرسال طلب الانضمام",
+  "registrationSuccessTitle": "تم إرسال الطلب بنجاح!",
+  "registrationSuccessMessage": "ستراجع إدارة الحديقة بياناتك وستتواصل معك في أقرب وقت ممكن.",
+  "registrationApprovalInfo": "بعد موافقة الإدارة ستحصل على الوصول إلى التطبيق وتتمكن من تسجيل الدخول.",
+  "backToHomeButton": "العودة للصفحة الرئيسية",
+  "newWorkerWelcomeTitle": "موظف جديد؟ مرحباً بك!",
+  "registrationStepsSubtitle": "انضم إلى فريق بارك جنانة في خطوات بسيطة",
+  "howItWorksSection": "كيف يعمل؟",
+  "step1Title": "أكمل نموذج التسجيل",
+  "step1Subtitle": "أدخل بياناتك الشخصية واختر كلمة مرور",
+  "step2Title": "موافقة الإدارة",
+  "step2Subtitle": "ستراجع إدارة الحديقة بياناتك وتوافق على حسابك",
+  "step3Title": "انضم إلى الفريق",
+  "step3Subtitle": "بعد الموافقة يمكنك تسجيل الدخول والبدء بالعمل",
+  "welcomeSubtitle": "أهلاً وسهلاً",
+  "shiftsNavLabel": "الورديات",
+  "weeklyScheduleNavLabel": "جدول العمل",
+  "tasksNavLabel": "المهام",
+  "reportsNavLabel": "التقارير",
+  "newsfeedNavLabel": "لوحة الإعلانات",
+  "manageWorkersNavLabel": "إدارة الموظفين",
+  "weeklySchedulingNavLabel": "الجدول الأسبوعي",
+  "dashboardNavLabel": "لوحة التحكم",
+  "totalTeamLabel": "إجمالي الفريق",
+  "monthlyHoursLabel": "ساعات الشهر",
+  "openTasksLabel": "المهام المفتوحة",
+  "presentTodayLabel": "الحاضرون اليوم",
+  "createShiftAction": "إنشاء وردية",
+  "createTaskAction": "إنشاء مهمة",
+  "publishPostAction": "نشر إعلان",
+  "hoursReportAction": "تقرير الساعات",
+  "workersTabLabel": "الموظفون",
+  "managersTabLabel": "المديرون",
+  "todayTabLabel": "اليوم",
+  "thisWeekTabLabel": "هذا الأسبوع",
+  "openTasksTabLabel": "مفتوحة",
+  "urgentTasksTabLabel": "عاجل",
+  "cropImageTitle": "اقتصاص الصورة",
+  "profilePictureUpdated": "تم تحديث صورة الملف الشخصي بنجاح",
+  "uploadError": "خطأ: {error}",
+  "takePhotoAction": "التقاط صورة",
+  "takePhrotoSubtitle": "استخدم الكاميرا",
+  "chooseFromGalleryAction": "اختر من المعرض",
+  "uploadFromGallerySubtitle": "رفع من صورك",
+  "noDataFound": "لم يتم العثور على بيانات",
+  "authorizedDepartmentsLabel": "الأقسام المعتمدة",
+  "departmentPermissionsSection": "صلاحيات القسم",
+  "workerRoleLabel": "موظف",
+  "ownerRoleLabel": "مالك",
+  "coOwnerRoleLabel": "مالك مشترك",
+  "attendanceSaved": "تم حفظ الحضور بنجاح",
+  "attendanceSaveError": "خطأ في حفظ الحضور",
+  "endShiftDialogTitle": "إنهاء الوردية",
+  "recordCheckoutConfirmation": "هل تسجل وقت الخروج الآن لهذه الوردية؟",
+  "endShiftButton": "إنهاء الوردية",
+  "checkoutRecordedReminder": "تم تسجيل وقت الخروج — تذكر الحفظ",
+  "recordUpdatedReminder": "تم تحديث السجل — تذكر الحفظ",
+  "recordAddedReminder": "تمت إضافة السجل — تذكر الحفظ",
+  "recordDeleted": "تم حذف السجل رقم {recordNumber}",
+  "undoButton": "تراجع",
+  "unsavedChangesTitle": "تغييرات غير محفوظة",
+  "stayButton": "ابق",
+  "exitWithoutSavingButton": "خروج بدون حفظ",
+  "workDaysLabel": "أيام العمل",
+  "hoursLabel": "ساعات",
+  "hoursShortLabel": "سا",
+  "recordsLabel": "سجلات",
+  "missingCheckoutLabel": "خروج مفقود",
+  "addRecordButton": "إضافة سجل",
+  "checkInFieldLabel": "دخول",
+  "checkOutFieldLabel": "خروج",
+  "attendanceReportError": "خطأ في تقرير الحضور: {error}",
+  "outsideParkBoundsMessage": "أنت لست داخل حدود الحديقة",
+  "draftRestoredSnackbar": "تمت استعادة المسودة",
+  "clearDraftAction": "مسح",
+  "taskTitleRequiredValidation": "يرجى إدخال عنوان المهمة",
+  "selectAtLeastOneWorkerValidation": "يرجى اختيار موظف واحد على الأقل",
+  "selectDeadlineValidation": "يرجى اختيار تاريخ ووقت",
+  "noCommentsEmpty": "لا توجد تعليقات بعد",
+  "callDialogTitle": "مكالمة صادرة",
+  "callConfirmation": "هل تتصل بـ {name}؟\n{phone}",
+  "dialFailed": "لا يمكن الاتصال بـ {phone}",
+  "noPendingWorkersEmpty": "لا يوجد موظفون بانتظار الموافقة",
+  "callTooltip": "اتصال",
+  "noActiveWorkersEmpty": "لا يوجد موظفون نشطون في النظام",
+  "workerApproved": "تمت الموافقة على الموظف بنجاح",
+  "applicationRejectedSnackbar": "تم رفض الطلب. تم إخطار الموظف.",
+  "approveWorkerButton": "الموافقة على الموظف",
+  "approveWorkerTitle": "الموافقة على الموظف",
+  "rejectApplicationButton": "رفض الطلب",
+  "rejectApplicationTitle": "رفض الطلب",
+  "showShiftsButton": "عرض الورديات",
+  "assignTaskButton": "تعيين مهمة",
+  "viewPerformanceButton": "عرض الأداء",
+  "correctAttendanceButton": "تصحيح الحضور",
+  "managePermissionsButton": "إدارة الصلاحيات والدور",
+  "revokeApprovalButton": "إلغاء موافقة الموظف",
+  "revokeApprovalTitle": "إلغاء موافقة الموظف",
+  "revokeApprovalMessage": "سيتم نقل الموظف مرة أخرى إلى قائمة انتظار الموافقة. يمكن التراجع عن هذا الإجراء.",
+  "approvalRevoked": "تم إلغاء موافقة الموظف",
+  "licensesUpdated": "تم تحديث الصلاحيات بنجاح",
+  "saveLicensesError": "خطأ في حفظ البيانات",
+  "attendanceReportTitle": "تقرير الحضور",
+  "daysLabel": "أيام",
+  "averagePerDayLabel": "متوسط/يوم",
+  "hoursPerDayChartTitle": "ساعات العمل حسب اليوم",
+  "attendanceDetailsTitle": "تفاصيل الحضور",
+  "shiftReportTitle": "تقرير الورديات",
+  "totalLabel": "الإجمالي",
+  "approvedLabel": "معتمدة",
+  "rejectedOtherLabel": "مرفوضة/أخرى",
+  "decisionsDistributionTitle": "توزيع القرارات",
+  "shiftsDetailsTitle": "تفاصيل الورديات",
+  "shiftCoverageTitle": "تغطية الورديات",
+  "totalShiftsLabel": "إجمالي الورديات",
+  "staffingRateLabel": "معدل التوظيف",
+  "activeDepartmentsLabel": "الأقسام النشطة",
+  "shiftsByDepartmentTitle": "الورديات حسب القسم",
+  "departmentDetailsTitle": "تفاصيل الأقسام",
+  "missingCheckoutsTitle": "المخرجات المفقودة",
+  "noMissingCheckoutsEmpty": "لا توجد مخرجات مفقودة",
+  "detailsByWorkerTitle": "التفاصيل حسب الموظف",
+  "myReportsTitle": "تقاريري",
+  "taskReportCard": "تقرير المهام",
+  "selectPhotosAction": "اختر صوراً",
+  "selectPhotosFromGallery": "اختر صوراً من المعرض",
+  "selectVideoAction": "اختر مقطع فيديو",
+  "selectVideoFromGallery": "اختر مقطع فيديو من المعرض",
+  "openCameraSubtitle": "افتح الكاميرا",
+  "postTitleHint": "أدخل عنوان المنشور...",
+  "postContentHint": "ماذا تريد أن تشارك؟",
+  "deleteCommentTitle": "حذف التعليق",
+  "deleteCommentConfirmation": "هل أنت متأكد أنك تريد حذف هذا التعليق؟",
+  "deletePostTitle": "حذف المنشور",
+  "deletePostConfirmation": "هل أنت متأكد أنك تريد حذف هذا المنشور؟\nلا يمكن التراجع عن هذا الإجراء.",
+  "editPostAction": "تعديل المنشور",
+  "deletePostAction": "حذف المنشور",
+  "editingPostTitle": "تعديل المنشور",
+  "notificationsTitle": "الإشعارات",
+  "markAllAsReadButton": "تحديد الكل كمقروء",
+  "loadNotificationsError": "خطأ في تحميل الإشعارات",
+  "openShiftError": "خطأ في فتح الوردية",
+  "openTaskError": "خطأ في فتح المهمة",
+  "noNotificationsEmpty": "لا توجد إشعارات",
+  "newNotificationsWillAppear": "ستظهر الإشعارات الجديدة هنا",
+  "cannotOpenLink": "لا يمكن فتح الرابط",
+  "settingsTitle": "الإعدادات",
+  "changePasswordTitle": "تغيير كلمة المرور",
+  "biometricMethodsSubtitle": "بصمة الإصبع / التعرف على الوجه",
+  "pushNotificationsTitle": "الإشعارات الفورية",
+  "pushNotificationsSubtitle": "تلقي تحديثات حول الورديات والمهام",
+  "privacyPolicyTitle": "سياسة الخصوصية",
+  "termsOfServiceTitle": "شروط الاستخدام",
+  "crashReportsTitle": "إرسال تقارير الأعطال",
+  "crashReportsSubtitle": "يساعدنا على تحسين استقرار التطبيق",
+  "appVersionTitle": "إصدار التطبيق",
+  "deleteAccountTitle": "حذف الحساب",
+  "deleteAccountSubtitle": "إجراء لا رجعة فيه — سيتم حذف جميع البيانات",
+  "passwordChanged": "تم تحديث كلمة المرور بنجاح",
+  "biometricAuthFailedSnackbar": "فشلت المصادقة البيومترية",
+  "enableBiometricError": "خطأ في تفعيل تسجيل الدخول البيومتري",
+  "enableBiometricTitle": "تفعيل تسجيل الدخول البيومتري",
+  "permanentDeletionTitle": "الحذف النهائي",
+  "optionsTooltip": "خيارات",
+  "settingsMenu": "الإعدادات",
+  "noButton": "لا",
+  "yesButton": "نعم",
+  "longPressHint": "اضغط مطولاً",
+  "weatherLabel": "الطقس",
+  "loadDataError": "لا يمكن تحميل البيانات. تحقق من الاتصال أو الفهرس.",
+  "noShiftsEmpty": "لا توجد ورديات للعرض",
+  "shiftHoursFormat": "الساعات: {startTime} - {endTime}",
+  "departmentPrefix": "القسم: {department}",
+  "unsavedChangesMessage": "لديك تغييرات غير محفوظة. هل تريد الخروج بدون حفظ؟",
+  "noAttendanceRecords": "لا توجد سجلات حضور لهذا الشهر",
+  "addManualRecordHint": "أضف سجلاً يدوياً أو اختر شهراً آخر",
+  "missingLabel": "مفقود",
+  "activeLabel": "نشط",
+  "saveChangesButton": "حفظ التغييرات",
+  "editAttendanceRecordTitle": "تعديل سجل الحضور",
+  "locationPermissionTitle": "مطلوب الوصول إلى الموقع",
+  "locationPermissionMessage": "لتسجيل الحضور أو الانصراف، يجب تفعيل خدمات الموقع على جهازك.",
+  "enableLocationButton": "تفعيل الموقع",
+  "clockInOutsideParkMessage": "أنت تحاول تسجيل الحضور خارج النطاق المسموح به. هل تريد المتابعة على أي حال؟",
+  "clockOutOutsideParkMessage": "أنت تحاول تسجيل الانصراف خارج النطاق المسموح به. هل تريد المتابعة على أي حال؟",
+  "longPressToEndShift": "اضغط مطولاً لإنهاء الوردية",
+  "longPressToStartShift": "اضغط مطولاً لبدء الوردية",
+  "clockedInSince": "منذ {time}",
+  "datePrefix": "التاريخ: {date}",
+  "clockInTimePrefix": "وقت الدخول: {time}",
+  "clockOutTimePrefix": "وقت الخروج: {time}",
+  "workDurationLabel": "مدة العمل: {hours}س {minutes}د",
+  "greetingNight": "مساء النور،",
+  "greetingMorning": "صباح الخير،",
+  "greetingAfternoon": "مرحباً،",
+  "greetingEvening": "مساء الخير،",
+  "motivationalMsg1": "أنت جزء مهم من فريقنا 💪",
+  "motivationalMsg2": "كل وردية هي فرصة للتأثير ✨",
+  "motivationalMsg3": "حافظ على ابتسامتك – إنها معدية 😄",
+  "thisMonthLabel": "هذا الشهر",
+  "nowLabel": "الآن",
+  "minutesAgoLabel": "منذ {n} د",
+  "hoursAgoLabel": "منذ {n} س",
+  "yesterdayLabel": "أمس",
+  "daysAgoLabel": "منذ {n} أيام",
+  "latestUpdateLabel": "آخر تحديث",
+  "readMoreLabel": "اقرأ المزيد",
+  "whatIsImportantNow": "ما المهم الآن",
+  "allUpToDate": "كل شيء محدّث — لا توجد عناصر عاجلة",
+  "shiftChangesWaiting": "تغييرات الوردية معلقة",
+  "tasksWaitingApproval": "مهام بانتظار الموافقة",
+  "newPostsInBoard": "منشورات جديدة على لوحة الإعلانات",
+  "newUpdatesInBoard": "تحديثات جديدة على لوحة الإعلانات",
+  "newBusinessActivity": "نشاط تجاري جديد للمراجعة",
+  "newShiftsAssigned": "ورديات جديدة مخصصة لك",
+  "openTasksWaiting": "مهام مفتوحة بانتظارك",
+  "clickToResetClockOut": "اضغط لإعادة ضبط وقت الخروج",
+  "clickToRegisterClockIn": "اضغط لتسجيل وقت الدخول",
+  "completedLabel": "مكتملة",
+  "presentNowLabel": "حاضرون الآن",
+  "noWorkersConnected": "لا يوجد موظفون متصلون حالياً",
+  "topWorkersThisMonth": "أفضل الموظفين هذا الشهر",
+  "workHoursThisMonth": "ساعات العمل — هذا الشهر",
+  "averageHoursPerWorker": "متوسط {hours} ساعة لكل موظف",
+  "ownerDashboardTitle": "لوحة التحكم — المالك",
+  "helloName": "مرحباً، {name}",
+  "quickActionsLabel": "الإجراءات السريعة",
+  "staffLabel": "الموظفون",
+  "staffCountSummary": "المجموع {count} من أعضاء الفريق • اضغط للإدارة",
+  "employeeManagementSystem": "نظام إدارة الموظفين",
+  "myProfileTitle": "ملفي الشخصي",
+  "gpsUnavailableTitle": "لا يمكن التحقق من الموقع",
+  "gpsUnavailableMessage": "خدمة الموقع غير متاحة أو لم يتم منح أذونات GPS. هل تريد المتابعة على أي حال؟",
+  "searchingLocationLabel": "...جارٍ تحديد الموقع",
+  "networkErrorLoadMessage": "تعذّر تحميل البيانات.\nتحقق من الاتصال وحاول مجدداً.",
+  "profileTooltip": "الملف الشخصي",
+  "notificationsTooltip": "الإشعارات",
+  "permissionsCoverageLabel": "تغطية الصلاحيات",
+  "noActivePermissions": "لا توجد صلاحيات نشطة",
+  "updateProfilePictureTitle": "تحديث صورة الملف الشخصي",
+  "chooseImageSourceTitle": "اختر مصدر الصورة",
+  "setAsProfilePictureConfirm": "هل تريد تعيين هذه الصورة كصورة ملفك الشخصي؟",
+  "ctaOpenButton": "افتح",
+  "clickForWeeklySchedule": "اضغط للجدول الأسبوعي",
+  "clickForManageWorkers": "اضغط لإدارة الموظفين",
+  "daysWorkedLabel": "أيام العمل",
+  "hoursWorkedLabel": "ساعات العمل",
+  "clockInFromLabel": "من {clockIn} · {duration}",
+
+  "accountSectionHeader": "الحساب",
+  "languageSectionHeader": "اللغة",
+  "languageSubtitle": "اختر لغة الواجهة",
+  "notificationsSectionHeader": "الإشعارات",
+  "infoSectionHeader": "المعلومات",
+  "signOutSectionHeader": "تسجيل الخروج",
+  "dangerZoneSectionHeader": "منطقة الخطر",
+  "requiresRecentLoginError": "يرجى تسجيل الدخول مجدداً قبل تغيير كلمة المرور",
+  "updatePasswordError": "خطأ في تحديث كلمة المرور",
+  "newPasswordLabel": "كلمة المرور الجديدة",
+  "passwordRequiredValidator": "يرجى إدخال كلمة المرور",
+  "updatePasswordButton": "تحديث كلمة المرور",
+  "biometricEnableDescription": "أدخل كلمة المرور الحالية لتفعيل تسجيل الدخول ببصمة الإصبع / التعرف على الوجه.",
+  "currentPasswordLabel": "كلمة المرور الحالية",
+  "biometricVerifyReason": "تحقق من هويتك لتفعيل تسجيل الدخول البيومتري",
+  "activateBiometricButton": "تفعيل تسجيل الدخول البيومتري",
+  "permanentDeletionMessage": "هذا الإجراء لا رجعة فيه تمامًا.\nسيتم حذف جميع بياناتك الشخصية نهائياً.",
+  "deleteAccountButton": "حذف الحساب",
+  "wrongPasswordError": "كلمة المرور غير صحيحة. يرجى المحاولة مجدداً.",
+  "requiresRecentLoginDeleteError": "يلزم تسجيل الدخول مجدداً قبل حذف الحساب",
+  "deleteAccountError": "خطأ في حذف الحساب. يرجى المحاولة مجدداً.",
+  "deleteAccountWarning": "سيؤدي هذا إلى حذف جميع بياناتك الشخصية نهائياً ولا يمكن التراجع عنه.\nيرجى إدخال كلمة المرور للتأكيد.",
+  "deleteMyAccountButton": "حذف حسابي نهائياً",
+  "newBadgeLabel": "جديد",
+
+  "newWorkersTabLabel": "موظفون جدد",
+  "activeWorkersTabLabel": "موظفون نشطون",
+  "searchWorkerHint": "البحث عن موظف بالاسم...",
+  "noSearchResultsEmpty": "لم يتم العثور على نتائج",
+  "workersMissingClockOutBanner": "{count} {workers} بخروج مفقود هذا الشهر",
+  "@workersMissingClockOutBanner": {
+    "description": "Banner shown when workers have missing clock-out",
+    "placeholders": {
+      "count": { "type": "int" },
+      "workers": { "type": "String" }
+    }
+  },
+  "workerLabelSingular": "موظف",
+  "workerLabelPlural": "موظفون",
+  "missingClockOutWarning": "وقت خروج مفقود — اضغط للتصحيح",
+  "workerSubtitleInPark": "موظف في بارك جنانة",
+  "workerEmailInfoLabel": "بريد إلكتروني",
+  "workerPhoneInfoLabel": "هاتف",
+  "workerDetailsCardTitle": "🧾 بيانات الموظف",
+  "adminActionsCardTitle": "🧭 إجراءات المدير",
+  "manageLicensesCardTitle": "🛠 إدارة الصلاحيات",
+  "noPermissionForUser": "لا توجد صلاحية لإدارة هذا المستخدم",
+  "newWorkerPendingApproval": "موظف جديد بانتظار الموافقة",
+  "approveEmailLabel": "البريد الإلكتروني",
+  "approveConfirmContent": "هل أنت متأكد أنك تريد الموافقة على هذا الموظف؟",
+  "rejectConfirmContent": "سيبقى الموظف قيد الانتظار ويمكنه إعادة التقديم. هل ترفض؟",
+  "roleSectionTitle": "الدور",
+  "managerRoleUpgradeNote": "ترقية دور المدير مخصصة للمالكين فقط",
+  "departmentsSectionHint": "اختر الأقسام التي يُصرح للموظف العمل فيها",
+  "roleChangedTitle": "تم تحديث دورك",
+  "roleChangedBody": "تم تغيير دورك من {fromRole} إلى {toRole}",
+  "@roleChangedBody": {
+    "description": "In-app notification body for role change",
+    "placeholders": {
+      "fromRole": { "type": "String" },
+      "toRole": { "type": "String" }
+    }
+  },
+  "searchByNameOrRoleHint": "البحث بالاسم أو الدور",
+  "workerAddedToShift": "تمت إضافة الموظف إلى الوردية بنجاح",
+  "workerRemovedFromShift": "تمت إزالة الموظف من الوردية",
+  "noWorkersFound": "لم يتم العثور على موظفين",
+  "addWorkersCount": "إضافة {count} موظفين",
+  "@addWorkersCount": {
+    "description": "Add N workers button label in draft mode",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "workerShiftsListSubtitle": "قائمة ورديات الموظف",
+  "filterAll": "الكل",
+  "filterUpcoming": "القادمة",
+  "filterPast": "الماضية",
+  "filterToday": "اليوم",
+  "filterThisWeek": "هذا الأسبوع",
+  "shiftNoteLabel": "ملاحظة: {note}",
+  "@shiftNoteLabel": {
+    "description": "Shift note label with content",
+    "placeholders": {
+      "note": { "type": "String" }
+    }
+  },
+  "ownerRoleShort": "مالك",
+  "coOwnerRoleShort": "شريك",
+
+  "newsfeedTitle": "لوحة الإعلانات",
+  "newPostButton": "منشور جديد",
+  "searchPostHint": "البحث عن منشور...",
+  "categoryAll": "الكل",
+  "categoryAnnouncements": "إعلانات",
+  "categoryUpdates": "تحديثات",
+  "categoryEvents": "فعاليات",
+  "categoryGeneral": "عام",
+  "categoryLabelAnnouncement": "إعلان",
+  "categoryLabelUpdate": "تحديث",
+  "categoryLabelEvent": "فعالية",
+  "categoryLabelGeneral": "عام",
+  "pinnedPostLabel": "منشور مثبت",
+  "readMoreLabel": "اقرأ المزيد",
+  "pinPostAction": "تثبيت المنشور",
+  "unpinPostAction": "إلغاء التثبيت",
+  "deletePostAction": "حذف المنشور",
+  "editPostAction": "تعديل المنشور",
+  "deletePostTitle": "حذف المنشور",
+  "deletePostMessage": "هل أنت متأكد أنك تريد حذف هذا المنشور؟\nلا يمكن التراجع عن هذا الإجراء.",
+  "deleteCommentTitle": "حذف التعليق",
+  "deleteCommentMessage": "هل أنت متأكد أنك تريد حذف هذا التعليق؟",
+  "deleteLabel": "حذف",
+  "postDeletedSuccess": "تم حذف المنشور بنجاح",
+  "postDeleteError": "خطأ في حذف المنشور: {error}",
+  "@postDeleteError": {
+    "description": "Error snackbar when post deletion fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "postPinnedSuccess": "تم تثبيت المنشور",
+  "postUnpinnedSuccess": "تم إلغاء تثبيت المنشور",
+  "errorPrefix": "خطأ: {error}",
+  "@errorPrefix": {
+    "description": "Generic error snackbar with error details",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "noPostsEmpty": "لا توجد منشورات بعد",
+  "noPostsManagerHint": "اضغط على \"منشور جديد\" لنشر أول منشور",
+  "noPostsWorkerHint": "سينشر المديرون التحديثات هنا قريباً",
+  "noPostsSearchEmpty": "لم يتم العثور على منشورات تطابق بحثك",
+  "noPostsCategoryEmpty": "لا توجد منشورات في هذه الفئة",
+  "feedLoadError": "خطأ في تحميل المنشورات",
+  "checkConnectionHint": "تحقق من اتصالك بالإنترنت وحاول مجدداً",
+  "defaultUserName": "مستخدم",
+  "createPostTitle": "منشور جديد",
+  "createPostSubtitle": "شارك التحديثات مع فريقك",
+  "selectCategoryLabel": "اختر فئة",
+  "postTitleLabel": "العنوان",
+  "postTitleHint": "أدخل عنوان المنشور...",
+  "postTitleRequired": "يرجى إدخال عنوان",
+  "postContentLabel": "محتوى المنشور",
+  "postContentHint": "ماذا تريد أن تشارك؟",
+  "postContentRequired": "يرجى إدخال محتوى",
+  "mediaLabel": "الوسائط ({count}/{max})",
+  "@mediaLabel": {
+    "description": "Media section label showing current and max count",
+    "placeholders": {
+      "count": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "addMediaButton": "أضف صوراً أو مقاطع فيديو",
+  "addMoreMediaButton": "أضف المزيد",
+  "mediaPickerTitle": "إضافة وسائط",
+  "pickImagesOption": "اختر صوراً",
+  "pickImagesSubtitle": "اختر صوراً من المعرض",
+  "pickVideoOption": "اختر فيديو",
+  "pickVideoSubtitle": "اختر فيديو من المعرض",
+  "takePhotoOption": "التقط صورة",
+  "takePhotoSubtitle": "افتح الكاميرا",
+  "maxMediaError": "يمكنك تحميل ما يصل إلى {max} ملفات",
+  "@maxMediaError": {
+    "description": "Error when user tries to add more than max media",
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
+  "videoLabel": "فيديو",
+  "publishPostButton": "نشر المنشور",
+  "publishingPostStatus": "جارٍ نشر المنشور...",
+  "preparingUploadStatus": "جارٍ التحضير للرفع...",
+  "postPublishedSuccess": "تم نشر المنشور بنجاح",
+  "postPublishError": "خطأ في نشر المنشور: {error}",
+  "@postPublishError": {
+    "description": "Error snackbar when post publishing fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "movWarningMessage": "قد تستخدم مقاطع .MOV من iPhone تنسيق Dolby Vision غير المدعوم على بعض الأجهزة. يُنصح باستخدام MP4.",
+  "postDetailTitle": "تفاصيل المنشور",
+  "tapToWatchVideo": "اضغط لمشاهدة الفيديو",
+  "commentsTitle": "التعليقات",
+  "noCommentsEmpty": "لا توجد تعليقات بعد",
+  "beFirstToComment": "كن أول من يعلق!",
+  "beFirstToCommentOnPost": "كن أول من يعلق على هذا المنشور!",
+  "addCommentHint": "أضف تعليقاً...",
+  "writeCommentHint": "اكتب تعليقاً...",
+  "commentAddedSuccess": "تمت إضافة التعليق",
+  "commentAddError": "خطأ في إضافة التعليق",
+  "commentDeletedSuccess": "تم حذف التعليق",
+  "commentDeleteError": "خطأ في حذف التعليق",
+  "commentUpdatedSuccess": "تم تحديث التعليق",
+  "commentUpdateError": "خطأ في تحديث التعليق",
+  "editPostTitle": "تعديل المنشور",
+  "postUpdatedSuccess": "تم تحديث المنشور",
+  "postUpdateError": "خطأ في تحديث المنشور",
+  "likersTitle": "تفاعلات المنشور",
+  "likersCount": "{count} أشخاص",
+  "@likersCount": {
+    "description": "Number of people who reacted to a post",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noLikersEmpty": "لا توجد إعجابات بعد",
+  "beFirstToLike": "كن أول من يعجب بهذا المنشور!",
+  "likersLoadError": "خطأ في تحميل البيانات",
+  "roleManager": "مدير",
+  "roleWorker": "موظف",
+  "roleAdmin": "مدير النظام",
+  "videoFormatNotSupported": "تنسيق الفيديو غير مدعوم",
+  "videoLoadError": "خطأ في تحميل الفيديو",
+  "videoFormatErrorDetail": "الفيديو مشفر بتنسيق Dolby Vision / HEVC غير مدعوم\nعلى هذا الجهاز. جرّب رفع فيديو H.264 (MP4 عادي).",
+  "videoPlaybackErrorDetail": "حدث خطأ أثناء تشغيل الفيديو.\nتحقق من اتصالك وحاول مجدداً.",
+  "videoLoadingLabel": "جارٍ تحميل الفيديو...",
+
+  "noPostsMatchSearch": "لم يتم العثور على منشورات تطابق البحث",
+  "noPostsInCategory": "لا توجد منشورات في هذه الفئة",
+  "noPostsYet": "لا توجد منشورات بعد",
+  "loadPostsError": "خطأ في تحميل المنشورات",
+  "deletePostError": "خطأ في حذف المنشور: {error}",
+  "@deletePostError": {
+    "description": "Error snackbar when post deletion fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "genericError": "خطأ: {error}",
+  "@genericError": {
+    "description": "Generic error message with details",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "taskStatusPending": "لم يبدأ بعد",
+  "taskStatusInProgress": "قيد التنفيذ",
+  "taskStatusDone": "مكتمل",
+  "taskStatusPendingReview": "في انتظار الموافقة",
+  "taskPriorityHigh": "عالية",
+  "taskPriorityMedium": "متوسطة",
+  "taskPriorityLow": "منخفضة",
+  "noTasksEmpty": "لا توجد مهام",
+  "noTasksForDay": "لا توجد مهام لهذا اليوم",
+  "noTasksNow": "لا توجد مهام حالياً",
+  "newTasksWillAppear": "ستظهر المهام الجديدة هنا",
+  "useCreateTaskButton": "استخدم زر 'إنشاء مهمة' لإضافة مهمة جديدة",
+  "taskManagementTitle": "إدارة المهام",
+  "allTasksTitle": "جميع المهام",
+  "allTasksSubtitle": "عرض شامل لجميع المهام",
+  "myTasksTitle": "مهامي",
+  "myTasksTabLabel": "مهامي",
+  "createdByMeTabLabel": "المهام التي أنشأتها",
+  "taskDetailsTitle": "تفاصيل المهمة",
+  "taskDescriptionLabel": "الوصف",
+  "taskDescriptionSectionTitle": "وصف المهمة",
+  "noTaskDescription": "لا يوجد وصف لهذه المهمة",
+  "taskInfoSectionTitle": "التفاصيل",
+  "taskDeadlineLabel": "تاريخ الاستحقاق",
+  "taskPriorityLabel": "الأولوية",
+  "taskDepartmentLabel": "القسم",
+  "taskCreatedAtLabel": "تم الإنشاء",
+  "taskAssigneesLabel": "الموظفون",
+  "taskAssigneesCount": "الموظفون ({count})",
+  "@taskAssigneesCount": {
+    "description": "Assignees section label with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "taskOverviewTabLabel": "نظرة عامة",
+  "taskDiscussionTabLabel": "النقاش",
+  "editTaskMenuItem": "تعديل المهمة",
+  "deleteTaskMenuItem": "حذف المهمة",
+  "createTaskButton": "إنشاء مهمة",
+  "deleteTaskTitle": "حذف المهمة",
+  "deleteTaskConfirmation": "هل تريد حذف \"{title}\"؟",
+  "@deleteTaskConfirmation": {
+    "description": "Delete task confirmation message",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "deleteTaskButton": "حذف",
+  "taskDeletedSnackbar": "تم حذف المهمة \"{title}\"",
+  "@taskDeletedSnackbar": {
+    "description": "Snackbar shown after task deletion",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "confirmDeleteTitle": "تأكيد الحذف",
+  "confirmDeleteTaskMessage": "هل أنت متأكد أنك تريد حذف المهمة '{title}'؟",
+  "@confirmDeleteTaskMessage": {
+    "description": "Confirm delete task message",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "taskOverdueSection": "متأخرة",
+  "taskTodaySection": "اليوم",
+  "taskUpcomingSection": "القادمة",
+  "taskCompletedSection": "مكتملة",
+  "taskDeadlineOverdue": "متأخر {days} {unit}",
+  "@taskDeadlineOverdue": {
+    "description": "Task overdue by N days",
+    "placeholders": {
+      "days": { "type": "int" },
+      "unit": { "type": "String" }
+    }
+  },
+  "taskDeadlineToday": "اليوم، {time}",
+  "@taskDeadlineToday": {
+    "description": "Task due today with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "taskDeadlineTomorrow": "غداً، {time}",
+  "@taskDeadlineTomorrow": {
+    "description": "Task due tomorrow with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "taskDeadlineInDays": "خلال {days} أيام",
+  "@taskDeadlineInDays": {
+    "description": "Task due in N days",
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "dayUnit": "يوم",
+  "daysUnit": "أيام",
+  "todayTasksProgress": "{completed} من {total} مكتملة اليوم",
+  "@todayTasksProgress": {
+    "description": "Today tasks progress",
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "noTasksToday": "لا توجد مهام لليوم",
+  "taskCountOverdue": "{count} مهام • {overdue} متأخرة",
+  "@taskCountOverdue": {
+    "description": "Task board header showing total and overdue counts",
+    "placeholders": {
+      "count": { "type": "int" },
+      "overdue": { "type": "int" }
+    }
+  },
+  "pendingManagerApproval": "في انتظار موافقة المدير",
+  "pendingApprovalLabel": "في انتظار الموافقة:",
+  "startTaskButton": "ابدأ العمل",
+  "startTaskAction": "ابدأ المهمة",
+  "finishTaskButton": "أنهِ المهمة",
+  "submitForApprovalButton": "أرسل لموافقة المدير",
+  "approveButton": "موافقة",
+  "rejectButton": "رفض",
+  "taskApprovedSnackbar": "تمت الموافقة على المهمة بنجاح",
+  "taskRejectedSnackbar": "تم إعادة المهمة إلى قيد التنفيذ",
+  "startWorkButton": "ابدأ العمل",
+  "sendCommentButton": "إرسال التعليق",
+  "addCommentHintTask": "أضف تعليقاً...",
+  "writeCommentHintTask": "اكتب تعليقاً...",
+  "commentSendError": "خطأ في إرسال التعليق",
+  "attachedFilesTitle": "الملفات المرفقة",
+  "attachedFileDefault": "مرفق",
+  "cannotOpenFile": "تعذر فتح الملف",
+  "filterAll": "الكل",
+  "filterStatusPending": "معلق",
+  "filterStatusInProgress": "قيد التنفيذ",
+  "filterStatusDone": "مكتمل",
+  "searchTaskHint": "بحث عن مهمة...",
+  "searchTaskByNameHint": "بحث عن مهمة بالاسم...",
+  "taskErrorPrefix": "خطأ: {error}",
+  "@taskErrorPrefix": {
+    "description": "Error prefix with details in task list",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "taskTitleLabel": "العنوان",
+  "taskTitleHint": "اسم المهمة",
+  "taskDescriptionFieldLabel": "الوصف",
+  "taskDescriptionHint": "وصف تفصيلي",
+  "taskDescriptionOptionalHint": "وصف تفصيلي (اختياري)",
+  "taskFieldRequired": "حقل مطلوب",
+  "taskFillAllFields": "يرجى ملء جميع الحقول واختيار موظفين",
+  "taskDateLabel": "التاريخ",
+  "taskTimeLabel": "الوقت",
+  "taskSelectDate": "اختر التاريخ",
+  "taskSelectTime": "اختر الوقت",
+  "taskDeadlineSectionTitle": "الموعد النهائي",
+  "taskDeadlineHint": "حدد تاريخ ووقت انتهاء المهمة",
+  "taskWorkersSectionTitle": "الموظفون المعيّنون",
+  "taskAssignWorkersTitle": "تعيين موظفين",
+  "taskSelectedWorkersCount": "اختر {count} موظفين",
+  "@taskSelectedWorkersCount": {
+    "description": "How many workers are selected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "taskSearchWorkerHint": "بحث عن موظف...",
+  "taskSearchWorkerByNameHint": "بحث بالاسم أو الدور...",
+  "taskSummaryTitle": "ملخص وإنشاء",
+  "taskSummarySubtitle": "راجع التفاصيل قبل إنشاء المهمة",
+  "taskBasicInfoTitle": "تفاصيل المهمة",
+  "taskBasicInfoSubtitle": "أدخل التفاصيل الأساسية للمهمة",
+  "taskStepDetails": "التفاصيل",
+  "taskStepWorkers": "الموظفون",
+  "taskStepDeadline": "الموعد",
+  "taskStepSummary": "الملخص",
+  "taskReviewWorkersLabel": "الموظفون",
+  "taskReviewDeadlineLabel": "الموعد النهائي",
+  "createTaskActionButton": "إنشاء المهمة",
+  "nextButton": "التالي",
+  "backStepButton": "رجوع",
+  "saveChangesTaskButton": "حفظ التغييرات",
+  "taskCreateError": "خطأ في إنشاء المهمة",
+  "taskUpdateError": "خطأ في تحديث المهمة",
+  "taskLogEdited": "تم تحديث المهمة",
+  "userFallbackName": "مستخدم",
+  "showLessButton": "عرض أقل",
+  "showAllButton": "عرض الكل",
+  "tasksTitleValidation": "يرجى إدخال عنوان المهمة",
+  "tasksWorkersValidation": "يرجى اختيار موظف واحد على الأقل",
+  "tasksDeadlineValidation": "يرجى اختيار التاريخ والوقت",
+  "userIdentificationError": "خطأ في تحديد المستخدم.",
+
+  "taskReturnedSnackbar": "تم إعادة المهمة إلى قيد التنفيذ",
+  "tasksOverdueCount": "{total} مهام • {overdue} متأخرة",
+  "@tasksOverdueCount": {
+    "description": "Task count summary with overdue count",
+    "placeholders": {
+      "total": { "type": "int" },
+      "overdue": { "type": "int" }
+    }
+  },
+
+  "noShiftsAvailableEmpty": "لا توجد ورديات متاحة الآن",
+  "shiftsComingSoonSubtitle": "ستُضاف ورديات جديدة قريبًا",
+  "noShiftsForDay": "لا توجد ورديات لهذا اليوم",
+  "selectOtherDayHint": "اختر يومًا آخر أو انتظر ورديات جديدة",
+  "tryReconnectHint": "حاول إعادة الاتصال",
+  "shiftStatusActive": "نشطة",
+  "shiftStatusCancelled": "ملغاة",
+  "pendingRequestsCount": "{count} طلبات",
+  "@pendingRequestsCount": {
+    "description": "Number of pending shift requests",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "newShiftFab": "وردية جديدة",
+  "managerShiftDashboardTitle": "إدارة الورديات",
+
+  "shiftRequestCancelledSnackbar": "تم إلغاء طلب الوردية",
+  "shiftConflictTitle": "تعارض الورديات",
+  "shiftConflictMessage": "أنت معيّن بالفعل في وردية في هذا التاريخ بساعات متداخلة ({startTime}–{endTime}). هل تريد المتابعة على أي حال؟",
+  "@shiftConflictMessage": {
+    "description": "Message shown when shift times conflict",
+    "placeholders": {
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+  "proceedAnywayButton": "المتابعة على أي حال",
+  "cancelShiftRequestLabel": "إلغاء طلب الوردية",
+  "joinShiftLabel": "الانضمام إلى الوردية",
+  "joinButton": "انضمام",
+  "shiftWorkedLabel": "عملت",
+  "shiftEndedLabel": "انتهى",
+  "shiftAssignedLabel": "معيّن",
+  "shiftFullLabel": "ممتلئة",
+  "shiftCancelledChip": "الوردية ملغاة",
+  "shiftOutdatedChip": "انتهى الموعد",
+  "youAreAssignedChip": "أنت معيّن",
+  "waitingApprovalChip": "في انتظار الموافقة",
+  "shiftFullChip": "الوردية ممتلئة",
+  "openForRegistrationChip": "مفتوحة للتسجيل",
+  "assignedWorkersSection": "الموظفون المعيّنون",
+  "noAssignedWorkersYet": "لا يوجد موظفون معيّنون بعد",
+  "messagesSection": "الرسائل",
+  "loadingMessages": "جارٍ تحميل الرسائل...",
+  "noMessagesYet": "لا توجد رسائل بعد",
+  "createNewShiftTitle": "إنشاء وردية جديدة",
+  "createShiftSubtitle": "أدخل التفاصيل لإنشاء وردية",
+  "dateLabel": "التاريخ",
+  "departmentLabel": "القسم",
+  "startTimeLabel": "البداية",
+  "endTimeLabel": "النهاية",
+  "maxWorkersLabel": "الحد الأقصى للموظفين",
+  "weeklyRecurrenceLabel": "التكرار الأسبوعي",
+  "shiftRepeatsWeekly": "الوردية تتكرر كل أسبوع",
+  "createRecurringShift": "إنشاء وردية متكررة",
+  "numberOfWeeksLabel": "عدد الأسابيع:",
+  "shiftsToBeCreatedLabel": "الورديات التي ستُنشأ:",
+  "createShiftButton": "إنشاء الوردية",
+  "shiftsCreatedSuccess": "تم إنشاء {count} ورديات بنجاح!",
+  "@shiftsCreatedSuccess": {
+    "description": "Snackbar shown when multiple shifts are created",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shiftCreatedSuccess": "تم إنشاء الوردية بنجاح!",
+  "createShiftError": "خطأ في إنشاء الوردية: {error}",
+  "@createShiftError": {
+    "description": "Error snackbar when shift creation fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "clearButton": "مسح",
+  "editShiftTitle": "تعديل الوردية",
+  "unsavedChangesHeaderSubtitle": "توجد تغييرات غير محفوظة",
+  "updateShiftDetailsSubtitle": "تحديث تفاصيل الوردية",
+  "saveChangesDialogTitle": "حفظ التغييرات",
+  "followingChangesSavedLabel": "سيتم حفظ التغييرات التالية:",
+  "workersNotifiedOfChanges": "سيتلقى جميع الموظفين المعيّنين والمنتظرين إشعاراً بالتغييرات",
+  "shiftUpdatedSuccess": "تم تحديث الوردية بنجاح!",
+  "updateShiftError": "خطأ في تحديث الوردية: {error}",
+  "@updateShiftError": {
+    "description": "Error snackbar when shift update fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "unsavedChangesMessage": "لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد الخروج؟",
+  "continueEditingButton": "متابعة التعديل",
+  "exitWithoutSavingButton": "الخروج دون حفظ",
+  "departmentChangedLabel": "القسم (تم التغيير)",
+  "hoursChangedLabel": "الساعات (تم التغيير)",
+  "maxWorkersChangedLabel": "الحد الأقصى للموظفين (تم التغيير)",
+  "changedBadge": "تم التغيير",
+  "tooManyWorkersWarning": "يوجد حالياً {count} موظفين معيّنين، أكثر من الحد الأقصى الجديد",
+  "@tooManyWorkersWarning": {
+    "description": "Warning when assigned workers exceed new max",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statusLabel": "الحالة",
+  "statusChangedLabel": "الحالة (تم التغيير)",
+  "shiftStatusCancelledMasc": "ملغى",
+  "shiftStatusCompleted": "مكتملة",
+  "noChangesLabel": "لا توجد تغييرات",
+  "weekRangeLabel": "أسبوع {start} - {end}",
+  "@weekRangeLabel": {
+    "description": "Week range label in manager week view",
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "myShiftsTitle": "ورديّاتي",
+  "nextWeekTooltip": "الأسبوع القادم",
+  "prevWeekTooltip": "الأسبوع الماضي",
+  "loadShiftsError": "خطأ في تحميل الورديات",
+  "todayLabel": "اليوم",
+  "pastLabel": "ماضٍ",
+  "noShiftsDay": "لا توجد ورديات",
+  "loadingShifts": "جارٍ تحميل الورديات...",
+  "loginToViewShifts": "يرجى تسجيل الدخول لعرض الورديات",
+  "viewShiftDetailsButton": "عرض تفاصيل الوردية",
+  "allShiftsTabLabel": "جميع الورديات",
+  "weeklyScheduleTitle": "جدول العمل الأسبوعي",
+  "noWorkersAssigned": "لم يتم تعيين موظفين",
+  "noWorkersAssignedForShift": "لم يتم تعيين موظفين لهذه الوردية",
+  "managerRoleShort": "مدير",
+  "workerRoleShort": "موظف",
+  "noShiftsThisWeek": "لا توجد ورديات هذا الأسبوع",
+  "notAssignedThisWeek": "لم يتم تعيينك في ورديات هذا الأسبوع",
+  "changesSavedSuccess": "تم حفظ التغييرات بنجاح!",
+  "saveChangesError": "خطأ في حفظ التغييرات: {error}",
+  "@saveChangesError": {
+    "description": "Error snackbar when saving changes fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "unsavedChangesCountMessage": "لديك {count} تغييرات غير محفوظة. هل أنت متأكد أنك تريد الخروج؟",
+  "@unsavedChangesCountMessage": {
+    "description": "Unsaved changes dialog message with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cancelAllButton": "إلغاء الكل",
+  "saveChangesWithCount": "حفظ التغييرات ({count})",
+  "@saveChangesWithCount": {
+    "description": "Save changes button with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "workersLabel": "الموظفون",
+  "requestsTabLabel": "الطلبات",
+  "approvedTabLabel": "المعتمدون",
+  "messagesTabLabel": "الرسائل",
+  "detailsTabLabel": "التفاصيل",
+  "noPendingRequests": "لا توجد طلبات معلقة",
+  "newRequestsWillAppear": "ستظهر الطلبات الجديدة هنا",
+  "willBeApprovedLabel": "سيتم القبول",
+  "willBeRejectedLabel": "سيتم الرفض",
+  "addWorkersButton": "إضافة موظفين",
+  "noAssignedWorkersEmpty": "لا يوجد موظفون معيّنون",
+  "clickAddWorkersHint": "انقر على \"إضافة موظفين\" للإضافة يدوياً",
+  "willBeAddedLabel": "سيتم الإضافة",
+  "willBeRemovedLabel": "سيتم الإزالة",
+  "willBeRestoredLabel": "سيتم الاستعادة",
+  "sendFirstMessage": "أرسل أول رسالة",
+  "writeMessageHint": "اكتب رسالة...",
+  "createdByLabel": "تم الإنشاء بواسطة",
+  "creationDateLabel": "تاريخ الإنشاء",
+  "lastUpdatedByLabel": "آخر تحديث بواسطة",
+  "shiftManagerLabel": "مسؤول الوردية",
+
+  "pendingChangesBanner": "{count} تغييرات في انتظار الحفظ",
+  "@pendingChangesBanner": {
+    "description": "Banner showing count of unsaved changes",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeApproved": "سيتم قبول {count} عامل",
+  "@workersWillBeApproved": {
+    "description": "Change summary: workers will be approved",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "requestsWillBeRejected": "سيتم رفض {count} طلب",
+  "@requestsWillBeRejected": {
+    "description": "Change summary: requests will be rejected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeRemoved": "سيتم إزالة {count} عامل",
+  "@workersWillBeRemoved": {
+    "description": "Change summary: workers will be removed",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeRestored": "سيتم إعادة {count} عامل إلى قائمة الانتظار",
+  "@workersWillBeRestored": {
+    "description": "Change summary: workers will be restored to pending list",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeAdded": "سيتم إضافة {count} عامل",
+  "@workersWillBeAdded": {
+    "description": "Change summary: workers will be added",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "commentsCountLabel": "{count} تعليق",
+  "@commentsCountLabel": {
+    "description": "Comment count label shown in comments sheet header",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "editCommentTitle": "تعديل التعليق",
+  "@editCommentTitle": { "description": "Title of the edit comment bottom sheet" },
+
+  "editCommentHint": "عدّل تعليقك...",
+  "@editCommentHint": { "description": "Hint text for the edit comment text field" },
+
+  "postTypeAnnouncementDesc": "إعلانات مهمة لجميع العمال",
+  "@postTypeAnnouncementDesc": { "description": "Description for announcement post type" },
+
+  "postTypeUpdateDesc": "تحديثات وتغييرات",
+  "@postTypeUpdateDesc": { "description": "Description for update post type" },
+
+  "postTypeEventDesc": "فعاليات وأنشطة",
+  "@postTypeEventDesc": { "description": "Description for event post type" },
+
+  "postTypeGeneralDesc": "معلومات عامة",
+  "@postTypeGeneralDesc": { "description": "Description for general post type" },
+
+  "dateRangeButton": "نطاق التواريخ",
+  "@dateRangeButton": { "description": "Date range toggle button label" },
+
+  "selectDateRange": "حدد نطاق التواريخ",
+  "@selectDateRange": { "description": "Placeholder for date range picker" },
+
+  "noAttendanceDataMonth": "لا توجد بيانات حضور لهذا الشهر",
+  "@noAttendanceDataMonth": { "description": "Empty state when no attendance data for month" },
+
+  "chartTooltipDayHours": "يوم {day}\n{hours} ساعات",
+  "@chartTooltipDayHours": {
+    "description": "Bar chart tooltip showing day number and hours",
+    "placeholders": {
+      "day": { "type": "int" },
+      "hours": { "type": "String" }
+    }
+  },
+
+  "missingClockOutLabel": "خروج مفقود",
+  "@missingClockOutLabel": { "description": "Badge label for missing clock-out on attendance card" },
+
+  "durationHoursMinutes": "{hours}س {minutes}د",
+  "@durationHoursMinutes": {
+    "description": "Duration badge showing hours and minutes",
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "clockInPrefix": "دخول: {time}",
+  "@clockInPrefix": {
+    "description": "Clock-in time row label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "clockOutPrefix": "خروج: {time}",
+  "@clockOutPrefix": {
+    "description": "Clock-out time row label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "exportingLabel": "جارٍ التصدير...",
+  "@exportingLabel": { "description": "Exporting progress label on PDF export button" },
+
+  "exportPdfButton": "تصدير PDF",
+  "@exportPdfButton": { "description": "Export to PDF button label" },
+
+  "allWorkersValidClockout": "جميع العمال سجّلوا خروجهم بشكل صحيح هذا الشهر",
+  "@allWorkersValidClockout": { "description": "Empty state subtitle for missing clockout report" },
+
+  "noShiftsMonth": "لا توجد وردیات لهذا الشهر",
+  "@noShiftsMonth": { "description": "Empty state when no shifts for the selected month" },
+
+  "shiftCountAndSlotsFormat": "{count} ورديات · {filled}/{total} أماكن ممتلئة",
+  "@shiftCountAndSlotsFormat": {
+    "description": "Shift count and filled slots text in department card",
+    "placeholders": {
+      "count": { "type": "int" },
+      "filled": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "shiftCountTooltip": "{count} ورديات",
+  "@shiftCountTooltip": {
+    "description": "Bar chart tooltip for shift count per department",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "taskDistributionTitle": "توزيع المهام",
+  "@taskDistributionTitle": { "description": "Task distribution report screen title" },
+
+  "noTasksMonth": "لا توجد مهام لهذا الشهر",
+  "@noTasksMonth": { "description": "Empty state when no tasks for the selected month" },
+
+  "totalTasksLabel": "إجمالي المهام",
+  "@totalTasksLabel": { "description": "Total tasks stat pill label" },
+
+  "workersWithTasksLabel": "عمال لديهم مهام",
+  "@workersWithTasksLabel": { "description": "Workers with tasks stat pill label" },
+
+  "completionRateLabel": "معدل الإنجاز",
+  "@completionRateLabel": { "description": "Completion rate stat pill label" },
+
+  "completionRateByWorkerTitle": "معدل الإنجاز حسب العامل",
+  "@completionRateByWorkerTitle": { "description": "Completion rate by worker bar chart title" },
+
+  "topTenLabel": "(أفضل 10)",
+  "@topTenLabel": { "description": "Top ten workers caption shown next to chart title" },
+
+  "workerDetailsTitle": "تفاصيل العمال",
+  "@workerDetailsTitle": { "description": "Worker details section title" },
+
+  "taskStatusDone": "منجز",
+  "@taskStatusDone": { "description": "Task status chip: done" },
+
+  "taskStatusInProgress": "قيد التنفيذ",
+  "@taskStatusInProgress": { "description": "Task status chip: in progress" },
+
+  "taskStatusPending": "في الانتظار",
+  "@taskStatusPending": { "description": "Task status chip: pending" },
+
+  "executionLabel": "إنجاز",
+  "@executionLabel": { "description": "Execution percentage label in pie chart center" },
+
+  "statusDistributionTitle": "توزيع الحالة",
+  "@statusDistributionTitle": { "description": "Status distribution pie chart title" },
+
+  "taskDetailsListTitle": "تفاصيل المهام",
+  "@taskDetailsListTitle": { "description": "Task details list section title" },
+
+  "taskGoalPrefix": "الموعد: {date}",
+  "@taskGoalPrefix": {
+    "description": "Task goal / due date row label",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "taskTimelineSubmitted": "قُدِّمت",
+  "@taskTimelineSubmitted": { "description": "Timeline row label: task submitted" },
+
+  "taskTimelineStarted": "بدأت",
+  "@taskTimelineStarted": { "description": "Timeline row label: task started" },
+
+  "taskTimelineEnded": "انتهت",
+  "@taskTimelineEnded": { "description": "Timeline row label: task ended" },
+
+  "workersHoursTitle": "ساعات العمل",
+  "@workersHoursTitle": { "description": "Workers hours report screen title" },
+
+  "activeWorkersLabel": "عمال نشطون",
+  "@activeWorkersLabel": { "description": "Active workers stat pill label" },
+
+  "totalHoursLabel": "إجمالي الساعات",
+  "@totalHoursLabel": { "description": "Total hours stat pill label" },
+
+  "avgPerWorkerLabel": "متوسط للعامل",
+  "@avgPerWorkerLabel": { "description": "Average per worker stat pill label" },
+
+  "hoursByWorkerTitle": "ساعات حسب العامل",
+  "@hoursByWorkerTitle": { "description": "Hours by worker bar chart title" },
+
+  "workerDaysAndAvgFormat": "{days} أيام · متوسط {avg} س/يوم",
+  "@workerDaysAndAvgFormat": {
+    "description": "Worker card subtitle showing days worked and average hours per day",
+    "placeholders": {
+      "days": { "type": "int" },
+      "avg": { "type": "String" }
+    }
+  },
+
+  "generalReportsTabLabel": "التقارير العامة",
+  "@generalReportsTabLabel": { "description": "General reports tab label" },
+
+  "personalReportsSubtitle": "عرض بيانات الحضور والمهام والورديات الشخصية",
+  "@personalReportsSubtitle": { "description": "Personal reports tab subtitle" },
+
+  "attendanceReportDescription": "ساعات العمل وأيام الحضور والملخص الشهري",
+  "@attendanceReportDescription": { "description": "Attendance report card description" },
+
+  "taskReportDescription": "حالة المهام والتقدم ونسب الإنجاز",
+  "@taskReportDescription": { "description": "Task report card description" },
+
+  "shiftReportDescription": "سجل الورديات والموافقات والقرارات",
+  "@shiftReportDescription": { "description": "Shift report card description" },
+
+  "generalReportsTitle": "التقارير العامة",
+  "@generalReportsTitle": { "description": "General reports section heading" },
+
+  "generalReportsSubtitle": "بيانات مجمّعة لجميع العمال",
+  "@generalReportsSubtitle": { "description": "General reports tab subtitle" },
+
+  "workersHoursDescription": "ملخص شهري لساعات العمل حسب العامل",
+  "@workersHoursDescription": { "description": "Workers hours report card description" },
+
+  "taskDistributionDescription": "المهام حسب العامل ونسب الإنجاز والترتيب",
+  "@taskDistributionDescription": { "description": "Task distribution report card description" },
+
+  "shiftCoverageDescription": "الورديات حسب القسم ونسبة الامتلاء والتفاصيل",
+  "@shiftCoverageDescription": { "description": "Shift coverage report card description" },
+
+  "missingClockoutsDescription": "العمال الذين نسوا تسجيل الخروج حسب الشهر",
+  "@missingClockoutsDescription": { "description": "Missing clockouts report card description" },
+
+  "reportsOfWorker": "تقارير {name}",
+  "@reportsOfWorker": {
+    "description": "Worker reports screen heading with worker name",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "workerReportsSubtitle": "عرض بيانات الحضور والمهام والورديات",
+  "@workerReportsSubtitle": { "description": "Worker reports screen subtitle" },
+
+  "performanceSummaryTitle": "ملخص الأداء — هذا الشهر",
+  "@performanceSummaryTitle": { "description": "Performance summary card title" },
+
+  "hoursWithValue": "{hours} ساعات",
+  "@hoursWithValue": {
+    "description": "Performance metric: hours this month",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "daysWithValue": "{days} أيام",
+  "@daysWithValue": {
+    "description": "Performance metric: days this month",
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "presenceLabel": "الحضور",
+  "@presenceLabel": { "description": "Performance metric label: presence" },
+
+  "atWorkLabel": "في العمل",
+  "@atWorkLabel": { "description": "Performance metric label: at work" },
+
+  "tasksCompletedLabel": "مهام منجزة",
+  "@tasksCompletedLabel": { "description": "Performance metric label: tasks completed" },
+
+  "shiftDecisionApproved": "موافق ({count})",
+  "@shiftDecisionApproved": {
+    "description": "Pie chart legend for approved shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftDecisionRejected": "مرفوض ({count})",
+  "@shiftDecisionRejected": {
+    "description": "Pie chart legend for rejected shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftDecisionOther": "أخرى ({count})",
+  "@shiftDecisionOther": {
+    "description": "Pie chart legend for other/pending shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "showDetailsLabel": "عرض التفاصيل",
+  "@showDetailsLabel": { "description": "Show details expand button label" },
+
+  "hideDetailsLabel": "إخفاء التفاصيل",
+  "@hideDetailsLabel": { "description": "Hide details collapse button label" },
+
+  "approvedByLabel": "موافق من قِبَل",
+  "@approvedByLabel": { "description": "Shift detail row label: approved by" },
+
+  "dateLabel": "التاريخ",
+  "@dateLabel": { "description": "Shift detail row label: date" },
+
+  "roleAtAssignmentLabel": "الدور عند التعيين",
+  "@roleAtAssignmentLabel": { "description": "Shift detail row label: role at time of assignment" },
+
+  "requestTimeLabel": "وقت الطلب",
+  "@requestTimeLabel": { "description": "Shift detail row label: request time" },
+
+  "removedByLabel": "أُزيل بواسطة",
+  "@removedByLabel": { "description": "Shift detail row label: removed by" },
+
+  "removalTimeLabel": "وقت الإزالة",
+  "@removalTimeLabel": { "description": "Shift detail row label: removal time" },
+
+  "cancelledByLabel": "أُلغي بواسطة",
+  "@cancelledByLabel": { "description": "Shift detail row label: cancelled by" },
+
+  "cancellationTimeLabel": "وقت الإلغاء",
+  "@cancellationTimeLabel": { "description": "Shift detail row label: cancellation time" },
+
+  "shiftStatusActiveFem": "نشطة",
+  "@shiftStatusActiveFem": { "description": "Shift status: active (feminine)" },
+
+  "shiftStatusCancelledFem": "ملغاة",
+  "@shiftStatusCancelledFem": { "description": "Shift status: cancelled (feminine)" },
+
+  "shiftStatusPendingFem": "معلقة",
+  "@shiftStatusPendingFem": { "description": "Shift status: pending (feminine)" },
+
+  "decisionAcceptedLabel": "مقبول",
+  "@decisionAcceptedLabel": { "description": "Shift decision label: accepted" },
+
+  "decisionRejectedLabel": "مرفوض",
+  "@decisionRejectedLabel": { "description": "Shift decision label: rejected" },
+
+  "decisionRemovedLabel": "محذوف",
+  "@decisionRemovedLabel": { "description": "Shift decision label: removed" },
+
+  "decisionPendingLabel": "قيد الانتظار",
+  "@decisionPendingLabel": { "description": "Shift decision label: pending (empty decision)" },
+
+  "shiftManagerRoleLabel": "مدير الوردية",
+  "@shiftManagerRoleLabel": { "description": "Role label: shift manager" },
+
+  "deptManagerRoleLabel": "مدير القسم",
+  "@deptManagerRoleLabel": { "description": "Role label: department manager" },
+
+  "hoursAbbrFormat": "{hours} س",
+  "@hoursAbbrFormat": {
+    "description": "Hours value with abbreviated hours unit",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "pickPhotoOption": "اختر صوراً",
+  "@pickPhotoOption": { "description": "Media picker option: pick photos from gallery" },
+
+  "pickPhotoSubtitle": "اختر صوراً من المعرض",
+  "@pickPhotoSubtitle": { "description": "Media picker option subtitle: pick photos" },
+
+  "adminRoleLabel": "مدير النظام",
+  "@adminRoleLabel": { "description": "Admin role label in likers sheet" },
+
+  "reactorsPeopleCount": "{count} أشخاص",
+  "@reactorsPeopleCount": {
+    "description": "Number of people who reacted to a post",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "deptGeneral": "عام",
+  "@deptGeneral": { "description": "Task department: general" },
+
+  "deptPaintball": "بينتبول",
+  "@deptPaintball": { "description": "Task department: paintball" },
+
+  "deptRopes": "حديقة الحبال",
+  "@deptRopes": { "description": "Task department: ropes park" },
+
+  "deptCarting": "كارتينج",
+  "@deptCarting": { "description": "Task department: carting" },
+
+  "deptWaterPark": "حديقة مائية",
+  "@deptWaterPark": { "description": "Task department: water park" },
+
+  "deptJimbory": "جيمبوري",
+  "@deptJimbory": { "description": "Task department: jimbory" },
+
+  "deptOperations": "العمليات",
+  "@deptOperations": { "description": "Shift department: operations/general" },
+
+  "preparingUploadShort": "جاري التحضير...",
+  "@preparingUploadShort": { "description": "Short upload preparation status shown on button" },
+
+  "clockReminder10hTitle": "هل نسيت تسجيل الخروج؟ ⏰",
+  "@clockReminder10hTitle": { "description": "Local notification title: 10h shift reminder" },
+
+  "clockReminder10hBody": "أنت في الوردية منذ 10 ساعات. تذكر تسجيل الخروج.",
+  "@clockReminder10hBody": { "description": "Local notification body: 10h shift reminder" },
+
+  "clockReminder12hTitle": "وردية طويلة جداً! 🚨",
+  "@clockReminder12hTitle": { "description": "Local notification title: 12h shift reminder" },
+
+  "clockReminder12hBody": "أنت في الوردية منذ 12 ساعة. سجّل الخروج في أقرب وقت.",
+  "@clockReminder12hBody": { "description": "Local notification body: 12h shift reminder" },
+
+  "taskDeadlineReminderTitle": "تذكير بالمهمة ⏰",
+  "@taskDeadlineReminderTitle": { "description": "Local notification title: task deadline reminder" },
+
+  "taskDeadlineReminderBody": "{title} — أقل من 24 ساعة متبقية للإنجاز",
+  "@taskDeadlineReminderBody": {
+    "description": "Local notification body: task deadline reminder",
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "pendingApprovalCount": "{count} عمال في انتظار الموافقة",
+  "@pendingApprovalCount": {
+    "description": "Dashboard: N workers awaiting manager approval",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "understaffedShiftsCount": "{count} وردية اليوم تفتقر للعمال",
+  "@understaffedShiftsCount": {
+    "description": "Dashboard: N shifts today lack enough workers",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "hoursAbbreviation": "س",
+  "@hoursAbbreviation": { "description": "Short abbreviation for hours" },
+
+  "minutesAbbreviation": "د",
+  "@minutesAbbreviation": { "description": "Short abbreviation for minutes" },
+
+  "daysThisMonth": "{count} أيام هذا الشهر",
+  "@daysThisMonth": {
+    "description": "Worker stat: number of days worked this month",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "totalHoursCount": "{count} ساعات",
+  "@totalHoursCount": {
+    "description": "Total hours label with value",
+    "placeholders": { "count": { "type": "String" } }
+  },
+
+  "activeDepartmentsPercent": "{percent}% من الأقسام نشطة",
+  "@activeDepartmentsPercent": {
+    "description": "Personal area: percentage of departments the worker is licensed for",
+    "placeholders": { "percent": { "type": "int" } }
+  },
+
+  "autoClockoutTitle": "تسجيل خروج تلقائي من الوردية",
+  "@autoClockoutTitle": { "description": "In-app notification title when system auto clocks out a worker" },
+
+  "autoClockoutBody": "لم تُبلّغ عن الخروج بعد 16 ساعة – أنهى النظام الوردية تلقائياً. تواصل مع مديرك.",
+  "@autoClockoutBody": { "description": "In-app notification body when system auto clocks out a worker" },
+
+  "postCategoryAnnouncement": "إعلان",
+  "@postCategoryAnnouncement": { "description": "Newsfeed post category: announcement" },
+
+  "postCategoryUpdate": "تحديث",
+  "@postCategoryUpdate": { "description": "Newsfeed post category: update" },
+
+  "postCategoryEvent": "حدث",
+  "@postCategoryEvent": { "description": "Newsfeed post category: event" },
+
+  "postCategoryGeneral": "عام",
+  "@postCategoryGeneral": { "description": "Newsfeed post category: general" },
+
+  "locationRationaleTitle": "الوصول إلى الموقع",
+  "@locationRationaleTitle": { "description": "Location permission rationale dialog title" },
+
+  "locationRationaleMessage": "يحتاج التطبيق إلى الوصول إلى موقعك للسماح بتسجيل الدخول والخروج داخل نطاق الحديقة.\n\nيُستخدم الموقع فقط للتحقق من الحضور ولا يُخزَّن أو يُشارَك.",
+  "@locationRationaleMessage": { "description": "Location permission rationale dialog message" },
+
+  "locationRationaleConfirm": "السماح بالوصول",
+  "@locationRationaleConfirm": { "description": "Location permission rationale confirm button" },
+
+  "locationRationaleCancel": "ليس الآن",
+  "@locationRationaleCancel": { "description": "Location permission rationale cancel button" },
+
+  "biometricLoginReason": "تحقق من هويتك لتسجيل الدخول إلى التطبيق",
+  "@biometricLoginReason": { "description": "Reason shown in OS biometric prompt when logging in" },
+
+  "shiftApprovedTitle": "تمت الموافقة على طلبك للوردية",
+  "@shiftApprovedTitle": { "description": "In-app notification title: worker approved for shift" },
+
+  "shiftApprovedBody": "تم تعيينك في الوردية بتاريخ {date}، {startTime}–{endTime}",
+  "@shiftApprovedBody": {
+    "description": "In-app notification body: worker approved for shift",
+    "placeholders": {
+      "date": { "type": "String" },
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "shiftRejectedTitle": "تم رفض طلبك للوردية",
+  "@shiftRejectedTitle": { "description": "In-app notification title: worker rejected from shift" },
+
+  "shiftRejectedBody": "لم تتم الموافقة على طلبك للوردية بتاريخ {date}، {startTime}–{endTime}",
+  "@shiftRejectedBody": {
+    "description": "In-app notification body: worker rejected from shift",
+    "placeholders": {
+      "date": { "type": "String" },
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "uploadingVideoProgress": "جارٍ رفع الفيديو {current} من {total}...",
+  "@uploadingVideoProgress": {
+    "description": "Upload progress: uploading video N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "uploadingImageProgress": "جارٍ رفع الصورة {current} من {total}...",
+  "@uploadingImageProgress": {
+    "description": "Upload progress: uploading image N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "uploadingProgress": "جارٍ الرفع {current} من {total}...",
+  "@uploadingProgress": {
+    "description": "Upload progress: uploading file N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "generatingThumbnailStatus": "جارٍ إنشاء الصورة المصغرة...",
+  "@generatingThumbnailStatus": { "description": "Upload progress: generating video thumbnail" },
+
+  "fileUploadedStatus": "تم رفع الملف {current}",
+  "@fileUploadedStatus": {
+    "description": "Upload progress: file N uploaded successfully",
+    "placeholders": { "current": { "type": "int" } }
+  }
+}
