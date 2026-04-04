@@ -50,4 +50,25 @@ class DateTimeUtils {
         return '';
     }
   }
+
+  /// 🌐 Get locale-aware short weekday name (e.g. "Mon", "ב׳", "الإثنين")
+  /// [weekday] follows DateTime.weekday: 1=Monday … 7=Sunday
+  static String getLocalizedWeekdayName(int weekday, String locale) {
+    // 2023-01-02 is a known Monday (weekday == 1)
+    final referenceMonday = DateTime(2023, 1, 2);
+    final date = referenceMonday.add(Duration(days: weekday - 1));
+    return DateFormat('EEE', locale).format(date);
+  }
+
+  /// 🌐 Format date string with locale-aware weekday prefix (e.g. "Mon, 15/06/2025")
+  static String formatDateWithDayLocalized(String date, String locale) {
+    try {
+      final dateTime = DateFormat('dd/MM/yyyy').parse(date);
+      final dayName = getLocalizedWeekdayName(dateTime.weekday, locale);
+      return '$dayName, ${formatDate(dateTime)}';
+    } catch (e) {
+      debugPrint('Error parsing date: $e');
+      return date;
+    }
+  }
 }
