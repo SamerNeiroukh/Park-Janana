@@ -38,12 +38,190 @@ const messaging = getMessaging();
  */
 async function getUserData(userId) {
   const doc = await db.collection("users").doc(userId).get();
-  if (!doc.exists) return { tokens: [], fullName: "משתמש" };
+  if (!doc.exists) return { tokens: [], fullName: "משתמש", locale: "he" };
   const data = doc.data();
   return {
     tokens: data.fcmTokens || [],
     fullName: data.fullName || "משתמש",
+    locale: data.locale || "he",
   };
+}
+
+// ── Notification string helpers ────────────────────────────────────────────
+
+function t(locale, key, vars = {}) {
+  const strings = {
+    // Shift assigned
+    shiftAssignedTitle: {
+      en: "You've been assigned to a shift! 🎉",
+      ar: "تم تعيينك في وردية! 🎉",
+      he: "שובצת למשמרת! 🎉",
+    },
+    shiftAssignedBody: {
+      en: `On ${vars.date} at ${vars.start}–${vars.end}`,
+      ar: `بتاريخ ${vars.date} الساعة ${vars.start}–${vars.end}`,
+      he: `בתאריך ${vars.date} בשעה ${vars.start}–${vars.end}`,
+    },
+    // Shift removed
+    shiftRemovedTitle: {
+      en: "Removed from shift",
+      ar: "تمت إزالتك من الوردية",
+      he: "הוסרת ממשמרת",
+    },
+    shiftRemovedBody: {
+      en: `You were removed from the ${vars.dept} shift on ${vars.date}`,
+      ar: `تمت إزالتك من وردية ${vars.dept} بتاريخ ${vars.date}`,
+      he: `הוסרת מהמשמרת ב${vars.dept} בתאריך ${vars.date}`,
+    },
+    // Shift rejected
+    shiftRejectedTitle: {
+      en: "Shift request update",
+      ar: "تحديث طلب الوردية",
+      he: "עדכון משמרת",
+    },
+    shiftRejectedBody: {
+      en: `Your request for the ${vars.dept} shift on ${vars.date} was not approved`,
+      ar: `لم تتم الموافقة على طلبك لوردية ${vars.dept} بتاريخ ${vars.date}`,
+      he: `הבקשה שלך למשמרת ב${vars.dept} בתאריך ${vars.date} לא אושרה`,
+    },
+    // Shift cancelled
+    shiftCancelledTitle: {
+      en: "Shift cancelled ❌",
+      ar: "تم إلغاء الوردية ❌",
+      he: "משמרת בוטלה ❌",
+    },
+    shiftCancelledBody: {
+      en: `The ${vars.dept} shift on ${vars.date} was cancelled${vars.reason ? `: ${vars.reason}` : ""}`,
+      ar: `تم إلغاء وردية ${vars.dept} بتاريخ ${vars.date}${vars.reason ? `: ${vars.reason}` : ""}`,
+      he: `המשמרת ב${vars.dept} בתאריך ${vars.date} בוטלה${vars.reason ? `: ${vars.reason}` : ""}`,
+    },
+    // Shift reactivated
+    shiftReactivatedTitle: {
+      en: "Shift update 🔄",
+      ar: "تحديث الوردية 🔄",
+      he: "עדכון משמרת 🔄",
+    },
+    shiftReactivatedBody: {
+      en: `The ${vars.dept} shift on ${vars.date} has been reactivated`,
+      ar: `تم إعادة تفعيل وردية ${vars.dept} بتاريخ ${vars.date}`,
+      he: `המשמרת ב${vars.dept} בתאריך ${vars.date} הופעלה מחדש`,
+    },
+    // Shift completed
+    shiftCompletedTitle: {
+      en: "Shift completed ✅",
+      ar: "اكتملت الوردية ✅",
+      he: "משמרת הושלמה ✅",
+    },
+    shiftCompletedBody: {
+      en: `The ${vars.dept} shift on ${vars.date} has been marked as completed`,
+      ar: `تم وضع علامة اكتمال على وردية ${vars.dept} بتاريخ ${vars.date}`,
+      he: `המשמרת ב${vars.dept} בתאריך ${vars.date} סומנה כהושלמה`,
+    },
+    // Shift message
+    shiftMessageTitle: {
+      en: `${vars.sender} sent a shift message 💬`,
+      ar: `${vars.sender} أرسل رسالة وردية 💬`,
+      he: `${vars.sender} שלח הודעת משמרת 💬`,
+    },
+    // Task assigned
+    taskAssignedTitle: {
+      en: "New task! 📋",
+      ar: "مهمة جديدة! 📋",
+      he: "משימה חדשה! 📋",
+    },
+    taskAssignedBody: {
+      en: `You have a new task: ${vars.title}`,
+      ar: `لديك مهمة جديدة: ${vars.title}`,
+      he: `קיבלת משימה חדשה: ${vars.title}`,
+    },
+    // Task comment
+    taskCommentTitle: {
+      en: `${vars.commenter} commented on "${vars.title}" 💬`,
+      ar: `${vars.commenter} علّق على "${vars.title}" 💬`,
+      he: `${vars.commenter} הגיב על "${vars.title}" 💬`,
+    },
+    // Task review requested
+    taskReviewTitle: {
+      en: "Task pending approval 🔔",
+      ar: "مهمة في انتظار الموافقة 🔔",
+      he: "משימה ממתינה לאישור 🔔",
+    },
+    taskReviewBody: {
+      en: `${vars.worker} completed "${vars.title}" and is waiting for your approval`,
+      ar: `${vars.worker} أنهى "${vars.title}" وينتظر موافقتك`,
+      he: `${vars.worker} סיים את "${vars.title}" וממתין לאישורך`,
+    },
+    // Task approved
+    taskApprovedTitle: {
+      en: "Task approved! ✅",
+      ar: "تمت الموافقة على المهمة! ✅",
+      he: "המשימה אושרה! ✅",
+    },
+    taskApprovedBody: {
+      en: `"${vars.title}" was approved by the manager`,
+      ar: `تمت الموافقة على "${vars.title}" من قِبل المدير`,
+      he: `"${vars.title}" אושרה על ידי המנהל`,
+    },
+    // Task rejected
+    taskRejectedTitle: {
+      en: "Task returned for revision 🔄",
+      ar: "تمت إعادة المهمة للمراجعة 🔄",
+      he: "המשימה הוחזרה לביצוע 🔄",
+    },
+    taskRejectedBody: {
+      en: `"${vars.title}" was not approved by the manager — please continue working on it`,
+      ar: `لم تتم الموافقة على "${vars.title}" من قِبل المدير — يرجى الاستمرار في تنفيذها`,
+      he: `"${vars.title}" לא אושרה על ידי המנהל - יש להמשיך בביצוע`,
+    },
+    // New user pending
+    newUserTitle: {
+      en: "New registration request 👤",
+      ar: "طلب تسجيل جديد 👤",
+      he: "בקשת הרשמה חדשה 👤",
+    },
+    newUserBody: {
+      en: `${vars.name} registered and is waiting for approval`,
+      ar: `${vars.name} سجّل وينتظر الموافقة`,
+      he: `${vars.name} נרשם למערכת וממתין לאישור`,
+    },
+    // Worker approved
+    workerApprovedTitle: {
+      en: "Your request was approved! 🎉",
+      ar: "تمت الموافقة على طلبك! 🎉",
+      he: "הבקשה שלך אושרה! 🎉",
+    },
+    workerApprovedBody: {
+      en: "Welcome! Your account has been approved and you can now log in",
+      ar: "مرحباً! تمت الموافقة على حسابك ويمكنك الآن تسجيل الدخول",
+      he: "ברוך הבא! חשבונך אושר ועכשיו תוכל להתחבר למערכת",
+    },
+    // Worker registration rejected
+    workerRejectedTitle: {
+      en: "Registration request update",
+      ar: "تحديث طلب التسجيل",
+      he: "עדכון בקשת הרשמה",
+    },
+    workerRejectedBody: {
+      en: "Your request was not approved. For more details contact the manager",
+      ar: "لم تتم الموافقة على طلبك. للمزيد من التفاصيل تواصل مع المدير",
+      he: "הבקשה שלך לא אושרה. לפרטים נוספים פנה למנהל",
+    },
+    // Post comment
+    postCommentTitle: {
+      en: `New comment on "${vars.postTitle}" 💬`,
+      ar: `تعليق جديد على "${vars.postTitle}" 💬`,
+      he: `תגובה חדשה על "${vars.postTitle}" 💬`,
+    },
+    postCommentBody: {
+      en: `${vars.commenter}: ${vars.preview}`,
+      ar: `${vars.commenter}: ${vars.preview}`,
+      he: `${vars.commenter}: ${vars.preview}`,
+    },
+  };
+
+  const entry = strings[key];
+  if (!entry) return "";
+  return entry[locale] || entry["he"] || "";
 }
 
 /**
@@ -172,16 +350,18 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
     const startTime = after.startTime || "";
     const endTime = after.endTime || "";
     await Promise.all(
-      newlyAssigned.map((uid) =>
-        notifyUser(
+      newlyAssigned.map(async (uid) => {
+        const { tokens, locale } = await getUserData(uid);
+        return notifyUser(
           uid,
           {
-            title: "שובצת למשמרת! 🎉",
-            body: `בתאריך ${shiftDate} בשעה ${startTime}–${endTime}`,
+            title: t(locale, "shiftAssignedTitle"),
+            body: t(locale, "shiftAssignedBody", { date: shiftDate, start: startTime, end: endTime }),
           },
-          { type: "shift_assigned", entityId: shiftId, entityType: "shift", shiftId }
-        )
-      )
+          { type: "shift_assigned", entityId: shiftId, entityType: "shift", shiftId },
+          { tokens }
+        );
+      })
     );
   }
 
@@ -193,16 +373,18 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
 
   if (removedWorkers.length > 0) {
     await Promise.all(
-      removedWorkers.map((uid) =>
-        notifyUser(
+      removedWorkers.map(async (uid) => {
+        const { tokens, locale } = await getUserData(uid);
+        return notifyUser(
           uid,
           {
-            title: "הוסרת ממשמרת",
-            body: `הוסרת מהמשמרת ב${department} בתאריך ${shiftDate}`,
+            title: t(locale, "shiftRemovedTitle"),
+            body: t(locale, "shiftRemovedBody", { dept: department, date: shiftDate }),
           },
-          { type: "shift_removed", entityId: shiftId, entityType: "shift", shiftId }
-        )
-      )
+          { type: "shift_removed", entityId: shiftId, entityType: "shift", shiftId },
+          { tokens }
+        );
+      })
     );
   }
 
@@ -212,16 +394,18 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
 
   if (newlyRejected.length > 0) {
     await Promise.all(
-      newlyRejected.map((uid) =>
-        notifyUser(
+      newlyRejected.map(async (uid) => {
+        const { tokens, locale } = await getUserData(uid);
+        return notifyUser(
           uid,
           {
-            title: "עדכון משמרת",
-            body: `הבקשה שלך למשמרת ב${department} בתאריך ${shiftDate} לא אושרה`,
+            title: t(locale, "shiftRejectedTitle"),
+            body: t(locale, "shiftRejectedBody", { dept: department, date: shiftDate }),
           },
-          { type: "shift_rejected", entityId: shiftId, entityType: "shift", shiftId }
-        )
-      )
+          { type: "shift_rejected", entityId: shiftId, entityType: "shift", shiftId },
+          { tokens }
+        );
+      })
     );
   }
 
@@ -235,45 +419,50 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
     const cancelReason = after.cancelReason || "";
 
     if (nowStatus === "cancelled") {
-      const bodyText = cancelReason
-        ? `המשמרת ב${department} בתאריך ${shiftDate} בוטלה: ${cancelReason}`
-        : `המשמרת ב${department} בתאריך ${shiftDate} בוטלה`;
-
       const workersToNotify = [...new Set([...assignedWorkers, ...requestedWorkers])];
       await Promise.all(
-        workersToNotify.map((uid) =>
-          notifyUser(
+        workersToNotify.map(async (uid) => {
+          const { tokens, locale } = await getUserData(uid);
+          return notifyUser(
             uid,
-            { title: "משמרת בוטלה ❌", body: bodyText },
-            { type: "shift_cancelled", entityId: shiftId, entityType: "shift", shiftId }
-          )
-        )
+            {
+              title: t(locale, "shiftCancelledTitle"),
+              body: t(locale, "shiftCancelledBody", { dept: department, date: shiftDate, reason: cancelReason }),
+            },
+            { type: "shift_cancelled", entityId: shiftId, entityType: "shift", shiftId },
+            { tokens }
+          );
+        })
       );
     } else if (nowStatus === "active") {
       await Promise.all(
-        assignedWorkers.map((uid) =>
-          notifyUser(
+        assignedWorkers.map(async (uid) => {
+          const { tokens, locale } = await getUserData(uid);
+          return notifyUser(
             uid,
             {
-              title: "עדכון משמרת 🔄",
-              body: `המשמרת ב${department} בתאריך ${shiftDate} הופעלה מחדש`,
+              title: t(locale, "shiftReactivatedTitle"),
+              body: t(locale, "shiftReactivatedBody", { dept: department, date: shiftDate }),
             },
-            { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
-          )
-        )
+            { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId },
+            { tokens }
+          );
+        })
       );
     } else if (nowStatus === "completed") {
       await Promise.all(
-        assignedWorkers.map((uid) =>
-          notifyUser(
+        assignedWorkers.map(async (uid) => {
+          const { tokens, locale } = await getUserData(uid);
+          return notifyUser(
             uid,
             {
-              title: "משמרת הושלמה ✅",
-              body: `המשמרת ב${department} בתאריך ${shiftDate} סומנה כהושלמה`,
+              title: t(locale, "shiftCompletedTitle"),
+              body: t(locale, "shiftCompletedBody", { dept: department, date: shiftDate }),
             },
-            { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId }
-          )
-        )
+            { type: "shift_update", entityId: shiftId, entityType: "shift", shiftId },
+            { tokens }
+          );
+        })
       );
     }
   }
@@ -285,24 +474,25 @@ exports.onShiftWritten = onDocumentUpdated("shifts/{shiftId}", async (event) => 
     const newMsg = nowMessages[nowMessages.length - 1];
     if (newMsg) {
       const senderId = newMsg.senderId || "";
-      // Single getUserData call — gets both name and tokens if needed.
-      // Never trust the client-supplied senderName field.
-      const senderName = senderId ? (await getUserData(senderId)).fullName : "מנהל";
+      const senderData = senderId ? await getUserData(senderId) : { fullName: "מנהל", locale: "he" };
+      const senderName = senderData.fullName;
       const msgText = newMsg.message || newMsg.text || "";
       const preview = msgText.length > 100 ? msgText.substring(0, 100) + "…" : msgText;
 
       const recipients = nowAssigned.filter((uid) => uid !== senderId);
       await Promise.all(
-        recipients.map((uid) =>
-          notifyUser(
+        recipients.map(async (uid) => {
+          const { tokens, locale } = await getUserData(uid);
+          return notifyUser(
             uid,
             {
-              title: `${senderName} שלח הודעת משמרת 💬`,
+              title: t(locale, "shiftMessageTitle", { sender: senderName }),
               body: preview,
             },
-            { type: "shift_message", entityId: shiftId, entityType: "shift", shiftId }
-          )
-        )
+            { type: "shift_message", entityId: shiftId, entityType: "shift", shiftId },
+            { tokens }
+          );
+        })
       );
     }
   }
@@ -317,20 +507,22 @@ exports.onTaskCreated = onDocumentCreated("tasks/{taskId}", async (event) => {
   if (!data) return;
 
   const taskId = event.params.taskId;
-  const taskTitle = data.title || "משימה חדשה";
+  const taskTitle = data.title || "";
   const assignedTo = data.assignedTo || [];
 
   await Promise.all(
-    assignedTo.map((uid) =>
-      notifyUser(
+    assignedTo.map(async (uid) => {
+      const { tokens, locale } = await getUserData(uid);
+      return notifyUser(
         uid,
         {
-          title: "משימה חדשה! 📋",
-          body: `קיבלת משימה חדשה: ${taskTitle}`,
+          title: t(locale, "taskAssignedTitle"),
+          body: t(locale, "taskAssignedBody", { title: taskTitle }),
         },
-        { type: "task_assigned", entityId: taskId, entityType: "task", taskId }
-      )
-    )
+        { type: "task_assigned", entityId: taskId, entityType: "task", taskId },
+        { tokens }
+      );
+    })
   );
 });
 
@@ -357,13 +549,16 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
 
   for (const uid of newlyAssigned) {
     notifications.push(
-      notifyUser(
-        uid,
-        {
-          title: "משימה חדשה! 📋",
-          body: `קיבלת משימה חדשה: ${taskTitle}`,
-        },
-        { type: "task_assigned", entityId: taskId, entityType: "task", taskId }
+      getUserData(uid).then(({ tokens, locale }) =>
+        notifyUser(
+          uid,
+          {
+            title: t(locale, "taskAssignedTitle"),
+            body: t(locale, "taskAssignedBody", { title: taskTitle }),
+          },
+          { type: "task_assigned", entityId: taskId, entityType: "task", taskId },
+          { tokens }
+        )
       )
     );
   }
@@ -375,8 +570,8 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
     const newComment = nowComments[nowComments.length - 1];
     if (newComment) {
       const commenterId = newComment.userId || newComment.by || "";
-      // Single read for commenter name — never trust client-supplied userName.
-      const commenterName = commenterId ? (await getUserData(commenterId)).fullName : "משתמש";
+      const commenterData = commenterId ? await getUserData(commenterId) : { fullName: "משתמש", locale: "he" };
+      const commenterName = commenterData.fullName;
       const commentText = newComment.text || newComment.message || "";
       const preview = commentText.length > 80 ? commentText.substring(0, 80) + "…" : commentText;
 
@@ -386,13 +581,16 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
       for (const uid of recipients) {
         if (!uid) continue;
         notifications.push(
-          notifyUser(
-            uid,
-            {
-              title: `${commenterName} הגיב על "${taskTitle}" 💬`,
-              body: preview,
-            },
-            { type: "task_comment", entityId: taskId, entityType: "task", taskId }
+          getUserData(uid).then(({ tokens, locale }) =>
+            notifyUser(
+              uid,
+              {
+                title: t(locale, "taskCommentTitle", { commenter: commenterName, title: taskTitle }),
+                body: preview,
+              },
+              { type: "task_comment", entityId: taskId, entityType: "task", taskId },
+              { tokens }
+            )
           )
         );
       }
@@ -412,41 +610,49 @@ exports.onTaskWritten = onDocumentUpdated("tasks/{taskId}", async (event) => {
     if (!creatorId || uid === creatorId) continue;
 
     if (nowStatus === "pending_review") {
-      const workerName = (await getUserData(uid)).fullName;
+      const workerData = await getUserData(uid);
+      const creatorData = await getUserData(creatorId);
       notifications.push(
         notifyUser(
           creatorId,
           {
-            title: "משימה ממתינה לאישור 🔔",
-            body: `${workerName} סיים את "${taskTitle}" וממתין לאישורך`,
+            title: t(creatorData.locale, "taskReviewTitle"),
+            body: t(creatorData.locale, "taskReviewBody", { worker: workerData.fullName, title: taskTitle }),
           },
-          { type: "task_review_requested", entityId: taskId, entityType: "task", taskId }
+          { type: "task_review_requested", entityId: taskId, entityType: "task", taskId },
+          { tokens: creatorData.tokens }
         )
       );
     }
 
     if (nowStatus === "done" && nowEntry.approvedBy && !prevEntry.approvedBy) {
       notifications.push(
-        notifyUser(
-          uid,
-          {
-            title: "המשימה אושרה! ✅",
-            body: `"${taskTitle}" אושרה על ידי המנהל`,
-          },
-          { type: "task_approved", entityId: taskId, entityType: "task", taskId }
+        getUserData(uid).then(({ tokens, locale }) =>
+          notifyUser(
+            uid,
+            {
+              title: t(locale, "taskApprovedTitle"),
+              body: t(locale, "taskApprovedBody", { title: taskTitle }),
+            },
+            { type: "task_approved", entityId: taskId, entityType: "task", taskId },
+            { tokens }
+          )
         )
       );
     }
 
     if (nowStatus === "in_progress" && nowEntry.rejectedBy && !prevEntry.rejectedBy) {
       notifications.push(
-        notifyUser(
-          uid,
-          {
-            title: "המשימה הוחזרה לביצוע 🔄",
-            body: `"${taskTitle}" לא אושרה על ידי המנהל - יש להמשיך בביצוע`,
-          },
-          { type: "task_rejected", entityId: taskId, entityType: "task", taskId }
+        getUserData(uid).then(({ tokens, locale }) =>
+          notifyUser(
+            uid,
+            {
+              title: t(locale, "taskRejectedTitle"),
+              body: t(locale, "taskRejectedBody", { title: taskTitle }),
+            },
+            { type: "task_rejected", entityId: taskId, entityType: "task", taskId },
+            { tokens }
+          )
         )
       );
     }
@@ -476,12 +682,14 @@ exports.onNewUserPending = onDocumentCreated("users/{userId}", async (event) => 
   await Promise.all(
     managersSnap.docs.map((mgr) => {
       const mgrId = mgr.id;
-      const tokens = mgr.data().fcmTokens || [];
+      const mgrData = mgr.data();
+      const tokens = mgrData.fcmTokens || [];
+      const locale = mgrData.locale || "he";
       return notifyUser(
         mgrId,
         {
-          title: "בקשת הרשמה חדשה 👤",
-          body: `${newUserName} נרשם למערכת וממתין לאישור`,
+          title: t(locale, "newUserTitle"),
+          body: t(locale, "newUserBody", { name: newUserName }),
         },
         { type: "new_user_pending", entityId: newUserId, entityType: "user", userId: newUserId },
         { tokens }
@@ -501,15 +709,18 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
 
   const userId = event.params.userId;
 
+  const { tokens, locale } = await getUserData(userId);
+
   // ── Approved ───────────────────────────────────────────────────────────
   if (!before.approved && after.approved === true) {
     await notifyUser(
       userId,
       {
-        title: "הבקשה שלך אושרה! 🎉",
-        body: "ברוך הבא! חשבונך אושר ועכשיו תוכל להתחבר למערכת",
+        title: t(locale, "workerApprovedTitle"),
+        body: t(locale, "workerApprovedBody"),
       },
-      { type: "worker_approved", entityId: userId, entityType: "user" }
+      { type: "worker_approved", entityId: userId, entityType: "user" },
+      { tokens }
     );
   }
 
@@ -518,10 +729,11 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
     await notifyUser(
       userId,
       {
-        title: "עדכון בקשת הרשמה",
-        body: "הבקשה שלך לא אושרה. לפרטים נוספים פנה למנהל",
+        title: t(locale, "workerRejectedTitle"),
+        body: t(locale, "workerRejectedBody"),
       },
-      { type: "worker_rejected", entityId: userId, entityType: "user" }
+      { type: "worker_rejected", entityId: userId, entityType: "user" },
+      { tokens }
     );
   }
 });
@@ -551,19 +763,21 @@ exports.onPostWritten = onDocumentUpdated("posts/{postId}", async (event) => {
   const commenterId = newComment.userId || "";
   if (commenterId === authorId) return; // Author commented on own post
 
-  // Single getUserData call — never trust the client-supplied userName field.
-  const commenterName = commenterId ? (await getUserData(commenterId)).fullName : "משתמש";
+  const commenterData = commenterId ? await getUserData(commenterId) : { fullName: "משתמש" };
+  const commenterName = commenterData.fullName;
   const commentText = newComment.content || newComment.text || "";
   const preview = commentText.length > 80 ? commentText.substring(0, 80) + "…" : commentText;
-  const postTitle = after.title || "הפוסט שלך";
+  const postTitle = after.title || "";
 
+  const { tokens: authorTokens, locale: authorLocale } = await getUserData(authorId);
   await notifyUser(
     authorId,
     {
-      title: `תגובה חדשה על "${postTitle}" 💬`,
-      body: `${commenterName}: ${preview}`,
+      title: t(authorLocale, "postCommentTitle", { postTitle }),
+      body: t(authorLocale, "postCommentBody", { commenter: commenterName, preview }),
     },
-    { type: "post_comment", entityId: postId, entityType: "post" }
+    { type: "post_comment", entityId: postId, entityType: "post" },
+    { tokens: authorTokens }
   );
 });
 
