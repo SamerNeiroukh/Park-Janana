@@ -582,10 +582,48 @@ class NotificationService {
   static const NotificationDetails _reminderDetails =
       NotificationDetails(android: _reminderAndroid, iOS: _reminderIOS);
 
+  static const String _clockInTimeKey = 'last_clock_in_millis';
+  static const String _pendingTasksKey = 'pending_task_reminders'; // JSON list
+
+  /// Reschedules all active local notifications in the current locale language.
+  /// Called whenever the user changes language in settings.
+  Future<void> rescheduleIfActive() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Reschedule clock-out reminders.
+    final clockMillis = prefs.getInt(_clockInTimeKey);
+    if (clockMillis != null) {
+      await scheduleClockOutReminders(
+        DateTime.fromMillisecondsSinceEpoch(clockMillis),
+      );
+    }
+
+    // Reschedule task deadline reminders.
+    final raw = prefs.getString(_pendingTasksKey);
+    if (raw != null) {
+      final list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw) as List).map((e) => Map<String, dynamic>.from(e as Map)),
+      );
+      for (final entry in list) {
+        final id = entry['id'] as String;
+        final title = entry['title'] as String;
+        final dueMillis = entry['dueMillis'] as int;
+        await scheduleTaskDeadlineReminder(
+          taskId: id,
+          taskTitle: title,
+          dueDate: DateTime.fromMillisecondsSinceEpoch(dueMillis),
+        );
+      }
+    }
+  }
+
   /// Schedule local reminders at clockIn + 10 h and clockIn + 12 h.
   /// Safe to call multiple times — cancels any existing reminders first.
   Future<void> scheduleClockOutReminders(DateTime clockInTime) async {
     await cancelClockOutReminders();
+    // Persist clock-in time so reminders can be rescheduled on language change.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_clockInTimeKey, clockInTime.millisecondsSinceEpoch);
 
     final local = tz.local;
     final now = tz.TZDateTime.now(local);
@@ -637,6 +675,8 @@ class NotificationService {
   Future<void> cancelClockOutReminders() async {
     await _localNotifications.cancel(_clockReminder10hId);
     await _localNotifications.cancel(_clockReminder12hId);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_clockInTimeKey);
     debugPrint('Clock-out reminders cancelled');
   }
 
@@ -695,12 +735,37 @@ class NotificationService {
           UILocalNotificationDateInterpretation.absoluteTime,
       payload: '{"type":"task_assigned","entityId":"$taskId","recipientId":"${FirebaseAuth.instance.currentUser?.uid ?? ""}"}',
     );
+    // Persist so reminders can be rescheduled on language change.
+    await _persistTaskReminder(taskId, taskTitle, dueDate.millisecondsSinceEpoch);
     debugPrint('Task deadline reminder scheduled: $taskTitle @ $reminderTime');
+  }
+
+  Future<void> _persistTaskReminder(String taskId, String taskTitle, int dueMillis) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pendingTasksKey);
+    final list = raw != null
+        ? List<Map<String, dynamic>>.from(
+            (jsonDecode(raw) as List).map((e) => Map<String, dynamic>.from(e as Map)))
+        : <Map<String, dynamic>>[];
+    list.removeWhere((e) => e['id'] == taskId); // deduplicate
+    list.add({'id': taskId, 'title': taskTitle, 'dueMillis': dueMillis});
+    await prefs.setString(_pendingTasksKey, jsonEncode(list));
+  }
+
+  Future<void> _removePersistedTaskReminder(String taskId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_pendingTasksKey);
+    if (raw == null) return;
+    final list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw) as List).map((e) => Map<String, dynamic>.from(e as Map)));
+    list.removeWhere((e) => e['id'] == taskId);
+    await prefs.setString(_pendingTasksKey, jsonEncode(list));
   }
 
   /// Cancel the deadline reminder for a specific task.
   Future<void> cancelTaskDeadlineReminder(String taskId) async {
     await _localNotifications.cancel(_taskNotifId(taskId));
+    await _removePersistedTaskReminder(taskId);
     debugPrint('Task deadline reminder cancelled for $taskId');
   }
 }
