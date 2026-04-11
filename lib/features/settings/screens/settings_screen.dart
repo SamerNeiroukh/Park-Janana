@@ -79,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _openTermsOfService() async {
-    const url = 'https://park-janana.co.il/terms';
+    const url = 'https://samerneiroukh.github.io/janana-privacy/terms.html';
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
@@ -227,7 +227,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _openPrivacyPolicy() async {
-    const url = 'https://park-janana.co.il/privacy';
+    const url = 'https://samerneiroukh.github.io/janana-privacy/';
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
