@@ -4,7 +4,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
-import 'package:park_janana/core/services/account_deletion_service.dart';
 import 'package:park_janana/features/auth/screens/welcome_screen.dart';
 import 'package:park_janana/features/home/providers/home_badge_provider.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
@@ -33,7 +32,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _biometricAvailable = false;
   bool _biometricEnabled = false;
   final BiometricService _biometricService = BiometricService();
-  final AccountDeletionService _deletionService = AccountDeletionService();
 
   @override
   void initState() {
@@ -90,29 +88,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showDeleteAccountSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _DeleteAccountSheet(
-        deletionService: _deletionService,
-        onDeleted: _onAccountDeleted,
-      ),
-    );
-  }
-
-  Future<void> _onAccountDeleted() async {
-    if (!mounted) return;
-    context.read<UserProvider>().clearUser();
-    context.read<HomeBadgeProvider>().reset();
-    await context.read<AppAuthProvider>().signOut();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-      (route) => false,
-    );
-  }
 
   Future<void> _toggleBiometric(bool enable) async {
     if (enable) {
@@ -348,16 +323,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'התנתקות',
                     titleColor: Colors.red.shade700,
                     onTap: _signOut,
-                  ),
-                  const SizedBox(height: 20),
-                  _sectionHeader('אזור סכנה'),
-                  _tile(
-                    icon: PhosphorIconsBold.trash,
-                    iconColor: const Color(0xFFDC2626),
-                    title: 'מחיקת חשבון',
-                    subtitle: 'פעולה בלתי הפיכה — כל הנתונים יימחקו',
-                    titleColor: const Color(0xFFDC2626),
-                    onTap: _showDeleteAccountSheet,
                   ),
                 ],
               ),
@@ -827,214 +792,3 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Delete Account Sheet
-// ---------------------------------------------------------------------------
-
-class _DeleteAccountSheet extends StatefulWidget {
-  const _DeleteAccountSheet({
-    required this.deletionService,
-    required this.onDeleted,
-  });
-
-  final AccountDeletionService deletionService;
-  final VoidCallback onDeleted;
-
-  @override
-  State<_DeleteAccountSheet> createState() => _DeleteAccountSheetState();
-}
-
-class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  bool _obscure = true;
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final confirmed = await showAppDialog(
-      context,
-      title: 'מחיקה סופית',
-      message:
-          'פעולה זו בלתי הפיכה לחלוטין.\nכל הנתונים האישיים שלך יימחקו לצמיתות.',
-      confirmText: 'מחק חשבון',
-      icon: PhosphorIconsBold.trash,
-      iconGradient: const [Color(0xFFEF4444), Color(0xFFDC2626)],
-      isDestructive: true,
-    );
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _isLoading = true);
-    try {
-      await widget.deletionService.deleteAccount(
-        _passwordController.text.trim(),
-      );
-      if (mounted) Navigator.pop(context);
-      widget.onDeleted();
-    } on Exception catch (e) {
-      if (!mounted) return;
-      final raw = e.toString();
-      final msg = raw.contains('wrong-password') ||
-              raw.contains('invalid-credential')
-          ? 'הסיסמה שגויה. אנא נסה שוב.'
-          : raw.contains('requires-recent-login')
-              ? 'נדרשת כניסה מחדש לפני מחיקת החשבון'
-              : 'שגיאה במחיקת החשבון. אנא נסה שוב.';
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(msg)));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: TaskTheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: TaskTheme.border,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(PhosphorIconsBold.trash,
-                          color: Color(0xFFDC2626), size: 22),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'מחיקת חשבון',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFDC2626),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'פעולה זו תמחק את כל הנתונים האישיים שלך לצמיתות ולא ניתן לבטלה.\nאנא הזן את הסיסמה שלך לאישור.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF6B7280),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscure,
-                  textDirection: TextDirection.ltr,
-                  decoration: InputDecoration(
-                    labelText: 'סיסמה נוכחית',
-                    border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM)),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure
-                          ? PhosphorIconsRegular.eyeSlash
-                          : PhosphorIconsRegular.eye),
-                      onPressed: () =>
-                          setState(() => _obscure = !_obscure),
-                    ),
-                  ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'נא להזין סיסמה' : null,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDC2626),
-                      borderRadius:
-                          BorderRadius.circular(TaskTheme.radiusM),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              const Color(0xFFDC2626).withValues(alpha: 0.35),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius:
-                          BorderRadius.circular(TaskTheme.radiusM),
-                      child: InkWell(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM),
-                        onTap: _isLoading ? null : _submit,
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 14),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.5),
-                                  ),
-                                )
-                              : const Text(
-                                  'מחק את חשבוני לצמיתות',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
