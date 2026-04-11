@@ -11,7 +11,7 @@ class WeatherService {
   static Map<String, dynamic>? _cachedWeather;
   static DateTime? _cacheTimestamp;
 
-  Future<Map<String, dynamic>?> fetchWeather({double lat = 31.7683, double lon = 35.2137}) async {
+  Future<Map<String, dynamic>?> fetchWeather({double lat = 31.805613, double lon = 35.121204}) async {
     // Return cached data if still fresh
     if (_cachedWeather != null &&
         _cacheTimestamp != null &&

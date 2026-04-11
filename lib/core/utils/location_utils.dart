@@ -4,8 +4,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 
 class LocationUtils {
-  static const double parkLatitude = 31.7683;
-  static const double parkLongitude = 35.2137;
+  static const double parkLatitude = 31.805613;
+  static const double parkLongitude = 35.121204;
   static const double allowedRadiusMeters = 100;
 
   /// Shows a rationale dialog explaining why location access is needed, then

@@ -34,6 +34,8 @@
 	<string>אנו משתמשים ב-Face ID כדי לאמת את זהותך בצורה מאובטחת</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>האפליקציה זקוקה לגישה למיקרופון כדי לצלם סרטונים לפרסום</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
