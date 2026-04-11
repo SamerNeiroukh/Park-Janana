@@ -73,7 +73,7 @@ class NewWorkerScreen extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.35),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(PhosphorIconsRegular.arrowLeft,
+                        child: const Icon(PhosphorIconsRegular.arrowRight,
                             color: Colors.white, size: 18),
                       ),
                     ),

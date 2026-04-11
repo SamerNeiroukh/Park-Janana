@@ -332,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         child: const Icon(
-                          PhosphorIconsRegular.arrowLeft,
+                          PhosphorIconsRegular.arrowRight,
                           color: AppColors.primary,
                           size: 18,
                         ),

@@ -413,7 +413,7 @@ class _RegistrationFormState extends State<RegistrationForm>
               // Back button — last child = LEFT in RTL
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(PhosphorIconsRegular.arrowLeft, size: 20),
+                icon: const Icon(PhosphorIconsRegular.arrowRight, size: 20),
                 color: _kAmber,
                 splashRadius: 24,
                 padding: const EdgeInsets.all(8),
