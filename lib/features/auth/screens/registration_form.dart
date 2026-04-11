@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
@@ -42,6 +43,8 @@ class _RegistrationFormState extends State<RegistrationForm>
   bool _submitted = false;
   bool _passVisible = false;
   bool _confirmVisible = false;
+  bool _privacyAccepted = false;
+  bool _privacyError = false;
 
   final Map<String, String?> _errors = {
     'name': null, 'phone': null, 'id': null,
@@ -179,7 +182,13 @@ class _RegistrationFormState extends State<RegistrationForm>
 
   Future<void> _submit() async {
     if (_isLoading) return;
-    if (!_validateAll()) {
+    final fieldsOk = _validateAll();
+    if (!_privacyAccepted) {
+      setState(() => _privacyError = true);
+      HapticFeedback.lightImpact();
+      return;
+    }
+    if (!fieldsOk) {
       setState(() {});
       HapticFeedback.lightImpact();
       return;
@@ -564,7 +573,97 @@ class _RegistrationFormState extends State<RegistrationForm>
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+
+                  // Privacy policy consent
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      _privacyAccepted = !_privacyAccepted;
+                      if (_privacyAccepted) _privacyError = false;
+                    }),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: _privacyError
+                            ? _kRed.withValues(alpha: 0.06)
+                            : _privacyAccepted
+                                ? _kGreen.withValues(alpha: 0.06)
+                                : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _privacyError
+                              ? _kRed
+                              : _privacyAccepted
+                                  ? _kGreen
+                                  : const Color(0xFFD1D5DB),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                            value: _privacyAccepted,
+                            onChanged: (v) => setState(() {
+                              _privacyAccepted = v ?? false;
+                              if (_privacyAccepted) _privacyError = false;
+                            }),
+                            activeColor: _kGreen,
+                            side: BorderSide(
+                              color: _privacyError ? _kRed : const Color(0xFF9CA3AF),
+                              width: 1.5,
+                            ),
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                const Text(
+                                  'קראתי ואני מסכים/ה ל',
+                                  style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
+                                ),
+                                GestureDetector(
+                                  onTap: () => launchUrl(
+                                    Uri.parse('https://samerneiroukh.github.io/janana-privacy/'),
+                                    mode: LaunchMode.externalApplication,
+                                  ),
+                                  child: const Text(
+                                    'מדיניות הפרטיות',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF1a237e),
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  if (_privacyError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6, right: 4),
+                      child: Row(
+                        children: [
+                          Icon(PhosphorIconsRegular.warningCircle, color: _kRed, size: 13),
+                          SizedBox(width: 4),
+                          Text(
+                            'יש לאשר את מדיניות הפרטיות להמשך',
+                            style: TextStyle(fontSize: 12, color: _kRed, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 20),
 
                   // Submit button
                   SizedBox(
