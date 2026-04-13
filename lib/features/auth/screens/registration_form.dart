@@ -640,6 +640,25 @@ class _RegistrationFormState extends State<RegistrationForm>
                                     ),
                                   ),
                                 ),
+                                const Text(
+                                  ' ול',
+                                  style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
+                                ),
+                                GestureDetector(
+                                  onTap: () => launchUrl(
+                                    Uri.parse('https://samerneiroukh.github.io/janana-privacy/terms.html'),
+                                    mode: LaunchMode.externalApplication,
+                                  ),
+                                  child: const Text(
+                                    'תנאי השימוש',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF1a237e),
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
