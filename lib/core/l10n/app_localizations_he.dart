@@ -2796,4 +2796,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String fileUploadedStatus(int current) {
     return 'קובץ $current הועלה';
   }
+
+  @override
+  String get agreeToPrivacyPrefix => 'קראתי ואני מסכים/ה ל';
+
+  @override
+  String get andConnector => ' ול';
+
+  @override
+  String get privacyPolicyRequiredError => 'יש לאשר את מדיניות הפרטיות להמשך';
 }

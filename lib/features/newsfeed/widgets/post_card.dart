@@ -182,7 +182,7 @@ class _PostCardState extends State<PostCard> {
                         // Title
                         Text(
                           widget.post.title,
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.start,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -238,7 +238,6 @@ class _PostCardState extends State<PostCard> {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              textDirection: TextDirection.rtl,
               children: [
                 const Icon(PhosphorIconsFill.pushPin, size: 13, color: AppColors.deepOrange),
                 const SizedBox(width: 4),
@@ -260,7 +259,6 @@ class _PostCardState extends State<PostCard> {
 
   Widget _buildHeader(Color categoryColor, DateTime date) {
     return Row(
-      textDirection: TextDirection.rtl,
       children: [
         _buildAvatar(categoryColor),
         const SizedBox(width: 12),
@@ -269,7 +267,6 @@ class _PostCardState extends State<PostCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Flexible(
                     child: Text(
@@ -292,7 +289,6 @@ class _PostCardState extends State<PostCard> {
               ),
               const SizedBox(height: 4),
               Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Text(
                     _formatTimestamp(date),
@@ -394,7 +390,6 @@ class _PostCardState extends State<PostCard> {
             PopupMenuItem(
               value: 'pin',
               child: Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(
                     widget.post.isPinned
@@ -414,7 +409,6 @@ class _PostCardState extends State<PostCard> {
           PopupMenuItem(
             value: 'delete',
             child: Row(
-              textDirection: TextDirection.rtl,
               children: [
                 const Icon(PhosphorIconsRegular.trash, size: 18, color: Colors.red),
                 const SizedBox(width: 10),
@@ -447,7 +441,7 @@ class _PostCardState extends State<PostCard> {
         final textPainter = TextPainter(
           text: textSpan,
           maxLines: 4,
-          textDirection: TextDirection.rtl,
+          textDirection: Directionality.of(context),
         );
         textPainter.layout(maxWidth: constraints.maxWidth);
         final isOverflowing = textPainter.didExceedMaxLines;
@@ -457,7 +451,7 @@ class _PostCardState extends State<PostCard> {
           children: [
             Text(
               widget.post.content,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.start,
               maxLines: 4,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -656,7 +650,6 @@ class _PostCardState extends State<PostCard> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _MergedReactionButton(
@@ -719,7 +712,6 @@ class _CategoryBadge extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
@@ -873,7 +865,6 @@ class _MergedReactionButtonState extends State<_MergedReactionButton> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      textDirection: TextDirection.rtl,
       children: [
         InkWell(
           key: _key,
@@ -975,7 +966,6 @@ class _ActionButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Icon(icon, size: 20, color: AppColors.greyDark.withValues(alpha: 0.65)),
             const SizedBox(width: 6),

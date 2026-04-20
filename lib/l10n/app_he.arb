@@ -2968,5 +2968,14 @@
   "@fileUploadedStatus": {
     "description": "Upload progress: file N uploaded successfully",
     "placeholders": { "current": { "type": "int" } }
-  }
+  },
+
+  "agreeToPrivacyPrefix": "קראתי ואני מסכים/ה ל",
+  "@agreeToPrivacyPrefix": { "description": "Prefix text before privacy policy link in registration form" },
+
+  "andConnector": " ול",
+  "@andConnector": { "description": "Connector word between privacy policy and terms of service links" },
+
+  "privacyPolicyRequiredError": "יש לאשר את מדיניות הפרטיות להמשך",
+  "@privacyPolicyRequiredError": { "description": "Error shown when user hasn't accepted the privacy policy" }
 }

@@ -246,9 +246,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
+    return Container(
         height: MediaQuery.of(context).size.height * 0.93,
         decoration: const BoxDecoration(
           color: Color(0xFFF8FAFC),
@@ -280,7 +278,6 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             );
           },
         ),
-      ),
     );
   }
 
@@ -616,9 +613,7 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Padding(
+      builder: (ctx) => Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
           child: Container(
             decoration: const BoxDecoration(
@@ -695,7 +690,6 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
             ),
           ),
         ),
-      ),
     );
     titleCtrl.dispose();
     contentCtrl.dispose();
@@ -1102,8 +1096,6 @@ class _PostDetailSheetState extends State<PostDetailSheet> {
               child: TextField(
                 controller: _commentController,
                 focusNode: _focusNode,
-                textAlign: TextAlign.right,
-                textDirection: TextDirection.rtl,
                 maxLines: null,
                 style: const TextStyle(fontSize: 15),
                 decoration: InputDecoration(
@@ -1847,9 +1839,7 @@ class _EditCommentSheetState extends State<_EditCommentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Padding(
+    return Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Container(
           decoration: const BoxDecoration(
@@ -1918,7 +1908,6 @@ class _EditCommentSheetState extends State<_EditCommentSheet> {
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -27,7 +27,6 @@ import 'features/home/providers/home_badge_provider.dart';
 
 /// Global navigator key for notification deep linking.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

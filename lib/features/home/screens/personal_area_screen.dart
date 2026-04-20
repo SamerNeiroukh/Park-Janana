@@ -371,6 +371,7 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
 
   Widget _buildHeader(UserModel user) {
     final topPad = MediaQuery.of(context).padding.top;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -390,13 +391,17 @@ class _PersonalAreaScreenState extends State<PersonalAreaScreen> {
         Positioned(bottom: 58, right: -50, child: _blob(150, 0.06)),
         Positioned(top: topPad + 50, right: 40, child: _blob(55, 0.07)),
         Positioned(top: topPad + 20, left: 80, child: _blob(35, 0.06)),
-        // Back button (RTL: left side, pointing right)
+        // Back button
         Positioned(
           top: topPad + 8,
-          left: 8,
+          left: isRTL ? null : 8,
+          right: isRTL ? 8 : null,
           child: IconButton(
-            icon: const Icon(PhosphorIconsRegular.arrowRight,
-                color: Colors.white, size: 20),
+            icon: const Icon(
+              PhosphorIconsRegular.arrowLeft,
+              color: Colors.white,
+              size: 20,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),

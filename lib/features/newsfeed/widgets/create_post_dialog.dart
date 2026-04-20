@@ -203,7 +203,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Flexible(
               child: Text(
                 message,
-                textAlign: TextAlign.right,
                 style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
               ),
             ),

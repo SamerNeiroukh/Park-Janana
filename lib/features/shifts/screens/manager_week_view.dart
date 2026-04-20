@@ -38,10 +38,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: UserHeader(),
-          ),
+          const UserHeader(),
           _buildWeekNavigation(),
           _buildCreateShiftButton(),
           Expanded(

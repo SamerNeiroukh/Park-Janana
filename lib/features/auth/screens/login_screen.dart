@@ -249,6 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final l10n = AppLocalizations.of(context);
     final size = MediaQuery.of(context).size;
     final topPad = MediaQuery.of(context).padding.top;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
       backgroundColor: _kHeroBg,
@@ -311,7 +312,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 Positioned(
                   top: topPad + 8,
-                  left: 16,
+                  left: isRTL ? null : 16,
+                  right: isRTL ? 16 : null,
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
@@ -328,7 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                       child: const Icon(
-                        PhosphorIconsRegular.arrowRight,
+                        PhosphorIconsRegular.arrowLeft,
                         color: AppColors.primary,
                         size: 18,
                       ),

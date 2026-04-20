@@ -52,13 +52,10 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (_) => Directionality(
-            textDirection: TextDirection.rtl,
-            child: ShiftDetailsPopup(
-              shift: shift,
-              shiftService: _shiftService,
-              departmentColor: departmentColor,
-            ),
+          builder: (_) => ShiftDetailsPopup(
+            shift: shift,
+            shiftService: _shiftService,
+            departmentColor: departmentColor,
           ),
         );
       });
@@ -202,7 +199,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
       child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          reverse: true, // Shows Sunday on right, Saturday on left
+          reverse: Directionality.of(context) == TextDirection.rtl,
           itemCount: 7,
           itemBuilder: (context, index) {
             final day = _currentWeekStart.add(Duration(days: index));

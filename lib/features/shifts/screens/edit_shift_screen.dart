@@ -164,12 +164,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final changes = _getChangeSummary();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
+      builder: (context) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -195,10 +192,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               ...changes.map((change) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
-                  textDirection: TextDirection.rtl,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(PhosphorIconsRegular.arrowLeft, size: 16, color: _selectedColor),
+                    Icon(PhosphorIconsRegular.arrowRight, size: 16, color: _selectedColor),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -220,7 +216,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
-                  textDirection: TextDirection.rtl,
                   children: [
                     const Icon(PhosphorIconsFill.bellRinging,
                         size: 20, color: AppColors.warningOrange),
@@ -256,7 +251,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             ),
           ],
         ),
-      ),
     );
 
     if (confirmed != true) return;
@@ -289,7 +283,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
-              textDirection: TextDirection.rtl,
               children: [
                 const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
                 const SizedBox(width: 8),
@@ -297,7 +290,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   child: Text(
                     _l10n.shiftUpdatedSuccess,
                     style: const TextStyle(fontWeight: FontWeight.w600),
-                    textAlign: TextAlign.right,
                   ),
                 ),
               ],
@@ -407,10 +399,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         backgroundColor: const Color(0xFFF8F9FB),
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),

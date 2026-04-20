@@ -2828,4 +2828,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String fileUploadedStatus(int current) {
     return 'File $current uploaded';
   }
+
+  @override
+  String get agreeToPrivacyPrefix => 'I have read and agree to the';
+
+  @override
+  String get andConnector => 'and';
+
+  @override
+  String get privacyPolicyRequiredError =>
+      'You must accept the privacy policy to continue';
 }

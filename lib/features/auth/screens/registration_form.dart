@@ -361,6 +361,7 @@ class _RegistrationFormState extends State<RegistrationForm>
   Widget _buildForm(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final topPad = MediaQuery.of(context).padding.top;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     final hasErrors = _touched.isNotEmpty && _errorCount > 0;
 
     return Column(
@@ -381,49 +382,93 @@ class _RegistrationFormState extends State<RegistrationForm>
             ],
           ),
           padding: EdgeInsets.only(
-              top: topPad + 4, bottom: 14, left: 8, right: 16),
+              top: topPad + 4, bottom: 14,
+              left: isRTL ? 16 : 8,
+              right: isRTL ? 8 : 16),
           child: Row(
-            children: [
-              Image.asset(
-                AppConstants.parkLogo,
-                height: 40,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      l10n.registrationTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF111827),
-                        letterSpacing: -0.3,
+            children: isRTL
+                ? [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(PhosphorIconsRegular.arrowLeft, size: 20),
+                      color: _kAmber,
+                      splashRadius: 24,
+                      padding: const EdgeInsets.all(8),
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.registrationTitle,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF111827),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          Text(
+                            l10n.registrationSubtitle,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      l10n.registrationSubtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
+                    const SizedBox(width: 12),
+                    Image.asset(
+                      AppConstants.parkLogo,
+                      height: 40,
+                      fit: BoxFit.contain,
+                    ),
+                  ]
+                : [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(PhosphorIconsRegular.arrowLeft, size: 20),
+                      color: _kAmber,
+                      splashRadius: 24,
+                      padding: const EdgeInsets.all(8),
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.registrationTitle,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF111827),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          Text(
+                            l10n.registrationSubtitle,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    const SizedBox(width: 12),
+                    Image.asset(
+                      AppConstants.parkLogo,
+                      height: 40,
+                      fit: BoxFit.contain,
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(PhosphorIconsRegular.arrowRight, size: 20),
-                color: _kAmber,
-                splashRadius: 24,
-                padding: const EdgeInsets.all(8),
-                constraints: const BoxConstraints(),
-              ),
-            ],
           ),
         ),
 
@@ -628,18 +673,18 @@ class _RegistrationFormState extends State<RegistrationForm>
                             child: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                const Text(
-                                  'קראתי ואני מסכים/ה ל',
-                                  style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
+                                Text(
+                                  _l10n.agreeToPrivacyPrefix,
+                                  style: const TextStyle(fontSize: 13, color: Color(0xFF374151)),
                                 ),
                                 GestureDetector(
                                   onTap: () => launchUrl(
                                     Uri.parse('https://samerneiroukh.github.io/janana-privacy/'),
                                     mode: LaunchMode.externalApplication,
                                   ),
-                                  child: const Text(
-                                    'מדיניות הפרטיות',
-                                    style: TextStyle(
+                                  child: Text(
+                                    _l10n.privacyPolicyTitle,
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       color: Color(0xFF1a237e),
                                       fontWeight: FontWeight.w600,
@@ -647,18 +692,18 @@ class _RegistrationFormState extends State<RegistrationForm>
                                     ),
                                   ),
                                 ),
-                                const Text(
-                                  ' ול',
-                                  style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
+                                Text(
+                                  _l10n.andConnector,
+                                  style: const TextStyle(fontSize: 13, color: Color(0xFF374151)),
                                 ),
                                 GestureDetector(
                                   onTap: () => launchUrl(
                                     Uri.parse('https://samerneiroukh.github.io/janana-privacy/terms.html'),
                                     mode: LaunchMode.externalApplication,
                                   ),
-                                  child: const Text(
-                                    'תנאי השימוש',
-                                    style: TextStyle(
+                                  child: Text(
+                                    _l10n.termsOfServiceTitle,
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       color: Color(0xFF1a237e),
                                       fontWeight: FontWeight.w600,
@@ -675,15 +720,15 @@ class _RegistrationFormState extends State<RegistrationForm>
                   ),
 
                   if (_privacyError)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 6, right: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, right: 4),
                       child: Row(
                         children: [
-                          Icon(PhosphorIconsRegular.warningCircle, color: _kRed, size: 13),
-                          SizedBox(width: 4),
+                          const Icon(PhosphorIconsRegular.warningCircle, color: _kRed, size: 13),
+                          const SizedBox(width: 4),
                           Text(
-                            'יש לאשר את מדיניות הפרטיות להמשך',
-                            style: TextStyle(fontSize: 12, color: _kRed, fontWeight: FontWeight.w500),
+                            _l10n.privacyPolicyRequiredError,
+                            style: const TextStyle(fontSize: 12, color: _kRed, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),

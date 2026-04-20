@@ -84,7 +84,7 @@ class _PostPreviewState extends State<_PostPreview> {
         children: [
           // ── Section label ────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.only(bottom: 10, right: 4),
+            padding: const EdgeInsetsDirectional.only(bottom: 10, end: 4),
             child: Row(
               children: [
                 Container(
@@ -160,9 +160,7 @@ class _PostPreviewState extends State<_PostPreview> {
                       ),
 
                     // ── Text content ────────────────────────
-                    Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Padding(
+                    Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +318,6 @@ class _PostPreviewState extends State<_PostPreview> {
                           ],
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),

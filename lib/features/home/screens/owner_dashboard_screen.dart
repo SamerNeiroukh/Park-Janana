@@ -335,9 +335,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         children: [
           const UserHeader(),
           Expanded(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: _isLoading
+            child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
                       ? _buildError()
@@ -387,7 +385,6 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                             ),
                           ),
                         ),
-            ),
           ),
         ],
       ),
@@ -574,8 +571,13 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(PhosphorIconsRegular.caretRight,
-                color: Color(0xFFD97706), size: 22),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? PhosphorIconsRegular.caretLeft
+                  : PhosphorIconsRegular.caretRight,
+              color: const Color(0xFFD97706),
+              size: 22,
+            ),
           ],
         ),
       ),
@@ -626,8 +628,13 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(PhosphorIconsRegular.caretRight,
-                color: Color(0xFFDC2626), size: 22),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? PhosphorIconsRegular.caretLeft
+                  : PhosphorIconsRegular.caretRight,
+              color: const Color(0xFFDC2626),
+              size: 22,
+            ),
           ],
         ),
       ),
@@ -913,13 +920,18 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(PhosphorIconsRegular.caretRight,
-                    color: Color(0xFF94A3B8), size: 18),
-                const SizedBox(width: 4),
                 Text(
                   l10n.staffCountSummary(_kpi!.totalStaff),
                   style: const TextStyle(
                       fontSize: 12, color: Color(0xFF94A3B8)),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? PhosphorIconsRegular.caretLeft
+                      : PhosphorIconsRegular.caretRight,
+                  color: const Color(0xFF94A3B8),
+                  size: 18,
                 ),
               ],
             ),
@@ -1471,8 +1483,13 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
             ),
-            const Icon(PhosphorIconsRegular.caretRight,
-                color: Colors.white70, size: 24),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? PhosphorIconsRegular.caretLeft
+                  : PhosphorIconsRegular.caretRight,
+              color: Colors.white70,
+              size: 24,
+            ),
           ],
         ),
       ),

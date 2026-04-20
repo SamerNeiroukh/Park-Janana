@@ -178,9 +178,7 @@ class _CommentsSheetState extends State<CommentsSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: AnimatedBuilder(
+    return AnimatedBuilder(
         animation: _animController,
         builder: (context, child) => SlideTransition(
           position: Tween<Offset>(
@@ -232,7 +230,6 @@ class _CommentsSheetState extends State<CommentsSheet>
             },
           ),
         ),
-      ),
     );
   }
 
@@ -257,10 +254,8 @@ class _CommentsSheetState extends State<CommentsSheet>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 20, 14),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -363,7 +358,6 @@ class _CommentsSheetState extends State<CommentsSheet>
           ],
         ),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Expanded(
               child: Container(
@@ -377,8 +371,6 @@ class _CommentsSheetState extends State<CommentsSheet>
                 child: TextField(
                   controller: _commentController,
                   focusNode: _focusNode,
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
                   maxLines: null,
                   style: const TextStyle(fontSize: 15),
                   decoration: InputDecoration(
@@ -517,7 +509,6 @@ class _CommentCardState extends State<_CommentCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               _buildAvatar(),
               const SizedBox(width: 12),
@@ -533,7 +524,6 @@ class _CommentCardState extends State<_CommentCard> {
                   ),
                   const SizedBox(height: 2),
                   Row(
-                    textDirection: TextDirection.rtl,
                     children: [
                       Text(
                         widget.timestamp,
@@ -575,7 +565,7 @@ class _CommentCardState extends State<_CommentCard> {
           const SizedBox(height: 12),
           Text(
             widget.comment.content,
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
             style: const TextStyle(
               fontSize: 14,
               height: 1.5,

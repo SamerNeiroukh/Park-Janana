@@ -54,16 +54,11 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: TaskTheme.background,
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -140,8 +135,7 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildReportCard({

@@ -219,16 +219,11 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: TaskTheme.background,
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -280,8 +275,7 @@ class _WorkerShiftReportState extends State<WorkerShiftReport> {
             if (!_isLoading && _shifts.isNotEmpty) _buildBottomBar(),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildEmptyState() {

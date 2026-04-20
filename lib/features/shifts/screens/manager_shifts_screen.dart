@@ -186,7 +186,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        reverse: true, // Shows Sunday on right, Saturday on left
+        reverse: Directionality.of(context) == TextDirection.rtl,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 7,
         itemBuilder: (context, index) {
@@ -368,7 +368,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                   children: [
                     // Main row
                     Row(
-                      textDirection: TextDirection.rtl,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
@@ -405,7 +404,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               ),
                               const SizedBox(height: 4),
                               Row(
-                                textDirection: TextDirection.rtl,
                                 children: [
                                   Icon(PhosphorIconsRegular.clock,
                                       size: 14, color: Colors.grey.shade500),
@@ -432,7 +430,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                     const SizedBox(height: 12),
                     // Info row
                     Row(
-                      textDirection: TextDirection.rtl,
                       children: [
                         if (!isCancelled) ...[
                           // Workers count
@@ -447,7 +444,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              textDirection: TextDirection.rtl,
                               children: [
                                 Icon(
                                   PhosphorIconsRegular.users,
@@ -478,7 +474,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                textDirection: TextDirection.rtl,
                                 children: [
                                   const Icon(
                                     PhosphorIconsRegular.clipboardText,
@@ -513,11 +508,10 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            textDirection: TextDirection.rtl,
                             children: [
                               if (isCancelled)
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 4),
+                                  padding: const EdgeInsetsDirectional.only(end: 4),
                                   child: Icon(PhosphorIconsRegular.xCircle, size: 14,
                                       color: Colors.red.shade600),
                                 ),

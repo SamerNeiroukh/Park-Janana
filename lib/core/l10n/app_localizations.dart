@@ -5241,6 +5241,24 @@ abstract class AppLocalizations {
   /// In he, this message translates to:
   /// **'קובץ {current} הועלה'**
   String fileUploadedStatus(int current);
+
+  /// Prefix text before privacy policy link in registration form
+  ///
+  /// In he, this message translates to:
+  /// **'קראתי ואני מסכים/ה ל'**
+  String get agreeToPrivacyPrefix;
+
+  /// Connector word between privacy policy and terms of service links
+  ///
+  /// In he, this message translates to:
+  /// **' ול'**
+  String get andConnector;
+
+  /// Error shown when user hasn't accepted the privacy policy
+  ///
+  /// In he, this message translates to:
+  /// **'יש לאשר את מדיניות הפרטיות להמשך'**
+  String get privacyPolicyRequiredError;
 }
 
 class _AppLocalizationsDelegate

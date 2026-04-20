@@ -127,9 +127,7 @@ class _HomeScreenState extends State<HomeScreen>
       return Scaffold(
         backgroundColor: _kBg,
         body: Center(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Padding(
+          child: Padding(
               padding: const EdgeInsets.all(32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -177,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ),
           ),
-        ),
       );
     }
 
@@ -648,10 +645,7 @@ class _HorizontalActionStrip extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.all(16),
-        child: Directionality(
-          // RTL: first item is top-right
-          textDirection: TextDirection.rtl,
-          child: GridView.builder(
+        child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -664,7 +658,6 @@ class _HorizontalActionStrip extends StatelessWidget {
             itemBuilder: (_, i) => _StripPill(item: items[i]),
           ),
         ),
-      ),
     )
         .animate()
         .fadeIn(duration: 380.ms, delay: 100.ms, curve: Curves.easeOut)
@@ -814,9 +807,7 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFEF4444), width: 1.5),
           ),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
+          child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -847,11 +838,15 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
                     ],
                   ),
                 ),
-                const Icon(PhosphorIconsRegular.caretRight,
-                    color: Color(0xFFDC2626), size: 22),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? PhosphorIconsRegular.caretLeft
+                      : PhosphorIconsRegular.caretRight,
+                  color: const Color(0xFFDC2626),
+                  size: 22,
+                ),
               ],
             ),
-          ),
         ),
       ),
     );

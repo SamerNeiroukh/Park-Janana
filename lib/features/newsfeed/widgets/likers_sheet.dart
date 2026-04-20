@@ -101,9 +101,7 @@ class _LikersSheetState extends State<LikersSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
+    return Container(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.6,
         ),
@@ -120,7 +118,6 @@ class _LikersSheetState extends State<LikersSheet>
             Flexible(child: _buildContent()),
           ],
         ),
-      ),
     );
   }
 
@@ -150,10 +147,8 @@ class _LikersSheetState extends State<LikersSheet>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 20, 14),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -358,7 +353,6 @@ class _LikerCard extends StatelessWidget {
         border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.5)),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Container(
             decoration: BoxDecoration(

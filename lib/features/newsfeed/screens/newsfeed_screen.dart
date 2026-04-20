@@ -328,7 +328,6 @@ class _NewsfeedScreenState extends State<NewsfeedScreen>
               child: Text(
                 message,
                 style: const TextStyle(fontWeight: FontWeight.w500),
-                textAlign: TextAlign.right,
               ),
             ),
             const SizedBox(width: 8),

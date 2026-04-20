@@ -50,12 +50,9 @@ class _MyWeeklyScheduleScreenState extends State<MyWeeklyScheduleScreen> {
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
-          builder: (_) => Directionality(
-            textDirection: TextDirection.rtl,
-            child: _ShiftDetailsSheet(
-              shift: initial,
-              date: DateTime(d.year, d.month, d.day),
-            ),
+          builder: (_) => _ShiftDetailsSheet(
+            shift: initial,
+            date: DateTime(d.year, d.month, d.day),
           ),
         );
       });
@@ -140,49 +137,44 @@ class _WeekHeader extends StatelessWidget {
     final range =
         '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
 
-    // Use explicit Directionality.ltr for this Row to control arrow placement manually
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-        child: Row(
-          children: [
-            // LEFT side of screen - next week (forward)
-            IconButton(
-              onPressed: onNext,
-              icon: const Icon(PhosphorIconsRegular.caretLeft),
-              tooltip: l10n.nextWeekTooltip,
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    l10n.myShiftsTitle,
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                    ),
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: isRtl ? onNext : onPrev,
+            icon: const Icon(PhosphorIconsRegular.caretLeft),
+            tooltip: isRtl ? l10n.nextWeekTooltip : l10n.prevWeekTooltip,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  l10n.myShiftsTitle,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.6,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    range,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  range,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // RIGHT side of screen - prev week (backward)
-            IconButton(
-              onPressed: onPrev,
-              icon: const Icon(PhosphorIconsRegular.caretRight),
-              tooltip: l10n.prevWeekTooltip,
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            onPressed: isRtl ? onPrev : onNext,
+            icon: const Icon(PhosphorIconsRegular.caretRight),
+            tooltip: isRtl ? l10n.prevWeekTooltip : l10n.nextWeekTooltip,
+          ),
+        ],
       ),
     );
   }
@@ -505,10 +497,7 @@ class _DayTimeline extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: _ShiftDetailsSheet(shift: shift, date: date),
-      ),
+      builder: (_) => _ShiftDetailsSheet(shift: shift, date: date),
     );
   }
 }

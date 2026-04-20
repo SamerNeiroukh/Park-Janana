@@ -203,9 +203,7 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
         if (conflict && mounted) {
           final proceed = await showDialog<bool>(
             context: context,
-            builder: (ctx) => Directionality(
-              textDirection: TextDirection.rtl,
-              child: AlertDialog(
+            builder: (ctx) => AlertDialog(
                 title: Row(
                   children: [
                     const Icon(PhosphorIconsRegular.warning, color: Colors.orange),
@@ -233,7 +231,6 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                   ),
                 ],
               ),
-            ),
           );
           if (proceed != true) return;
         }
@@ -321,7 +318,6 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                     children: [
                       // Header row
                       Row(
-                        textDirection: TextDirection.rtl,
                         children: [
                           // Department icon
                           Container(
@@ -360,7 +356,6 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                                 ),
                                 const SizedBox(height: 4),
                                 Row(
-                                  textDirection: TextDirection.rtl,
                                   children: [
                                     Icon(
                                       PhosphorIconsRegular.clock,
@@ -387,7 +382,6 @@ class _WorkerShiftCardState extends State<WorkerShiftCard>
                       const SizedBox(height: 16),
                       // Status & Progress row
                       Row(
-                        textDirection: TextDirection.rtl,
                         children: [
                           Icon(
                             PhosphorIconsRegular.users,
@@ -683,9 +677,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: DraggableScrollableSheet(
+    return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.75,
         minChildSize: 0.5,
@@ -791,8 +783,7 @@ class _ShiftDetailsPopupState extends State<ShiftDetailsPopup> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSectionTitle(String title, IconData icon) {

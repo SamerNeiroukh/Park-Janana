@@ -18,6 +18,7 @@ class NewWorkerScreen extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final topPad = MediaQuery.of(context).padding.top;
     final bottomPad = MediaQuery.of(context).padding.bottom;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
       backgroundColor: _kBg,
@@ -61,7 +62,8 @@ class NewWorkerScreen extends StatelessWidget {
                 ),
                 Positioned(
                   top: topPad + 8,
-                  left: 16,
+                  left: isRTL ? null : 16,
+                  right: isRTL ? 16 : null,
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
@@ -70,8 +72,11 @@ class NewWorkerScreen extends StatelessWidget {
                         color: Colors.black.withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(PhosphorIconsRegular.arrowRight,
-                          color: Colors.white, size: 18),
+                      child: const Icon(
+                        PhosphorIconsRegular.arrowLeft,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),

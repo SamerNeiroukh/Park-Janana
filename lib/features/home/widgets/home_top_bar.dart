@@ -57,9 +57,7 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Padding(
+    return Padding(
         padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -156,8 +154,7 @@ class HomeTopBar extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 

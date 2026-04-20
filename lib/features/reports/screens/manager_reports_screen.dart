@@ -52,16 +52,11 @@ class _ManagerReportsScreenState extends State<ManagerReportsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: TaskTheme.background,
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             Container(
               color: TaskTheme.surface,
               child: TabBar(
@@ -104,8 +99,7 @@ class _ManagerReportsScreenState extends State<ManagerReportsScreen>
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 

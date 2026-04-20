@@ -203,7 +203,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
-              textDirection: TextDirection.rtl,
               children: [
                 const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
                 const SizedBox(width: 8),
@@ -243,13 +242,10 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   Future<bool?> _showSaveConfirmation(ShiftModel currentShift) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
+      builder: (context) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -308,7 +304,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -316,9 +311,8 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
-          Icon(PhosphorIconsRegular.arrowLeft, size: 16, color: color),
+          Icon(PhosphorIconsRegular.arrowRight, size: 16, color: color),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -407,10 +401,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
 
             return Column(
               children: [
-                const Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: UserHeader(),
-                ),
+                const UserHeader(),
                   // Unsaved changes banner
                   if (_hasUnsavedChanges)
                     _buildUnsavedBanner(departmentColor),
@@ -667,12 +658,10 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Row(
-                            textDirection: TextDirection.rtl,
-                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(_l10n.shiftUpdatedSuccess),
-                              const SizedBox(width: 8),
                               const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(_l10n.shiftUpdatedSuccess),
                             ],
                           ),
                           backgroundColor: AppColors.success,
@@ -746,9 +735,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Stack(
+                child: Stack(
                     children: [
                       Container(
                         height: 8,
@@ -779,7 +766,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                       ),
                     ],
                   ),
-                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -1319,7 +1305,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           Expanded(
             child: TextField(
               controller: _messageController,
-              textDirection: TextDirection.rtl,
               style: const TextStyle(fontSize: 15),
               decoration: InputDecoration(
                 hintText: _l10n.writeMessageHint,
@@ -1436,7 +1421,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 return Expanded(
                   child: Text(
                     name,
-                    textAlign: TextAlign.left,
+                    textAlign: TextAlign.start,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,

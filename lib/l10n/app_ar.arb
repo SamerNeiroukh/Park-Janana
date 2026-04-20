@@ -1,7 +1,7 @@
 {
   "@@locale": "ar",
 
-  "appTitle": "بارك جنانة",
+  "appTitle": "بارك جنانا",
   "loginButton": "تسجيل الدخول",
   "newWorkerButton": "موظف جديد؟",
   "logoutLabel": "تسجيل الخروج",
@@ -61,7 +61,7 @@
   "applicationRejectedMessage": "تم رفض طلب الموافقة من قِبل الإدارة.\nيمكنك إرسال طلب موافقة جديد.",
   "reApplyButton": "إعادة التقديم",
   "reApplySuccess": "تمت إعادة إرسال الطلب. ستقوم الإدارة بإخطارك بقرارها.",
-  "registrationTitle": "التسجيل في بارك جنانة",
+  "registrationTitle": "التسجيل في بارك جنانا",
   "registrationSubtitle": "أكمل بياناتك لإرسال طلب الانضمام",
   "nameRequiredValidation": "يرجى إدخال الاسم الكامل",
   "nameInvalidCharsValidation": "يرجى إدخال اسم يحتوي على أحرف صحيحة فقط",
@@ -95,7 +95,7 @@
   "registrationApprovalInfo": "بعد موافقة الإدارة ستحصل على الوصول إلى التطبيق وتتمكن من تسجيل الدخول.",
   "backToHomeButton": "العودة للصفحة الرئيسية",
   "newWorkerWelcomeTitle": "موظف جديد؟ مرحباً بك!",
-  "registrationStepsSubtitle": "انضم إلى فريق بارك جنانة في خطوات بسيطة",
+  "registrationStepsSubtitle": "انضم إلى فريق بارك جنانا في خطوات بسيطة",
   "howItWorksSection": "كيف يعمل؟",
   "step1Title": "أكمل نموذج التسجيل",
   "step1Subtitle": "أدخل بياناتك الشخصية واختر كلمة مرور",
@@ -378,7 +378,7 @@
   "workerLabelSingular": "موظف",
   "workerLabelPlural": "موظفون",
   "missingClockOutWarning": "وقت خروج مفقود — اضغط للتصحيح",
-  "workerSubtitleInPark": "موظف في بارك جنانة",
+  "workerSubtitleInPark": "موظف في بارك جنانا",
   "workerEmailInfoLabel": "بريد إلكتروني",
   "workerPhoneInfoLabel": "هاتف",
   "workerDetailsCardTitle": "🧾 بيانات الموظف",
@@ -1469,5 +1469,14 @@
   "@fileUploadedStatus": {
     "description": "Upload progress: file N uploaded successfully",
     "placeholders": { "current": { "type": "int" } }
-  }
+  },
+
+  "agreeToPrivacyPrefix": "لقد قرأت وأوافق على",
+  "@agreeToPrivacyPrefix": { "description": "Prefix text before privacy policy link in registration form" },
+
+  "andConnector": "و",
+  "@andConnector": { "description": "Connector word between privacy policy and terms of service links" },
+
+  "privacyPolicyRequiredError": "يجب الموافقة على سياسة الخصوصية للمتابعة",
+  "@privacyPolicyRequiredError": { "description": "Error shown when user hasn't accepted the privacy policy" }
 }

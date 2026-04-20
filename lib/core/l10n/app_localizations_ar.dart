@@ -9,7 +9,7 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appTitle => 'بارك جنانة';
+  String get appTitle => 'بارك جنانا';
 
   @override
   String get loginButton => 'تسجيل الدخول';
@@ -198,7 +198,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تمت إعادة إرسال الطلب. ستقوم الإدارة بإخطارك بقرارها.';
 
   @override
-  String get registrationTitle => 'التسجيل في بارك جنانة';
+  String get registrationTitle => 'التسجيل في بارك جنانا';
 
   @override
   String get registrationSubtitle => 'أكمل بياناتك لإرسال طلب الانضمام';
@@ -309,7 +309,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get registrationStepsSubtitle =>
-      'انضم إلى فريق بارك جنانة في خطوات بسيطة';
+      'انضم إلى فريق بارك جنانا في خطوات بسيطة';
 
   @override
   String get howItWorksSection => 'كيف يعمل؟';
@@ -1192,7 +1192,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get missingClockOutWarning => 'وقت خروج مفقود — اضغط للتصحيح';
 
   @override
-  String get workerSubtitleInPark => 'موظف في بارك جنانة';
+  String get workerSubtitleInPark => 'موظف في بارك جنانا';
 
   @override
   String get workerEmailInfoLabel => 'بريد إلكتروني';
@@ -2814,4 +2814,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String fileUploadedStatus(int current) {
     return 'تم رفع الملف $current';
   }
+
+  @override
+  String get agreeToPrivacyPrefix => 'لقد قرأت وأوافق على';
+
+  @override
+  String get andConnector => 'و';
+
+  @override
+  String get privacyPolicyRequiredError =>
+      'يجب الموافقة على سياسة الخصوصية للمتابعة';
 }

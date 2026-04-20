@@ -303,15 +303,12 @@ class _ManagerWeeklyScheduleScreenState
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: _ShiftDetailSheet(
-          shift: shift,
-          date: date,
-          workerMap: workerMap,
-          shiftService: _shiftService,
-          workerService: _workerService,
-        ),
+      builder: (_) => _ShiftDetailSheet(
+        shift: shift,
+        date: date,
+        workerMap: workerMap,
+        shiftService: _shiftService,
+        workerService: _workerService,
       ),
     );
   }
@@ -339,48 +336,44 @@ class _WeekHeader extends StatelessWidget {
     final range =
         '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
 
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-        child: Row(
-          children: [
-            // LEFT side - next week (future)
-            IconButton(
-              onPressed: onNext,
-              icon: const Icon(PhosphorIconsRegular.caretLeft, size: 28),
-              tooltip: l10n.nextWeekTooltip,
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    l10n.weeklyScheduleTitle,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                    ),
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: isRtl ? onNext : onPrev,
+            icon: const Icon(PhosphorIconsRegular.caretLeft, size: 28),
+            tooltip: isRtl ? l10n.nextWeekTooltip : l10n.prevWeekTooltip,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  l10n.weeklyScheduleTitle,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.6,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    range,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  range,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // RIGHT side - prev week (past)
-            IconButton(
-              onPressed: onPrev,
-              icon: const Icon(PhosphorIconsRegular.caretRight, size: 28),
-              tooltip: l10n.prevWeekTooltip,
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            onPressed: isRtl ? onPrev : onNext,
+            icon: const Icon(PhosphorIconsRegular.caretRight, size: 28),
+            tooltip: isRtl ? l10n.prevWeekTooltip : l10n.nextWeekTooltip,
+          ),
+        ],
       ),
     );
   }
@@ -1324,15 +1317,12 @@ class _MyShiftsTabState extends State<_MyShiftsTab> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: _ShiftDetailSheet(
-          shift: shift,
-          date: date,
-          workerMap: workerMap,
-          shiftService: widget.shiftService,
-          workerService: widget.workerService,
-        ),
+      builder: (_) => _ShiftDetailSheet(
+        shift: shift,
+        date: date,
+        workerMap: workerMap,
+        shiftService: widget.shiftService,
+        workerService: widget.workerService,
       ),
     );
   }

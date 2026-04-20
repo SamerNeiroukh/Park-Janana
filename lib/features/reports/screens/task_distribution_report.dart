@@ -148,10 +148,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
       backgroundColor: TaskTheme.background,
       body: Column(
         children: [
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: UserHeader(),
-          ),
+          const UserHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(

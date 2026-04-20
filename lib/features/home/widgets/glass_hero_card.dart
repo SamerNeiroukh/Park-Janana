@@ -269,7 +269,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_l10n.attendanceReportError(e.toString()), textAlign: TextAlign.right),
+          content: Text(_l10n.attendanceReportError(e.toString())),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
