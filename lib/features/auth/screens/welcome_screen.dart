@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:park_janana/features/auth/screens/login_screen.dart';
 import 'package:park_janana/features/auth/screens/new_worker_screen.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/l10n/app_localizations.dart';
+import 'package:park_janana/core/providers/locale_provider.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WelcomeScreen — animated entry screen with staggered entrance, floating
@@ -150,6 +152,109 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     super.dispose();
   }
 
+  String _languageFlag(Locale locale) {
+    switch (locale.languageCode) {
+      case 'en': return '🇬🇧';
+      case 'ar': return '🇸🇦';
+      default:   return '🇮🇱';
+    }
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final current = context.read<LocaleProvider>().locale;
+    final options = [
+      (const Locale('he'), l10n.languageHebrew, '🇮🇱'),
+      (const Locale('en'), l10n.languageEnglish, '🇬🇧'),
+      (const Locale('ar'), l10n.languageArabic, '🇸🇦'),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.30),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.languageLabel,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...options.map((opt) {
+              final (locale, name, flag) = opt;
+              final isSelected = locale.languageCode == current.languageCode;
+              return GestureDetector(
+                onTap: () {
+                  context.read<LocaleProvider>().setLocale(locale);
+                  Navigator.pop(context);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primaryBlue.withValues(alpha: 0.18)
+                        : Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primaryBlue
+                          : Colors.white.withValues(alpha: 0.15),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(flag, style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: TextStyle(
+                            color: isSelected
+                                ? AppColors.primaryBlue
+                                : Colors.white.withValues(alpha: 0.85),
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      if (isSelected)
+                        Icon(Icons.check_circle_rounded,
+                            color: AppColors.primaryBlue, size: 20),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Unchanged navigation logic with slide-up page transition.
   void _navigateToScreen(BuildContext context, Widget screen) {
     Navigator.push(
@@ -181,7 +286,39 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           // ── Layer 1: animated background ─────────────────────────────────
           _WelcomeBackground(particleController: _particleController),
 
-          // ── Layer 2: content ──────────────────────────────────────────────
+          // ── Layer 2: language picker button ──────────────────────────────
+          SafeArea(
+            child: Align(
+              alignment: AlignmentDirectional.topEnd,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: GestureDetector(
+                  onTap: () => _showLanguagePicker(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.language_rounded, color: Colors.white, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          _languageFlag(context.watch<LocaleProvider>().locale),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ── Layer 3: content ──────────────────────────────────────────────
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28.0),
