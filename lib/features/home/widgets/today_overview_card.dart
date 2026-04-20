@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// "מה חשוב עכשיו" — Smart Context Panel.
@@ -23,15 +24,15 @@ class SmartContextPanel extends StatelessWidget {
 
   // ── Role-specific item definitions ────────────────────────────────────
 
-  List<_ContextItem> _items() {
+  List<_ContextItem> _items(AppLocalizations l10n) {
     final allClear = shiftsBadge == 0 && tasksBadge == 0 && newsfeedBadge == 0;
 
     if (allClear) {
-      return const [
+      return [
         _ContextItem(
-          color: Color(0xFF22C55E),
+          color: const Color(0xFF22C55E),
           icon: PhosphorIconsRegular.checkCircle,
-          text: 'הכל מעודכן — אין פריטים דחופים',
+          text: l10n.allUpToDate,
           count: 0,
         ),
       ];
@@ -44,21 +45,21 @@ class SmartContextPanel extends StatelessWidget {
             _ContextItem(
               color: const Color(0xFF3B82F6),
               icon: PhosphorIconsRegular.clock,
-              text: 'שינויים במשמרות ממתינים',
+              text: l10n.shiftChangesWaiting,
               count: shiftsBadge,
             ),
           if (tasksBadge > 0)
             _ContextItem(
               color: const Color(0xFF8B5CF6),
               icon: PhosphorIconsRegular.clipboard,
-              text: 'משימות ממתינות לאישור',
+              text: l10n.tasksWaitingApproval,
               count: tasksBadge,
             ),
           if (newsfeedBadge > 0)
             _ContextItem(
               color: const Color(0xFFF59E0B),
               icon: PhosphorIconsRegular.newspaper,
-              text: 'פוסטים חדשים בלוח המודעות',
+              text: l10n.newPostsInBoard,
               count: newsfeedBadge,
             ),
         ];
@@ -69,14 +70,14 @@ class SmartContextPanel extends StatelessWidget {
             _ContextItem(
               color: const Color(0xFF3B82F6),
               icon: PhosphorIconsRegular.newspaper,
-              text: 'עדכונים חדשים בלוח המודעות',
+              text: l10n.newUpdatesInBoard,
               count: newsfeedBadge,
             ),
           if (tasksBadge > 0)
             _ContextItem(
               color: const Color(0xFFF59E0B),
               icon: PhosphorIconsRegular.chartBar,
-              text: 'פעילות עסקית חדשה לבדיקה',
+              text: l10n.newBusinessActivity,
               count: tasksBadge,
             ),
         ];
@@ -87,21 +88,21 @@ class SmartContextPanel extends StatelessWidget {
             _ContextItem(
               color: const Color(0xFF3B82F6),
               icon: PhosphorIconsRegular.clock,
-              text: 'משמרות חדשות שהוקצו לך',
+              text: l10n.newShiftsAssigned,
               count: shiftsBadge,
             ),
           if (tasksBadge > 0)
             _ContextItem(
               color: const Color(0xFF8B5CF6),
               icon: PhosphorIconsRegular.clipboardText,
-              text: 'משימות פתוחות ממתינות לך',
+              text: l10n.openTasksWaiting,
               count: tasksBadge,
             ),
           if (newsfeedBadge > 0)
             _ContextItem(
               color: const Color(0xFFF59E0B),
               icon: PhosphorIconsRegular.megaphone,
-              text: 'עדכונים חדשים בלוח המודעות',
+              text: l10n.newUpdatesInBoard,
               count: newsfeedBadge,
             ),
         ];
@@ -112,7 +113,8 @@ class SmartContextPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = _items();
+    final l10n = AppLocalizations.of(context);
+    final items = _items(l10n);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -128,9 +130,7 @@ class SmartContextPanel extends StatelessWidget {
             ),
           ],
         ),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Padding(
+        child: Padding(
             padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,10 +166,10 @@ class SmartContextPanel extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'מה חשוב עכשיו',
-                        style: TextStyle(
+                        l10n.whatIsImportantNow,
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF111827),
@@ -204,7 +204,6 @@ class SmartContextPanel extends StatelessWidget {
             ),
           ),
         ),
-      ),
     )
         .animate()
         .fadeIn(

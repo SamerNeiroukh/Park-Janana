@@ -27,7 +27,7 @@ class MonthSelector extends StatelessWidget {
     final thisMonth = DateTime(now.year, now.month);
     final isCurrentMonth = DateTime(selectedMonth.year, selectedMonth.month)
         .isAtSameMomentAs(thisMonth);
-    final formatted = DateFormat.yMMMM('he').format(selectedMonth);
+    final formatted = DateFormat.yMMMM(Localizations.localeOf(context).languageCode).format(selectedMonth);
 
     // Use explicit LTR so Row order matches visual order exactly
     return Directionality(

@@ -51,7 +51,23 @@
       "Bash(export PUB_CACHE=\"C:/pub-cache\")",
       "Bash(__NEW_LINE_5dca3bd0ac857055__ python3:*)",
       "Bash(sed -n '346,360p' lib/features/attendance/widgets/clock_in_out_widget.dart)",
-      "Bash(sed -n '444,452p' lib/features/attendance/widgets/clock_in_out_widget.dart)"
+      "Bash(sed -n '444,452p' lib/features/attendance/widgets/clock_in_out_widget.dart)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(curl -L \"https://github.com/google/fonts/raw/main/ofl/notosansarabic/NotoSansArabic%5Bwdth%2Cwght%5D.ttf\" -o assets/fonts/NotoSansArabic-Regular.ttf)",
+      "Bash(flutter gen-l10n:*)",
+      "Bash(git -C /Users/samerneiroukh/development/Park-Janana diff HEAD~1 lib/features/tasks/screens/task_details_screen.dart)",
+      "Bash(git -C /Users/samerneiroukh/development/Park-Janana log --oneline -5)",
+      "Bash(git -C /Users/samerneiroukh/development/Park-Janana diff HEAD task_details_screen.dart)",
+      "Bash(git -C /Users/samerneiroukh/development/Park-Janana diff lib/features/tasks/screens/task_details_screen.dart)",
+      "Bash(for key:*)",
+      "Bash(do)",
+      "Bash(if ! grep -q \"\"\"$key\"\"\" /Users/samerneiroukh/development/Park-Janana/lib/l10n/app_he.arb)",
+      "Bash(then)",
+      "Bash(fi)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/samerneiroukh/development/Park-Janana/**)"
     ],
     "additionalDirectories": [
       "c:\\dev\\park_janana\\android\\app"

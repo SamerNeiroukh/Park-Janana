@@ -4,6 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/core/models/user_model.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'task_details_screen.dart';
 import 'package:park_janana/features/tasks/screens/create_task_flow_screen.dart';
 import 'package:park_janana/features/tasks/screens/edit_task_screen.dart';
@@ -34,7 +35,15 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  bool _isNavigating = false; // ✅ prevent multiple FAB presses
+  bool _isNavigating = false;
+
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void dispose() {
@@ -52,22 +61,22 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primary,
         onPressed: _handleCreateTaskPress,
-        label: const Text("יצירת משימה", style: TextStyle(color: Colors.white)),
+        label: Text(_l10n.createTaskButton, style: const TextStyle(color: Colors.white)),
         icon: const Icon(PhosphorIconsRegular.plus, color: Colors.white),
       ),
       body: Column(
         children: [
           const UserHeader(),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            child: Text("ניהול משימות", style: AppTheme.screenTitle),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            child: Text(_l10n.taskManagementTitle, style: AppTheme.screenTitle),
           ),
           _buildDateNavigation(),
           _buildFilterButtons(),
           _buildSearchBar(),
           Expanded(
             child: currentUid == null
-                ? const Center(child: Text("שגיאה בזיהוי המשתמש."))
+                ? Center(child: Text(_l10n.userIdentificationError))
                 : StreamBuilder<List<TaskModel>>(
                     stream: _taskService.getTasksCreatedBy(currentUid),
                     builder: (context, snapshot) {
@@ -103,20 +112,20 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                       }
 
                       if (tasks.isEmpty) {
-                        return const Column(
+                        return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(height: 40),
+                            const SizedBox(height: 40),
                             Text(
-                              "אין משימות ליום זה",
-                              style: TextStyle(
+                              _l10n.noTasksForDay,
+                              style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.w600),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
-                              "השתמש בכפתור 'יצירת משימה' כדי להוסיף אחת חדשה",
+                              _l10n.useCreateTaskButton,
                               style:
-                                  TextStyle(fontSize: 14, color: Colors.grey),
+                                  const TextStyle(fontSize: 14, color: Colors.grey),
                             ),
                           ],
                         );
@@ -243,34 +252,31 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: TextField(
-          controller: _searchController,
-          onChanged: (value) {
-            setState(() {
-              _searchQuery = value.trim().toLowerCase();
-            });
-          },
-          decoration: InputDecoration(
-            hintText: 'חיפוש משימה לפי שם...',
-            prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.primary),
-            suffixIcon: _searchQuery.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(PhosphorIconsRegular.x, size: 20),
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() => _searchQuery = '');
-                    },
-                  )
-                : null,
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.trim().toLowerCase();
+          });
+        },
+        decoration: InputDecoration(
+          hintText: _l10n.searchTaskByNameHint,
+          prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass, color: AppColors.primary),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(PhosphorIconsRegular.x, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
           ),
         ),
       ),
@@ -279,10 +285,10 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
 
   Widget _buildFilterButtons() {
     final List<Map<String, dynamic>> buttonData = [
-      {'label': 'הכל', 'value': 'all', 'color': Colors.grey},
-      {'label': 'ממתין', 'value': 'pending', 'color': Colors.red},
-      {'label': 'בתהליך', 'value': 'in_progress', 'color': Colors.orange},
-      {'label': 'הושלם', 'value': 'done', 'color': Colors.green},
+      {'label': _l10n.filterAll, 'value': 'all', 'color': Colors.grey},
+      {'label': _l10n.filterStatusPending, 'value': 'pending', 'color': Colors.red},
+      {'label': _l10n.filterStatusInProgress, 'value': 'in_progress', 'color': Colors.orange},
+      {'label': _l10n.filterStatusDone, 'value': 'done', 'color': Colors.green},
     ];
 
     return Padding(
@@ -420,7 +426,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 _buildCardAction(
-                  label: "ערוך",
+                  label: _l10n.editTaskMenuItem,
                   icon: PhosphorIconsRegular.pencilSimple,
                   color: AppColors.primary,
                   onPressed: () => Navigator.push(
@@ -431,7 +437,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
                 ),
                 const SizedBox(width: 8),
                 _buildCardAction(
-                  label: "מחק",
+                  label: _l10n.deleteTaskButton,
                   icon: PhosphorIconsRegular.trash,
                   color: Colors.red.shade600,
                   onPressed: () => _confirmDeleteTask(task),
@@ -450,15 +456,15 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
     switch (status) {
       case 'in_progress':
         color = Colors.orange;
-        label = 'בתהליך';
+        label = _l10n.taskStatusInProgress;
         break;
       case 'done':
         color = Colors.green;
-        label = 'הושלם';
+        label = _l10n.taskStatusDone;
         break;
       default:
         color = Colors.red;
-        label = 'ממתין';
+        label = _l10n.taskStatusPending;
     }
     return Chip(
       backgroundColor: color.withValues(alpha: 0.15),
@@ -492,9 +498,9 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
   Future<void> _confirmDeleteTask(TaskModel task) async {
     final confirmed = await showAppDialog(
       context,
-      title: 'אישור מחיקה',
-      message: "האם אתה בטוח שברצונך למחוק את המשימה '${task.title}'?",
-      confirmText: 'מחק',
+      title: _l10n.confirmDeleteTitle,
+      message: _l10n.confirmDeleteTaskMessage(task.title),
+      confirmText: _l10n.deleteTaskButton,
       icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
@@ -507,7 +513,7 @@ class _ManagerTaskDashboardState extends State<ManagerTaskDashboard> {
               const Icon(PhosphorIconsRegular.trash,
                   color: Colors.white, size: 18),
               const SizedBox(width: 8),
-              Text('המשימה "${task.title}" נמחקה',
+              Text(_l10n.taskDeletedSnackbar(task.title),
                   style: const TextStyle(fontWeight: FontWeight.w600)),
             ]),
             backgroundColor: const Color(0xFFEF4444),

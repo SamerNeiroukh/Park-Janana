@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
@@ -334,9 +335,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         children: [
           const UserHeader(),
           Expanded(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: _isLoading
+            child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
                       ? _buildError()
@@ -386,7 +385,6 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                             ),
                           ),
                         ),
-            ),
           ),
         ],
       ),
@@ -396,6 +394,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Error state ──────────────────────────────────────────────────────────
 
   Widget _buildError() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -405,9 +404,9 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const Icon(PhosphorIconsRegular.warningCircle,
                 size: 56, color: Color(0xFFEF4444)),
             const SizedBox(height: 16),
-            const Text(
-              'שגיאה בטעינת הנתונים',
-              style: TextStyle(
+            Text(
+              l10n.loadDataError,
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A)),
@@ -423,7 +422,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             FilledButton.icon(
               onPressed: _loadKpis,
               icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
-              label: const Text('נסה שוב'),
+              label: Text(l10n.retryButton),
               style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF7C3AED)),
             ),
@@ -436,9 +435,10 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Welcome card ─────────────────────────────────────────────────────────
 
   Widget _buildWelcomeCard(String ownerName) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final dateStr =
-        DateFormat('EEEE, d בMMMM yyyy', 'he').format(now);
+        DateFormat.yMMMMEEEEd(Localizations.localeOf(context).languageCode).format(now);
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -476,16 +476,16 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'לוח בקרה — בעלים',
-                      style: TextStyle(
+                    Text(
+                      l10n.ownerDashboardTitle,
+                      style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white70,
                           fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'שלום, $ownerName',
+                      l10n.helloName(ownerName),
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -529,6 +529,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Pending approval alert ────────────────────────────────────────────────
 
   Widget _buildPendingAlert() {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () => _go(const ManageWorkersScreen()),
       child: Container(
@@ -555,23 +556,28 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${_kpi!.pendingApproval} עובדים ממתינים לאישור',
+                    l10n.pendingApprovalCount(_kpi!.pendingApproval),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF92400E),
                     ),
                   ),
-                  const Text(
-                    'לחץ לניהול עובדים',
-                    style: TextStyle(
+                  Text(
+                    l10n.clickForManageWorkers,
+                    style: const TextStyle(
                         fontSize: 12, color: Color(0xFFB45309)),
                   ),
                 ],
               ),
             ),
-            const Icon(PhosphorIconsRegular.caretRight,
-                color: Color(0xFFD97706), size: 22),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? PhosphorIconsRegular.caretLeft
+                  : PhosphorIconsRegular.caretRight,
+              color: const Color(0xFFD97706),
+              size: 22,
+            ),
           ],
         ),
       ),
@@ -581,6 +587,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Understaffed shifts alert ─────────────────────────────────────────────
 
   Widget _buildUnderstaffedAlert() {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () => _go(const ManagerWeeklyScheduleScreen()),
       child: Container(
@@ -607,22 +614,27 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${_kpi!.understaffedShiftsToday} משמרות היום חסרות עובדים',
+                    l10n.understaffedShiftsCount(_kpi!.understaffedShiftsToday),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF991B1B),
                     ),
                   ),
-                  const Text(
-                    'לחץ לסידור שבועי',
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
+                  Text(
+                    l10n.clickForWeeklySchedule,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
                   ),
                 ],
               ),
             ),
-            const Icon(PhosphorIconsRegular.caretRight,
-                color: Color(0xFFDC2626), size: 22),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? PhosphorIconsRegular.caretLeft
+                  : PhosphorIconsRegular.caretRight,
+              color: const Color(0xFFDC2626),
+              size: 22,
+            ),
           ],
         ),
       ),
@@ -632,28 +644,29 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Quick stat pills (4 across) ───────────────────────────────────────────
 
   Widget _buildStatPills() {
+    final l10n = AppLocalizations.of(context);
     final pills = [
       _StatPill(
         value: '${_kpi!.totalStaff}',
-        label: 'צוות כולל',
+        label: l10n.totalTeamLabel,
         icon: PhosphorIconsRegular.usersThree,
         color: const Color(0xFF7C3AED),
       ),
       _StatPill(
         value: _kpi!.totalHoursMonth.toStringAsFixed(0),
-        label: 'שעות החודש',
+        label: l10n.monthlyHoursLabel,
         icon: PhosphorIconsFill.clock,
         color: const Color(0xFF0EA5E9),
       ),
       _StatPill(
         value: '${_kpi!.openTasks}',
-        label: 'משימות פתוחות',
+        label: l10n.openTasksLabel,
         icon: PhosphorIconsRegular.clipboard,
         color: const Color(0xFF8B5CF6),
       ),
       _StatPill(
         value: '${_kpi!.clockedInToday}',
-        label: 'נוכחים היום',
+        label: l10n.presentTodayLabel,
         icon: PhosphorIconsRegular.userCheck,
         color: const Color(0xFF10B981),
       ),
@@ -724,22 +737,23 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Quick Owner Actions ───────────────────────────────────────────────────
 
   Widget _buildQuickActions(UserModel user) {
+    final l10n = AppLocalizations.of(context);
     final actions = [
       _QuickAction(
         icon: PhosphorIconsRegular.plusCircle,
-        label: 'צור משמרת',
+        label: l10n.createShiftAction,
         color: const Color(0xFF4F46E5),
         onTap: () => _go(const CreateShiftScreen()),
       ),
       _QuickAction(
         icon: PhosphorIconsRegular.clipboardText,
-        label: 'צור משימה',
+        label: l10n.createTaskAction,
         color: const Color(0xFF8B5CF6),
         onTap: () => _go(const CreateTaskFlowScreen()),
       ),
       _QuickAction(
         icon: PhosphorIconsFill.megaphone,
-        label: 'פרסם הודעה',
+        label: l10n.publishPostAction,
         color: const Color(0xFFF59E0B),
         onTap: () => showDialog(
           context: context,
@@ -753,7 +767,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       ),
       _QuickAction(
         icon: PhosphorIconsRegular.chartBar,
-        label: 'דוח שעות',
+        label: l10n.hoursReportAction,
         color: const Color(0xFF0EA5E9),
         onTap: () => _go(const WorkersHoursReport()),
       ),
@@ -775,13 +789,13 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(PhosphorIconsRegular.lightning, color: Color(0xFF7C3AED), size: 18),
-              SizedBox(width: 8),
+              const Icon(PhosphorIconsRegular.lightning, color: Color(0xFF7C3AED), size: 18),
+              const SizedBox(width: 8),
               Text(
-                'פעולות מהירות',
-                style: TextStyle(
+                l10n.quickActionsLabel,
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -840,6 +854,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Workforce card ────────────────────────────────────────────────────────
 
   Widget _buildWorkforceCard() {
+    final l10n = AppLocalizations.of(context);
     final total = _kpi!.totalStaff == 0 ? 1 : _kpi!.totalStaff;
     final workerFrac = _kpi!.workersCount / total;
     final managerFrac = _kpi!.managersCount / total;
@@ -874,10 +889,10 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       color: Color(0xFF7C3AED), size: 20),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'כוח אדם',
-                    style: TextStyle(
+                    l10n.staffLabel,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF0F172A),
@@ -889,7 +904,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 18),
             // Workers row
             _buildRoleRow(
-              label: 'עובדים',
+              label: l10n.workersTabLabel,
               count: _kpi!.workersCount,
               fraction: workerFrac,
               color: const Color(0xFF3B82F6),
@@ -897,7 +912,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 12),
             // Managers row
             _buildRoleRow(
-              label: 'מנהלים',
+              label: l10n.managersTabLabel,
               count: _kpi!.managersCount,
               fraction: managerFrac,
               color: const Color(0xFF7C3AED),
@@ -905,13 +920,18 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(PhosphorIconsRegular.caretRight,
-                    color: Color(0xFF94A3B8), size: 18),
-                const SizedBox(width: 4),
                 Text(
-                  'סה"כ ${_kpi!.totalStaff} אנשים בצוות • לחץ לניהול',
+                  l10n.staffCountSummary(_kpi!.totalStaff),
                   style: const TextStyle(
                       fontSize: 12, color: Color(0xFF94A3B8)),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? PhosphorIconsRegular.caretLeft
+                      : PhosphorIconsRegular.caretRight,
+                  color: const Color(0xFF94A3B8),
+                  size: 18,
                 ),
               ],
             ),
@@ -967,6 +987,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Active workers card ───────────────────────────────────────────────────
 
   Widget _buildActiveWorkersCard() {
+    final l10n = AppLocalizations.of(context);
     final active = _kpi!.activeNow;
 
     return Container(
@@ -996,9 +1017,9 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'נוכחים כעת',
-                style: TextStyle(
+              Text(
+                l10n.presentNowLabel,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -1024,12 +1045,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           ),
           const SizedBox(height: 14),
           if (active.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Center(
                 child: Text(
-                  'אין עובדים מחוברים כרגע',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                  l10n.noWorkersConnected,
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
                 ),
               ),
             )
@@ -1046,8 +1067,8 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   final hours = elapsed.inHours;
                   final minutes = elapsed.inMinutes.remainder(60);
                   final durationStr = hours > 0
-                      ? '$hours:${minutes.toString().padLeft(2, '0')} ש׳'
-                      : '$minutes דק׳';
+                      ? '$hours:${minutes.toString().padLeft(2, '0')} ${l10n.hoursAbbreviation}'
+                      : '$minutes ${l10n.minutesAbbreviation}';
                   final clockInStr = DateFormat('HH:mm').format(w.clockIn);
                   final firstName = w.name.trim().split(' ').first;
 
@@ -1102,7 +1123,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'מ-$clockInStr · $durationStr',
+                            l10n.clockInFromLabel(clockInStr, durationStr),
                             style: const TextStyle(
                               fontSize: 9,
                               color: Color(0xFF94A3B8),
@@ -1126,6 +1147,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Shifts card ───────────────────────────────────────────────────────────
 
   Widget _buildShiftsCard() {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () => _go(const ManagerWeeklyScheduleScreen()),
       child: Container(
@@ -1156,9 +1178,9 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       color: Color(0xFF4F46E5), size: 18),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'משמרות',
-                  style: TextStyle(
+                Text(
+                  l10n.shiftsNavLabel,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A),
@@ -1177,14 +1199,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 12),
             _buildMiniStat(
               icon: PhosphorIconsRegular.calendarDot,
-              label: 'היום',
+              label: l10n.todayTabLabel,
               value: '${_kpi!.shiftsToday}',
               color: const Color(0xFF4F46E5),
             ),
             const SizedBox(height: 6),
             _buildMiniStat(
               icon: PhosphorIconsRegular.calendarDots,
-              label: 'השבוע',
+              label: l10n.thisWeekTabLabel,
               value: '${_kpi!.shiftsThisWeek}',
               color: const Color(0xFF6366F1),
             ),
@@ -1197,6 +1219,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Tasks card ────────────────────────────────────────────────────────────
 
   Widget _buildTasksCard() {
+    final l10n = AppLocalizations.of(context);
     final total =
         _kpi!.openTasks + _kpi!.doneTasks == 0 ? 1 : _kpi!.openTasks + _kpi!.doneTasks;
     final donePercent =
@@ -1232,9 +1255,9 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       color: Color(0xFF8B5CF6), size: 18),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'משימות',
-                  style: TextStyle(
+                Text(
+                  l10n.tasksNavLabel,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A),
@@ -1254,9 +1277,9 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       color: Color(0xFF10B981),
                     ),
                   ),
-                  const Text(
-                    'הושלמו',
-                    style: TextStyle(
+                  Text(
+                    l10n.completedLabel,
+                    style: const TextStyle(
                         fontSize: 12, color: Color(0xFF94A3B8)),
                   ),
                 ],
@@ -1265,14 +1288,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             const SizedBox(height: 12),
             _buildMiniStat(
               icon: PhosphorIconsRegular.clipboardText,
-              label: 'פתוחות',
+              label: l10n.openTasksTabLabel,
               value: '${_kpi!.openTasks}',
               color: const Color(0xFFF59E0B),
             ),
             const SizedBox(height: 6),
             _buildMiniStat(
               icon: PhosphorIconsBold.warning,
-              label: 'דחוף',
+              label: l10n.urgentTasksTabLabel,
               value: '${_kpi!.highPriorityTasks}',
               color: const Color(0xFFEF4444),
             ),
@@ -1285,6 +1308,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Top Workers card ──────────────────────────────────────────────────────
 
   Widget _buildTopWorkers() {
+    final l10n = AppLocalizations.of(context);
     final medals = ['🥇', '🥈', '🥉'];
     final medalColors = [
       const Color(0xFFF59E0B),
@@ -1308,14 +1332,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(PhosphorIconsRegular.trophy,
+              const Icon(PhosphorIconsRegular.trophy,
                   color: Color(0xFFF59E0B), size: 20),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'מובילי החודש',
-                style: TextStyle(
+                l10n.topWorkersThisMonth,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -1360,7 +1384,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          '${worker.days} ימים החודש',
+                          l10n.daysThisMonth(worker.days),
                           style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8)),
                         ),
@@ -1375,7 +1399,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${worker.hours.toStringAsFixed(1)} ש׳',
+                      '${worker.hours.toStringAsFixed(1)} ${l10n.hoursAbbreviation}',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -1395,6 +1419,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   // ── Hours card ────────────────────────────────────────────────────────────
 
   Widget _buildHoursCard() {
+    final l10n = AppLocalizations.of(context);
     final avgHours = _kpi!.totalStaff > 0
         ? (_kpi!.totalHoursMonth / _kpi!.totalStaff)
         : 0.0;
@@ -1434,16 +1459,16 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'שעות עבודה — החודש',
-                    style: TextStyle(
+                  Text(
+                    l10n.workHoursThisMonth,
+                    style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white70,
                         fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${_kpi!.totalHoursMonth.toStringAsFixed(1)} שעות',
+                    l10n.totalHoursCount(_kpi!.totalHoursMonth.toStringAsFixed(1)),
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
@@ -1451,15 +1476,20 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                     ),
                   ),
                   Text(
-                    'ממוצע ${avgHours.toStringAsFixed(1)} שעות לעובד',
+                    l10n.averageHoursPerWorker(avgHours.toStringAsFixed(1)),
                     style: const TextStyle(
                         fontSize: 12, color: Colors.white70),
                   ),
                 ],
               ),
             ),
-            const Icon(PhosphorIconsRegular.caretRight,
-                color: Colors.white70, size: 24),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? PhosphorIconsRegular.caretLeft
+                  : PhosphorIconsRegular.caretRight,
+              color: Colors.white70,
+              size: 24,
+            ),
           ],
         ),
       ),

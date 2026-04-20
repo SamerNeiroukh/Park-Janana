@@ -4,6 +4,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/screens/welcome_screen.dart';
 import 'package:park_janana/features/home/providers/home_badge_provider.dart';
 import 'package:park_janana/features/home/providers/user_provider.dart';
@@ -11,6 +12,7 @@ import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/tasks/theme/task_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:park_janana/core/providers/locale_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:park_janana/core/services/biometric_service.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
@@ -82,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('לא ניתן לפתוח את הקישור')),
+          SnackBar(content: Text(AppLocalizations.of(context).cannotOpenLink)),
         );
       }
     }
@@ -169,11 +171,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _signOut() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showAppDialog(
       context,
-      title: 'התנתקות',
-      message: 'האם אתה בטוח שברצונך להתנתק?',
-      confirmText: 'התנתק',
+      title: l10n.logoutTitle,
+      message: l10n.logoutConfirmation,
+      confirmText: l10n.logoutLabel,
       icon: PhosphorIconsRegular.signOut,
       isDestructive: true,
     );
@@ -207,7 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('לא ניתן לפתוח את הקישור')),
+          SnackBar(content: Text(AppLocalizations.of(context).cannotOpenLink)),
         );
       }
     }
@@ -215,118 +218,226 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: Column(
+        children: [
+          const UserHeader(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(PhosphorIconsRegular.gear,
+                      color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(AppLocalizations.of(context).settingsTitle, style: TaskTheme.heading2),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
+          ),
+          Expanded(
+            child: Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context);
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  children: [
+                    _sectionHeader(l10n.accountSectionHeader),
+                    _tile(
+                      icon: PhosphorIconsRegular.lock,
+                      iconColor: TaskTheme.inProgress,
+                      title: l10n.changePasswordTitle,
+                      onTap: _showChangePasswordSheet,
+                    ),
+                    if (_biometricAvailable)
+                      _switchTile(
+                        icon: PhosphorIconsRegular.fingerprint,
+                        iconColor: TaskTheme.done,
+                        title: l10n.biometricLoginTitle,
+                        subtitle: l10n.biometricMethodsSubtitle,
+                        value: _biometricEnabled,
+                        onChanged: _toggleBiometric,
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(PhosphorIconsRegular.gear,
-                        color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text('הגדרות', style: TaskTheme.heading2),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                children: [
-                  _sectionHeader('חשבון'),
-                  _tile(
-                    icon: PhosphorIconsRegular.lock,
-                    iconColor: TaskTheme.inProgress,
-                    title: 'שינוי סיסמה',
-                    onTap: _showChangePasswordSheet,
-                  ),
-                  if (_biometricAvailable)
+                    const SizedBox(height: 20),
+                    _sectionHeader(l10n.languageSectionHeader),
+                    _buildLanguageTile(context, l10n),
+                    const SizedBox(height: 20),
+                    _sectionHeader(l10n.notificationsSectionHeader),
                     _switchTile(
-                      icon: PhosphorIconsRegular.fingerprint,
+                      icon: PhosphorIconsRegular.bell,
+                      iconColor: TaskTheme.primary,
+                      title: l10n.pushNotificationsTitle,
+                      subtitle: l10n.pushNotificationsSubtitle,
+                      value: _notificationsEnabled,
+                      onChanged: _toggleNotifications,
+                    ),
+                    const SizedBox(height: 20),
+                    _sectionHeader(l10n.infoSectionHeader),
+                    _tile(
+                      icon: PhosphorIconsRegular.shieldCheck,
                       iconColor: TaskTheme.done,
-                      title: 'כניסה ביומטרית',
-                      subtitle: 'טביעת אצבע / זיהוי פנים',
-                      value: _biometricEnabled,
-                      onChanged: _toggleBiometric,
+                      title: l10n.privacyPolicyTitle,
+                      trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
+                          size: 16, color: TaskTheme.textTertiary),
+                      onTap: _openPrivacyPolicy,
                     ),
-                  const SizedBox(height: 20),
-                  _sectionHeader('התראות'),
-                  _switchTile(
-                    icon: PhosphorIconsRegular.bell,
-                    iconColor: TaskTheme.primary,
-                    title: 'התראות פוש',
-                    subtitle: 'קבלת עדכונים על משמרות ומשימות',
-                    value: _notificationsEnabled,
-                    onChanged: _toggleNotifications,
-                  ),
-                  const SizedBox(height: 20),
-                  _sectionHeader('מידע'),
-                  _tile(
-                    icon: PhosphorIconsRegular.shieldCheck,
-                    iconColor: TaskTheme.done,
-                    title: 'מדיניות פרטיות',
-                    trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
-                        size: 16, color: TaskTheme.textTertiary),
-                    onTap: _openPrivacyPolicy,
-                  ),
-                  _tile(
-                    icon: PhosphorIconsRegular.fileText,
-                    iconColor: TaskTheme.inProgress,
-                    title: 'תנאי שימוש',
-                    trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
-                        size: 16, color: TaskTheme.textTertiary),
-                    onTap: _openTermsOfService,
-                  ),
-                  _switchTile(
-                    icon: PhosphorIconsRegular.bug,
-                    iconColor: TaskTheme.textSecondary,
-                    title: 'שלח דוחות קריסה',
-                    subtitle: 'עוזר לנו לשפר את יציבות האפליקציה',
-                    value: _crashlyticsEnabled,
-                    onChanged: _toggleCrashlytics,
-                  ),
-                  _tile(
-                    icon: PhosphorIconsRegular.info,
-                    iconColor: TaskTheme.textSecondary,
-                    title: 'גרסת האפליקציה',
-                    trailing: Text(
-                      _kAppVersion,
-                      style:
-                          TaskTheme.caption.copyWith(fontWeight: FontWeight.w600),
+                    _tile(
+                      icon: PhosphorIconsRegular.fileText,
+                      iconColor: TaskTheme.inProgress,
+                      title: l10n.termsOfServiceTitle,
+                      trailing: const Icon(PhosphorIconsRegular.arrowSquareOut,
+                          size: 16, color: TaskTheme.textTertiary),
+                      onTap: _openTermsOfService,
                     ),
-                    onTap: null,
-                  ),
-                  const SizedBox(height: 20),
-                  _sectionHeader('יציאה'),
-                  _tile(
-                    icon: PhosphorIconsRegular.signOut,
-                    iconColor: Colors.red.shade600,
-                    title: 'התנתקות',
-                    titleColor: Colors.red.shade700,
-                    onTap: _signOut,
-                  ),
-                ],
+                    _switchTile(
+                      icon: PhosphorIconsRegular.bug,
+                      iconColor: TaskTheme.textSecondary,
+                      title: l10n.crashReportsTitle,
+                      subtitle: l10n.crashReportsSubtitle,
+                      value: _crashlyticsEnabled,
+                      onChanged: _toggleCrashlytics,
+                    ),
+                    _tile(
+                      icon: PhosphorIconsRegular.info,
+                      iconColor: TaskTheme.textSecondary,
+                      title: l10n.appVersionTitle,
+                      trailing: Text(
+                        _kAppVersion,
+                        style: TaskTheme.caption.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      onTap: null,
+                    ),
+                    const SizedBox(height: 20),
+                    _sectionHeader(l10n.signOutSectionHeader),
+                    _tile(
+                      icon: PhosphorIconsRegular.signOut,
+                      iconColor: Colors.red.shade600,
+                      title: l10n.logoutLabel,
+                      titleColor: Colors.red.shade700,
+                      onTap: _signOut,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _currentLanguageName(Locale locale, AppLocalizations l10n) {
+    switch (locale.languageCode) {
+      case 'en': return l10n.languageEnglish;
+      case 'ar': return l10n.languageArabic;
+      default:   return l10n.languageHebrew;
+    }
+  }
+
+  Widget _buildLanguageTile(BuildContext context, AppLocalizations l10n) {
+    final locale = context.watch<LocaleProvider>().locale;
+    return _tile(
+      icon: PhosphorIconsRegular.globe,
+      iconColor: const Color(0xFF7C3AED),
+      title: l10n.languageLabel,
+      subtitle: _currentLanguageName(locale, l10n),
+      trailing: Text(
+        _currentLanguageName(locale, l10n),
+        style: TaskTheme.caption.copyWith(fontWeight: FontWeight.w600),
+      ),
+      onTap: () => _showLanguagePicker(context, l10n, locale),
+    );
+  }
+
+  void _showLanguagePicker(
+      BuildContext context, AppLocalizations l10n, Locale current) {
+    final options = [
+      (const Locale('he'), l10n.languageHebrew,  '🇮🇱'),
+      (const Locale('en'), l10n.languageEnglish, '🇬🇧'),
+      (const Locale('ar'), l10n.languageArabic,  '🇸🇦'),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: TaskTheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: TaskTheme.border,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
+            const SizedBox(height: 20),
+            Text(l10n.languageLabel,
+                style: TaskTheme.heading2),
+            const SizedBox(height: 16),
+            ...options.map((opt) {
+              final (locale, name, flag) = opt;
+              final isSelected = locale.languageCode == current.languageCode;
+              return GestureDetector(
+                onTap: () {
+                  context.read<LocaleProvider>().setLocale(locale);
+                  Navigator.pop(context);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF7C3AED).withValues(alpha: 0.08)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF7C3AED)
+                          : TaskTheme.border,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(flag, style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(name,
+                            style: TaskTheme.body.copyWith(
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? const Color(0xFF7C3AED)
+                                  : TaskTheme.textPrimary,
+                            )),
+                      ),
+                      if (isSelected)
+                        const Icon(PhosphorIconsFill.checkCircle,
+                            color: Color(0xFF7C3AED), size: 20),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -457,14 +568,15 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('הסיסמה עודכנה בהצלחה')),
+          SnackBar(content: Text(AppLocalizations.of(context).passwordChanged)),
         );
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         final msg = e.code == 'requires-recent-login'
-            ? 'יש להתחבר מחדש לפני שינוי הסיסמה'
-            : 'שגיאה בעדכון הסיסמה';
+            ? l10n.requiresRecentLoginError
+            : l10n.updatePasswordError;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg)));
       }
@@ -475,135 +587,132 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: TaskTheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: TaskTheme.border,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: TaskTheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: TaskTheme.border,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text('שינוי סיסמה', style: TaskTheme.heading2),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _newPasswordController,
-                  obscureText: _obscureNew,
-                  textDirection: TextDirection.ltr,
-                  decoration: InputDecoration(
-                    labelText: 'סיסמה חדשה',
-                    border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM)),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureNew
-                          ? PhosphorIconsRegular.eyeSlash
-                          : PhosphorIconsRegular.eye),
-                      onPressed: () =>
-                          setState(() => _obscureNew = !_obscureNew),
-                    ),
+              ),
+              const SizedBox(height: 20),
+              Text(l10n.changePasswordTitle, style: TaskTheme.heading2),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _newPasswordController,
+                obscureText: _obscureNew,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(
+                  labelText: l10n.newPasswordLabel,
+                  border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(TaskTheme.radiusM)),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureNew
+                        ? PhosphorIconsRegular.eyeSlash
+                        : PhosphorIconsRegular.eye),
+                    onPressed: () =>
+                        setState(() => _obscureNew = !_obscureNew),
                   ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'נא להזין סיסמה';
-                    if (v.trim().length < 6) return 'הסיסמה חייבת להכיל לפחות 6 תווים';
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  controller: _confirmController,
-                  obscureText: _obscureConfirm,
-                  textDirection: TextDirection.ltr,
-                  decoration: InputDecoration(
-                    labelText: 'אימות סיסמה',
-                    border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM)),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirm
-                          ? PhosphorIconsRegular.eyeSlash
-                          : PhosphorIconsRegular.eye),
-                      onPressed: () =>
-                          setState(() => _obscureConfirm = !_obscureConfirm),
-                    ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return l10n.passwordRequiredValidator;
+                  if (v.trim().length < 6) return l10n.passwordMinLengthValidation;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: _confirmController,
+                obscureText: _obscureConfirm,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(
+                  labelText: l10n.confirmPasswordLabel,
+                  border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(TaskTheme.radiusM)),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirm
+                        ? PhosphorIconsRegular.eyeSlash
+                        : PhosphorIconsRegular.eye),
+                    onPressed: () =>
+                        setState(() => _obscureConfirm = !_obscureConfirm),
                   ),
-                  validator: (v) {
-                    if (v != _newPasswordController.text) {
-                      return 'הסיסמאות אינן תואמות';
-                    }
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: Container(
-                    decoration: BoxDecoration(
+                validator: (v) {
+                  if (v != _newPasswordController.text) {
+                    return l10n.passwordMismatchValidation;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(TaskTheme.radiusM),
+                    gradient: const LinearGradient(
+                      colors: [TaskTheme.primary, Color(0xFF5B8DEF)],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                    ),
+                    boxShadow: TaskTheme.buttonShadow(TaskTheme.primary),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius:
+                        BorderRadius.circular(TaskTheme.radiusM),
+                    child: InkWell(
                       borderRadius:
                           BorderRadius.circular(TaskTheme.radiusM),
-                      gradient: const LinearGradient(
-                        colors: [TaskTheme.primary, Color(0xFF5B8DEF)],
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                      ),
-                      boxShadow:
-                          TaskTheme.buttonShadow(TaskTheme.primary),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius:
-                          BorderRadius.circular(TaskTheme.radiusM),
-                      child: InkWell(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM),
-                        onTap: _isLoading ? null : _submit,
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 14),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.5),
-                                  ),
-                                )
-                              : const Text(
-                                  'עדכן סיסמה',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white),
+                      onTap: _isLoading ? null : _submit,
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5),
                                 ),
-                        ),
+                              )
+                            : Text(
+                                l10n.updatePasswordButton,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white),
+                              ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -646,12 +755,12 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
 
     try {
       final authenticated = await widget.biometricService.authenticate(
-        reason: 'אמת את זהותך כדי להפעיל כניסה ביומטרית',
+        reason: AppLocalizations.of(context).biometricVerifyReason,
       );
       if (!authenticated) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('האימות הביומטרי נכשל')),
+            SnackBar(content: Text(AppLocalizations.of(context).biometricAuthFailedSnackbar)),
           );
         }
         return;
@@ -668,7 +777,7 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה בהפעלת הכניסה הביומטרית')),
+          SnackBar(content: Text(AppLocalizations.of(context).enableBiometricError)),
         );
       }
     } finally {
@@ -678,113 +787,110 @@ class _BiometricEnableSheetState extends State<_BiometricEnableSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: TaskTheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: TaskTheme.border,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: TaskTheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: TaskTheme.border,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text('הפעלת כניסה ביומטרית', style: TaskTheme.heading2),
-                const SizedBox(height: 8),
-                const Text(
-                  'הזן את הסיסמה הנוכחית שלך כדי לאפשר כניסה עם טביעת אצבע / זיהוי פנים.',
-                  style: TaskTheme.caption,
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscure,
-                  textDirection: TextDirection.ltr,
-                  decoration: InputDecoration(
-                    labelText: 'סיסמה נוכחית',
-                    border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM)),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure
-                          ? PhosphorIconsRegular.eyeSlash
-                          : PhosphorIconsRegular.eye),
-                      onPressed: () => setState(() => _obscure = !_obscure),
-                    ),
+              ),
+              const SizedBox(height: 20),
+              Text(l10n.enableBiometricTitle, style: TaskTheme.heading2),
+              const SizedBox(height: 8),
+              Text(
+                l10n.biometricEnableDescription,
+                style: TaskTheme.caption,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscure,
+                textDirection: TextDirection.ltr,
+                decoration: InputDecoration(
+                  labelText: l10n.currentPasswordLabel,
+                  border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(TaskTheme.radiusM)),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscure
+                        ? PhosphorIconsRegular.eyeSlash
+                        : PhosphorIconsRegular.eye),
+                    onPressed: () => setState(() => _obscure = !_obscure),
                   ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'נא להזין סיסמה';
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(TaskTheme.radiusM),
-                      gradient: const LinearGradient(
-                        colors: [TaskTheme.primary, Color(0xFF5B8DEF)],
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                      ),
-                      boxShadow:
-                          TaskTheme.buttonShadow(TaskTheme.primary),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return l10n.passwordRequiredValidator;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(TaskTheme.radiusM),
+                    gradient: const LinearGradient(
+                      colors: [TaskTheme.primary, Color(0xFF5B8DEF)],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
                     ),
-                    child: Material(
-                      color: Colors.transparent,
+                    boxShadow: TaskTheme.buttonShadow(TaskTheme.primary),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius:
+                        BorderRadius.circular(TaskTheme.radiusM),
+                    child: InkWell(
                       borderRadius:
                           BorderRadius.circular(TaskTheme.radiusM),
-                      child: InkWell(
-                        borderRadius:
-                            BorderRadius.circular(TaskTheme.radiusM),
-                        onTap: _isLoading ? null : _submit,
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 14),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.5),
-                                  ),
-                                )
-                              : const Text(
-                                  'הפעל כניסה ביומטרית',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white),
+                      onTap: _isLoading ? null : _submit,
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5),
                                 ),
-                        ),
+                              )
+                            : Text(
+                                l10n.activateBiometricButton,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white),
+                              ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

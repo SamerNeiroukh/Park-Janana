@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/config/departments.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -41,6 +43,13 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
 
   bool _isSaving = false;
   bool _hasChanges = false;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   final List<Map<String, dynamic>> departments = [
     {'name': 'פארק חבלים', 'icon': PhosphorIconsRegular.tree, 'color': const Color(0xFF43A047)},
@@ -51,9 +60,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
   ];
 
   final List<Map<String, dynamic>> statusOptions = [
-    {'value': 'active', 'label': 'פעיל', 'color': AppColors.success, 'icon': PhosphorIconsFill.checkCircle},
-    {'value': 'cancelled', 'label': 'בוטל', 'color': Colors.red, 'icon': PhosphorIconsRegular.xCircle},
-    {'value': 'completed', 'label': 'הושלם', 'color': Colors.blue, 'icon': PhosphorIconsRegular.checks},
+    {'value': 'active', 'color': AppColors.success, 'icon': PhosphorIconsFill.checkCircle},
+    {'value': 'cancelled', 'color': Colors.red, 'icon': PhosphorIconsRegular.xCircle},
+    {'value': 'completed', 'color': Colors.blue, 'icon': PhosphorIconsRegular.checks},
   ];
 
   Color get _selectedColor {
@@ -113,25 +122,32 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     }
   }
 
+  String _statusLabel(String value) {
+    switch (value) {
+      case 'active': return _l10n.shiftStatusActive;
+      case 'cancelled': return _l10n.shiftStatusCancelledMasc;
+      case 'completed': return _l10n.shiftStatusCompleted;
+      default: return value;
+    }
+  }
+
   List<String> _getChangeSummary() {
     final List<String> changes = [];
 
     if (_selectedDate != _originalDate) {
-      changes.add('תאריך: ${DateFormat('dd/MM/yyyy').format(_originalDate)} → ${DateFormat('dd/MM/yyyy').format(_selectedDate)}');
+      changes.add('${_l10n.dateLabel}: ${DateFormat('dd/MM/yyyy').format(_originalDate)} → ${DateFormat('dd/MM/yyyy').format(_selectedDate)}');
     }
     if (_selectedDepartment != _originalDepartment) {
-      changes.add('מחלקה: $_originalDepartment → $_selectedDepartment');
+      changes.add('${_l10n.departmentLabel}: $_originalDepartment → $_selectedDepartment');
     }
     if (_startTime != _originalStartTime || _endTime != _originalEndTime) {
-      changes.add('שעות: ${_formatTime(_originalStartTime)}-${_formatTime(_originalEndTime)} → ${_formatTime(_startTime)}-${_formatTime(_endTime)}');
+      changes.add('${_l10n.hoursLabel}: ${_formatTime(_originalStartTime)}-${_formatTime(_originalEndTime)} → ${_formatTime(_startTime)}-${_formatTime(_endTime)}');
     }
     if (_maxWorkers != _originalMaxWorkers) {
-      changes.add('מקסימום עובדים: $_originalMaxWorkers → $_maxWorkers');
+      changes.add('${_l10n.maxWorkersLabel}: $_originalMaxWorkers → $_maxWorkers');
     }
     if (_status != _originalStatus) {
-      final oldLabel = statusOptions.firstWhere((s) => s['value'] == _originalStatus)['label'];
-      final newLabel = statusOptions.firstWhere((s) => s['value'] == _status)['label'];
-      changes.add('סטטוס: $oldLabel → $newLabel');
+      changes.add('${_l10n.statusLabel}: ${_statusLabel(_originalStatus)} → ${_statusLabel(_status)}');
     }
 
     return changes;
@@ -148,12 +164,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final changes = _getChangeSummary();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
+      builder: (context) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -164,25 +177,24 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 child: Icon(PhosphorIconsRegular.floppyDisk, color: _selectedColor),
               ),
               const SizedBox(width: 12),
-              const Text('שמירת שינויים'),
+              Text(_l10n.saveChangesDialogTitle),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'השינויים הבאים יישמרו:',
-                style: TextStyle(fontWeight: FontWeight.w600),
+              Text(
+                _l10n.followingChangesSavedLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
               ...changes.map((change) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
-                  textDirection: TextDirection.rtl,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(PhosphorIconsRegular.arrowLeft, size: 16, color: _selectedColor),
+                    Icon(PhosphorIconsRegular.arrowRight, size: 16, color: _selectedColor),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -204,14 +216,13 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
-                  textDirection: TextDirection.rtl,
                   children: [
                     const Icon(PhosphorIconsFill.bellRinging,
                         size: 20, color: AppColors.warningOrange),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'כל העובדים המשובצים והממתינים יקבלו התראה על השינויים',
+                        _l10n.workersNotifiedOfChanges,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade700,
@@ -226,7 +237,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('ביטול', style: TextStyle(color: Colors.grey.shade600)),
+              child: Text(_l10n.cancelButton, style: TextStyle(color: Colors.grey.shade600)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
@@ -236,11 +247,10 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('שמור שינויים', style: TextStyle(color: Colors.white)),
+              child: Text(_l10n.saveChangesButton, style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
-      ),
     );
 
     if (confirmed != true) return;
@@ -272,16 +282,14 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
-              textDirection: TextDirection.rtl,
+            content: Row(
               children: [
-                Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
-                SizedBox(width: 8),
+                const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'המשמרת עודכנה בהצלחה!',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                    textAlign: TextAlign.right,
+                    _l10n.shiftUpdatedSuccess,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -299,7 +307,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('שגיאה בעדכון המשמרת: $e'),
+            content: Text(_l10n.updateShiftError(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -364,10 +372,10 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
 
     final result = await showAppDialog(
       context,
-      title: 'שינויים לא שמורים',
-      message: 'יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
-      confirmText: 'צא ללא שמירה',
-      cancelText: 'המשך לערוך',
+      title: _l10n.unsavedChangesTitle,
+      message: _l10n.unsavedChangesMessage,
+      confirmText: _l10n.exitWithoutSavingButton,
+      cancelText: _l10n.continueEditingButton,
       icon: PhosphorIconsRegular.warning,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
       isDestructive: true,
@@ -387,16 +395,11 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           Navigator.of(context).pop();
         }
       },
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          backgroundColor: const Color(0xFFF8F9FB),
-          body: Column(
-            children: [
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: UserHeader(),
-              ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FB),
+        body: Column(
+          children: [
+            const UserHeader(),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -431,7 +434,6 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -469,9 +471,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'עריכת משמרת',
-                  style: TextStyle(
+                Text(
+                  _l10n.editShiftTitle,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -479,7 +481,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _hasChanges ? 'יש שינויים לא שמורים' : 'עדכן את פרטי המשמרת',
+                  _hasChanges ? _l10n.unsavedChangesHeaderSubtitle : _l10n.updateShiftDetailsSubtitle,
                   style: TextStyle(
                     fontSize: 14,
                     color: _hasChanges
@@ -546,7 +548,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final isChanged = _selectedDate != _originalDate;
 
     return _buildSectionCard(
-      title: 'תאריך',
+      title: _l10n.dateLabel,
       child: InkWell(
         onTap: _selectDate,
         child: Padding(
@@ -581,7 +583,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  DateTimeUtils.getHebrewWeekdayName(_selectedDate.weekday),
+                  DateTimeUtils.getLocalizedWeekdayName(_selectedDate.weekday, Localizations.localeOf(context).languageCode),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -595,9 +597,9 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                       color: AppColors.warningOrange,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      'שונה',
-                      style: TextStyle(
+                    child: Text(
+                      _l10n.changedBadge,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -620,7 +622,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final isChanged = _selectedDepartment != _originalDepartment;
 
     return _buildSectionCard(
-      title: isChanged ? 'מחלקה (שונה)' : 'מחלקה',
+      title: isChanged ? '${_l10n.departmentLabel} (${_l10n.changedBadge})' : _l10n.departmentLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Wrap(
@@ -666,7 +668,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      dept['name'] as String,
+                      getLocalizedDepartmentName(dept['name'] as String, _l10n),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -687,12 +689,12 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final isChanged = _startTime != _originalStartTime || _endTime != _originalEndTime;
 
     return _buildSectionCard(
-      title: isChanged ? 'שעות (שונה)' : 'שעות',
+      title: isChanged ? '${_l10n.hoursLabel} (${_l10n.changedBadge})' : _l10n.hoursLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
           children: [
-            Expanded(child: _buildTimeButton('התחלה', _startTime, true)),
+            Expanded(child: _buildTimeButton(_l10n.startTimeLabel, _startTime, true)),
             const SizedBox(width: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -703,7 +705,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
               child: Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade500, size: 18),
             ),
             const SizedBox(width: 12),
-            Expanded(child: _buildTimeButton('סיום', _endTime, false)),
+            Expanded(child: _buildTimeButton(_l10n.endTimeLabel, _endTime, false)),
           ],
         ),
       ),
@@ -768,7 +770,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final isChanged = _maxWorkers != _originalMaxWorkers;
 
     return _buildSectionCard(
-      title: isChanged ? 'מספר עובדים מקסימלי (שונה)' : 'מספר עובדים מקסימלי',
+      title: isChanged ? '${_l10n.maxWorkersLabel} (${_l10n.changedBadge})' : _l10n.maxWorkersLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
@@ -838,7 +840,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'יש כרגע ${widget.shift.assignedWorkers.length} עובדים משובצים, יותר מהמקסימום החדש',
+                          _l10n.tooManyWorkersWarning(widget.shift.assignedWorkers.length),
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.red,
@@ -874,7 +876,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
     final isChanged = _status != _originalStatus;
 
     return _buildSectionCard(
-      title: isChanged ? 'סטטוס (שונה)' : 'סטטוס',
+      title: isChanged ? '${_l10n.statusLabel} (${_l10n.changedBadge})' : _l10n.statusLabel,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Wrap(
@@ -920,7 +922,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      status['label'] as String,
+                      _statusLabel(status['value'] as String),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -982,7 +984,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    _hasChanges ? 'שמור שינויים' : 'אין שינויים',
+                    _hasChanges ? _l10n.saveChangesButton : _l10n.noChangesLabel,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1012,7 +1014,7 @@ class _EditShiftScreenState extends State<EditShiftScreen> {
           Icon(PhosphorIconsRegular.arrowRight, color: Colors.grey.shade600, size: 18),
           const SizedBox(width: 6),
           Text(
-            'ביטול',
+            _l10n.cancelButton,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,

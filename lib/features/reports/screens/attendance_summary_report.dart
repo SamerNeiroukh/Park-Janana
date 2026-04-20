@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/attendance_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -30,6 +31,8 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
   late DateTime selectedMonth;
   bool isLoading = true;
   AttendanceModel? attendanceData;
+  late AppLocalizations _l10n;
+  late String _localeCode;
 
   // Date range mode
   bool _isRangeMode = false;
@@ -41,6 +44,13 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
     super.initState();
     selectedMonth = DateTime.now();
     _loadAttendance();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+    _localeCode = Localizations.localeOf(context).languageCode;
   }
 
   Future<void> _loadAttendance() async {
@@ -135,16 +145,11 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -163,7 +168,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                     child: const Icon(PhosphorIconsRegular.clock, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('דו״ח נוכחות', style: TaskTheme.heading2),
+                  Text(_l10n.attendanceReportTitle, style: TaskTheme.heading2),
                   const Spacer(),
                   // Toggle between month picker and custom date range
                   GestureDetector(
@@ -187,7 +192,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'טווח תאריכים',
+                            _l10n.dateRangeButton,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -228,7 +233,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                         const SizedBox(width: 8),
                         Text(
                           _dateRange == null
-                              ? 'בחר טווח תאריכים'
+                              ? _l10n.selectDateRange
                               : '${_dateRange!.start.day}/${_dateRange!.start.month}/${_dateRange!.start.year}  —  ${_dateRange!.end.day}/${_dateRange!.end.month}/${_dateRange!.end.year}',
                           style: TextStyle(
                             fontSize: 14,
@@ -281,7 +286,6 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             if (!isLoading && attendanceData != null) _buildBottomBar(),
           ],
         ),
-      ),
     );
   }
 
@@ -293,7 +297,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
           const Icon(PhosphorIconsRegular.calendarX, size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
-            'אין נתוני נוכחות לחודש זה',
+            _l10n.noAttendanceDataMonth,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -313,7 +317,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             icon: PhosphorIconsRegular.calendarBlank,
             color: TaskTheme.inProgress,
             value: '$days',
-            label: 'ימים',
+            label: _l10n.daysLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -322,7 +326,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             icon: PhosphorIconsRegular.clock,
             color: TaskTheme.done,
             value: totalHours.toStringAsFixed(1),
-            label: 'שעות',
+            label: _l10n.hoursLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -331,7 +335,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
             icon: PhosphorIconsRegular.trendUp,
             color: TaskTheme.pending,
             value: avgHours.toStringAsFixed(1),
-            label: 'ממוצע/יום',
+            label: _l10n.averagePerDayLabel,
           ),
         ),
       ],
@@ -392,11 +396,11 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(PhosphorIconsRegular.chartBar, size: 18, color: TaskTheme.primary),
-              SizedBox(width: 8),
-              Text('שעות עבודה לפי יום', style: TaskTheme.heading3),
+              const Icon(PhosphorIconsRegular.chartBar, size: 18, color: TaskTheme.primary),
+              const SizedBox(width: 8),
+              Text(_l10n.hoursPerDayChartTitle, style: TaskTheme.heading3),
             ],
           ),
           const SizedBox(height: 16),
@@ -413,7 +417,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         final day = sortedDays[group.x.toInt()];
                         return BarTooltipItem(
-                          'יום $day\n${rod.toY.toStringAsFixed(1)} שעות',
+                          _l10n.chartTooltipDayHours(day, rod.toY.toStringAsFixed(1)),
                           const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -500,17 +504,17 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('פירוט נוכחות', style: TaskTheme.heading3),
+            const Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.attendanceDetailsTitle, style: TaskTheme.heading3),
           ],
         ),
         const SizedBox(height: 10),
         ...sessions.map((session) {
           final date = DateFormat('dd/MM/yyyy').format(session.clockIn);
-          final dayName = DateFormat('EEEE', 'he').format(session.clockIn);
+          final dayName = DateFormat('EEEE', _localeCode).format(session.clockIn);
           final clockIn = DateFormat('HH:mm').format(session.clockIn);
           final clockOut = DateFormat('HH:mm').format(session.clockOut);
           final duration = session.clockOut.difference(session.clockIn);
@@ -555,14 +559,14 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                             color: missedColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(PhosphorIconsRegular.prohibit, size: 11, color: missedColor),
-                              SizedBox(width: 4),
+                              const Icon(PhosphorIconsRegular.prohibit, size: 11, color: missedColor),
+                              const SizedBox(width: 4),
                               Text(
-                                'יציאה חסרה',
-                                style: TextStyle(
+                                _l10n.missingClockOutLabel,
+                                style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: missedColor,
@@ -581,7 +585,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '$hoursש׳ $minutesד׳',
+                          _l10n.durationHoursMinutes(hours, minutes),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -598,14 +602,14 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                       const Icon(PhosphorIconsRegular.signIn, size: 16, color: TaskTheme.inProgress),
                       const SizedBox(width: 6),
                       Text(
-                        'כניסה: $clockIn',
+                        _l10n.clockInPrefix(clockIn),
                         style: TaskTheme.body.copyWith(fontSize: 13),
                       ),
                       const SizedBox(width: 20),
                       const Icon(PhosphorIconsRegular.signOut, size: 16, color: TaskTheme.overdue),
                       const SizedBox(width: 6),
                       Text(
-                        'יציאה: $clockOut',
+                        _l10n.clockOutPrefix(clockOut),
                         style: TaskTheme.body.copyWith(fontSize: 13),
                       ),
                     ],
@@ -662,7 +666,7 @@ class _AttendanceSummaryScreenState extends State<AttendanceSummaryScreen> {
                           color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      _isExporting ? 'מייצא...' : 'ייצוא PDF',
+                      _isExporting ? _l10n.exportingLabel : _l10n.exportPdfButton,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

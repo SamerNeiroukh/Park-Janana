@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class TaskHeaderSection extends StatelessWidget {
   final String title;
@@ -17,12 +18,13 @@ class TaskHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final String time = DateFormat('HH:mm').format(dueDate);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildStatusChip(status),
+        _buildStatusChip(context, l10n, status),
         Text(
           time,
           style: const TextStyle(
@@ -35,22 +37,22 @@ class TaskHeaderSection extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(String status) {
+  Widget _buildStatusChip(BuildContext context, AppLocalizations l10n, String status) {
     Color color;
     String label;
 
     switch (status) {
       case 'in_progress':
         color = Colors.orange;
-        label = 'בתהליך';
+        label = l10n.taskStatusInProgress;
         break;
       case 'done':
         color = Colors.green;
-        label = 'הושלם';
+        label = l10n.taskStatusDone;
         break;
       default:
         color = Colors.red;
-        label = 'ממתין';
+        label = l10n.taskStatusPending;
     }
 
     return Chip(

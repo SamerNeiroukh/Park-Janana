@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import '../models/post_model.dart';
 
@@ -243,10 +244,10 @@ class NewsfeedService {
         double? aspectRatio;
 
         if (isVideo) {
-          reportProgress(0.0, 'מעלה סרטון ${i + 1}/$total...');
+          reportProgress(0.0, await _uploadingVideoStatus(i + 1, total));
         } else {
           aspectRatio = await _readImageAspectRatio(file);
-          reportProgress(0.0, 'מעלה תמונה ${i + 1}/$total...');
+          reportProgress(0.0, await _uploadingImageStatus(i + 1, total));
         }
 
         final extension = file.path.split('.').last.toLowerCase();
@@ -267,7 +268,7 @@ class NewsfeedService {
                 ? snapshot.bytesTransferred / snapshot.totalBytes
                 : 0.0;
             // Upload phase occupies 0–85% of the file's slice
-            reportProgress(byteRatio * 0.85, 'מעלה ${i + 1}/$total...');
+            reportProgress(byteRatio * 0.85, await _uploadingStatus(i + 1, total));
           } else if (state == TaskState.error) {
             throw Exception('Upload failed for file ${i + 1}');
           } else if (state == TaskState.canceled) {
@@ -282,7 +283,7 @@ class NewsfeedService {
         // Thumbnail generation for videos (85–100% of slice)
         String? thumbnailUrl;
         if (isVideo) {
-          reportProgress(0.85, 'מייצר תמונה מקדימה...');
+          reportProgress(0.85, await _generatingThumbnailStatus());
           final result = await _generateAndUploadThumbnail(
             videoFile: file,
             postId: postId,
@@ -292,7 +293,7 @@ class NewsfeedService {
           aspectRatio = result.aspectRatio;
         }
 
-        reportProgress(1.0, i + 1 == total ? 'מפרסם פוסט...' : 'קובץ ${i + 1} הועלה');
+        reportProgress(1.0, i + 1 == total ? await _publishingPostStatus() : await _fileUploadedStatus(i + 1));
 
         uploadedMedia.add(PostMedia(
           url: url,
@@ -440,5 +441,66 @@ class NewsfeedService {
     QuerySnapshot<Map<String, dynamic>> snapshot,
   ) {
     return snapshot.docs.map((doc) => PostModel.fromFirestore(doc)).toList();
+  }
+
+  // ── Locale-aware upload progress helpers ─────────────────────────────────
+
+  static Future<String> _savedLocaleCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('app_locale') ?? 'he';
+  }
+
+  static Future<String> _uploadingVideoStatus(int current, int total) async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Uploading video $current of $total...';
+      case 'ar': return 'جارٍ رفع الفيديو $current من $total...';
+      default:   return 'מעלה סרטון $current מתוך $total...';
+    }
+  }
+
+  static Future<String> _uploadingImageStatus(int current, int total) async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Uploading image $current of $total...';
+      case 'ar': return 'جارٍ رفع الصورة $current من $total...';
+      default:   return 'מעלה תמונה $current מתוך $total...';
+    }
+  }
+
+  static Future<String> _uploadingStatus(int current, int total) async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Uploading $current of $total...';
+      case 'ar': return 'جارٍ الرفع $current من $total...';
+      default:   return 'מעלה $current מתוך $total...';
+    }
+  }
+
+  static Future<String> _generatingThumbnailStatus() async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Generating thumbnail...';
+      case 'ar': return 'جارٍ إنشاء الصورة المصغرة...';
+      default:   return 'מייצר תמונה מקדימה...';
+    }
+  }
+
+  static Future<String> _publishingPostStatus() async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Publishing post...';
+      case 'ar': return 'جارٍ نشر المنشور...';
+      default:   return 'מפרסם פוסט...';
+    }
+  }
+
+  static Future<String> _fileUploadedStatus(int current) async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'File $current uploaded';
+      case 'ar': return 'تم رفع الملف $current';
+      default:   return 'קובץ $current הועלה';
+    }
   }
 }

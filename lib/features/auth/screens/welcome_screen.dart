@@ -4,8 +4,8 @@ import 'package:park_janana/features/auth/screens/login_screen.dart';
 import 'package:park_janana/features/auth/screens/new_worker_screen.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
-import 'package:park_janana/core/constants/app_strings.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WelcomeScreen — animated entry screen with staggered entrance, floating
@@ -207,7 +207,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     child: FadeTransition(
                       opacity: _titleFade,
                       child: Text(
-                        AppStrings.appTitle,
+                        AppLocalizations.of(context).appTitle,
                         textAlign: TextAlign.center,
                         style: AppTheme.titleStyle.copyWith(
                           fontSize: 40,
@@ -249,7 +249,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     child: FadeTransition(
                       opacity: _button1Fade,
                       child: _PressableButton(
-                        label: AppStrings.loginButtonText,
+                        label: AppLocalizations.of(context).loginButton,
                         color: AppColors.primaryBlue,
                         onPressed: () =>
                             _navigateToScreen(context, const LoginScreen()),
@@ -265,7 +265,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     child: FadeTransition(
                       opacity: _button2Fade,
                       child: _PressableButton(
-                        label: AppStrings.newWorkerButtonText,
+                        label: AppLocalizations.of(context).newWorkerButton,
                         color: AppColors.secondaryYellow,
                         onPressed: () =>
                             _navigateToScreen(context, const NewWorkerScreen()),
@@ -394,7 +394,7 @@ class _WelcomeSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'ברוכים הבאים',
+      AppLocalizations.of(context).welcomeSubtitle,
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 16,
@@ -535,15 +535,12 @@ class _PressableButtonState extends State<_PressableButton>
             ],
           ),
           alignment: Alignment.center,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Text(
-              widget.label,
-              style: AppTheme.buttonTextStyle.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+          child: Text(
+            widget.label,
+            style: AppTheme.buttonTextStyle.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
         ),

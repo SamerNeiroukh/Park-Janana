@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -80,20 +81,14 @@ class _NotificationHistoryScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
-            _buildHeader(),
-            Expanded(child: _buildBody()),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
+          _buildHeader(),
+          Expanded(child: _buildBody()),
+        ],
       ),
     );
   }
@@ -120,14 +115,14 @@ class _NotificationHistoryScreenState
                 color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
-          const Expanded(
-            child: Text('התראות', style: TaskTheme.heading2),
+          Expanded(
+            child: Text(AppLocalizations.of(context).notificationsTitle, style: TaskTheme.heading2),
           ),
           if (_uid != null && !_isMarkingAll)
             TextButton.icon(
               onPressed: _markAllAsRead,
               icon: const Icon(PhosphorIconsRegular.checks, size: 16),
-              label: const Text('סמן הכל כנקרא'),
+              label: Text(AppLocalizations.of(context).markAllAsReadButton),
               style: TextButton.styleFrom(
                 foregroundColor: TaskTheme.primary,
                 textStyle: const TextStyle(
@@ -175,7 +170,7 @@ class _NotificationHistoryScreenState
                 const Icon(PhosphorIconsRegular.warningCircle,
                     size: 48, color: TaskTheme.overdue),
                 const SizedBox(height: 12),
-                const Text('שגיאה בטעינת ההתראות', style: TaskTheme.body),
+                Text(AppLocalizations.of(context).loadNotificationsError, style: TaskTheme.body),
                 const SizedBox(height: 6),
                 Text('${snap.error}',
                     style: TaskTheme.caption, textAlign: TextAlign.center),
@@ -262,9 +257,9 @@ class _NotificationHistoryScreenState
                               color: cfg.color,
                               borderRadius: BorderRadius.circular(999),
                             ),
-                            child: const Text(
-                              'חדש',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context).newBadgeLabel,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
@@ -285,7 +280,7 @@ class _NotificationHistoryScreenState
                       ),
                     ],
                     const SizedBox(height: 4),
-                    Text(_relativeTime(item.createdAt), style: TaskTheme.caption),
+                    Text(_relativeTime(context, item.createdAt), style: TaskTheme.caption),
                   ],
                 ),
               ),
@@ -382,7 +377,7 @@ class _NotificationHistoryScreenState
       debugPrint('_openShift error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה בפתיחת המשמרת')),
+          SnackBar(content: Text(AppLocalizations.of(context).openShiftError)),
         );
       }
     }
@@ -422,7 +417,7 @@ class _NotificationHistoryScreenState
       debugPrint('_openTask error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה בפתיחת המשימה')),
+          SnackBar(content: Text(AppLocalizations.of(context).openTaskError)),
         );
       }
     }
@@ -489,13 +484,14 @@ class _NotificationHistoryScreenState
     return false;
   }
 
-  String _relativeTime(DateTime dt) {
+  String _relativeTime(BuildContext context, DateTime dt) {
+    final l10n = AppLocalizations.of(context);
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'עכשיו';
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דקות';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
-    if (diff.inDays == 1) return 'אתמול';
-    return 'לפני ${diff.inDays} ימים';
+    if (diff.inMinutes < 1) return l10n.nowLabel;
+    if (diff.inMinutes < 60) return l10n.minutesAgoLabel(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgoLabel(diff.inHours);
+    if (diff.inDays == 1) return l10n.yesterdayLabel;
+    return l10n.daysAgoLabel(diff.inDays);
   }
 
   _TypeConfig _typeConfig(String type) {
@@ -540,6 +536,7 @@ class _NotificationHistoryScreenState
   // ── Empty state ───────────────────────────────────────────────────────────
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -547,10 +544,10 @@ class _NotificationHistoryScreenState
           const Icon(PhosphorIconsRegular.bell,
               size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
-          Text('אין התראות',
+          Text(l10n.noNotificationsEmpty,
               style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary)),
           const SizedBox(height: 6),
-          const Text('התראות חדשות יופיעו כאן', style: TaskTheme.caption),
+          Text(l10n.newNotificationsWillAppear, style: TaskTheme.caption),
         ],
       ),
     );

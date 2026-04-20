@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -25,6 +26,13 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   DateTime _currentWeekStart = DateTimeUtils.startOfWeek(DateTime.now());
   DateTime _selectedDay = DateTime.now();
   bool _isNavigating = false;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   Color _getDepartmentColor(String department) {
     switch (department) {
@@ -62,23 +70,17 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FB),
-        floatingActionButton: _buildCreateShiftButton(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
-            _buildWeekHeader(),
-            _buildDaySelector(),
-            Expanded(child: _buildShiftList()),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FB),
+      floatingActionButton: _buildCreateShiftButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      body: Column(
+        children: [
+          const UserHeader(),
+          _buildWeekHeader(),
+          _buildDaySelector(),
+          Expanded(child: _buildShiftList()),
+        ],
       ),
     );
   }
@@ -124,9 +126,9 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
           Expanded(
             child: Column(
               children: [
-                const Text(
-                  'ניהול משמרות',
-                  style: TextStyle(
+                Text(
+                  _l10n.managerShiftDashboardTitle,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -182,14 +184,12 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
     return Container(
       height: 90,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          reverse: true, // Shows Sunday on right, Saturday on left
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: 7,
-          itemBuilder: (context, index) {
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        reverse: Directionality.of(context) == TextDirection.rtl,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: 7,
+        itemBuilder: (context, index) {
             // RTL order: Sunday (index 0) on right → Saturday (index 6) on left
             final DateTime day = _currentWeekStart.add(Duration(days: index));
 
@@ -233,7 +233,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateTimeUtils.getHebrewWeekdayName(day.weekday),
+                    DateTimeUtils.getLocalizedWeekdayName(day.weekday, Localizations.localeOf(context).languageCode),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -271,7 +271,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
           );
           },
         ),
-      ),
     );
   }
 
@@ -369,7 +368,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                   children: [
                     // Main row
                     Row(
-                      textDirection: TextDirection.rtl,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
@@ -406,7 +404,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               ),
                               const SizedBox(height: 4),
                               Row(
-                                textDirection: TextDirection.rtl,
                                 children: [
                                   Icon(PhosphorIconsRegular.clock,
                                       size: 14, color: Colors.grey.shade500),
@@ -433,7 +430,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                     const SizedBox(height: 12),
                     // Info row
                     Row(
-                      textDirection: TextDirection.rtl,
                       children: [
                         if (!isCancelled) ...[
                           // Workers count
@@ -448,7 +444,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              textDirection: TextDirection.rtl,
                               children: [
                                 Icon(
                                   PhosphorIconsRegular.users,
@@ -479,7 +474,6 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                textDirection: TextDirection.rtl,
                                 children: [
                                   const Icon(
                                     PhosphorIconsRegular.clipboardText,
@@ -488,7 +482,7 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '$requestsCount בקשות',
+                                    _l10n.pendingRequestsCount(requestsCount),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -514,19 +508,18 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            textDirection: TextDirection.rtl,
                             children: [
                               if (isCancelled)
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 4),
+                                  padding: const EdgeInsetsDirectional.only(end: 4),
                                   child: Icon(PhosphorIconsRegular.xCircle, size: 14,
                                       color: Colors.red.shade600),
                                 ),
                               Text(
                                 shift.status == 'active'
-                                    ? 'פעיל'
+                                    ? _l10n.shiftStatusActive
                                     : shift.status == 'cancelled'
-                                        ? 'בוטלה'
+                                        ? _l10n.shiftStatusCancelled
                                         : shift.status,
                                 style: TextStyle(
                                   fontSize: 11,
@@ -554,8 +547,8 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
-      child: Text('אין משמרות ליום זה'),
+    return Center(
+      child: Text(_l10n.noShiftsForDay),
     );
   }
 
@@ -567,9 +560,9 @@ class _ManagerShiftsScreenState extends State<ManagerShiftsScreen> {
     return FloatingActionButton.extended(
       backgroundColor: AppColors.primary,
       icon: const Icon(PhosphorIconsRegular.plus, color: Colors.white),
-      label: const Text(
-        'משמרת חדשה',
-        style: TextStyle(color: Colors.white),
+      label: Text(
+        _l10n.newShiftFab,
+        style: const TextStyle(color: Colors.white),
       ),
       onPressed: _isNavigating
           ? null

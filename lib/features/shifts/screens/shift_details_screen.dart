@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
@@ -12,6 +13,7 @@ import 'package:park_janana/core/widgets/message_bubble.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 import 'package:park_janana/features/workers/screens/users_screen.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
+import 'package:park_janana/core/utils/datetime_utils.dart';
 import 'edit_shift_screen.dart';
 
 class ShiftDetailsScreen extends StatefulWidget {
@@ -49,6 +51,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   bool _isSaving = false;
   bool _showSaveBar = true;
   final ScrollController _scrollController = ScrollController();
+  late AppLocalizations _l10n;
 
   bool get _hasUnsavedChanges =>
       _pendingApprovals.isNotEmpty ||
@@ -63,6 +66,12 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       _pendingRemovals.length +
       _pendingUndos.length +
       _pendingAdditions.length;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -193,15 +202,14 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
-              textDirection: TextDirection.rtl,
+            content: Row(
               children: [
-                Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
-                SizedBox(width: 8),
+                const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'השינויים נשמרו בהצלחה!',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    _l10n.changesSavedSuccess,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -219,7 +227,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('שגיאה בשמירת השינויים: $e'),
+            content: Text(_l10n.saveChangesError(e.toString())),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
@@ -234,13 +242,10 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
   Future<bool?> _showSaveConfirmation(ShiftModel currentShift) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
+      builder: (context) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -251,33 +256,33 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 child: const Icon(PhosphorIconsRegular.floppyDisk, color: AppColors.success),
               ),
               const SizedBox(width: 12),
-              const Text('שמירת שינויים'),
+              Text(_l10n.saveChangesDialogTitle),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'השינויים הבאים יישמרו:',
-                style: TextStyle(fontWeight: FontWeight.w600),
+              Text(
+                _l10n.followingChangesSavedLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
               if (_pendingApprovals.isNotEmpty)
-                _buildChangeItem('${_pendingApprovals.length} עובדים יאושרו',
+                _buildChangeItem(_l10n.workersWillBeApproved(_pendingApprovals.length),
                     AppColors.success),
               if (_pendingRejections.isNotEmpty)
                 _buildChangeItem(
-                    '${_pendingRejections.length} בקשות יידחו', Colors.red),
+                    _l10n.requestsWillBeRejected(_pendingRejections.length), Colors.red),
               if (_pendingRemovals.isNotEmpty)
                 _buildChangeItem(
-                    '${_pendingRemovals.length} עובדים יוסרו', Colors.red),
+                    _l10n.workersWillBeRemoved(_pendingRemovals.length), Colors.red),
               if (_pendingUndos.isNotEmpty)
                 _buildChangeItem(
-                    '${_pendingUndos.length} עובדים יוחזרו לרשימת הממתינים',
+                    _l10n.workersWillBeRestored(_pendingUndos.length),
                     AppColors.warningOrange),
               if (_pendingAdditions.isNotEmpty)
-                _buildChangeItem('${_pendingAdditions.length} עובדים יתווספו',
+                _buildChangeItem(_l10n.workersWillBeAdded(_pendingAdditions.length),
                     AppColors.success),
             ],
           ),
@@ -285,7 +290,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child:
-                  Text('ביטול', style: TextStyle(color: Colors.grey.shade600)),
+                  Text(_l10n.cancelButton, style: TextStyle(color: Colors.grey.shade600)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
@@ -295,11 +300,10 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('שמור', style: TextStyle(color: Colors.white)),
+              child: Text(_l10n.saveButton, style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -307,9 +311,8 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
-          Icon(PhosphorIconsRegular.arrowLeft, size: 16, color: color),
+          Icon(PhosphorIconsRegular.arrowRight, size: 16, color: color),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -327,10 +330,10 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
 
     final result = await showAppDialog(
       context,
-      title: 'שינויים לא שמורים',
-      message: 'יש לך $_pendingChangesCount שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
-      confirmText: 'צא ללא שמירה',
-      cancelText: 'המשך לערוך',
+      title: _l10n.unsavedChangesTitle,
+      message: _l10n.unsavedChangesCountMessage(_pendingChangesCount),
+      confirmText: _l10n.exitWithoutSavingButton,
+      cancelText: _l10n.continueEditingButton,
       icon: PhosphorIconsRegular.warning,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
       isDestructive: true,
@@ -384,26 +387,21 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           Navigator.of(context).pop();
         }
       },
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          backgroundColor: const Color(0xFFF8F9FB),
-          body: StreamBuilder<ShiftModel>(
-            stream: widget.shiftService.getShiftStream(widget.shift.id),
-            initialData: widget.shift,
-            builder: (context, snapshot) {
-              final ShiftModel currentShift = snapshot.data ?? widget.shift;
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FB),
+        body: StreamBuilder<ShiftModel>(
+          stream: widget.shiftService.getShiftStream(widget.shift.id),
+          initialData: widget.shift,
+          builder: (context, snapshot) {
+            final ShiftModel currentShift = snapshot.data ?? widget.shift;
 
-              final departmentColor =
-                  _getDepartmentColor(currentShift.department);
-              final departmentIcon = _getDepartmentIcon(currentShift.department);
+            final departmentColor =
+                _getDepartmentColor(currentShift.department);
+            final departmentIcon = _getDepartmentIcon(currentShift.department);
 
-              return Column(
-                children: [
-                  const Directionality(
-                    textDirection: TextDirection.ltr,
-                    child: UserHeader(),
-                  ),
+            return Column(
+              children: [
+                const UserHeader(),
                   // Unsaved changes banner
                   if (_hasUnsavedChanges)
                     _buildUnsavedBanner(departmentColor),
@@ -451,7 +449,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             },
           ),
         ),
-      ),
     );
   }
 
@@ -466,7 +463,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '$_pendingChangesCount שינויים ממתינים לשמירה',
+              _l10n.pendingChangesBanner(_pendingChangesCount),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -484,9 +481,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 _pendingAdditions.clear();
               });
             },
-            child: const Text(
-              'בטל הכל',
-              style: TextStyle(
+            child: Text(
+              _l10n.cancelAllButton,
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -544,7 +541,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                         const Icon(PhosphorIconsRegular.floppyDisk, color: Colors.white, size: 22),
                         const SizedBox(width: 10),
                         Text(
-                          'שמור שינויים ($_pendingChangesCount)',
+                          _l10n.saveChangesWithCount(_pendingChangesCount),
                           style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
@@ -629,7 +626,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                           size: 14, color: AppColors.warningOrange),
                       const SizedBox(width: 4),
                       Text(
-                        '$requests בקשות',
+                        _l10n.pendingRequestsCount(requests),
                         style: const TextStyle(
                           color: AppColors.warningOrange,
                           fontWeight: FontWeight.w600,
@@ -660,13 +657,11 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                     if ((result ?? false) && mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Row(
-                            textDirection: TextDirection.rtl,
-                            mainAxisAlignment: MainAxisAlignment.end,
+                          content: Row(
                             children: [
-                              Text('המשמרת עודכנה בהצלחה'),
-                              SizedBox(width: 8),
-                              Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
+                              const Icon(PhosphorIconsFill.checkCircle, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(_l10n.shiftUpdatedSuccess),
                             ],
                           ),
                           backgroundColor: AppColors.success,
@@ -701,7 +696,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                       size: 18, color: Colors.grey.shade500),
                   const SizedBox(width: 8),
                   Text(
-                    shift.formattedDateWithDay,
+                    DateTimeUtils.formatDateWithDayLocalized(shift.date, Localizations.localeOf(context).languageCode),
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.grey.shade700,
@@ -732,7 +727,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           Row(
             children: [
               Text(
-                'עובדים',
+                _l10n.workersLabel,
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -740,9 +735,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Stack(
+                child: Stack(
                     children: [
                       Container(
                         height: 8,
@@ -773,7 +766,6 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                       ),
                     ],
                   ),
-                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -797,11 +789,11 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
 
   Widget _buildTabBar(ShiftModel shift, Color departmentColor) {
     final tabs = [
-      _TabItem(PhosphorIconsRegular.clipboardText, 'בקשות',
+      _TabItem(PhosphorIconsRegular.clipboardText, _l10n.requestsTabLabel,
           shift.requestedWorkers.length),
-      _TabItem(PhosphorIconsRegular.usersThree, 'מאושרים', shift.assignedWorkers.length),
-      _TabItem(PhosphorIconsRegular.chatCircle, 'הודעות', shift.messages.length),
-      _TabItem(PhosphorIconsRegular.info, 'פרטים', 0),
+      _TabItem(PhosphorIconsRegular.usersThree, _l10n.approvedTabLabel, shift.assignedWorkers.length),
+      _TabItem(PhosphorIconsRegular.chatCircle, _l10n.messagesTabLabel, shift.messages.length),
+      _TabItem(PhosphorIconsRegular.info, _l10n.detailsTabLabel, 0),
     ];
 
     return Container(
@@ -898,8 +890,8 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     return _buildWorkerList(
       workerIds: shift.requestedWorkers,
       emptyIcon: PhosphorIconsRegular.hourglass,
-      emptyText: 'אין בקשות ממתינות',
-      emptySubtext: 'בקשות חדשות יופיעו כאן',
+      emptyText: _l10n.noPendingRequests,
+      emptySubtext: _l10n.newRequestsWillAppear,
       departmentColor: departmentColor,
       actionBuilder: (user) {
         final isPendingApproval = _pendingApprovals.contains(user.uid);
@@ -907,14 +899,14 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
 
         if (isPendingApproval) {
           return _buildPendingLabel(
-            'יאושר',
+            _l10n.willBeApprovedLabel,
             AppColors.success,
             () => _cancelPendingAction(user.uid),
           );
         }
         if (isPendingRejection) {
           return _buildPendingLabel(
-            'יידחה',
+            _l10n.willBeRejectedLabel,
             Colors.red,
             () => _cancelPendingAction(user.uid),
           );
@@ -994,7 +986,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      isFull ? 'המשמרת מלאה' : 'הוסף עובדים',
+                      isFull ? _l10n.shiftFullChip : _l10n.addWorkersButton,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -1024,8 +1016,8 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
     if (allWorkerIds.isEmpty) {
       return _buildEmptyState(
         PhosphorIconsRegular.prohibit,
-        'אין עובדים משובצים',
-        'לחץ על "הוסף עובדים" להוספה ידנית',
+        _l10n.noAssignedWorkersEmpty,
+        _l10n.clickAddWorkersHint,
         departmentColor,
       );
     }
@@ -1052,19 +1044,19 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
             Widget actions;
             if (isPendingAddition) {
               actions = _buildPendingLabel(
-                'יתווסף',
+                _l10n.willBeAddedLabel,
                 AppColors.success,
                 () => _cancelPendingAction(user.uid),
               );
             } else if (isPendingRemoval) {
               actions = _buildPendingLabel(
-                'יוסר',
+                _l10n.willBeRemovedLabel,
                 Colors.red,
                 () => _cancelPendingAction(user.uid),
               );
             } else if (isPendingUndo) {
               actions = _buildPendingLabel(
-                'יוחזר',
+                _l10n.willBeRestoredLabel,
                 AppColors.warningOrange,
                 () => _cancelPendingAction(user.uid),
               );
@@ -1250,8 +1242,8 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           child: shift.messages.isEmpty
               ? _buildEmptyState(
                   PhosphorIconsRegular.chatCircle,
-                  'אין הודעות עדיין',
-                  'שלח הודעה ראשונה',
+                  _l10n.noMessagesYet,
+                  _l10n.sendFirstMessage,
                   departmentColor,
                 )
               : ListView.builder(
@@ -1313,10 +1305,9 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
           Expanded(
             child: TextField(
               controller: _messageController,
-              textDirection: TextDirection.rtl,
               style: const TextStyle(fontSize: 15),
               decoration: InputDecoration(
-                hintText: 'כתוב הודעה...',
+                hintText: _l10n.writeMessageHint,
                 hintStyle: TextStyle(color: Colors.grey.shade500),
                 border: InputBorder.none,
                 contentPadding:
@@ -1340,30 +1331,30 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
       children: [
         _buildInfoCard(
           icon: PhosphorIconsRegular.flag,
-          label: 'סטטוס',
-          value: shift.status == 'active' ? 'פעיל' : shift.status,
+          label: _l10n.statusLabel,
+          value: shift.status == 'active' ? _l10n.shiftStatusActive : shift.status,
           valueColor: shift.status == 'active' ? AppColors.success : null,
           departmentColor: departmentColor,
         ),
         _buildInfoCard(
           icon: PhosphorIconsRegular.user,
-          label: 'נוצר על ידי',
+          label: _l10n.createdByLabel,
           value: shift.createdBy,
           isUserId: true,
           departmentColor: departmentColor,
         ),
         _buildInfoCard(
           icon: PhosphorIconsRegular.calendarBlank,
-          label: 'תאריך יצירה',
+          label: _l10n.creationDateLabel,
           value: shift.createdAt == null
               ? '-'
-              : DateFormat('dd/MM/yyyy בשעה HH:mm')
+              : DateFormat('dd/MM/yyyy – HH:mm')
                   .format(shift.createdAt!.toDate()),
           departmentColor: departmentColor,
         ),
         _buildInfoCard(
           icon: PhosphorIconsRegular.pencilSimple,
-          label: 'עודכן לאחרונה על ידי',
+          label: _l10n.lastUpdatedByLabel,
           value: shift.lastUpdatedBy,
           isUserId: true,
           departmentColor: departmentColor,
@@ -1371,7 +1362,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
         if (shift.shiftManager.isNotEmpty)
           _buildInfoCard(
             icon: PhosphorIconsRegular.shieldStar,
-            label: 'אחראי משמרת',
+            label: _l10n.shiftManagerLabel,
             value: shift.shiftManager,
             isUserId: true,
             departmentColor: departmentColor,
@@ -1430,7 +1421,7 @@ class _ShiftDetailsScreenState extends State<ShiftDetailsScreen>
                 return Expanded(
                   child: Text(
                     name,
-                    textAlign: TextAlign.left,
+                    textAlign: TextAlign.start,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Centralized design system for the task management feature.
@@ -58,16 +59,16 @@ class TaskTheme {
     }
   }
 
-  static String statusLabel(String status) {
+  static String statusLabel(String status, AppLocalizations l10n) {
     switch (status) {
       case 'in_progress':
-        return 'בביצוע';
+        return l10n.taskStatusInProgress;
       case 'pending_review':
-        return 'ממתין לאישור';
+        return l10n.taskStatusPendingReview;
       case 'done':
-        return 'הושלם';
+        return l10n.taskStatusDone;
       default:
-        return 'טרם התחיל';
+        return l10n.taskStatusPending;
     }
   }
 
@@ -96,14 +97,14 @@ class TaskTheme {
     }
   }
 
-  static String priorityLabel(String priority) {
+  static String priorityLabel(String priority, AppLocalizations l10n) {
     switch (priority) {
       case 'high':
-        return 'גבוהה';
+        return l10n.taskPriorityHigh;
       case 'medium':
-        return 'בינונית';
+        return l10n.taskPriorityMedium;
       default:
-        return 'נמוכה';
+        return l10n.taskPriorityLow;
     }
   }
 
@@ -119,20 +120,20 @@ class TaskTheme {
   }
 
   // ─── Department helpers ────────────────────────────────────
-  static String departmentLabel(String key) {
+  static String departmentLabel(String key, AppLocalizations l10n) {
     switch (key) {
       case 'paintball':
-        return 'פיינטבול';
+        return l10n.deptPaintball;
       case 'ropes':
-        return 'פארק חבלים';
+        return l10n.deptRopes;
       case 'carting':
-        return 'קרטינג';
+        return l10n.deptCarting;
       case 'water_park':
-        return 'פארק מים';
+        return l10n.deptWaterPark;
       case 'jimbory':
-        return 'ג\'ימבורי';
+        return l10n.deptJimbory;
       default:
-        return 'כללי';
+        return l10n.deptGeneral;
     }
   }
 

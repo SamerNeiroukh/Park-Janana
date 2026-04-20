@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:park_janana/core/constants/app_strings.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/auth/services/auth_service.dart';
 import 'package:park_janana/core/utils/custom_exception.dart';
@@ -9,6 +8,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/features/auth/screens/forgot_password_screen.dart';
 import 'package:park_janana/core/services/biometric_service.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -92,11 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginWithBiometrics() async {
     setState(() => _isLoading = true);
+    final reason = AppLocalizations.of(context).biometricLoginReason;
     try {
-      final authenticated = await _biometricService.authenticate();
+      final authenticated = await _biometricService.authenticate(reason: reason);
       if (!authenticated) {
         if (!mounted) return;
-        _showBanner('אימות ביומטרי נכשל. אנא נסה שוב.', _BannerType.error);
+        _showBanner(AppLocalizations.of(context).biometricAuthFailed, _BannerType.error);
         return;
       }
 
@@ -104,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (creds == null) {
         if (!mounted) return;
         _showBanner(
-          'לא נמצאו פרטי כניסה שמורים. אנא כנס עם אימייל וסיסמה.',
+          AppLocalizations.of(context).noBiometricCredentials,
           _BannerType.warning,
         );
         setState(() => _biometricLoginEnabled = false);
@@ -119,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _showBanner(e.message, _BannerType.error);
     } catch (e) {
       if (!mounted) return;
-      _showBanner('שגיאה: $e', _BannerType.error);
+      _showBanner(AppLocalizations.of(context).uploadError(e.toString()), _BannerType.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -127,12 +128,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _offerBiometricSetup(String email, String password) async {
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     final enable = await showAppDialog(
       context,
-      title: 'כניסה ביומטרית',
-      message: 'האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?',
-      confirmText: 'אפשר',
-      cancelText: 'לא, תודה',
+      title: l10n.biometricLoginTitle,
+      message: l10n.biometricSetupPrompt,
+      confirmText: l10n.enableBiometricButton,
+      cancelText: l10n.declineBiometricButton,
       icon: PhosphorIconsRegular.fingerprint,
       iconGradient: const [Color(0xFF6366F1), Color(0xFF4338CA)],
     );
@@ -190,19 +192,20 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      _showBanner('שגיאה: $e', _BannerType.error);
+      _showBanner(AppLocalizations.of(context).uploadError(e.toString()), _BannerType.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _showRejectedDialog(String uid) {
+    final l10n = AppLocalizations.of(context);
     showAppDialog(
       context,
-      title: 'הבקשה נדחתה',
-      message: 'בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.',
-      confirmText: 'שלח בקשה מחדש',
-      cancelText: 'ביטול',
+      title: l10n.applicationRejectedTitle,
+      message: l10n.applicationRejectedMessage,
+      confirmText: l10n.reApplyButton,
+      cancelText: l10n.cancelButton,
       icon: PhosphorIconsRegular.xCircle,
       iconGradient: const [Color(0xFFFF8C00), Color(0xFFE65100)],
     ).then((confirmed) async {
@@ -220,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _authService.reApply(uid);
       if (!mounted) return;
       _showBanner(
-        'הבקשה נשלחה מחדש. ההנהלה תעדכן אותך בהחלטה.',
+        AppLocalizations.of(context).reApplySuccess,
         _BannerType.success,
       );
     } on CustomException catch (e) {
@@ -243,315 +246,307 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final size = MediaQuery.of(context).size;
     final topPad = MediaQuery.of(context).padding.top;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: _kHeroBg,
-        body: Column(
-          children: [
-            // ── Hero ──────────────────────────────────────────────────────────
-            SizedBox(
-              height: size.height * _kHeroHeight,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // White background
-                  const ColoredBox(color: _kHeroBg),
+    return Scaffold(
+      backgroundColor: _kHeroBg,
+      body: Column(
+        children: [
+          // ── Hero ──────────────────────────────────────────────────────────
+          SizedBox(
+            height: size.height * _kHeroHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                const ColoredBox(color: _kHeroBg),
 
-                  // Blob — large, top-right (sky blue)
-                  Positioned(
-                    top: -55,
-                    right: -55,
+                Positioned(
+                  top: -55,
+                  right: -55,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _kBlobBlue,
+                    ),
+                  ),
+                ),
+
+                Positioned(
+                  bottom: -30,
+                  left: -30,
+                  child: Container(
+                    width: 130,
+                    height: 130,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _kBlobYellow,
+                    ),
+                  ),
+                ),
+
+                Positioned(
+                  top: topPad + 30,
+                  left: 60,
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _kBlobRed,
+                    ),
+                  ),
+                ),
+
+                Center(
+                  child: Image.asset(
+                    AppConstants.parkLogo,
+                    height: 100,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                Positioned(
+                  top: topPad + 8,
+                  left: isRTL ? null : 16,
+                  right: isRTL ? 16 : null,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _kBlobBlue,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        PhosphorIconsRegular.arrowLeft,
+                        color: AppColors.primary,
+                        size: 18,
                       ),
                     ),
                   ),
+                ),
+              ],
+            ),
+          ),
 
-                  // Blob — medium, bottom-left (warm yellow)
-                  Positioned(
-                    bottom: -30,
-                    left: -30,
-                    child: Container(
-                      width: 130,
-                      height: 130,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _kBlobYellow,
-                      ),
-                    ),
-                  ),
-
-                  // Blob — small, top-left (soft coral)
-                  Positioned(
-                    top: topPad + 30,
-                    left: 60,
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _kBlobRed,
-                      ),
-                    ),
-                  ),
-
-                  // Park logo — centered
-                  Center(
-                    child: Image.asset(
-                      AppConstants.parkLogo,
-                      height: 100,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-
-                  // Back button — top left, light style for white bg
-                  Positioned(
-                    top: topPad + 8,
-                    left: 16,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          PhosphorIconsRegular.arrowRight,
-                          color: AppColors.primary,
-                          size: 18,
-                        ),
-                      ),
-                    ),
+          // ── Content card ─────────────────────────────────────────────────
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: _kCardBg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 20,
+                    offset: Offset(0, -4),
                   ),
                 ],
               ),
-            ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(28, 28, 28, 32),
+                child: Form(
+                  key: _formKey,
+                  child: AutofillGroup(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.welcomeTitle,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          l10n.loginCredentialsPrompt,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
 
-            // ── Content card ─────────────────────────────────────────────────
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: _kCardBg,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 20,
-                      offset: Offset(0, -4),
-                    ),
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(28, 28, 28, 32),
-                  child: Form(
-                    key: _formKey,
-                    child: AutofillGroup(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Title
-                          const Text(
-                            'שלום, ברוכים הבאים',
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                        const SizedBox(height: 24),
+
+                        // ── Inline banner ─────────────────────────────────
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                          child: _bannerMessage != null
+                              ? _StatusBanner(
+                                  message: _bannerMessage!,
+                                  type: _bannerType,
+                                  onDismiss: _dismissBanner,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+
+                        // ── Email field ───────────────────────────────────
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          textAlign: TextAlign.right,
+                          decoration: _inputDecoration(
+                            label: l10n.emailFieldLabel,
+                            hint: l10n.emailFieldHint,
+                            icon: PhosphorIconsRegular.envelope,
+                            errorText: _emailError,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.emailRequiredValidation;
+                            }
+                            if (!value.contains('@')) {
+                              return l10n.emailInvalidValidation;
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ── Password field ────────────────────────────────
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          autofillHints: const [AutofillHints.password],
+                          textAlign: TextAlign.right,
+                          decoration: _inputDecoration(
+                            label: l10n.passwordFieldLabel,
+                            hint: l10n.passwordFieldHint,
+                            icon: PhosphorIconsRegular.lock,
+                            errorText: _passwordError,
+                            suffix: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? PhosphorIconsRegular.eye
+                                    : PhosphorIconsRegular.eyeSlash,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            'אנא הכנס את פרטי הכניסה שלך',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.passwordRequiredError;
+                            }
+                            if (value.length < 6) {
+                              return l10n.passwordLengthError;
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // ── Forgot password ───────────────────────────────
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ForgotPasswordScreen(),
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // ── Inline banner ─────────────────────────────────
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                            child: _bannerMessage != null
-                                ? _StatusBanner(
-                                    message: _bannerMessage!,
-                                    type: _bannerType,
-                                    onDismiss: _dismissBanner,
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-
-                          // ── Email field ───────────────────────────────────
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            autofillHints: const [AutofillHints.email],
-                            textAlign: TextAlign.right,
-                            decoration: _inputDecoration(
-                              label: 'אימייל',
-                              hint: 'הכנס את כתובת האימייל שלך',
-                              icon: PhosphorIconsRegular.envelope,
-                              errorText: _emailError,
+                            child: Text(
+                              l10n.forgotPassword,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                                decorationColor: AppColors.primary,
+                              ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'אנא הכנס כתובת אימייל';
-                              }
-                              if (!value.contains('@')) {
-                                return 'אנא הכנס כתובת אימייל תקינה';
-                              }
-                              return null;
-                            },
                           ),
+                        ),
 
+                        const SizedBox(height: 28),
+
+                        // ── Login button (gradient) ───────────────────────
+                        _GradientButton(
+                          onPressed: _isLoading ? null : _login,
+                          isLoading: _isLoading,
+                          label: l10n.loginButton,
+                        ),
+
+                        // ── Biometric ─────────────────────────────────────
+                        if (_biometricAvailable && _biometricLoginEnabled) ...[
                           const SizedBox(height: 16),
-
-                          // ── Password field ────────────────────────────────
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            autofillHints: const [AutofillHints.password],
-                            textAlign: TextAlign.right,
-                            decoration: _inputDecoration(
-                              label: 'סיסמה',
-                              hint: 'הכנס את הסיסמה שלך',
-                              icon: PhosphorIconsRegular.lock,
-                              errorText: _passwordError,
-                              suffix: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? PhosphorIconsRegular.eye
-                                      : PhosphorIconsRegular.eyeSlash,
-                                  color: AppColors.textSecondary,
-                                  size: 20,
+                          Row(
+                            children: [
+                              const Expanded(child: Divider()),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  l10n.orDividerText,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
                                 ),
-                                onPressed: () => setState(
-                                    () => _obscurePassword = !_obscurePassword),
                               ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'אנא הכנס סיסמה';
-                              }
-                              if (value.length < 6) {
-                                return 'הסיסמה חייבת להכיל לפחות 6 תווים';
-                              }
-                              return null;
-                            },
+                              const Expanded(child: Divider()),
+                            ],
                           ),
-
-                          const SizedBox(height: 12),
-
-                          // ── Forgot password ───────────────────────────────
-                          Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ForgotPasswordScreen(),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 52,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                    color: AppColors.primary, width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: const Text(
-                                AppStrings.forgotPassword,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.primary,
+                              onPressed:
+                                  _isLoading ? null : _loginWithBiometrics,
+                              icon: const Icon(PhosphorIconsRegular.fingerprint,
+                                  color: AppColors.primary, size: 22),
+                              label: Text(
+                                l10n.biometricLoginTitle,
+                                style: const TextStyle(
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.primary,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 28),
-
-                          // ── Login button (gradient) ───────────────────────
-                          _GradientButton(
-                            onPressed: _isLoading ? null : _login,
-                            isLoading: _isLoading,
-                            label: 'כניסה',
-                          ),
-
-                          // ── Biometric ─────────────────────────────────────
-                          if (_biometricAvailable && _biometricLoginEnabled) ...[
-                            const SizedBox(height: 16),
-                            const Row(
-                              children: [
-                                Expanded(child: Divider()),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  child: Text(
-                                    'או',
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(child: Divider()),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              height: 52,
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                      color: AppColors.primary, width: 1.5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                ),
-                                onPressed:
-                                    _isLoading ? null : _loginWithBiometrics,
-                                icon: const Icon(PhosphorIconsRegular.fingerprint,
-                                    color: AppColors.primary, size: 22),
-                                label: const Text(
-                                  'כניסה ביומטרית',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  // Shared input decoration factory
   InputDecoration _inputDecoration({
     required String label,
     required String hint,

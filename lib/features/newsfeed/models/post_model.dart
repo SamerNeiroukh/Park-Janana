@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 /// ===============================
 /// Media Model (for posts)
@@ -267,16 +268,16 @@ class PostModel {
     return result;
   }
 
-  String get categoryDisplayName {
+  String categoryDisplayName(AppLocalizations l10n) {
     switch (category) {
       case 'announcement':
-        return 'הודעה';
+        return l10n.postCategoryAnnouncement;
       case 'update':
-        return 'עדכון';
+        return l10n.postCategoryUpdate;
       case 'event':
-        return 'אירוע';
+        return l10n.postCategoryEvent;
       default:
-        return 'כללי';
+        return l10n.postCategoryGeneral;
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 /// Compact metrics status panel shown below the top bar.
 ///
@@ -52,9 +53,7 @@ class MetricsStatusPanel extends StatelessWidget {
             ),
           ],
         ),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Row(
+        child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // ── Date + dept chip ──────────────────────────────────
@@ -98,13 +97,13 @@ class MetricsStatusPanel extends StatelessWidget {
               // ── Stat chips ────────────────────────────────────────
               _StatChip(
                 value: '$daysWorked',
-                label: 'ימים',
+                label: AppLocalizations.of(context).daysLabel,
                 color: const Color(0xFF4F46E5),
               ),
               const SizedBox(width: 8),
               _StatChip(
                 value: hoursWorked.toStringAsFixed(1),
-                label: "שע'",
+                label: AppLocalizations.of(context).hoursShortLabel,
                 color: const Color(0xFF7C3AED),
               ),
 
@@ -119,7 +118,6 @@ class MetricsStatusPanel extends StatelessWidget {
             ],
           ),
         ),
-      ),
     )
         .animate()
         .fadeIn(duration: 350.ms, curve: Curves.easeOut)

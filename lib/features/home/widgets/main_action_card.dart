@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Primary Focus Card — the single dominant action card on the home screen.
@@ -22,7 +23,7 @@ class MainActionCard extends StatefulWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    this.ctaLabel = 'פתח',
+    this.ctaLabel = '',
     required this.icon,
     required this.gradient,
     required this.onTap,
@@ -65,9 +66,7 @@ class _MainActionCardState extends State<MainActionCard> {
               ),
             ],
           ),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Padding(
+          child: Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -110,7 +109,9 @@ class _MainActionCardState extends State<MainActionCard> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                widget.ctaLabel,
+                                widget.ctaLabel.isEmpty
+                                    ? AppLocalizations.of(context).ctaOpenButton
+                                    : widget.ctaLabel,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
@@ -153,7 +154,6 @@ class _MainActionCardState extends State<MainActionCard> {
             ),
           ),
         ),
-      ),
     )
         .animate()
         .fadeIn(duration: 400.ms, curve: Curves.easeOut)

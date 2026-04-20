@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
@@ -93,6 +94,7 @@ class ShiftCardState extends State<ShiftCard> {
   }
 
   Widget _buildMainInfo() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -111,7 +113,7 @@ class ShiftCardState extends State<ShiftCard> {
             const Icon(PhosphorIconsRegular.users, size: 18, color: AppColors.textSecondary),
             const SizedBox(width: 4),
             Text(
-              "${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers} עובדים",
+              "${widget.shift.assignedWorkers.length}/${widget.shift.maxWorkers} ${l10n.workersLabel}",
               style: AppTheme.bodyText,
             ),
             if (widget.shift.requestedWorkers.isNotEmpty) ...[
@@ -123,7 +125,7 @@ class ShiftCardState extends State<ShiftCard> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  "בקשות: ${widget.shift.requestedWorkers.length}",
+                  l10n.pendingRequestsCount(widget.shift.requestedWorkers.length),
                   style: AppTheme.bodyText.copyWith(
                     color: AppColors.warningOrange,
                     fontWeight: FontWeight.bold,

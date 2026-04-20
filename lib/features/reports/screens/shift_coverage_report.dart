@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/attendance/widgets/month_selector.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -16,10 +17,17 @@ class ShiftCoverageReport extends StatefulWidget {
 
 class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
   late DateTime _selectedMonth;
+  late AppLocalizations _l10n;
   bool _isLoading = true;
   bool _isExporting = false;
   List<DeptShiftStat> _deptStats = [];
   int _totalShifts = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   // Department display order
   static const _deptOrder = [
@@ -80,7 +88,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
         final a = agg[dept]!;
         ordered.add(DeptShiftStat(
           department: dept,
-          hebrewName: TaskTheme.departmentLabel(dept),
+          hebrewName: TaskTheme.departmentLabel(dept, _l10n),
           shiftCount: a.shiftCount,
           totalCapacity: a.totalCapacity,
           filledSlots: a.filledSlots,
@@ -91,7 +99,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
       if (!_deptOrder.contains(entry.key)) {
         ordered.add(DeptShiftStat(
           department: entry.key,
-          hebrewName: TaskTheme.departmentLabel(entry.key),
+          hebrewName: TaskTheme.departmentLabel(entry.key, _l10n),
           shiftCount: entry.value.shiftCount,
           totalCapacity: entry.value.totalCapacity,
           filledSlots: entry.value.filledSlots,
@@ -130,16 +138,11 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -159,7 +162,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('כיסוי משמרות', style: TaskTheme.heading2),
+                  Text(_l10n.shiftCoverageTitle, style: TaskTheme.heading2),
                 ],
               ),
             ),
@@ -195,7 +198,6 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
             if (!_isLoading && _deptStats.isNotEmpty) _buildBottomBar(),
           ],
         ),
-      ),
     );
   }
 
@@ -208,7 +210,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
               size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
-            'אין משמרות לחודש זה',
+            _l10n.noShiftsMonth,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -229,7 +231,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
             icon: PhosphorIconsRegular.calendarBlank,
             color: TaskTheme.inProgress,
             value: '$_totalShifts',
-            label: 'סה"כ משמרות',
+            label: _l10n.totalShiftsLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -238,7 +240,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
             icon: PhosphorIconsFill.checkCircle,
             color: TaskTheme.done,
             value: '$fillRate%',
-            label: 'מילוי משרות',
+            label: _l10n.staffingRateLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -247,7 +249,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
             icon: PhosphorIconsRegular.storefront,
             color: TaskTheme.pending,
             value: '${_deptStats.length}',
-            label: 'מחלקות פעילות',
+            label: _l10n.activeDepartmentsLabel,
           ),
         ),
       ],
@@ -310,12 +312,12 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(PhosphorIconsRegular.chartBar,
+              const Icon(PhosphorIconsRegular.chartBar,
                   size: 18, color: TaskTheme.done),
-              SizedBox(width: 8),
-              Text('משמרות לפי מחלקה', style: TaskTheme.heading3),
+              const SizedBox(width: 8),
+              Text(_l10n.shiftsByDepartmentTitle, style: TaskTheme.heading3),
             ],
           ),
           const SizedBox(height: 16),
@@ -332,7 +334,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                       getTooltipItem: (group, _, rod, _) {
                         final d = _deptStats[group.x];
                         return BarTooltipItem(
-                          '${d.hebrewName}\n${d.shiftCount} משמרות',
+                          '${d.hebrewName}\n${d.shiftCount} ${_l10n.totalShiftsLabel}',
                           const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -418,11 +420,11 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('פירוט מחלקות', style: TaskTheme.heading3),
+            const Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.departmentDetailsTitle, style: TaskTheme.heading3),
           ],
         ),
         const SizedBox(height: 10),
@@ -462,7 +464,7 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                         Text(d.hebrewName, style: TaskTheme.heading3),
                         const SizedBox(height: 4),
                         Text(
-                          '${d.shiftCount} משמרות · ${d.filledSlots}/${d.totalCapacity} מקומות מלאים',
+                          _l10n.shiftCountAndSlotsFormat(d.shiftCount, d.filledSlots, d.totalCapacity),
                           style: TaskTheme.caption,
                         ),
                       ],
@@ -527,15 +529,15 @@ class _ShiftCoverageReportState extends State<ShiftCoverageReport> {
                         width: 22,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2.5))
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(PhosphorIconsRegular.filePdf,
+                          const Icon(PhosphorIconsRegular.filePdf,
                               color: Colors.white, size: 20),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'ייצוא PDF',
-                            style: TextStyle(
+                            _l10n.exportPdfButton,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white),

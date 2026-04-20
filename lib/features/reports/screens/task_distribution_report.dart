@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
@@ -18,9 +19,16 @@ class TaskDistributionReport extends StatefulWidget {
 
 class _TaskDistributionReportState extends State<TaskDistributionReport> {
   late DateTime _selectedMonth;
+  late AppLocalizations _l10n;
   bool _isLoading = true;
   bool _isExporting = false;
   List<WorkerTaskStat> _stats = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -136,16 +144,11 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -165,7 +168,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('התפלגות משימות', style: TaskTheme.heading2),
+                  Text(_l10n.taskDistributionTitle, style: TaskTheme.heading2),
                 ],
               ),
             ),
@@ -201,7 +204,6 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
             if (!_isLoading && _stats.isNotEmpty) _buildBottomBar(),
           ],
         ),
-      ),
     );
   }
 
@@ -214,7 +216,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
               size: 64, color: TaskTheme.textTertiary),
           const SizedBox(height: 12),
           Text(
-            'אין משימות לחודש זה',
+            _l10n.noTasksMonth,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -240,7 +242,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
             icon: PhosphorIconsRegular.checkSquare,
             color: TaskTheme.inProgress,
             value: '$totalTasks',
-            label: 'סה"כ משימות',
+            label: _l10n.totalTasksLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -249,7 +251,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
             icon: PhosphorIconsRegular.users,
             color: TaskTheme.done,
             value: '${_stats.length}',
-            label: 'עובדים עם משימות',
+            label: _l10n.workersWithTasksLabel,
           ),
         ),
         const SizedBox(width: 10),
@@ -258,7 +260,7 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
             icon: PhosphorIconsRegular.percent,
             color: rateColor,
             value: '$overallRate%',
-            label: 'שיעור השלמה',
+            label: _l10n.completionRateLabel,
           ),
         ),
       ],
@@ -321,13 +323,14 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
               const Icon(PhosphorIconsRegular.chartBar,
                   size: 18, color: TaskTheme.pending),
               const SizedBox(width: 8),
-              const Text('שיעור השלמה לפי עובד', style: TaskTheme.heading3),
+              Text(_l10n.completionRateByWorkerTitle, style: TaskTheme.heading3),
               if (_stats.length > 10) ...[
                 const Spacer(),
-                const Text('(10 מובילים)', style: TaskTheme.caption),
+                Text(_l10n.topTenLabel, style: TaskTheme.caption),
               ],
             ],
           ),
+
           const SizedBox(height: 16),
           SizedBox(
             height: 200,
@@ -432,11 +435,11 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
-            SizedBox(width: 8),
-            Text('פירוט עובדים', style: TaskTheme.heading3),
+            const Icon(PhosphorIconsRegular.listBullets, size: 18, color: TaskTheme.primary),
+            const SizedBox(width: 8),
+            Text(_l10n.workerDetailsTitle, style: TaskTheme.heading3),
           ],
         ),
         const SizedBox(height: 10),
@@ -494,13 +497,13 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                         // Status chips row
                         Row(
                           children: [
-                            _chip('${s.done}', 'הושלם', TaskTheme.done),
+                            _chip('${s.done}', _l10n.taskStatusDone, TaskTheme.done),
                             const SizedBox(width: 6),
-                            _chip('${s.inProgress}', 'בביצוע',
+                            _chip('${s.inProgress}', _l10n.taskStatusInProgress,
                                 TaskTheme.inProgress),
                             const SizedBox(width: 6),
                             _chip(
-                                '${s.pending}', 'ממתין', TaskTheme.pending),
+                                '${s.pending}', _l10n.taskStatusPending, TaskTheme.pending),
                           ],
                         ),
                       ],
@@ -584,15 +587,15 @@ class _TaskDistributionReportState extends State<TaskDistributionReport> {
                         width: 22,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2.5))
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(PhosphorIconsRegular.filePdf,
+                          const Icon(PhosphorIconsRegular.filePdf,
                               color: Colors.white, size: 20),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'ייצוא PDF',
-                            style: TextStyle(
+                            _l10n.exportPdfButton,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white),

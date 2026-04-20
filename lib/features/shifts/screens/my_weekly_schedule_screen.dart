@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -26,6 +27,13 @@ class _MyWeeklyScheduleScreenState extends State<MyWeeklyScheduleScreen> {
 
   late DateTime _weekStart;
   bool _hasAutoScrolled = false;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -42,12 +50,9 @@ class _MyWeeklyScheduleScreenState extends State<MyWeeklyScheduleScreen> {
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
-          builder: (_) => Directionality(
-            textDirection: TextDirection.rtl,
-            child: _ShiftDetailsSheet(
-              shift: initial,
-              date: DateTime(d.year, d.month, d.day),
-            ),
+          builder: (_) => _ShiftDetailsSheet(
+            shift: initial,
+            date: DateTime(d.year, d.month, d.day),
           ),
         );
       });
@@ -83,31 +88,28 @@ class _MyWeeklyScheduleScreenState extends State<MyWeeklyScheduleScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F9),
       appBar: const UserHeader(),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
-          children: [
-            _WeekHeader(
-              start: _weekStart,
-              onPrev: _prevWeek,
-              onNext: _nextWeek,
-            ),
-            Expanded(
-              child: user == null
-                  ? const _ErrorState(message: 'יש להתחבר כדי לצפות במשמרות')
-                  : _Timeline(
-                      userId: user.uid,
-                      weekStart: _weekStart,
-                      shiftService: _shiftService,
-                      controller: _scrollController,
-                      hasAutoScrolled: _hasAutoScrolled,
-                      onAutoScrollComplete: () {
-                        _hasAutoScrolled = true;
-                      },
-                    ),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          _WeekHeader(
+            start: _weekStart,
+            onPrev: _prevWeek,
+            onNext: _nextWeek,
+          ),
+          Expanded(
+            child: user == null
+                ? _ErrorState(message: _l10n.loginToViewShifts)
+                : _Timeline(
+                    userId: user.uid,
+                    weekStart: _weekStart,
+                    shiftService: _shiftService,
+                    controller: _scrollController,
+                    hasAutoScrolled: _hasAutoScrolled,
+                    onAutoScrollComplete: () {
+                      _hasAutoScrolled = true;
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -130,53 +132,49 @@ class _WeekHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final end = start.add(const Duration(days: 6));
     final range =
         '${DateFormat('dd.MM').format(end)} – ${DateFormat('dd.MM').format(start)}';
 
-    // Use explicit Directionality.ltr for this Row to control arrow placement manually
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-        child: Row(
-          children: [
-            // LEFT side of screen - next week (forward)
-            IconButton(
-              onPressed: onNext,
-              icon: const Icon(PhosphorIconsRegular.caretLeft),
-              tooltip: 'שבוע הבא',
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  const Text(
-                    'המשמרות שלי',
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                    ),
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: isRtl ? onNext : onPrev,
+            icon: const Icon(PhosphorIconsRegular.caretLeft),
+            tooltip: isRtl ? l10n.nextWeekTooltip : l10n.prevWeekTooltip,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  l10n.myShiftsTitle,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.6,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    range,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  range,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // RIGHT side of screen - prev week (backward)
-            IconButton(
-              onPressed: onPrev,
-              icon: const Icon(PhosphorIconsRegular.caretRight),
-              tooltip: 'שבוע קודם',
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            onPressed: isRtl ? onPrev : onNext,
+            icon: const Icon(PhosphorIconsRegular.caretRight),
+            tooltip: isRtl ? l10n.prevWeekTooltip : l10n.nextWeekTooltip,
+          ),
+        ],
       ),
     );
   }
@@ -216,8 +214,9 @@ class _Timeline extends StatelessWidget {
 
         // Error state
         if (snapshot.hasError) {
+          final l10n = AppLocalizations.of(context);
           return _ErrorState(
-            message: 'שגיאה בטעינת המשמרות',
+            message: l10n.loadShiftsError,
             onRetry: () {
               // Trigger rebuild by accessing the stream again
               (context as Element).markNeedsBuild();
@@ -338,6 +337,7 @@ class _DayTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final thisDay = DateTime(date.year, date.month, date.day);
@@ -378,7 +378,7 @@ class _DayTimeline extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      DateFormat('EEE', 'he').format(date),
+                      DateFormat('EEE', Localizations.localeOf(context).languageCode).format(date),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -419,9 +419,9 @@ class _DayTimeline extends StatelessWidget {
                             color: AppColors.primaryBlue,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'היום',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.todayLabel,
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -433,7 +433,7 @@ class _DayTimeline extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          'עבר',
+                          l10n.pastLabel,
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.grey.shade500,
@@ -466,7 +466,7 @@ class _DayTimeline extends StatelessWidget {
                     ? Padding(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         child: Text(
-                          'אין משמרות',
+                          l10n.noShiftsDay,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade400,
@@ -497,10 +497,7 @@ class _DayTimeline extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: _ShiftDetailsSheet(shift: shift, date: date),
-      ),
+      builder: (_) => _ShiftDetailsSheet(shift: shift, date: date),
     );
   }
 }
@@ -717,7 +714,7 @@ class _ShiftDetailsSheet extends StatelessWidget {
                   size: 18, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
-                DateFormat('EEEE, d בMMMM', 'he').format(date),
+                DateFormat.MMMMEEEEd(Localizations.localeOf(context).languageCode).format(date),
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.grey.shade700,
@@ -800,9 +797,9 @@ class _ShiftDetailsSheet extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'צפה בפרטי המשמרת',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context).viewShiftDetailsButton,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -874,7 +871,7 @@ class _LoadingState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'טוען משמרות...',
+            AppLocalizations.of(context).loadingShifts,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -922,7 +919,7 @@ class _ErrorState extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(PhosphorIconsRegular.arrowsClockwise, size: 18),
-                label: const Text('נסה שוב'),
+                label: Text(AppLocalizations.of(context).retryButton),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,

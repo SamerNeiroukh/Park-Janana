@@ -13,6 +13,7 @@ import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/services/clock_service.dart';
 import 'package:park_janana/core/utils/location_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 // ── Clock geometry ────────────────────────────────────────────────────────────
 const double _kFace = 126.0;
@@ -24,14 +25,6 @@ const _kSecondActive = Color(0xFF4ADE80); // green  — active second hand
 const _kArcIn        = Color(0xFF4ADE80); // green arc while clocking IN
 const _kArcOut       = Color(0xFFF87171); // red   arc while clocking OUT
 
-// ── Quotes (rotate every 10 s when idle) ──────────────────────────────────────
-const _kQuotes = [
-  '! היום זו הזדמנות חדשה להצטיין',
-  '! תן את המיטב שלך בפארק היום',
-  'אתה חלק חשוב בצוות שלנו 💪',
-  'כל משמרת היא הזדמנות להשפיע ✨',
-  'תשמור על חיוך – זה מדבק 😄',
-];
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  GlassHeroCard  — merged greeting + clock card
@@ -68,6 +61,9 @@ class GlassHeroCard extends StatefulWidget {
 
 class _GlassHeroCardState extends State<GlassHeroCard>
     with TickerProviderStateMixin {
+
+  // ── Localizations ─────────────────────────────────────────────────────────
+  late AppLocalizations _l10n;
 
   // ── Attendance state ───────────────────────────────────────────────────────
   final ClockService _clockService = ClockService();
@@ -112,9 +108,15 @@ class _GlassHeroCardState extends State<GlassHeroCard>
     _clockTimer = Timer.periodic(
       const Duration(seconds: 1), (_) { if (mounted) setState(() => _now = DateTime.now()); });
     _quoteTimer = Timer.periodic(
-      const Duration(seconds: 10), (_) { if (mounted) setState(() => _quoteIdx = (_quoteIdx + 1) % _kQuotes.length); });
+      const Duration(seconds: 10), (_) { if (mounted) setState(() => _quoteIdx = (_quoteIdx + 1) % 3); });
 
     _fetchSession();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
   }
 
   @override
@@ -161,8 +163,8 @@ class _GlassHeroCardState extends State<GlassHeroCard>
           .collection('notifications')
           .add({
         'type': 'clockout_missed',
-        'title': 'יציאה אוטומטית ממשמרת',
-        'body': 'לא דיווחת יציאה לאחר 16 שעות – המערכת סיימה את המשמרת אוטומטית. פנה למנהל שלך.',
+        'title': _l10n.autoClockoutTitle,
+        'body': _l10n.autoClockoutBody,
         'entityId': '',
         'isRead': false,
         'createdAt': FieldValue.serverTimestamp(),
@@ -267,7 +269,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('שגיאה בדיווח נוכחות: $e', textAlign: TextAlign.right),
+          content: Text(_l10n.attendanceReportError(e.toString())),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -284,10 +286,10 @@ class _GlassHeroCardState extends State<GlassHeroCard>
   }
 
   Future<bool?> _showLocationWarning(bool clockingIn, {bool gpsUnavailable = false}) {
-    final title = gpsUnavailable ? 'לא ניתן לאמת מיקום' : 'אינך נמצא בגבולות הפארק';
+    final title = gpsUnavailable ? _l10n.gpsUnavailableTitle : _l10n.outsideParkBoundsMessage;
     final body  = gpsUnavailable
-        ? 'שירות המיקום אינו זמין או שהרשאות GPS לא אושרו. האם ברצונך להמשיך בכל זאת?'
-        : 'אתה מנסה ${clockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?';
+        ? _l10n.gpsUnavailableMessage
+        : clockingIn ? _l10n.clockInOutsideParkMessage : _l10n.clockOutOutsideParkMessage;
 
     return showGeneralDialog<bool>(
       context: context,
@@ -334,7 +336,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         elevation: 0, minimumSize: const Size(100, 48)),
                     onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('לא', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    child: Text(_l10n.noButton, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -351,7 +353,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                       child: Container(
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                        child: const Text('כן', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.white)),
+                        child: Text(_l10n.yesButton, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.white)),
                       ),
                     ),
                   ),
@@ -372,11 +374,11 @@ class _GlassHeroCardState extends State<GlassHeroCard>
 
   String _greeting() {
     final h = DateTime.now().hour;
-    if (h < 5)  return 'לילה טוב,';
-    if (h < 12) return 'בוקר טוב,';
-    if (h < 17) return 'צהריים טובים,';
-    if (h < 21) return 'ערב טוב,';
-    return 'לילה טוב,';
+    if (h < 5)  return _l10n.greetingNight;
+    if (h < 12) return _l10n.greetingMorning;
+    if (h < 17) return _l10n.greetingAfternoon;
+    if (h < 21) return _l10n.greetingEvening;
+    return _l10n.greetingNight;
   }
 
   String _weatherEmoji(String d) {
@@ -397,6 +399,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
   Widget build(BuildContext context) {
     final active   = _session != null;
     final arcColor = active ? _kArcOut : _kArcIn;
+    final motivationalMessages = [_l10n.motivationalMsg1, _l10n.motivationalMsg2, _l10n.motivationalMsg3];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -426,10 +429,8 @@ class _GlassHeroCardState extends State<GlassHeroCard>
             Positioned(bottom: 60, left: 30,    child: _Circle(28,  Colors.white.withValues(alpha: 0.065))),
 
             // ── Main content ──────────────────────────────────────────────
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -518,8 +519,8 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                             )
                           : Semantics(
                               button: true,
-                              label: active ? 'לחץ לאיפוס שעון יציאה' : 'לחץ לרישום שעון כניסה',
-                              hint: 'לחץ לחיצה ארוכה',
+                              label: active ? _l10n.clickToResetClockOut : _l10n.clickToRegisterClockIn,
+                              hint: _l10n.longPressHint,
                               child: GestureDetector(
                                 onLongPressStart: _onLongPressStart,
                                 onLongPressEnd:   _onLongPressEnd,
@@ -574,9 +575,9 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                           ),
                         ),
                         child: _checkingLocation
-                            ? const _QuoteText(
-                                key: ValueKey('loc'),
-                                text: '...מחפש מיקום',
+                            ? _QuoteText(
+                                key: const ValueKey('loc'),
+                                text: _l10n.searchingLocationLabel,
                               )
                             : active
                                 ? _ActiveInfo(
@@ -586,7 +587,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                   )
                                 : _QuoteText(
                                     key: ValueKey(_quoteIdx),
-                                    text: _kQuotes[_quoteIdx],
+                                    text: motivationalMessages[_quoteIdx],
                                   ),
                       ),
                     ),
@@ -618,8 +619,8 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                                 const SizedBox(width: 5),
                                 Text(
                                   active
-                                      ? 'לחיצה ארוכה לסיום משמרת'
-                                      : 'לחיצה ארוכה להתחיל משמרת',
+                                      ? _l10n.longPressToEndShift
+                                      : _l10n.longPressToStartShift,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 13,
@@ -645,7 +646,7 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                     // ── 7. Stats strip ─────────────────────────────────────
                     Center(
                       child: Text(
-                        'החודש',
+                        _l10n.thisMonthLabel,
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -660,13 +661,13 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                         Expanded(child: _Stat(
                           icon: PhosphorIconsRegular.calendarBlank,
                           value: '${widget.daysWorked}',
-                          label: 'ימים',
+                          label: _l10n.daysLabel,
                         )),
                         Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.14)),
                         Expanded(child: _Stat(
                           icon: PhosphorIconsRegular.clock,
                           value: widget.hoursWorked.toStringAsFixed(1),
-                          label: "שע'",
+                          label: _l10n.hoursShortLabel,
                         )),
                         if (widget.weatherDescription != null && widget.temperature != null) ...[
                           Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.14)),
@@ -681,7 +682,6 @@ class _GlassHeroCardState extends State<GlassHeroCard>
                   ],
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -733,7 +733,7 @@ class _ActiveInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     String two(int n) => n.toString().padLeft(2, '0');
     final str   = '${two(elapsed.inHours)}:${two(elapsed.inMinutes.remainder(60))}:${two(elapsed.inSeconds.remainder(60))}';
-    final since = 'מאז ${two(clockInTime.hour)}:${two(clockInTime.minute)}';
+    final since = AppLocalizations.of(context).clockedInSince('${two(clockInTime.hour)}:${two(clockInTime.minute)}');
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Text(str, style: const TextStyle(
         fontSize: 24, fontWeight: FontWeight.w700,
@@ -798,7 +798,7 @@ class _WeatherStat extends StatelessWidget {
         fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white, height: 1.0,
       )),
       const SizedBox(height: 3),
-      Text('מזג אוויר', style: TextStyle(
+      Text(AppLocalizations.of(context).weatherLabel, style: TextStyle(
         fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.50),
       )),
     ],

@@ -6,6 +6,7 @@ import 'package:park_janana/core/constants/app_dimensions.dart';
 import 'package:park_janana/core/constants/app_durations.dart';
 import 'package:park_janana/core/constants/app_theme.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -48,6 +49,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.backgroundBlueLight,
       body: Column(
@@ -61,11 +63,11 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _buildWorkerSummary(),
+                  _buildWorkerSummary(l10n),
                   const SizedBox(height: AppDimensions.spacingXL),
-                  _buildFilterButtons(),
+                  _buildFilterButtons(l10n),
                   const SizedBox(height: AppDimensions.spacingXL),
-                  Expanded(child: _buildShiftList()),
+                  Expanded(child: _buildShiftList(l10n)),
                 ],
               ),
             ),
@@ -75,7 +77,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
     );
   }
 
-  Widget _buildWorkerSummary() {
+  Widget _buildWorkerSummary(AppLocalizations l10n) {
     return FadeTransition(
       opacity: _animationController,
       child: Container(
@@ -113,10 +115,10 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                     ),
                   ),
                   const SizedBox(height: AppDimensions.spacingS),
-                  const Text(
-                    "רשימת המשמרות של העובד",
+                  Text(
+                    l10n.workerShiftsListSubtitle,
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: AppDimensions.fontM,
                       color: AppColors.greyDark,
                     ),
@@ -130,17 +132,17 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
     );
   }
 
-  Widget _buildFilterButtons() {
+  Widget _buildFilterButtons(AppLocalizations l10n) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          _filterButton("all", "הכל"),
-          _filterButton("upcoming", "קרובות"),
-          _filterButton("past", "עבר"),
-          _filterButton("today", "היום"),
-          _filterButton("thisWeek", "השבוע"),
+          _filterButton("all", l10n.filterAll),
+          _filterButton("upcoming", l10n.filterUpcoming),
+          _filterButton("past", l10n.filterPast),
+          _filterButton("today", l10n.filterToday),
+          _filterButton("thisWeek", l10n.filterThisWeek),
         ],
       ),
     );
@@ -171,7 +173,7 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
     );
   }
 
-  Widget _buildShiftList() {
+  Widget _buildShiftList(AppLocalizations l10n) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection(AppConstants.shiftsCollection)
@@ -183,12 +185,11 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
         }
 
         if (!snapshot.hasData) {
-          return const Center(
-              child: Text("לא ניתן לטעון נתונים. בדוק חיבור או אינדקס."));
+          return Center(child: Text(l10n.loadDataError));
         }
 
         if (snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("אין משמרות להצגה"));
+          return Center(child: Text(l10n.noShiftsEmpty));
         }
 
         final now = DateTime.now();
@@ -292,13 +293,13 @@ class _ShiftsButtonScreenState extends State<ShiftsButtonScreen>
                       ],
                     ),
                     const SizedBox(height: AppDimensions.spacingS),
-                    Text("שעות: $startTime - $endTime",
+                    Text(l10n.shiftHoursFormat(startTime, endTime),
                         style: AppTheme.bodyText),
-                    Text("מחלקה: $department", style: AppTheme.bodyText),
+                    Text(l10n.departmentPrefix(department), style: AppTheme.bodyText),
                     if (note.isNotEmpty) ...[
                       const SizedBox(height: AppDimensions.spacingXS),
                       Text(
-                        "הערה: $note",
+                        l10n.shiftNoteLabel(note),
                         style: AppTheme.bodyText
                             .copyWith(fontStyle: FontStyle.italic),
                       ),

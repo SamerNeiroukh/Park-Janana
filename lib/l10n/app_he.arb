@@ -1,0 +1,2981 @@
+{
+  "@@locale": "he",
+
+  "appTitle": "פארק ג׳ננה",
+  "@appTitle": { "description": "The name of the application" },
+
+  "loginButton": "כניסה",
+  "@loginButton": { "description": "Login button label" },
+
+  "newWorkerButton": "עובד חדש?",
+  "@newWorkerButton": { "description": "Registration prompt for new workers" },
+
+  "logoutLabel": "התנתק",
+  "@logoutLabel": { "description": "Logout label" },
+
+  "logoutTitle": "התנתקות",
+  "@logoutTitle": { "description": "Logout dialog/screen title" },
+
+  "logoutConfirmation": "האם אתה בטוח שברצונך להתנתק?",
+  "@logoutConfirmation": { "description": "Logout confirmation dialog message" },
+
+  "errorGeneral": "אירעה שגיאה, נסה שוב",
+  "@errorGeneral": { "description": "Generic error message" },
+
+  "retryButton": "נסה שוב",
+  "@retryButton": { "description": "Retry button label" },
+
+  "profileScreenTitle": "האזור האישי שלך",
+  "@profileScreenTitle": { "description": "Personal area screen title" },
+
+  "forgotPassword": "שכחתי סיסמה",
+  "@forgotPassword": { "description": "Forgot password label" },
+
+  "shiftsTitle": "משמרות זמינות",
+  "@shiftsTitle": { "description": "Available shifts screen title" },
+
+  "managerDashboardTitle": "לוח ניהול משמרות",
+  "@managerDashboardTitle": { "description": "Manager shift dashboard title" },
+
+  "newShiftButton": "צור משמרת חדשה",
+  "@newShiftButton": { "description": "Create new shift button label" },
+
+  "profileUpdateSuccess": "התמונה עודכנה בהצלחה",
+  "@profileUpdateSuccess": { "description": "Profile picture update success message" },
+
+  "shiftRequestSuccess": "בקשתך נשלחה למשמרת",
+  "@shiftRequestSuccess": { "description": "Shift request sent success message" },
+
+  "shiftCancelSuccess": "הבקשה למשמרת בוטלה",
+  "@shiftCancelSuccess": { "description": "Shift request cancelled message" },
+
+  "confirmButton": "אישור",
+  "@confirmButton": { "description": "Confirm button label" },
+
+  "cancelButton": "ביטול",
+  "@cancelButton": { "description": "Cancel button label" },
+
+  "saveButton": "שמור",
+  "@saveButton": { "description": "Save button label" },
+
+  "closeButton": "סגור",
+  "@closeButton": { "description": "Close button label" },
+
+  "noInternetError": "לא ניתן להתחבר לשרתי האפליקציה. אנא בדוק את החיבור לאינטרנט ונסה שוב.",
+  "@noInternetError": { "description": "Firebase/network connection error shown at startup" },
+
+  "languageLabel": "שפה",
+  "@languageLabel": { "description": "Language selector label" },
+
+  "languageHebrew": "עברית",
+  "@languageHebrew": { "description": "Hebrew language option" },
+
+  "languageEnglish": "English",
+  "@languageEnglish": { "description": "English language option" },
+
+  "languageArabic": "العربية",
+  "@languageArabic": { "description": "Arabic language option" },
+
+  "appInitializationError": "שגיאה באתחול האפליקציה",
+  "@appInitializationError": { "description": "App initialization error title" },
+
+  "contactSupportMessage": "אם הבעיה נמשכת, אנא צור קשר עם התמיכה",
+  "@contactSupportMessage": { "description": "Contact support prompt shown on error screen" },
+
+  "offlineStatusText": "אין חיבור לאינטרנט",
+  "@offlineStatusText": { "description": "Offline banner text" },
+
+  "onlineStatusText": "החיבור לאינטרנט שוחזר ✓",
+  "@onlineStatusText": { "description": "Connection restored banner text" },
+
+  "offlineModeLabel": "פועל במצב לא מקוון",
+  "@offlineModeLabel": { "description": "Offline mode label in banner" },
+
+  "managerRole": "מנהל",
+  "@managerRole": { "description": "Manager role label" },
+
+  "messageUpdateError": "שגיאה בעדכון ההודעה",
+  "@messageUpdateError": { "description": "Message update error snackbar" },
+
+  "messageDeletionError": "שגיאה במחיקת ההודעה",
+  "@messageDeletionError": { "description": "Message deletion error snackbar" },
+
+  "passwordRecoveryTitle": "שחזור סיסמה",
+  "@passwordRecoveryTitle": { "description": "Forgot password screen title" },
+
+  "enterEmailAddressPrompt": "אנא הזן את כתובת האימייל שלך",
+  "@enterEmailAddressPrompt": { "description": "Email input prompt on forgot password screen" },
+
+  "emailRequiredValidation": "אנא הכנס כתובת אימייל",
+  "@emailRequiredValidation": { "description": "Email required validation message" },
+
+  "emailInvalidValidation": "אנא הכנס כתובת אימייל תקינה",
+  "@emailInvalidValidation": { "description": "Email format validation message" },
+
+  "resetLinkSent": "קישור לאיפוס הסיסמה נשלח למייל שלך",
+  "@resetLinkSent": { "description": "Password reset link sent snackbar" },
+
+  "resetLinkError": "שגיאה בשליחת קישור לאיפוס סיסמה",
+  "@resetLinkError": { "description": "Password reset link error snackbar" },
+
+  "sendResetLinkButton": "שלח קישור לאיפוס",
+  "@sendResetLinkButton": { "description": "Send reset link button label" },
+
+  "backButton": "חזור",
+  "@backButton": { "description": "Back button label" },
+
+  "welcomeTitle": "שלום, ברוכים הבאים",
+  "@welcomeTitle": { "description": "Welcome/greeting title on login screen" },
+
+  "loginCredentialsPrompt": "אנא הכנס את פרטי הכניסה שלך",
+  "@loginCredentialsPrompt": { "description": "Login credentials prompt subtitle" },
+
+  "emailFieldLabel": "אימייל",
+  "@emailFieldLabel": { "description": "Email field label" },
+
+  "emailFieldHint": "הכנס את כתובת האימייל שלך",
+  "@emailFieldHint": { "description": "Email field hint text" },
+
+  "passwordFieldLabel": "סיסמה",
+  "@passwordFieldLabel": { "description": "Password field label" },
+
+  "passwordFieldHint": "הכנס את הסיסמה שלך",
+  "@passwordFieldHint": { "description": "Password field hint text" },
+
+  "passwordRequiredError": "אנא הכנס סיסמה",
+  "@passwordRequiredError": { "description": "Password required error message" },
+
+  "passwordLengthError": "הסיסמה חייבת להכיל לפחות 6 תווים",
+  "@passwordLengthError": { "description": "Password minimum length error" },
+
+  "orDividerText": "או",
+  "@orDividerText": { "description": "Or divider between login methods" },
+
+  "biometricLoginTitle": "כניסה ביומטרית",
+  "@biometricLoginTitle": { "description": "Biometric login title" },
+
+  "biometricSetupPrompt": "האם לאפשר כניסה עתידית באמצעות טביעת אצבע / זיהוי פנים?",
+  "@biometricSetupPrompt": { "description": "Biometric setup prompt message" },
+
+  "enableBiometricButton": "אפשר",
+  "@enableBiometricButton": { "description": "Enable biometric button label" },
+
+  "declineBiometricButton": "לא, תודה",
+  "@declineBiometricButton": { "description": "Decline biometric setup button label" },
+
+  "biometricAuthFailed": "אימות ביומטרי נכשל. אנא נסה שוב.",
+  "@biometricAuthFailed": { "description": "Biometric authentication failed message" },
+
+  "noBiometricCredentials": "לא נמצאו פרטי כניסה שמורים. אנא כנס עם אימייל וסיסמה.",
+  "@noBiometricCredentials": { "description": "No saved biometric credentials message" },
+
+  "applicationRejectedTitle": "הבקשה נדחתה",
+  "@applicationRejectedTitle": { "description": "Application rejected dialog title" },
+
+  "applicationRejectedMessage": "בקשתך לאישור נדחתה על ידי ההנהלה.\nניתן לשלוח בקשת אישור חדשה.",
+  "@applicationRejectedMessage": { "description": "Application rejected dialog message" },
+
+  "reApplyButton": "שלח בקשה מחדש",
+  "@reApplyButton": { "description": "Re-apply button label" },
+
+  "reApplySuccess": "הבקשה נשלחה מחדש. ההנהלה תעדכן אותך בהחלטה.",
+  "@reApplySuccess": { "description": "Re-apply success snackbar" },
+
+  "registrationTitle": "הרשמה לפארק גננה",
+  "@registrationTitle": { "description": "Registration screen title" },
+
+  "registrationSubtitle": "מלא את הפרטים לשליחת בקשת הצטרפות",
+  "@registrationSubtitle": { "description": "Registration screen subtitle" },
+
+  "nameRequiredValidation": "יש להזין שם מלא",
+  "@nameRequiredValidation": { "description": "Name required validation message" },
+
+  "nameInvalidCharsValidation": "יש להזין שם בתווים תקינים בלבד",
+  "@nameInvalidCharsValidation": { "description": "Name contains invalid characters validation" },
+
+  "fullNameLabel": "שם מלא",
+  "@fullNameLabel": { "description": "Full name field label" },
+
+  "fullNameHint": "לדוגמה: ישראל ישראלי",
+  "@fullNameHint": { "description": "Full name field hint" },
+
+  "phoneDigitsValidation": "מספר טלפון חייב להכיל בדיוק 10 ספרות",
+  "@phoneDigitsValidation": { "description": "Phone number digits validation message" },
+
+  "phoneFormatValidation": "מספר טלפון ישראלי חייב להתחיל ב-05",
+  "@phoneFormatValidation": { "description": "Phone number format validation message" },
+
+  "phoneLabel": "מספר טלפון",
+  "@phoneLabel": { "description": "Phone number field label" },
+
+  "phoneHint": "05XXXXXXXX",
+  "@phoneHint": { "description": "Phone number field hint" },
+
+  "idDigitsValidation": "תעודת זהות חייבת להכיל בדיוק 9 ספרות",
+  "@idDigitsValidation": { "description": "ID number digits validation message" },
+
+  "idCheckDigitValidation": "מספר תעודת הזהות אינו תקין",
+  "@idCheckDigitValidation": { "description": "ID check digit validation message" },
+
+  "idLabel": "תעודת זהות",
+  "@idLabel": { "description": "ID number field label" },
+
+  "idHint": "9 ספרות",
+  "@idHint": { "description": "ID number field hint" },
+
+  "emailLabel": "כתובת אימייל",
+  "@emailLabel": { "description": "Email address field label" },
+
+  "emailHint": "name@example.com",
+  "@emailHint": { "description": "Email address field hint" },
+
+  "passwordMinLengthValidation": "הסיסמה חייבת להכיל לפחות 6 תווים",
+  "@passwordMinLengthValidation": { "description": "Password minimum length validation" },
+
+  "passwordLabel": "סיסמה",
+  "@passwordLabel": { "description": "Password field label" },
+
+  "passwordHint": "לפחות 6 תווים",
+  "@passwordHint": { "description": "Password field hint" },
+
+  "passwordMismatchValidation": "הסיסמאות אינן תואמות",
+  "@passwordMismatchValidation": { "description": "Password mismatch validation message" },
+
+  "confirmPasswordLabel": "אישור סיסמה",
+  "@confirmPasswordLabel": { "description": "Confirm password field label" },
+
+  "confirmPasswordHint": "הזן שוב את הסיסמה",
+  "@confirmPasswordHint": { "description": "Confirm password field hint" },
+
+  "personalDetailsSection": "פרטים אישיים",
+  "@personalDetailsSection": { "description": "Personal details section header" },
+
+  "loginDetailsSection": "פרטי כניסה",
+  "@loginDetailsSection": { "description": "Login details section header" },
+
+  "validationErrorsBanner": "יש לתקן {count} {noun} לפני שליחה",
+  "@validationErrorsBanner": {
+    "description": "Validation errors banner with count",
+    "placeholders": {
+      "count": { "type": "int" },
+      "noun": { "type": "String" }
+    }
+  },
+
+  "validationErrorSingular": "שגיאה",
+  "@validationErrorSingular": { "description": "Singular form of error" },
+
+  "validationErrorPlural": "שגיאות",
+  "@validationErrorPlural": { "description": "Plural form of errors" },
+
+  "registrationApprovalNotice": "לאחר שליחת הבקשה, ההנהלה תאשר את חשבונך ותוכל להתחבר לאפליקציה.",
+  "@registrationApprovalNotice": { "description": "Registration approval notice text" },
+
+  "submitRegistrationButton": "שלח בקשת הצטרפות",
+  "@submitRegistrationButton": { "description": "Submit registration button label" },
+
+  "registrationSuccessTitle": "הבקשה נשלחה בהצלחה!",
+  "@registrationSuccessTitle": { "description": "Registration success dialog title" },
+
+  "registrationSuccessMessage": "הנהלת הפארק תבדוק את פרטיך ותיצור איתך קשר בהקדם האפשרי.",
+  "@registrationSuccessMessage": { "description": "Registration success dialog message" },
+
+  "registrationApprovalInfo": "לאחר אישור ההנהלה תקבל גישה לאפליקציה ותוכל להתחבר.",
+  "@registrationApprovalInfo": { "description": "Registration approval info text" },
+
+  "backToHomeButton": "חזור לדף הראשי",
+  "@backToHomeButton": { "description": "Back to home button label" },
+
+  "newWorkerWelcomeTitle": "עובד חדש? ברוך הבא!",
+  "@newWorkerWelcomeTitle": { "description": "New worker welcome screen title" },
+
+  "registrationStepsSubtitle": "הצטרף לצוות פארק גננה בכמה צעדים פשוטים",
+  "@registrationStepsSubtitle": { "description": "Registration steps subtitle" },
+
+  "howItWorksSection": "איך זה עובד?",
+  "@howItWorksSection": { "description": "How it works section header" },
+
+  "step1Title": "מלא טופס הרשמה",
+  "@step1Title": { "description": "Registration step 1 title" },
+
+  "step1Subtitle": "הזן את פרטיך האישיים ובחר סיסמה",
+  "@step1Subtitle": { "description": "Registration step 1 subtitle" },
+
+  "step2Title": "אישור ההנהלה",
+  "@step2Title": { "description": "Registration step 2 title" },
+
+  "step2Subtitle": "הנהלת הפארק תבדוק את פרטיך ותאשר את חשבונך",
+  "@step2Subtitle": { "description": "Registration step 2 subtitle" },
+
+  "step3Title": "הצטרף לצוות",
+  "@step3Title": { "description": "Registration step 3 title" },
+
+  "step3Subtitle": "לאחר האישור תוכל להתחבר ולהתחיל לעבוד",
+  "@step3Subtitle": { "description": "Registration step 3 subtitle" },
+
+  "welcomeSubtitle": "ברוכים הבאים",
+  "@welcomeSubtitle": { "description": "Welcome subtitle on welcome screen" },
+
+  "shiftsNavLabel": "משמרות",
+  "@shiftsNavLabel": { "description": "Shifts navigation label" },
+
+  "weeklyScheduleNavLabel": "סידור עבודה",
+  "@weeklyScheduleNavLabel": { "description": "Weekly work schedule navigation label" },
+
+  "tasksNavLabel": "משימות",
+  "@tasksNavLabel": { "description": "Tasks navigation label" },
+
+  "reportsNavLabel": "דוחות",
+  "@reportsNavLabel": { "description": "Reports navigation label" },
+
+  "newsfeedNavLabel": "לוח מודעות",
+  "@newsfeedNavLabel": { "description": "Newsfeed/bulletin board navigation label" },
+
+  "manageWorkersNavLabel": "ניהול עובדים",
+  "@manageWorkersNavLabel": { "description": "Worker management navigation label" },
+
+  "weeklySchedulingNavLabel": "סידור שבועי",
+  "@weeklySchedulingNavLabel": { "description": "Weekly scheduling navigation label" },
+
+  "dashboardNavLabel": "לוח בקרה",
+  "@dashboardNavLabel": { "description": "Dashboard navigation label" },
+
+  "totalTeamLabel": "צוות כולל",
+  "@totalTeamLabel": { "description": "Total team size metric label" },
+
+  "monthlyHoursLabel": "שעות החודש",
+  "@monthlyHoursLabel": { "description": "Monthly hours metric label" },
+
+  "openTasksLabel": "משימות פתוחות",
+  "@openTasksLabel": { "description": "Open tasks metric label" },
+
+  "presentTodayLabel": "נוכחים היום",
+  "@presentTodayLabel": { "description": "Present today metric label" },
+
+  "createShiftAction": "צור משמרת",
+  "@createShiftAction": { "description": "Create shift action button" },
+
+  "createTaskAction": "צור משימה",
+  "@createTaskAction": { "description": "Create task action button" },
+
+  "publishPostAction": "פרסם הודעה",
+  "@publishPostAction": { "description": "Publish post action button" },
+
+  "hoursReportAction": "דוח שעות",
+  "@hoursReportAction": { "description": "Hours report action button" },
+
+  "workersTabLabel": "עובדים",
+  "@workersTabLabel": { "description": "Workers tab label" },
+
+  "managersTabLabel": "מנהלים",
+  "@managersTabLabel": { "description": "Managers tab label" },
+
+  "todayTabLabel": "היום",
+  "@todayTabLabel": { "description": "Today tab label" },
+
+  "thisWeekTabLabel": "השבוע",
+  "@thisWeekTabLabel": { "description": "This week tab label" },
+
+  "openTasksTabLabel": "פתוחות",
+  "@openTasksTabLabel": { "description": "Open tasks tab label" },
+
+  "urgentTasksTabLabel": "דחוף",
+  "@urgentTasksTabLabel": { "description": "Urgent tasks tab label" },
+
+  "cropImageTitle": "חתוך תמונה",
+  "@cropImageTitle": { "description": "Image cropper dialog title" },
+
+  "profilePictureUpdated": "תמונת הפרופיל עודכנה בהצלחה",
+  "@profilePictureUpdated": { "description": "Profile picture updated snackbar" },
+
+  "uploadError": "שגיאה: {error}",
+  "@uploadError": {
+    "description": "Upload error snackbar with error detail",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "takePhotoAction": "צלם תמונה",
+  "@takePhotoAction": { "description": "Take photo action label" },
+
+  "takePhrotoSubtitle": "השתמש במצלמה",
+  "@takePhrotoSubtitle": { "description": "Take photo subtitle" },
+
+  "chooseFromGalleryAction": "בחר מהגלריה",
+  "@chooseFromGalleryAction": { "description": "Choose from gallery action label" },
+
+  "uploadFromGallerySubtitle": "העלה מהתמונות שלך",
+  "@uploadFromGallerySubtitle": { "description": "Upload from gallery subtitle" },
+
+  "noDataFound": "לא נמצאו נתונים",
+  "@noDataFound": { "description": "No data found placeholder" },
+
+  "authorizedDepartmentsLabel": "מחלקות מורשות",
+  "@authorizedDepartmentsLabel": { "description": "Authorized departments section label" },
+
+  "departmentPermissionsSection": "הרשאות מחלקה",
+  "@departmentPermissionsSection": { "description": "Department permissions section header" },
+
+  "workerRoleLabel": "עובד",
+  "@workerRoleLabel": { "description": "Worker role label" },
+
+  "ownerRoleLabel": "בעלים",
+  "@ownerRoleLabel": { "description": "Owner role label" },
+
+  "coOwnerRoleLabel": "בעלים משותף",
+  "@coOwnerRoleLabel": { "description": "Co-owner role label" },
+
+  "attendanceSaved": "הנוכחות נשמרה בהצלחה",
+  "@attendanceSaved": { "description": "Attendance saved success snackbar" },
+
+  "attendanceSaveError": "שגיאה בשמירת הנוכחות",
+  "@attendanceSaveError": { "description": "Attendance save error snackbar" },
+
+  "endShiftDialogTitle": "סיום משמרת",
+  "@endShiftDialogTitle": { "description": "End shift dialog title" },
+
+  "recordCheckoutConfirmation": "לרשום יציאה עכשיו עבור משמרת זו?",
+  "@recordCheckoutConfirmation": { "description": "Record checkout confirmation message" },
+
+  "endShiftButton": "סיים משמרת",
+  "@endShiftButton": { "description": "End shift button label" },
+
+  "checkoutRecordedReminder": "שעת יציאה נרשמה — זכור לשמור",
+  "@checkoutRecordedReminder": { "description": "Checkout recorded reminder snackbar" },
+
+  "recordUpdatedReminder": "הרשומה עודכנה — זכור לשמור",
+  "@recordUpdatedReminder": { "description": "Record updated reminder snackbar" },
+
+  "recordAddedReminder": "רשומה נוספה — זכור לשמור",
+  "@recordAddedReminder": { "description": "Record added reminder snackbar" },
+
+  "recordDeleted": "רשומה מס׳ {recordNumber} נמחקה",
+  "@recordDeleted": {
+    "description": "Record deleted snackbar with record number",
+    "placeholders": { "recordNumber": { "type": "int" } }
+  },
+
+  "undoButton": "בטל",
+  "@undoButton": { "description": "Undo button label" },
+
+  "unsavedChangesTitle": "שינויים לא נשמרו",
+  "@unsavedChangesTitle": { "description": "Unsaved changes dialog title" },
+
+  "stayButton": "הישאר",
+  "@stayButton": { "description": "Stay button label in unsaved changes dialog" },
+
+  "exitWithoutSavingButton": "צא בלי לשמור",
+  "@exitWithoutSavingButton": { "description": "Exit without saving button label" },
+
+  "workDaysLabel": "ימי עבודה",
+  "@workDaysLabel": { "description": "Work days metric label" },
+
+  "hoursLabel": "שעות",
+  "@hoursLabel": { "description": "Hours label" },
+
+  "hoursShortLabel": "שע׳",
+  "@hoursShortLabel": { "description": "Hours abbreviated label" },
+
+  "recordsLabel": "רשומות",
+  "@recordsLabel": { "description": "Records label" },
+
+  "missingCheckoutLabel": "חסר יציאה",
+  "@missingCheckoutLabel": { "description": "Missing checkout label" },
+
+  "addRecordButton": "הוסף רשומה",
+  "@addRecordButton": { "description": "Add record button label" },
+
+  "checkInFieldLabel": "כניסה",
+  "@checkInFieldLabel": { "description": "Check-in field label" },
+
+  "checkOutFieldLabel": "יציאה",
+  "@checkOutFieldLabel": { "description": "Check-out field label" },
+
+  "attendanceReportError": "שגיאה בדיווח נוכחות: {error}",
+  "@attendanceReportError": {
+    "description": "Attendance report error snackbar",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "outsideParkBoundsMessage": "אינך נמצא בגבולות הפארק",
+  "@outsideParkBoundsMessage": { "description": "Outside park bounds dialog message" },
+
+  "draftRestoredSnackbar": "טיוטה שוחזרה",
+  "@draftRestoredSnackbar": { "description": "Draft restored snackbar" },
+
+  "clearDraftAction": "נקה",
+  "@clearDraftAction": { "description": "Clear draft action label" },
+
+  "taskTitleRequiredValidation": "נא להזין כותרת למשימה",
+  "@taskTitleRequiredValidation": { "description": "Task title required validation message" },
+
+  "selectAtLeastOneWorkerValidation": "נא לבחור לפחות עובד אחד",
+  "@selectAtLeastOneWorkerValidation": { "description": "Select at least one worker validation message" },
+
+  "selectDeadlineValidation": "נא לבחור תאריך ושעה",
+  "@selectDeadlineValidation": { "description": "Select deadline validation message" },
+
+  "noCommentsEmpty": "אין תגובות עדיין",
+  "@noCommentsEmpty": { "description": "No comments empty state" },
+
+  "callDialogTitle": "שיחה יוצאת",
+  "@callDialogTitle": { "description": "Outgoing call dialog title" },
+
+  "callConfirmation": "להתקשר אל {name}?\n{phone}",
+  "@callConfirmation": {
+    "description": "Call confirmation dialog message",
+    "placeholders": {
+      "name": { "type": "String" },
+      "phone": { "type": "String" }
+    }
+  },
+
+  "dialFailed": "לא ניתן לחייג אל {phone}",
+  "@dialFailed": {
+    "description": "Dial failed snackbar",
+    "placeholders": { "phone": { "type": "String" } }
+  },
+
+  "noPendingWorkersEmpty": "אין עובדים שממתינים לאישור",
+  "@noPendingWorkersEmpty": { "description": "No pending workers empty state" },
+
+  "callTooltip": "התקשר",
+  "@callTooltip": { "description": "Call tooltip label" },
+
+  "noActiveWorkersEmpty": "אין עובדים פעילים במערכת",
+  "@noActiveWorkersEmpty": { "description": "No active workers empty state" },
+
+  "workerApproved": "העובד אושר בהצלחה",
+  "@workerApproved": { "description": "Worker approved snackbar" },
+
+  "applicationRejectedSnackbar": "הבקשה נדחתה. העובד קיבל הודעה.",
+  "@applicationRejectedSnackbar": { "description": "Application rejected snackbar" },
+
+  "approveWorkerButton": "אשר עובד",
+  "@approveWorkerButton": { "description": "Approve worker button label" },
+
+  "approveWorkerTitle": "אישור עובד",
+  "@approveWorkerTitle": { "description": "Approve worker screen title" },
+
+  "rejectApplicationButton": "דחה בקשה",
+  "@rejectApplicationButton": { "description": "Reject application button label" },
+
+  "rejectApplicationTitle": "דחיית בקשה",
+  "@rejectApplicationTitle": { "description": "Reject application screen title" },
+
+  "showShiftsButton": "הצג משמרות",
+  "@showShiftsButton": { "description": "Show shifts button label" },
+
+  "assignTaskButton": "שייך משימה",
+  "@assignTaskButton": { "description": "Assign task button label" },
+
+  "viewPerformanceButton": "הצג ביצועים",
+  "@viewPerformanceButton": { "description": "View performance button label" },
+
+  "correctAttendanceButton": "תיקון נוכחות",
+  "@correctAttendanceButton": { "description": "Correct attendance button label" },
+
+  "managePermissionsButton": "ניהול הרשאות ותפקיד",
+  "@managePermissionsButton": { "description": "Manage permissions and role button label" },
+
+  "revokeApprovalButton": "בטל אישור עובד",
+  "@revokeApprovalButton": { "description": "Revoke worker approval button label" },
+
+  "revokeApprovalTitle": "ביטול אישור עובד",
+  "@revokeApprovalTitle": { "description": "Revoke approval dialog title" },
+
+  "revokeApprovalMessage": "העובד יועבר חזרה לרשימת הממתינים לאישור. הפעולה ניתנת לביטול.",
+  "@revokeApprovalMessage": { "description": "Revoke approval dialog message" },
+
+  "approvalRevoked": "אישור העובד בוטל",
+  "@approvalRevoked": { "description": "Approval revoked snackbar" },
+
+  "licensesUpdated": "ההרשאות עודכנו בהצלחה",
+  "@licensesUpdated": { "description": "Licenses/permissions updated snackbar" },
+
+  "saveLicensesError": "שגיאה בשמירת הנתונים",
+  "@saveLicensesError": { "description": "Save licenses error snackbar" },
+
+  "attendanceReportTitle": "דו״ח נוכחות",
+  "@attendanceReportTitle": { "description": "Attendance report screen title" },
+
+  "daysLabel": "ימים",
+  "@daysLabel": { "description": "Days label" },
+
+  "averagePerDayLabel": "ממוצע/יום",
+  "@averagePerDayLabel": { "description": "Average per day label" },
+
+  "hoursPerDayChartTitle": "שעות עבודה לפי יום",
+  "@hoursPerDayChartTitle": { "description": "Hours per day chart title" },
+
+  "attendanceDetailsTitle": "פירוט נוכחות",
+  "@attendanceDetailsTitle": { "description": "Attendance details section title" },
+
+  "shiftReportTitle": "דו״ח משמרות",
+  "@shiftReportTitle": { "description": "Shift report screen title" },
+
+  "totalLabel": "סה״כ",
+  "@totalLabel": { "description": "Total label" },
+
+  "approvedLabel": "אושרו",
+  "@approvedLabel": { "description": "Approved label" },
+
+  "rejectedOtherLabel": "נדחו/אחר",
+  "@rejectedOtherLabel": { "description": "Rejected/other label" },
+
+  "decisionsDistributionTitle": "התפלגות החלטות",
+  "@decisionsDistributionTitle": { "description": "Decisions distribution chart title" },
+
+  "shiftsDetailsTitle": "פירוט משמרות",
+  "@shiftsDetailsTitle": { "description": "Shifts details section title" },
+
+  "shiftCoverageTitle": "כיסוי משמרות",
+  "@shiftCoverageTitle": { "description": "Shift coverage report title" },
+
+  "totalShiftsLabel": "סה\"כ משמרות",
+  "@totalShiftsLabel": { "description": "Total shifts label" },
+
+  "staffingRateLabel": "מילוי משרות",
+  "@staffingRateLabel": { "description": "Staffing rate label" },
+
+  "activeDepartmentsLabel": "מחלקות פעילות",
+  "@activeDepartmentsLabel": { "description": "Active departments label" },
+
+  "shiftsByDepartmentTitle": "משמרות לפי מחלקה",
+  "@shiftsByDepartmentTitle": { "description": "Shifts by department chart title" },
+
+  "departmentDetailsTitle": "פירוט מחלקות",
+  "@departmentDetailsTitle": { "description": "Department details section title" },
+
+  "missingCheckoutsTitle": "יציאות חסרות",
+  "@missingCheckoutsTitle": { "description": "Missing checkouts report title" },
+
+  "noMissingCheckoutsEmpty": "אין יציאות חסרות",
+  "@noMissingCheckoutsEmpty": { "description": "No missing checkouts empty state" },
+
+  "detailsByWorkerTitle": "פירוט לפי עובד",
+  "@detailsByWorkerTitle": { "description": "Details by worker section title" },
+
+  "myReportsTitle": "הדוחות שלי",
+  "@myReportsTitle": { "description": "My reports screen title" },
+
+  "taskReportCard": "דו״ח משימות",
+  "@taskReportCard": { "description": "Task report card label" },
+
+  "selectPhotosAction": "בחר תמונות",
+  "@selectPhotosAction": { "description": "Select photos action label" },
+
+  "selectPhotosFromGallery": "בחר תמונות מהגלריה",
+  "@selectPhotosFromGallery": { "description": "Select photos from gallery subtitle" },
+
+  "selectVideoAction": "בחר סרטון",
+  "@selectVideoAction": { "description": "Select video action label" },
+
+  "selectVideoFromGallery": "בחר סרטון מהגלריה",
+  "@selectVideoFromGallery": { "description": "Select video from gallery subtitle" },
+
+  "openCameraSubtitle": "פתח את המצלמה",
+  "@openCameraSubtitle": { "description": "Open camera subtitle" },
+
+  "postTitleHint": "הזן כותרת לפוסט...",
+  "@postTitleHint": { "description": "Post title input hint" },
+
+  "postContentHint": "מה תרצה לשתף?",
+  "@postContentHint": { "description": "Post content input hint" },
+
+  "deleteCommentTitle": "מחיקת תגובה",
+  "@deleteCommentTitle": { "description": "Delete comment dialog title" },
+
+  "deleteCommentConfirmation": "האם אתה בטוח שברצונך למחוק את התגובה?",
+  "@deleteCommentConfirmation": { "description": "Delete comment confirmation message" },
+
+  "deletePostTitle": "מחיקת פוסט",
+  "@deletePostTitle": { "description": "Delete post dialog title" },
+
+  "deletePostConfirmation": "האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.",
+  "@deletePostConfirmation": { "description": "Delete post confirmation message" },
+
+  "editPostAction": "ערוך פוסט",
+  "@editPostAction": { "description": "Edit post action label" },
+
+  "deletePostAction": "מחק פוסט",
+  "@deletePostAction": { "description": "Delete post action label" },
+
+  "editingPostTitle": "עריכת פוסט",
+  "@editingPostTitle": { "description": "Editing post title" },
+
+  "notificationsTitle": "התראות",
+  "@notificationsTitle": { "description": "Notifications screen title" },
+
+  "markAllAsReadButton": "סמן הכל כנקרא",
+  "@markAllAsReadButton": { "description": "Mark all as read button label" },
+
+  "loadNotificationsError": "שגיאה בטעינת ההתראות",
+  "@loadNotificationsError": { "description": "Load notifications error message" },
+
+  "openShiftError": "שגיאה בפתיחת המשמרת",
+  "@openShiftError": { "description": "Open shift error snackbar" },
+
+  "openTaskError": "שגיאה בפתיחת המשימה",
+  "@openTaskError": { "description": "Open task error snackbar" },
+
+  "noNotificationsEmpty": "אין התראות",
+  "@noNotificationsEmpty": { "description": "No notifications empty state" },
+
+  "newNotificationsWillAppear": "התראות חדשות יופיעו כאן",
+  "@newNotificationsWillAppear": { "description": "New notifications will appear here subtitle" },
+
+  "cannotOpenLink": "לא ניתן לפתוח את הקישור",
+  "@cannotOpenLink": { "description": "Cannot open link snackbar" },
+
+  "settingsTitle": "הגדרות",
+  "@settingsTitle": { "description": "Settings screen title" },
+
+  "changePasswordTitle": "שינוי סיסמה",
+  "@changePasswordTitle": { "description": "Change password section title" },
+
+  "biometricMethodsSubtitle": "טביעת אצבע / זיהוי פנים",
+  "@biometricMethodsSubtitle": { "description": "Biometric methods subtitle" },
+
+  "pushNotificationsTitle": "התראות פוש",
+  "@pushNotificationsTitle": { "description": "Push notifications section title" },
+
+  "pushNotificationsSubtitle": "קבלת עדכונים על משמרות ומשימות",
+  "@pushNotificationsSubtitle": { "description": "Push notifications subtitle" },
+
+  "privacyPolicyTitle": "מדיניות פרטיות",
+  "@privacyPolicyTitle": { "description": "Privacy policy section title" },
+
+  "termsOfServiceTitle": "תנאי שימוש",
+  "@termsOfServiceTitle": { "description": "Terms of service section title" },
+
+  "crashReportsTitle": "שלח דוחות קריסה",
+  "@crashReportsTitle": { "description": "Crash reports section title" },
+
+  "crashReportsSubtitle": "עוזר לנו לשפר את יציבות האפליקציה",
+  "@crashReportsSubtitle": { "description": "Crash reports section subtitle" },
+
+  "appVersionTitle": "גרסת האפליקציה",
+  "@appVersionTitle": { "description": "App version section title" },
+
+  "deleteAccountTitle": "מחיקת חשבון",
+  "@deleteAccountTitle": { "description": "Delete account section title" },
+
+  "deleteAccountSubtitle": "פעולה בלתי הפיכה — כל הנתונים יימחקו",
+  "@deleteAccountSubtitle": { "description": "Delete account section subtitle" },
+
+  "passwordChanged": "הסיסמה עודכנה בהצלחה",
+  "@passwordChanged": { "description": "Password changed success snackbar" },
+
+  "biometricAuthFailedSnackbar": "האימות הביומטרי נכשל",
+  "@biometricAuthFailedSnackbar": { "description": "Biometric auth failed snackbar in settings" },
+
+  "enableBiometricError": "שגיאה בהפעלת הכניסה הביומטרית",
+  "@enableBiometricError": { "description": "Enable biometric error snackbar" },
+
+  "enableBiometricTitle": "הפעלת כניסה ביומטרית",
+  "@enableBiometricTitle": { "description": "Enable biometric dialog title" },
+
+  "permanentDeletionTitle": "מחיקה סופית",
+  "@permanentDeletionTitle": { "description": "Permanent deletion dialog title" },
+
+  "optionsTooltip": "אפשרויות",
+  "@optionsTooltip": { "description": "Options tooltip" },
+
+  "settingsMenu": "הגדרות",
+  "@settingsMenu": { "description": "Settings menu item" },
+
+  "noButton": "לא",
+  "@noButton": { "description": "No button label" },
+
+  "yesButton": "כן",
+  "@yesButton": { "description": "Yes button label" },
+
+  "longPressHint": "לחץ לחיצה ארוכה",
+  "@longPressHint": { "description": "Long press hint label" },
+
+  "weatherLabel": "מזג אוויר",
+  "@weatherLabel": { "description": "Weather label" },
+
+  "loadDataError": "לא ניתן לטעון נתונים. בדוק חיבור או אינדקס.",
+  "@loadDataError": { "description": "Load data error message" },
+
+  "noShiftsEmpty": "אין משמרות להצגה",
+  "@noShiftsEmpty": { "description": "No shifts empty state" },
+
+  "shiftHoursFormat": "שעות: {startTime} - {endTime}",
+  "@shiftHoursFormat": {
+    "description": "Shift hours format",
+    "placeholders": {
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "departmentPrefix": "מחלקה: {department}",
+  "@departmentPrefix": {
+    "description": "Department prefix with value",
+    "placeholders": { "department": { "type": "String" } }
+  },
+
+  "unsavedChangesMessage": "יש שינויים שלא נשמרו. האם לצאת בלי לשמור?",
+  "@unsavedChangesMessage": { "description": "Unsaved changes dialog message" },
+
+  "noAttendanceRecords": "אין רשומות נוכחות לחודש זה",
+  "@noAttendanceRecords": { "description": "No attendance records empty state" },
+
+  "addManualRecordHint": "הוסף רשומה ידנית או בחר חודש אחר",
+  "@addManualRecordHint": { "description": "Add manual record hint text under empty state" },
+
+  "missingLabel": "חסר",
+  "@missingLabel": { "description": "Missing label (short, for time chip)" },
+
+  "activeLabel": "פעיל",
+  "@activeLabel": { "description": "Active label (short, for time chip)" },
+
+  "saveChangesButton": "שמור שינויים",
+  "@saveChangesButton": { "description": "Save changes button label" },
+
+  "editAttendanceRecordTitle": "עריכת רשומת נוכחות",
+  "@editAttendanceRecordTitle": { "description": "Edit attendance record dialog title" },
+
+  "locationPermissionTitle": "נדרשת גישה למיקום",
+  "@locationPermissionTitle": { "description": "Location permission required dialog title" },
+
+  "locationPermissionMessage": "כדי לדווח כניסה או יציאה ממשמרת יש לאפשר שירותי מיקום במכשיר.",
+  "@locationPermissionMessage": { "description": "Location permission required dialog message" },
+
+  "enableLocationButton": "הפעל מיקום",
+  "@enableLocationButton": { "description": "Enable location settings button label" },
+
+  "clockInOutsideParkMessage": "אתה מנסה להתחבר מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?",
+  "@clockInOutsideParkMessage": { "description": "Clock-in outside park bounds confirmation message" },
+
+  "clockOutOutsideParkMessage": "אתה מנסה להתנתק מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?",
+  "@clockOutOutsideParkMessage": { "description": "Clock-out outside park bounds confirmation message" },
+
+  "longPressToEndShift": "לחיצה ארוכה לסיום משמרת",
+  "@longPressToEndShift": { "description": "Long-press hint label when clocked in" },
+
+  "longPressToStartShift": "לחיצה ארוכה להתחיל משמרת",
+  "@longPressToStartShift": { "description": "Long-press hint label when clocked out" },
+
+  "clockedInSince": "מאז {time}",
+  "@clockedInSince": {
+    "description": "Clocked in since label with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "datePrefix": "תאריך: {date}",
+  "@datePrefix": {
+    "description": "Date label with value",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "clockInTimePrefix": "שעת כניסה: {time}",
+  "@clockInTimePrefix": {
+    "description": "Clock-in time label with value",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "clockOutTimePrefix": "שעת יציאה: {time}",
+  "@clockOutTimePrefix": {
+    "description": "Clock-out time label with value",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "workDurationLabel": "משך העבודה: {hours}ש׳ {minutes}ד׳",
+  "@workDurationLabel": {
+    "description": "Work duration label with hours and minutes",
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "greetingNight": "לילה טוב,",
+  "@greetingNight": { "description": "Good night greeting" },
+
+  "greetingMorning": "בוקר טוב,",
+  "@greetingMorning": { "description": "Good morning greeting" },
+
+  "greetingAfternoon": "צהריים טובים,",
+  "@greetingAfternoon": { "description": "Good afternoon greeting" },
+
+  "greetingEvening": "ערב טוב,",
+  "@greetingEvening": { "description": "Good evening greeting" },
+
+  "motivationalMsg1": "אתה חלק חשוב בצוות שלנו 💪",
+  "@motivationalMsg1": { "description": "Motivational message 1" },
+
+  "motivationalMsg2": "כל משמרת היא הזדמנות להשפיע ✨",
+  "@motivationalMsg2": { "description": "Motivational message 2" },
+
+  "motivationalMsg3": "תשמור על חיוך – זה מדבק 😄",
+  "@motivationalMsg3": { "description": "Motivational message 3" },
+
+  "thisMonthLabel": "החודש",
+  "@thisMonthLabel": { "description": "This month label" },
+
+  "nowLabel": "עכשיו",
+  "@nowLabel": { "description": "Now label (for time display)" },
+
+  "minutesAgoLabel": "לפני {n} דק'",
+  "@minutesAgoLabel": {
+    "description": "Minutes ago label",
+    "placeholders": { "n": { "type": "int" } }
+  },
+
+  "hoursAgoLabel": "לפני {n} שע'",
+  "@hoursAgoLabel": {
+    "description": "Hours ago label",
+    "placeholders": { "n": { "type": "int" } }
+  },
+
+  "yesterdayLabel": "אתמול",
+  "@yesterdayLabel": { "description": "Yesterday label" },
+
+  "daysAgoLabel": "לפני {n} ימים",
+  "@daysAgoLabel": {
+    "description": "Days ago label",
+    "placeholders": { "n": { "type": "int" } }
+  },
+
+  "latestUpdateLabel": "עדכון אחרון",
+  "@latestUpdateLabel": { "description": "Latest update label on home card" },
+
+  "readMoreLabel": "קרא עוד",
+  "@readMoreLabel": { "description": "Read more label" },
+
+  "whatIsImportantNow": "מה חשוב עכשיו",
+  "@whatIsImportantNow": { "description": "Today overview card section title" },
+
+  "allUpToDate": "הכל מעודכן — אין פריטים דחופים",
+  "@allUpToDate": { "description": "All up to date status message" },
+
+  "shiftChangesWaiting": "שינויים במשמרות ממתינים",
+  "@shiftChangesWaiting": { "description": "Shift changes pending status message" },
+
+  "tasksWaitingApproval": "משימות ממתינות לאישור",
+  "@tasksWaitingApproval": { "description": "Tasks awaiting approval status message" },
+
+  "newPostsInBoard": "פוסטים חדשים בלוח המודעות",
+  "@newPostsInBoard": { "description": "New posts in bulletin board status message" },
+
+  "newUpdatesInBoard": "עדכונים חדשים בלוח המודעות",
+  "@newUpdatesInBoard": { "description": "New updates in bulletin board status message" },
+
+  "newBusinessActivity": "פעילות עסקית חדשה לבדיקה",
+  "@newBusinessActivity": { "description": "New business activity to review status message" },
+
+  "newShiftsAssigned": "משמרות חדשות שהוקצו לך",
+  "@newShiftsAssigned": { "description": "New shifts assigned status message" },
+
+  "openTasksWaiting": "משימות פתוחות ממתינות לך",
+  "@openTasksWaiting": { "description": "Open tasks waiting status message" },
+
+  "clickToResetClockOut": "לחץ לאיפוס שעון יציאה",
+  "@clickToResetClockOut": { "description": "Accessibility label: tap to reset clock-out" },
+
+  "clickToRegisterClockIn": "לחץ לרישום שעון כניסה",
+  "@clickToRegisterClockIn": { "description": "Accessibility label: tap to register clock-in" },
+
+  "completedLabel": "הושלמו",
+  "@completedLabel": { "description": "Completed label (tasks)" },
+
+  "presentNowLabel": "נוכחים כעת",
+  "@presentNowLabel": { "description": "Present now section title on owner dashboard" },
+
+  "noWorkersConnected": "אין עובדים מחוברים כרגע",
+  "@noWorkersConnected": { "description": "No workers currently connected empty state" },
+
+  "topWorkersThisMonth": "מובילי החודש",
+  "@topWorkersThisMonth": { "description": "Top workers this month section title" },
+
+  "workHoursThisMonth": "שעות עבודה — החודש",
+  "@workHoursThisMonth": { "description": "Work hours this month chart title" },
+
+  "averageHoursPerWorker": "ממוצע {hours} שעות לעובד",
+  "@averageHoursPerWorker": {
+    "description": "Average hours per worker subtitle",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "ownerDashboardTitle": "לוח בקרה — בעלים",
+  "@ownerDashboardTitle": { "description": "Owner dashboard screen title" },
+
+  "helloName": "שלום, {name}",
+  "@helloName": {
+    "description": "Hello greeting with name",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "quickActionsLabel": "פעולות מהירות",
+  "@quickActionsLabel": { "description": "Quick actions section label" },
+
+  "staffLabel": "כוח אדם",
+  "@staffLabel": { "description": "Staff section label" },
+
+  "staffCountSummary": "סה\"כ {count} אנשים בצוות • לחץ לניהול",
+  "@staffCountSummary": {
+    "description": "Staff count summary line",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "employeeManagementSystem": "מערכת ניהול עובדים",
+  "@employeeManagementSystem": { "description": "Employee management system label on splash" },
+
+  "myProfileTitle": "הפרופיל שלי",
+  "@myProfileTitle": { "description": "My profile screen title" },
+
+  "gpsUnavailableTitle": "לא ניתן לאמת מיקום",
+  "@gpsUnavailableTitle": { "description": "GPS unavailable dialog title" },
+
+  "gpsUnavailableMessage": "שירות המיקום אינו זמין או שהרשאות GPS לא אושרו. האם ברצונך להמשיך בכל זאת?",
+  "@gpsUnavailableMessage": { "description": "GPS unavailable dialog message" },
+
+  "searchingLocationLabel": "...מחפש מיקום",
+  "@searchingLocationLabel": { "description": "Shown while GPS location is being determined on clock-in/out" },
+
+  "networkErrorLoadMessage": "לא ניתן לטעון את הנתונים.\nבדוק את החיבור ונסה שוב.",
+  "@networkErrorLoadMessage": { "description": "Network error load message on home screen" },
+
+  "profileTooltip": "פרופיל",
+  "@profileTooltip": { "description": "Profile button tooltip" },
+
+  "notificationsTooltip": "התראות",
+  "@notificationsTooltip": { "description": "Notifications button tooltip" },
+
+  "permissionsCoverageLabel": "כיסוי הרשאות",
+  "@permissionsCoverageLabel": { "description": "Permissions coverage label" },
+
+  "noActivePermissions": "אין הרשאות פעילות",
+  "@noActivePermissions": { "description": "No active permissions empty state" },
+
+  "updateProfilePictureTitle": "עדכון תמונת פרופיל",
+  "@updateProfilePictureTitle": { "description": "Update profile picture bottom sheet title" },
+
+  "chooseImageSourceTitle": "בחר מקור לתמונה",
+  "@chooseImageSourceTitle": { "description": "Choose image source bottom sheet subtitle" },
+
+  "setAsProfilePictureConfirm": "להגדיר תמונה זו כתמונת הפרופיל שלך?",
+  "@setAsProfilePictureConfirm": { "description": "Set as profile picture confirmation message" },
+
+  "ctaOpenButton": "פתח",
+  "@ctaOpenButton": { "description": "Default CTA open button label on action card" },
+
+  "clickForWeeklySchedule": "לחץ לסידור שבועי",
+  "@clickForWeeklySchedule": { "description": "Hint label to tap for weekly schedule" },
+
+  "clickForManageWorkers": "לחץ לניהול עובדים",
+  "@clickForManageWorkers": { "description": "Hint label to tap for manage workers" },
+
+  "daysWorkedLabel": "ימים שעבדת",
+  "@daysWorkedLabel": { "description": "Days worked stat label on user card" },
+
+  "hoursWorkedLabel": "שעות שעבדת",
+  "@hoursWorkedLabel": { "description": "Hours worked stat label on user card" },
+
+  "clockInFromLabel": "מ-{clockIn} · {duration}",
+  "@clockInFromLabel": {
+    "description": "Clock-in from time and duration label",
+    "placeholders": {
+      "clockIn": { "type": "String" },
+      "duration": { "type": "String" }
+    }
+  },
+
+  "accountSectionHeader": "חשבון",
+  "@accountSectionHeader": { "description": "Account section header in settings" },
+
+  "languageSectionHeader": "שפה",
+  "@languageSectionHeader": { "description": "Language section header in settings" },
+
+  "languageSubtitle": "בחר את שפת הממשק",
+  "@languageSubtitle": { "description": "Language tile subtitle in settings" },
+
+  "notificationsSectionHeader": "התראות",
+  "@notificationsSectionHeader": { "description": "Notifications section header in settings" },
+
+  "infoSectionHeader": "מידע",
+  "@infoSectionHeader": { "description": "Information section header in settings" },
+
+  "signOutSectionHeader": "יציאה",
+  "@signOutSectionHeader": { "description": "Sign out section header in settings" },
+
+  "dangerZoneSectionHeader": "אזור סכנה",
+  "@dangerZoneSectionHeader": { "description": "Danger zone section header in settings" },
+
+  "requiresRecentLoginError": "יש להתחבר מחדש לפני שינוי הסיסמה",
+  "@requiresRecentLoginError": { "description": "Requires recent login error for password change" },
+
+  "updatePasswordError": "שגיאה בעדכון הסיסמה",
+  "@updatePasswordError": { "description": "Error updating password snackbar" },
+
+  "newPasswordLabel": "סיסמה חדשה",
+  "@newPasswordLabel": { "description": "New password field label" },
+
+  "passwordRequiredValidator": "נא להזין סיסמה",
+  "@passwordRequiredValidator": { "description": "Password required validator message" },
+
+  "updatePasswordButton": "עדכן סיסמה",
+  "@updatePasswordButton": { "description": "Update password button label" },
+
+  "biometricEnableDescription": "הזן את הסיסמה הנוכחית שלך כדי לאפשר כניסה עם טביעת אצבע / זיהוי פנים.",
+  "@biometricEnableDescription": { "description": "Description in biometric enable sheet" },
+
+  "currentPasswordLabel": "סיסמה נוכחית",
+  "@currentPasswordLabel": { "description": "Current password field label" },
+
+  "biometricVerifyReason": "אמת את זהותך כדי להפעיל כניסה ביומטרית",
+  "@biometricVerifyReason": { "description": "Reason shown in biometric prompt when enabling biometric login" },
+
+  "activateBiometricButton": "הפעל כניסה ביומטרית",
+  "@activateBiometricButton": { "description": "Activate biometric login button label" },
+
+  "permanentDeletionMessage": "פעולה זו בלתי הפיכה לחלוטין.\nכל הנתונים האישיים שלך יימחקו לצמיתות.",
+  "@permanentDeletionMessage": { "description": "Permanent deletion confirmation dialog message" },
+
+  "deleteAccountButton": "מחק חשבון",
+  "@deleteAccountButton": { "description": "Delete account button label in confirmation dialog" },
+
+  "wrongPasswordError": "הסיסמה שגויה. אנא נסה שוב.",
+  "@wrongPasswordError": { "description": "Wrong password error snackbar" },
+
+  "requiresRecentLoginDeleteError": "נדרשת כניסה מחדש לפני מחיקת החשבון",
+  "@requiresRecentLoginDeleteError": { "description": "Requires recent login error for account deletion" },
+
+  "deleteAccountError": "שגיאה במחיקת החשבון. אנא נסה שוב.",
+  "@deleteAccountError": { "description": "Error deleting account snackbar" },
+
+  "deleteAccountWarning": "פעולה זו תמחק את כל הנתונים האישיים שלך לצמיתות ולא ניתן לבטלה.\nאנא הזן את הסיסמה שלך לאישור.",
+  "@deleteAccountWarning": { "description": "Warning text shown in delete account sheet" },
+
+  "deleteMyAccountButton": "מחק את חשבוני לצמיתות",
+  "@deleteMyAccountButton": { "description": "Delete my account permanently button label" },
+
+  "newBadgeLabel": "חדש",
+  "@newBadgeLabel": { "description": "New badge label on unread notification tiles" },
+
+  "newWorkersTabLabel": "עובדים חדשים",
+  "@newWorkersTabLabel": { "description": "New workers tab label in manage workers screen" },
+
+  "activeWorkersTabLabel": "עובדים פעילים",
+  "@activeWorkersTabLabel": { "description": "Active workers tab label in manage workers screen" },
+
+  "searchWorkerHint": "חיפוש עובד לפי שם...",
+  "@searchWorkerHint": { "description": "Search worker text field hint" },
+
+  "noSearchResultsEmpty": "לא נמצאו תוצאות",
+  "@noSearchResultsEmpty": { "description": "No search results empty state" },
+
+  "workersMissingClockOutBanner": "{count} {workers} עם שעת יציאה חסרה החודש",
+  "@workersMissingClockOutBanner": {
+    "description": "Banner shown when workers have missing clock-out",
+    "placeholders": {
+      "count": { "type": "int" },
+      "workers": { "type": "String" }
+    }
+  },
+
+  "workerLabelSingular": "עובד",
+  "@workerLabelSingular": { "description": "Singular word for worker (used in banner)" },
+
+  "workerLabelPlural": "עובדים",
+  "@workerLabelPlural": { "description": "Plural word for workers (used in banner)" },
+
+  "missingClockOutWarning": "חסר שעת יציאה — לחץ לתיקון",
+  "@missingClockOutWarning": { "description": "Missing clock-out warning row on worker card" },
+
+  "workerSubtitleInPark": "עובד בפארק ג׳ננה",
+  "@workerSubtitleInPark": { "description": "Worker subtitle shown on review worker screen" },
+
+  "workerEmailInfoLabel": "אימייל",
+  "@workerEmailInfoLabel": { "description": "Email label in worker info row" },
+
+  "workerPhoneInfoLabel": "טלפון",
+  "@workerPhoneInfoLabel": { "description": "Phone label in worker info row" },
+
+  "workerDetailsCardTitle": "🧾 פרטי העובד",
+  "@workerDetailsCardTitle": { "description": "Worker details card title" },
+
+  "adminActionsCardTitle": "🧭 פעולות מנהל",
+  "@adminActionsCardTitle": { "description": "Admin actions card title on review worker screen" },
+
+  "manageLicensesCardTitle": "🛠 ניהול משא",
+  "@manageLicensesCardTitle": { "description": "Manage licenses card title on review worker screen" },
+
+  "noPermissionForUser": "אין הרשאה לניהול משתמש זה",
+  "@noPermissionForUser": { "description": "No permission to manage this user message" },
+
+  "newWorkerPendingApproval": "עובד חדש ממתין לאישור",
+  "@newWorkerPendingApproval": { "description": "New worker pending approval subtitle" },
+
+  "approveEmailLabel": "דוא\"ל",
+  "@approveEmailLabel": { "description": "Email label in approve worker info card" },
+
+  "approveConfirmContent": "האם אתה בטוח שברצונך לאשר את העובד הזה?",
+  "@approveConfirmContent": { "description": "Approve worker confirmation dialog message" },
+
+  "rejectConfirmContent": "העובד ישאר בהמתנה ויוכל להגיש בקשה שוב. האם לדחות?",
+  "@rejectConfirmContent": { "description": "Reject worker confirmation dialog message" },
+
+  "roleSectionTitle": "תפקיד",
+  "@roleSectionTitle": { "description": "Role section title in edit licenses screen" },
+
+  "managerRoleUpgradeNote": "שדרוג לתפקיד מנהל מותר לבעלים בלבד",
+  "@managerRoleUpgradeNote": { "description": "Note that upgrading to manager role is for owners only" },
+
+  "departmentsSectionHint": "בחר את המחלקות בהן מורשה העובד לעבוד",
+  "@departmentsSectionHint": { "description": "Hint text under departments section title" },
+
+  "roleChangedTitle": "התפקיד שלך עודכן",
+  "@roleChangedTitle": { "description": "In-app notification title for role change" },
+
+  "roleChangedBody": "תפקידך שונה מ{fromRole} ל{toRole}",
+  "@roleChangedBody": {
+    "description": "In-app notification body for role change",
+    "placeholders": {
+      "fromRole": { "type": "String" },
+      "toRole": { "type": "String" }
+    }
+  },
+
+  "searchByNameOrRoleHint": "חיפוש לפי שם או תפקיד",
+  "@searchByNameOrRoleHint": { "description": "Search field hint in users screen" },
+
+  "workerAddedToShift": "עובד נוסף למשמרת בהצלחה",
+  "@workerAddedToShift": { "description": "Worker added to shift success snackbar" },
+
+  "workerRemovedFromShift": "עובד הוסר מהמשמרת",
+  "@workerRemovedFromShift": { "description": "Worker removed from shift snackbar" },
+
+  "noWorkersFound": "לא נמצאו עובדים",
+  "@noWorkersFound": { "description": "No workers found empty state in users screen" },
+
+  "addWorkersCount": "הוסף {count} עובדים",
+  "@addWorkersCount": {
+    "description": "Add N workers button label in draft mode",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "workerShiftsListSubtitle": "רשימת המשמרות של העובד",
+  "@workerShiftsListSubtitle": { "description": "Worker shifts list subtitle in shifts button screen" },
+
+  "filterAll": "הכל",
+  "@filterAll": { "description": "Filter button: all shifts" },
+
+  "filterUpcoming": "קרובות",
+  "@filterUpcoming": { "description": "Filter button: upcoming shifts" },
+
+  "filterPast": "עבר",
+  "@filterPast": { "description": "Filter button: past shifts" },
+
+  "filterToday": "היום",
+  "@filterToday": { "description": "Filter button: today shifts" },
+
+  "filterThisWeek": "השבוע",
+  "@filterThisWeek": { "description": "Filter button: this week shifts" },
+
+  "shiftNoteLabel": "הערה: {note}",
+  "@shiftNoteLabel": {
+    "description": "Shift note label with content",
+    "placeholders": {
+      "note": { "type": "String" }
+    }
+  },
+
+  "ownerRoleShort": "בעלים",
+  "@ownerRoleShort": { "description": "Owner role short label for worker card badge" },
+
+  "coOwnerRoleShort": "שותף",
+  "@coOwnerRoleShort": { "description": "Co-owner role short label for worker card badge" },
+
+  "newsfeedTitle": "לוח מודעות",
+  "@newsfeedTitle": { "description": "Newsfeed screen title" },
+
+  "newPostButton": "פוסט חדש",
+  "@newPostButton": { "description": "FAB label to create a new post" },
+
+  "searchPostHint": "חיפוש פוסט...",
+  "@searchPostHint": { "description": "Search field hint text in newsfeed" },
+
+  "categoryAll": "הכל",
+  "@categoryAll": { "description": "Category filter: all posts" },
+
+  "categoryAnnouncements": "הודעות",
+  "@categoryAnnouncements": { "description": "Category filter: announcements" },
+
+  "categoryUpdates": "עדכונים",
+  "@categoryUpdates": { "description": "Category filter: updates" },
+
+  "categoryEvents": "אירועים",
+  "@categoryEvents": { "description": "Category filter: events" },
+
+  "categoryGeneral": "כללי",
+  "@categoryGeneral": { "description": "Category filter: general" },
+
+  "categoryLabelAnnouncement": "הודעה",
+  "@categoryLabelAnnouncement": { "description": "Category badge label: announcement" },
+
+  "categoryLabelUpdate": "עדכון",
+  "@categoryLabelUpdate": { "description": "Category badge label: update" },
+
+  "categoryLabelEvent": "אירוע",
+  "@categoryLabelEvent": { "description": "Category badge label: event" },
+
+  "categoryLabelGeneral": "כללי",
+  "@categoryLabelGeneral": { "description": "Category badge label: general" },
+
+  "pinnedPostLabel": "פוסט נעוץ",
+  "@pinnedPostLabel": { "description": "Label shown on pinned posts" },
+
+  "readMoreLabel": "קרא עוד",
+  "@readMoreLabel": { "description": "Read more link on truncated post content" },
+
+  "pinPostAction": "נעץ פוסט",
+  "@pinPostAction": { "description": "Pin post menu action" },
+
+  "unpinPostAction": "בטל נעיצה",
+  "@unpinPostAction": { "description": "Unpin post menu action" },
+
+  "deletePostAction": "מחק פוסט",
+  "@deletePostAction": { "description": "Delete post menu action" },
+
+  "editPostAction": "ערוך פוסט",
+  "@editPostAction": { "description": "Edit post menu action" },
+
+  "deletePostTitle": "מחיקת פוסט",
+  "@deletePostTitle": { "description": "Delete post confirmation dialog title" },
+
+  "deletePostMessage": "האם אתה בטוח שברצונך למחוק את הפוסט?\nפעולה זו לא ניתנת לביטול.",
+  "@deletePostMessage": { "description": "Delete post confirmation dialog message" },
+
+  "deleteCommentTitle": "מחיקת תגובה",
+  "@deleteCommentTitle": { "description": "Delete comment confirmation dialog title" },
+
+  "deleteCommentMessage": "האם אתה בטוח שברצונך למחוק את התגובה?",
+  "@deleteCommentMessage": { "description": "Delete comment confirmation dialog message" },
+
+  "deleteLabel": "מחק",
+  "@deleteLabel": { "description": "Delete confirm button label" },
+
+  "postDeletedSuccess": "הפוסט נמחק בהצלחה",
+  "@postDeletedSuccess": { "description": "Success snackbar after post deletion" },
+
+  "postDeleteError": "שגיאה במחיקת הפוסט: {error}",
+  "@postDeleteError": {
+    "description": "Error snackbar when post deletion fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "postPinnedSuccess": "הפוסט ננעץ",
+  "@postPinnedSuccess": { "description": "Success snackbar when post is pinned" },
+
+  "postUnpinnedSuccess": "הפוסט הוסר מהנעוצים",
+  "@postUnpinnedSuccess": { "description": "Success snackbar when post is unpinned" },
+
+  "errorPrefix": "שגיאה: {error}",
+  "@errorPrefix": {
+    "description": "Generic error snackbar with error details",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "noPostsEmpty": "אין פוסטים עדיין",
+  "@noPostsEmpty": { "description": "Empty state title in newsfeed" },
+
+  "noPostsManagerHint": "לחץ על \"פוסט חדש\" כדי לפרסם את הפוסט הראשון",
+  "@noPostsManagerHint": { "description": "Empty state hint for managers" },
+
+  "noPostsWorkerHint": "המנהלים יפרסמו כאן עדכונים בקרוב",
+  "@noPostsWorkerHint": { "description": "Empty state hint for workers" },
+
+  "noPostsSearchEmpty": "לא נמצאו פוסטים התואמים לחיפוש",
+  "@noPostsSearchEmpty": { "description": "Empty state when search returns no results" },
+
+  "noPostsCategoryEmpty": "אין פוסטים בקטגוריה זו",
+  "@noPostsCategoryEmpty": { "description": "Empty state when category has no posts" },
+
+  "feedLoadError": "שגיאה בטעינת הפוסטים",
+  "@feedLoadError": { "description": "Error state title in newsfeed" },
+
+  "checkConnectionHint": "בדוק את החיבור לאינטרנט ונסה שוב",
+  "@checkConnectionHint": { "description": "Error state hint to check connection" },
+
+  "defaultUserName": "משתמש",
+  "@defaultUserName": { "description": "Default fallback user name" },
+
+  "createPostTitle": "פוסט חדש",
+  "@createPostTitle": { "description": "Create post dialog header title" },
+
+  "createPostSubtitle": "שתף עדכונים עם הצוות",
+  "@createPostSubtitle": { "description": "Create post dialog header subtitle" },
+
+  "selectCategoryLabel": "בחר קטגוריה",
+  "@selectCategoryLabel": { "description": "Category section label in create post dialog" },
+
+  "postTitleLabel": "כותרת",
+  "@postTitleLabel": { "description": "Title field label in create post dialog" },
+
+  "postTitleHint": "הזן כותרת לפוסט...",
+  "@postTitleHint": { "description": "Title field hint in create post dialog" },
+
+  "postTitleRequired": "יש להזין כותרת",
+  "@postTitleRequired": { "description": "Validation error when title is empty" },
+
+  "postContentLabel": "תוכן הפוסט",
+  "@postContentLabel": { "description": "Content field label in create post dialog" },
+
+  "postContentHint": "מה תרצה לשתף?",
+  "@postContentHint": { "description": "Content field hint in create post dialog" },
+
+  "postContentRequired": "יש להזין תוכן",
+  "@postContentRequired": { "description": "Validation error when content is empty" },
+
+  "mediaLabel": "מדיה ({count}/{max})",
+  "@mediaLabel": {
+    "description": "Media section label showing current and max count",
+    "placeholders": {
+      "count": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+
+  "addMediaButton": "הוסף תמונות או סרטונים",
+  "@addMediaButton": { "description": "Add media button label when no media selected" },
+
+  "addMoreMediaButton": "הוסף עוד",
+  "@addMoreMediaButton": { "description": "Add more media button label when media already selected" },
+
+  "mediaPickerTitle": "הוסף מדיה",
+  "@mediaPickerTitle": { "description": "Media picker bottom sheet title" },
+
+  "pickImagesOption": "בחר תמונות",
+  "@pickImagesOption": { "description": "Media picker option: pick images from gallery" },
+
+  "pickImagesSubtitle": "בחר תמונות מהגלריה",
+  "@pickImagesSubtitle": { "description": "Media picker option subtitle: pick from gallery" },
+
+  "pickVideoOption": "בחר סרטון",
+  "@pickVideoOption": { "description": "Media picker option: pick video from gallery" },
+
+  "pickVideoSubtitle": "בחר סרטון מהגלריה",
+  "@pickVideoSubtitle": { "description": "Media picker option subtitle: pick video" },
+
+  "takePhotoOption": "צלם תמונה",
+  "@takePhotoOption": { "description": "Media picker option: take photo with camera" },
+
+  "takePhotoSubtitle": "פתח את המצלמה",
+  "@takePhotoSubtitle": { "description": "Media picker option subtitle: open camera" },
+
+  "maxMediaError": "ניתן להעלות עד {max} קבצים",
+  "@maxMediaError": {
+    "description": "Error when user tries to add more than max media",
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
+
+  "videoLabel": "וידאו",
+  "@videoLabel": { "description": "Video label shown on video thumbnails" },
+
+  "publishPostButton": "פרסם פוסט",
+  "@publishPostButton": { "description": "Submit button in create post dialog" },
+
+  "publishingPostStatus": "מפרסם פוסט...",
+  "@publishingPostStatus": { "description": "Upload status: publishing post" },
+
+  "preparingUploadStatus": "מכין להעלאה...",
+  "@preparingUploadStatus": { "description": "Upload status: preparing upload" },
+
+  "postPublishedSuccess": "הפוסט פורסם בהצלחה",
+  "@postPublishedSuccess": { "description": "Success snackbar after post is published" },
+
+  "postPublishError": "שגיאה בפרסום הפוסט: {error}",
+  "@postPublishError": {
+    "description": "Error snackbar when post publishing fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "movWarningMessage": "סרטוני .MOV מאייפון עשויים להיות בפורמט Dolby Vision שלא נתמך בחלק מהמכשירים. מומלץ להשתמש ב-MP4.",
+  "@movWarningMessage": { "description": "Warning shown when user picks a .MOV video" },
+
+  "postDetailTitle": "פרטי הפוסט",
+  "@postDetailTitle": { "description": "Post detail sheet header title" },
+
+  "tapToWatchVideo": "הקש לצפייה בסרטון",
+  "@tapToWatchVideo": { "description": "Video thumbnail label in post detail" },
+
+  "commentsTitle": "תגובות",
+  "@commentsTitle": { "description": "Comments section header title" },
+
+  "noCommentsEmpty": "אין תגובות עדיין",
+  "@noCommentsEmpty": { "description": "Empty state title in comments" },
+
+  "beFirstToComment": "היה הראשון להגיב!",
+  "@beFirstToComment": { "description": "Empty state hint in comments sheet" },
+
+  "beFirstToCommentOnPost": "היה הראשון להגיב על הפוסט!",
+  "@beFirstToCommentOnPost": { "description": "Empty state hint in post detail comments" },
+
+  "addCommentHint": "הוסף תגובה...",
+  "@addCommentHint": { "description": "Comment input hint in post detail sheet" },
+
+  "writeCommentHint": "כתוב תגובה...",
+  "@writeCommentHint": { "description": "Comment input hint in comments sheet" },
+
+  "commentAddedSuccess": "התגובה נוספה",
+  "@commentAddedSuccess": { "description": "Success snackbar after comment added" },
+
+  "commentAddError": "שגיאה בהוספת תגובה",
+  "@commentAddError": { "description": "Error snackbar when adding comment fails" },
+
+  "commentDeletedSuccess": "התגובה נמחקה",
+  "@commentDeletedSuccess": { "description": "Success snackbar after comment deleted" },
+
+  "commentDeleteError": "שגיאה במחיקת תגובה",
+  "@commentDeleteError": { "description": "Error snackbar when deleting comment fails" },
+
+  "commentUpdatedSuccess": "התגובה עודכנה",
+  "@commentUpdatedSuccess": { "description": "Success snackbar after comment edited" },
+
+  "commentUpdateError": "שגיאה בעדכון תגובה",
+  "@commentUpdateError": { "description": "Error snackbar when editing comment fails" },
+
+  "editPostTitle": "עריכת פוסט",
+  "@editPostTitle": { "description": "Edit post sheet title" },
+
+  "postUpdatedSuccess": "הפוסט עודכן",
+  "@postUpdatedSuccess": { "description": "Success snackbar after post edited" },
+
+  "postUpdateError": "שגיאה בעדכון הפוסט",
+  "@postUpdateError": { "description": "Error snackbar when editing post fails" },
+
+  "likersTitle": "תגובות לפוסט",
+  "@likersTitle": { "description": "Likers sheet header title" },
+
+  "likersCount": "{count} אנשים",
+  "@likersCount": {
+    "description": "Number of people who reacted to a post",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "noLikersEmpty": "עדיין אין לייקים",
+  "@noLikersEmpty": { "description": "Empty state title in likers sheet" },
+
+  "beFirstToLike": "היה הראשון לאהוב את הפוסט!",
+  "@beFirstToLike": { "description": "Empty state hint in likers sheet" },
+
+  "likersLoadError": "שגיאה בטעינת הנתונים",
+  "@likersLoadError": { "description": "Error message when likers fail to load" },
+
+  "roleManager": "מנהל",
+  "@roleManager": { "description": "Manager role display name in likers sheet" },
+
+  "roleWorker": "עובד",
+  "@roleWorker": { "description": "Worker role display name in likers sheet" },
+
+  "roleAdmin": "מנהל מערכת",
+  "@roleAdmin": { "description": "Admin role display name in likers sheet" },
+
+  "videoFormatNotSupported": "פורמט סרטון לא נתמך",
+  "@videoFormatNotSupported": { "description": "Video player error: unsupported format" },
+
+  "videoLoadError": "שגיאה בטעינת הסרטון",
+  "@videoLoadError": { "description": "Video player error: failed to load" },
+
+  "videoFormatErrorDetail": "הסרטון מקודד בפורמט Dolby Vision / HEVC שלא נתמך\nבמכשיר זה. נסה להעלות סרטון ב-H.264 (MP4 רגיל).",
+  "@videoFormatErrorDetail": { "description": "Video player format error detail message" },
+
+  "videoPlaybackErrorDetail": "אירעה שגיאה בהפעלת הסרטון.\nבדוק את החיבור ונסה שוב.",
+  "@videoPlaybackErrorDetail": { "description": "Video player playback error detail message" },
+
+  "videoLoadingLabel": "טוען סרטון...",
+  "@videoLoadingLabel": { "description": "Video player loading label" },
+
+  "noPostsMatchSearch": "לא נמצאו פוסטים התואמים לחיפוש",
+  "@noPostsMatchSearch": { "description": "Empty state when search returns no posts" },
+
+  "noPostsInCategory": "אין פוסטים בקטגוריה זו",
+  "@noPostsInCategory": { "description": "Empty state when selected category has no posts" },
+
+  "noPostsYet": "אין פוסטים עדיין",
+  "@noPostsYet": { "description": "Empty state title when no posts exist" },
+
+  "loadPostsError": "שגיאה בטעינת הפוסטים",
+  "@loadPostsError": { "description": "Error state title when posts fail to load" },
+
+  "deletePostError": "שגיאה במחיקת הפוסט: {error}",
+  "@deletePostError": {
+    "description": "Error snackbar when post deletion fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "genericError": "שגיאה: {error}",
+  "@genericError": {
+    "description": "Generic error message with details",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "taskStatusPending": "טרם התחיל",
+  "@taskStatusPending": { "description": "Task status: not yet started" },
+
+  "taskStatusInProgress": "בביצוע",
+  "@taskStatusInProgress": { "description": "Task status: in progress" },
+
+  "taskStatusDone": "הושלם",
+  "@taskStatusDone": { "description": "Task status: done/completed" },
+
+  "taskStatusPendingReview": "ממתין לאישור",
+  "@taskStatusPendingReview": { "description": "Task status: pending manager review" },
+
+  "taskPriorityHigh": "גבוהה",
+  "@taskPriorityHigh": { "description": "Task priority: high" },
+
+  "taskPriorityMedium": "בינונית",
+  "@taskPriorityMedium": { "description": "Task priority: medium" },
+
+  "taskPriorityLow": "נמוכה",
+  "@taskPriorityLow": { "description": "Task priority: low" },
+
+  "noTasksEmpty": "אין משימות",
+  "@noTasksEmpty": { "description": "Empty state when no tasks exist" },
+
+  "noTasksForDay": "אין משימות ליום זה",
+  "@noTasksForDay": { "description": "Empty state when no tasks for the selected day" },
+
+  "noTasksNow": "אין משימות כרגע",
+  "@noTasksNow": { "description": "Empty state for worker timeline with no tasks" },
+
+  "newTasksWillAppear": "משימות חדשות יופיעו כאן",
+  "@newTasksWillAppear": { "description": "Subtitle for empty task state" },
+
+  "useCreateTaskButton": "השתמש בכפתור 'יצירת משימה' כדי להוסיף אחת חדשה",
+  "@useCreateTaskButton": { "description": "Hint shown in empty task state for managers" },
+
+  "taskManagementTitle": "ניהול משימות",
+  "@taskManagementTitle": { "description": "Task management screen title" },
+
+  "allTasksTitle": "כל המשימות",
+  "@allTasksTitle": { "description": "All tasks screen title" },
+
+  "allTasksSubtitle": "תצוגה כוללת לכל המשימות",
+  "@allTasksSubtitle": { "description": "All tasks screen subtitle" },
+
+  "myTasksTitle": "המשימות שלי",
+  "@myTasksTitle": { "description": "Worker task header title" },
+
+  "myTasksTabLabel": "המשימות שלי",
+  "@myTasksTabLabel": { "description": "Tab label for tasks assigned to current user" },
+
+  "createdByMeTabLabel": "משימות שיצרתי",
+  "@createdByMeTabLabel": { "description": "Tab label for tasks created by current user" },
+
+  "taskDetailsTitle": "פרטי המשימה",
+  "@taskDetailsTitle": { "description": "Task details section title" },
+
+  "taskDescriptionLabel": "תיאור",
+  "@taskDescriptionLabel": { "description": "Task description section label" },
+
+  "taskDescriptionSectionTitle": "תיאור המשימה",
+  "@taskDescriptionSectionTitle": { "description": "Task description section heading" },
+
+  "noTaskDescription": "אין תיאור למשימה זו",
+  "@noTaskDescription": { "description": "Placeholder when task has no description" },
+
+  "taskInfoSectionTitle": "פרטים",
+  "@taskInfoSectionTitle": { "description": "Task info section title in details screen" },
+
+  "taskDeadlineLabel": "תאריך יעד",
+  "@taskDeadlineLabel": { "description": "Task deadline field label" },
+
+  "taskPriorityLabel": "עדיפות",
+  "@taskPriorityLabel": { "description": "Task priority field label" },
+
+  "taskDepartmentLabel": "מחלקה",
+  "@taskDepartmentLabel": { "description": "Task department field label" },
+
+  "taskCreatedAtLabel": "נוצרה",
+  "@taskCreatedAtLabel": { "description": "Task created-at field label" },
+
+  "taskAssigneesLabel": "עובדים",
+  "@taskAssigneesLabel": { "description": "Task assignees section label" },
+
+  "taskAssigneesCount": "עובדים ({count})",
+  "@taskAssigneesCount": {
+    "description": "Assignees section label with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "taskOverviewTabLabel": "סקירה",
+  "@taskOverviewTabLabel": { "description": "Overview tab label in task details" },
+
+  "taskDiscussionTabLabel": "דיון",
+  "@taskDiscussionTabLabel": { "description": "Discussion tab label in task details" },
+
+  "editTaskMenuItem": "ערוך משימה",
+  "@editTaskMenuItem": { "description": "Edit task popup menu item" },
+
+  "deleteTaskMenuItem": "מחק משימה",
+  "@deleteTaskMenuItem": { "description": "Delete task popup menu item" },
+
+  "createTaskButton": "יצירת משימה",
+  "@createTaskButton": { "description": "Create task floating action button label" },
+
+  "deleteTaskTitle": "מחיקת משימה",
+  "@deleteTaskTitle": { "description": "Delete task confirmation dialog title" },
+
+  "deleteTaskConfirmation": "למחוק את \"{title}\"?",
+  "@deleteTaskConfirmation": {
+    "description": "Delete task confirmation message",
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "deleteTaskButton": "מחק",
+  "@deleteTaskButton": { "description": "Delete button label in task dialogs" },
+
+  "taskDeletedSnackbar": "המשימה \"{title}\" נמחקה",
+  "@taskDeletedSnackbar": {
+    "description": "Snackbar shown after task deletion",
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "confirmDeleteTitle": "אישור מחיקה",
+  "@confirmDeleteTitle": { "description": "Confirm delete dialog title" },
+
+  "confirmDeleteTaskMessage": "האם אתה בטוח שברצונך למחוק את המשימה '{title}'?",
+  "@confirmDeleteTaskMessage": {
+    "description": "Confirm delete task message in manager dashboard",
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "taskOverdueSection": "באיחור",
+  "@taskOverdueSection": { "description": "Overdue tasks section title" },
+
+  "taskTodaySection": "להיום",
+  "@taskTodaySection": { "description": "Today tasks section title" },
+
+  "taskUpcomingSection": "הקרובות",
+  "@taskUpcomingSection": { "description": "Upcoming tasks section title" },
+
+  "taskCompletedSection": "הושלמו",
+  "@taskCompletedSection": { "description": "Completed tasks section title" },
+
+  "taskDeadlineOverdue": "באיחור {days} {unit}",
+  "@taskDeadlineOverdue": {
+    "description": "Task overdue by N days",
+    "placeholders": {
+      "days": { "type": "int" },
+      "unit": { "type": "String" }
+    }
+  },
+
+  "taskDeadlineToday": "היום, {time}",
+  "@taskDeadlineToday": {
+    "description": "Task due today with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "taskDeadlineTomorrow": "מחר, {time}",
+  "@taskDeadlineTomorrow": {
+    "description": "Task due tomorrow with time",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "taskDeadlineInDays": "בעוד {days} ימים",
+  "@taskDeadlineInDays": {
+    "description": "Task due in N days",
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "dayUnit": "יום",
+  "@dayUnit": { "description": "Singular day unit" },
+
+  "daysUnit": "ימים",
+  "@daysUnit": { "description": "Plural days unit" },
+
+  "todayTasksProgress": "{completed} מתוך {total} הושלמו היום",
+  "@todayTasksProgress": {
+    "description": "Today tasks progress in worker timeline header",
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "noTasksToday": "אין משימות להיום",
+  "@noTasksToday": { "description": "No tasks for today in progress header" },
+
+  "taskCountOverdue": "{count} משימות • {overdue} באיחור",
+  "@taskCountOverdue": {
+    "description": "Task board header showing total and overdue counts",
+    "placeholders": {
+      "count": { "type": "int" },
+      "overdue": { "type": "int" }
+    }
+  },
+
+  "pendingManagerApproval": "ממתין לאישור מנהל",
+  "@pendingManagerApproval": { "description": "Banner shown when worker task is pending manager review" },
+
+  "pendingApprovalLabel": "ממתינים לאישור:",
+  "@pendingApprovalLabel": { "description": "Label for list of workers pending approval" },
+
+  "startTaskButton": "התחל לעבוד",
+  "@startTaskButton": { "description": "Start task quick action button" },
+
+  "startTaskAction": "התחל משימה",
+  "@startTaskAction": { "description": "Start task button in worker task card" },
+
+  "finishTaskButton": "סיים משימה",
+  "@finishTaskButton": { "description": "Finish task button in worker task details" },
+
+  "submitForApprovalButton": "שלח לאישור מנהל",
+  "@submitForApprovalButton": { "description": "Submit for manager approval button" },
+
+  "approveButton": "אשר",
+  "@approveButton": { "description": "Approve button in task board" },
+
+  "rejectButton": "דחה",
+  "@rejectButton": { "description": "Reject button in task board" },
+
+  "taskApprovedSnackbar": "המשימה אושרה בהצלחה",
+  "@taskApprovedSnackbar": { "description": "Snackbar shown after task approval" },
+
+  "taskRejectedSnackbar": "המשימה הוחזרה לביצוע",
+  "@taskRejectedSnackbar": { "description": "Snackbar shown after task rejection" },
+
+  "startWorkButton": "להתחיל לעבוד",
+  "@startWorkButton": { "description": "Start work action button in task details" },
+
+  "sendCommentButton": "שלח תגובה",
+  "@sendCommentButton": { "description": "Send comment button" },
+
+  "addCommentHintTask": "הוסף תגובה...",
+  "@addCommentHintTask": { "description": "Add comment hint text in task details" },
+
+  "writeCommentHintTask": "כתוב תגובה...",
+  "@writeCommentHintTask": { "description": "Write comment hint text in task discussion tab" },
+
+  "commentSendError": "שגיאה בשליחת תגובה",
+  "@commentSendError": { "description": "Error snackbar when comment submission fails" },
+
+  "attachedFilesTitle": "קבצים מצורפים",
+  "@attachedFilesTitle": { "description": "Attached files section title" },
+
+  "attachedFileDefault": "קובץ מצורף",
+  "@attachedFileDefault": { "description": "Default label for an attachment when name cannot be determined" },
+
+  "cannotOpenFile": "לא ניתן לפתוח את הקובץ",
+  "@cannotOpenFile": { "description": "Snackbar when attachment cannot be opened" },
+
+  "filterAll": "הכל",
+  "@filterAll": { "description": "All filter option" },
+
+  "filterStatusPending": "ממתין",
+  "@filterStatusPending": { "description": "Pending filter label" },
+
+  "filterStatusInProgress": "בביצוע",
+  "@filterStatusInProgress": { "description": "In-progress filter label" },
+
+  "filterStatusDone": "הושלם",
+  "@filterStatusDone": { "description": "Done filter label" },
+
+  "searchTaskHint": "חיפוש משימה...",
+  "@searchTaskHint": { "description": "Search task hint text" },
+
+  "searchTaskByNameHint": "חיפוש משימה לפי שם...",
+  "@searchTaskByNameHint": { "description": "Search task by name hint text in manager dashboard" },
+
+  "taskErrorPrefix": "שגיאה: {error}",
+  "@taskErrorPrefix": {
+    "description": "Error prefix with details in task list",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "taskTitleLabel": "כותרת",
+  "@taskTitleLabel": { "description": "Task title field label" },
+
+  "taskTitleHint": "שם המשימה",
+  "@taskTitleHint": { "description": "Task title field hint" },
+
+  "taskDescriptionFieldLabel": "תיאור",
+  "@taskDescriptionFieldLabel": { "description": "Task description field label" },
+
+  "taskDescriptionHint": "תיאור מפורט",
+  "@taskDescriptionHint": { "description": "Task description field hint" },
+
+  "taskDescriptionOptionalHint": "תיאור מפורט (אופציונלי)",
+  "@taskDescriptionOptionalHint": { "description": "Task description optional hint" },
+
+  "taskFieldRequired": "שדה חובה",
+  "@taskFieldRequired": { "description": "Field required validation message" },
+
+  "taskFillAllFields": "יש למלא את כל השדות ולבחור עובדים",
+  "@taskFillAllFields": { "description": "Validation error when required fields are missing" },
+
+  "taskDateLabel": "תאריך",
+  "@taskDateLabel": { "description": "Date picker label in task edit" },
+
+  "taskTimeLabel": "שעה",
+  "@taskTimeLabel": { "description": "Time picker label in task edit/create" },
+
+  "taskSelectDate": "בחר תאריך",
+  "@taskSelectDate": { "description": "Select date placeholder" },
+
+  "taskSelectTime": "בחר שעה",
+  "@taskSelectTime": { "description": "Select time placeholder" },
+
+  "taskDeadlineSectionTitle": "מועד יעד",
+  "@taskDeadlineSectionTitle": { "description": "Deadline section title in create/edit task" },
+
+  "taskDeadlineHint": "הגדר תאריך ושעת סיום למשימה",
+  "@taskDeadlineHint": { "description": "Deadline section hint in create task" },
+
+  "taskWorkersSectionTitle": "עובדים משובצים",
+  "@taskWorkersSectionTitle": { "description": "Assigned workers section title in edit task" },
+
+  "taskAssignWorkersTitle": "שיבוץ עובדים",
+  "@taskAssignWorkersTitle": { "description": "Assign workers step title in create task" },
+
+  "taskSelectedWorkersCount": "בחר {count} עובדים",
+  "@taskSelectedWorkersCount": {
+    "description": "How many workers are selected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "taskSearchWorkerHint": "חיפוש עובד...",
+  "@taskSearchWorkerHint": { "description": "Search worker hint in edit task" },
+
+  "taskSearchWorkerByNameHint": "חיפוש לפי שם או תפקיד...",
+  "@taskSearchWorkerByNameHint": { "description": "Search worker by name or role hint" },
+
+  "taskSummaryTitle": "סיכום ויצירה",
+  "@taskSummaryTitle": { "description": "Summary step title in create task flow" },
+
+  "taskSummarySubtitle": "בדוק את הפרטים לפני יצירת המשימה",
+  "@taskSummarySubtitle": { "description": "Summary step subtitle" },
+
+  "taskBasicInfoTitle": "פרטי המשימה",
+  "@taskBasicInfoTitle": { "description": "Basic info step title in create/edit task" },
+
+  "taskBasicInfoSubtitle": "מלא את הפרטים הבסיסיים של המשימה",
+  "@taskBasicInfoSubtitle": { "description": "Basic info step subtitle" },
+
+  "taskStepDetails": "פרטים",
+  "@taskStepDetails": { "description": "Step indicator label: details" },
+
+  "taskStepWorkers": "עובדים",
+  "@taskStepWorkers": { "description": "Step indicator label: workers" },
+
+  "taskStepDeadline": "מועד",
+  "@taskStepDeadline": { "description": "Step indicator label: deadline" },
+
+  "taskStepSummary": "סיכום",
+  "@taskStepSummary": { "description": "Step indicator label: summary" },
+
+  "taskReviewWorkersLabel": "עובדים",
+  "@taskReviewWorkersLabel": { "description": "Workers label in review card" },
+
+  "taskReviewDeadlineLabel": "מועד יעד",
+  "@taskReviewDeadlineLabel": { "description": "Deadline label in review card" },
+
+  "createTaskActionButton": "צור משימה",
+  "@createTaskActionButton": { "description": "Create task submit button" },
+
+  "nextButton": "המשך",
+  "@nextButton": { "description": "Next step button in multi-step forms" },
+
+  "backStepButton": "חזור",
+  "@backStepButton": { "description": "Go back step button in multi-step forms" },
+
+  "saveChangesTaskButton": "שמור שינויים",
+  "@saveChangesTaskButton": { "description": "Save changes button in edit task screen" },
+
+  "taskCreateError": "שגיאה ביצירת המשימה",
+  "@taskCreateError": { "description": "Error when task creation fails" },
+
+  "taskUpdateError": "שגיאה בעדכון המשימה",
+  "@taskUpdateError": { "description": "Error when task update fails" },
+
+  "taskLogEdited": "המשימה עודכנה",
+  "@taskLogEdited": { "description": "Activity log entry for task edit" },
+
+  "userFallbackName": "משתמש",
+  "@userFallbackName": { "description": "Fallback user name when name cannot be loaded" },
+
+  "showLessButton": "הצג פחות",
+  "@showLessButton": { "description": "Show less button to collapse list" },
+
+  "showAllButton": "הצג הכל",
+  "@showAllButton": { "description": "Show all button to expand list" },
+
+  "tasksTitleValidation": "נא להזין כותרת למשימה",
+  "@tasksTitleValidation": { "description": "Validation: task title is required" },
+
+  "tasksWorkersValidation": "נא לבחור לפחות עובד אחד",
+  "@tasksWorkersValidation": { "description": "Validation: at least one worker must be selected" },
+
+  "tasksDeadlineValidation": "נא לבחור תאריך ושעה",
+  "@tasksDeadlineValidation": { "description": "Validation: deadline date and time are required" },
+
+  "userIdentificationError": "שגיאה בזיהוי המשתמש.",
+  "@userIdentificationError": { "description": "Error shown when current user ID is null" },
+
+  "taskReturnedSnackbar": "המשימה הוחזרה לביצוע",
+  "@taskReturnedSnackbar": { "description": "Snackbar shown after task is returned to in-progress" },
+
+  "tasksOverdueCount": "{total} משימות • {overdue} באיחור",
+  "@tasksOverdueCount": {
+    "description": "Task count summary with overdue count",
+    "placeholders": {
+      "total": { "type": "int" },
+      "overdue": { "type": "int" }
+    }
+  },
+
+  "noShiftsAvailableEmpty": "אין משמרות זמינות כרגע",
+  "@noShiftsAvailableEmpty": { "description": "No shifts available empty state" },
+
+  "shiftsComingSoonSubtitle": "בקרוב יתווספו משמרות חדשות",
+  "@shiftsComingSoonSubtitle": { "description": "Subtitle shown when no shifts are available yet" },
+
+  "noShiftsForDay": "אין משמרות ליום זה",
+  "@noShiftsForDay": { "description": "No shifts for the selected day" },
+
+  "selectOtherDayHint": "בחר יום אחר או המתן למשמרות חדשות",
+  "@selectOtherDayHint": { "description": "Hint to select another day or wait" },
+
+  "tryReconnectHint": "נסה להתחבר מחדש",
+  "@tryReconnectHint": { "description": "Hint to reconnect when user identification fails" },
+
+  "shiftStatusActive": "פעיל",
+  "@shiftStatusActive": { "description": "Shift status: active" },
+
+  "shiftStatusCancelled": "בוטלה",
+  "@shiftStatusCancelled": { "description": "Shift status: cancelled" },
+
+  "pendingRequestsCount": "{count} בקשות",
+  "@pendingRequestsCount": {
+    "description": "Number of pending shift requests",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "newShiftFab": "משמרת חדשה",
+  "@newShiftFab": { "description": "New shift floating action button label" },
+
+  "managerShiftDashboardTitle": "ניהול משמרות",
+  "@managerShiftDashboardTitle": { "description": "Manager shifts screen header title" },
+
+  "shiftRequestCancelledSnackbar": "הבקשה למשמרת בוטלה",
+  "@shiftRequestCancelledSnackbar": { "description": "Snackbar shown when shift request is cancelled" },
+
+  "shiftConflictTitle": "התנגשות משמרות",
+  "@shiftConflictTitle": { "description": "Title for shift conflict dialog" },
+
+  "shiftConflictMessage": "כבר משובץ למשמרת בתאריך זה בשעות החופפות ({startTime}–{endTime}). האם להמשיך בכל זאת?",
+  "@shiftConflictMessage": {
+    "description": "Message shown when shift times conflict",
+    "placeholders": {
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "proceedAnywayButton": "המשך בכל זאת",
+  "@proceedAnywayButton": { "description": "Button to proceed despite conflict" },
+
+  "cancelShiftRequestLabel": "בטל בקשה למשמרת",
+  "@cancelShiftRequestLabel": { "description": "Semantics label for cancel shift request button" },
+
+  "joinShiftLabel": "הצטרף למשמרת",
+  "@joinShiftLabel": { "description": "Semantics label for join shift button" },
+
+  "joinButton": "הצטרף",
+  "@joinButton": { "description": "Join button text" },
+
+  "shiftWorkedLabel": "עבדת",
+  "@shiftWorkedLabel": { "description": "Label shown when worker has worked this shift" },
+
+  "shiftEndedLabel": "הסתיים",
+  "@shiftEndedLabel": { "description": "Label shown when shift has ended" },
+
+  "shiftAssignedLabel": "משובץ",
+  "@shiftAssignedLabel": { "description": "Label shown when worker is assigned to shift" },
+
+  "shiftFullLabel": "מלא",
+  "@shiftFullLabel": { "description": "Label shown when shift is full" },
+
+  "shiftCancelledChip": "המשמרת בוטלה",
+  "@shiftCancelledChip": { "description": "Chip shown when shift is cancelled" },
+
+  "shiftOutdatedChip": "עבר התאריך",
+  "@shiftOutdatedChip": { "description": "Chip shown when shift date has passed" },
+
+  "youAreAssignedChip": "אתה משובץ",
+  "@youAreAssignedChip": { "description": "Chip shown when worker is assigned to shift" },
+
+  "waitingApprovalChip": "ממתין לאישור",
+  "@waitingApprovalChip": { "description": "Chip shown when shift request is waiting for approval" },
+
+  "shiftFullChip": "המשמרת מלאה",
+  "@shiftFullChip": { "description": "Chip shown when shift is full" },
+
+  "openForRegistrationChip": "פתוח להרשמה",
+  "@openForRegistrationChip": { "description": "Chip shown when shift is open for registration" },
+
+  "assignedWorkersSection": "עובדים משובצים",
+  "@assignedWorkersSection": { "description": "Section title for assigned workers" },
+
+  "noAssignedWorkersYet": "אין עובדים משובצים עדיין",
+  "@noAssignedWorkersYet": { "description": "Empty state for assigned workers section" },
+
+  "messagesSection": "הודעות",
+  "@messagesSection": { "description": "Messages section title" },
+
+  "loadingMessages": "טוען הודעות...",
+  "@loadingMessages": { "description": "Loading messages placeholder" },
+
+  "noMessagesYet": "אין הודעות עדיין",
+  "@noMessagesYet": { "description": "Empty state for messages section" },
+
+  "createNewShiftTitle": "יצירת משמרת חדשה",
+  "@createNewShiftTitle": { "description": "Create new shift screen title" },
+
+  "createShiftSubtitle": "מלא את הפרטים ליצירת משמרת",
+  "@createShiftSubtitle": { "description": "Create shift screen subtitle" },
+
+  "dateLabel": "תאריך",
+  "@dateLabel": { "description": "Date section label" },
+
+  "departmentLabel": "מחלקה",
+  "@departmentLabel": { "description": "Department section label" },
+
+  "startTimeLabel": "התחלה",
+  "@startTimeLabel": { "description": "Start time button label" },
+
+  "endTimeLabel": "סיום",
+  "@endTimeLabel": { "description": "End time button label" },
+
+  "maxWorkersLabel": "מספר עובדים מקסימלי",
+  "@maxWorkersLabel": { "description": "Maximum workers section label" },
+
+  "weeklyRecurrenceLabel": "חזרה שבועית",
+  "@weeklyRecurrenceLabel": { "description": "Weekly recurrence section label" },
+
+  "shiftRepeatsWeekly": "משמרת חוזרת כל שבוע",
+  "@shiftRepeatsWeekly": { "description": "Label shown when recurring shift is enabled" },
+
+  "createRecurringShift": "צור משמרת חוזרת",
+  "@createRecurringShift": { "description": "Label shown when recurring shift is disabled" },
+
+  "numberOfWeeksLabel": "מספר שבועות:",
+  "@numberOfWeeksLabel": { "description": "Number of weeks label in recurring shift" },
+
+  "shiftsToBeCreatedLabel": "משמרות שייווצרו:",
+  "@shiftsToBeCreatedLabel": { "description": "Shifts to be created preview label" },
+
+  "createShiftButton": "צור משמרת",
+  "@createShiftButton": { "description": "Create shift button label" },
+
+  "shiftsCreatedSuccess": "{count} משמרות נוצרו בהצלחה!",
+  "@shiftsCreatedSuccess": {
+    "description": "Snackbar shown when multiple shifts are created",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftCreatedSuccess": "משמרת נוצרה בהצלחה!",
+  "@shiftCreatedSuccess": { "description": "Snackbar shown when a shift is created" },
+
+  "createShiftError": "שגיאה ביצירת משמרת: {error}",
+  "@createShiftError": {
+    "description": "Error snackbar when shift creation fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "clearButton": "נקה",
+  "@clearButton": { "description": "Clear draft action label" },
+
+  "editShiftTitle": "עריכת משמרת",
+  "@editShiftTitle": { "description": "Edit shift screen title" },
+
+  "unsavedChangesHeaderSubtitle": "יש שינויים לא שמורים",
+  "@unsavedChangesHeaderSubtitle": { "description": "Header subtitle when there are unsaved changes" },
+
+  "updateShiftDetailsSubtitle": "עדכן את פרטי המשמרת",
+  "@updateShiftDetailsSubtitle": { "description": "Header subtitle prompting to update shift details" },
+
+  "saveChangesDialogTitle": "שמירת שינויים",
+  "@saveChangesDialogTitle": { "description": "Save changes dialog title" },
+
+  "followingChangesSavedLabel": "השינויים הבאים יישמרו:",
+  "@followingChangesSavedLabel": { "description": "Label above list of changes in save dialog" },
+
+  "workersNotifiedOfChanges": "כל העובדים המשובצים והממתינים יקבלו התראה על השינויים",
+  "@workersNotifiedOfChanges": { "description": "Note that workers will be notified of changes" },
+
+  "shiftUpdatedSuccess": "המשמרת עודכנה בהצלחה!",
+  "@shiftUpdatedSuccess": { "description": "Snackbar shown when shift is updated successfully" },
+
+  "updateShiftError": "שגיאה בעדכון המשמרת: {error}",
+  "@updateShiftError": {
+    "description": "Error snackbar when shift update fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "unsavedChangesMessage": "יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?",
+  "@unsavedChangesMessage": { "description": "Unsaved changes dialog message" },
+
+  "continueEditingButton": "המשך לערוך",
+  "@continueEditingButton": { "description": "Continue editing button label" },
+
+  "exitWithoutSavingButton": "צא ללא שמירה",
+  "@exitWithoutSavingButton": { "description": "Exit without saving button label" },
+
+  "departmentChangedLabel": "מחלקה (שונה)",
+  "@departmentChangedLabel": { "description": "Department label when changed" },
+
+  "hoursChangedLabel": "שעות (שונה)",
+  "@hoursChangedLabel": { "description": "Hours label when changed" },
+
+  "maxWorkersChangedLabel": "מספר עובדים מקסימלי (שונה)",
+  "@maxWorkersChangedLabel": { "description": "Max workers label when changed" },
+
+  "changedBadge": "שונה",
+  "@changedBadge": { "description": "Badge label indicating a value has changed" },
+
+  "tooManyWorkersWarning": "יש כרגע {count} עובדים משובצים, יותר מהמקסימום החדש",
+  "@tooManyWorkersWarning": {
+    "description": "Warning when assigned workers exceed new max",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "statusLabel": "סטטוס",
+  "@statusLabel": { "description": "Status section label" },
+
+  "statusChangedLabel": "סטטוס (שונה)",
+  "@statusChangedLabel": { "description": "Status label when changed" },
+
+  "shiftStatusCancelledMasc": "בוטל",
+  "@shiftStatusCancelledMasc": { "description": "Shift status: cancelled (masculine form)" },
+
+  "shiftStatusCompleted": "הושלם",
+  "@shiftStatusCompleted": { "description": "Shift status: completed" },
+
+  "noChangesLabel": "אין שינויים",
+  "@noChangesLabel": { "description": "Label shown when there are no changes to save" },
+
+  "weekRangeLabel": "שבוע {start} - {end}",
+  "@weekRangeLabel": {
+    "description": "Week range label in manager week view",
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+
+  "myShiftsTitle": "המשמרות שלי",
+  "@myShiftsTitle": { "description": "My shifts screen title" },
+
+  "nextWeekTooltip": "שבוע הבא",
+  "@nextWeekTooltip": { "description": "Tooltip for next week navigation button" },
+
+  "prevWeekTooltip": "שבוע קודם",
+  "@prevWeekTooltip": { "description": "Tooltip for previous week navigation button" },
+
+  "loadShiftsError": "שגיאה בטעינת המשמרות",
+  "@loadShiftsError": { "description": "Error message when shifts fail to load" },
+
+  "todayLabel": "היום",
+  "@todayLabel": { "description": "Today label on day timeline" },
+
+  "pastLabel": "עבר",
+  "@pastLabel": { "description": "Past label on day timeline" },
+
+  "noShiftsDay": "אין משמרות",
+  "@noShiftsDay": { "description": "No shifts for this day on timeline" },
+
+  "loadingShifts": "טוען משמרות...",
+  "@loadingShifts": { "description": "Loading shifts placeholder" },
+
+  "loginToViewShifts": "יש להתחבר כדי לצפות במשמרות",
+  "@loginToViewShifts": { "description": "Message shown when user is not logged in" },
+
+  "viewShiftDetailsButton": "צפה בפרטי המשמרת",
+  "@viewShiftDetailsButton": { "description": "Button to view full shift details" },
+
+  "allShiftsTabLabel": "כל המשמרות",
+  "@allShiftsTabLabel": { "description": "Tab label for all shifts" },
+
+  "weeklyScheduleTitle": "סידור עבודה שבועי",
+  "@weeklyScheduleTitle": { "description": "Weekly schedule screen title" },
+
+  "noWorkersAssigned": "לא שובצו עובדים",
+  "@noWorkersAssigned": { "description": "No workers assigned empty state" },
+
+  "noWorkersAssignedForShift": "לא שובצו עובדים למשמרת זו",
+  "@noWorkersAssignedForShift": { "description": "No workers assigned for this shift" },
+
+  "managerRoleShort": "מנהל",
+  "@managerRoleShort": { "description": "Manager role short label" },
+
+  "workerRoleShort": "עובד",
+  "@workerRoleShort": { "description": "Worker role short label" },
+
+  "noShiftsThisWeek": "אין משמרות השבוע",
+  "@noShiftsThisWeek": { "description": "No shifts this week empty state" },
+
+  "notAssignedThisWeek": "לא שובצת למשמרות בשבוע זה",
+  "@notAssignedThisWeek": { "description": "Not assigned to shifts this week message" },
+
+  "changesSavedSuccess": "השינויים נשמרו בהצלחה!",
+  "@changesSavedSuccess": { "description": "Changes saved successfully snackbar" },
+
+  "saveChangesError": "שגיאה בשמירת השינויים: {error}",
+  "@saveChangesError": {
+    "description": "Error snackbar when saving changes fails",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "unsavedChangesCountMessage": "יש לך {count} שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?",
+  "@unsavedChangesCountMessage": {
+    "description": "Unsaved changes dialog message with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "cancelAllButton": "בטל הכל",
+  "@cancelAllButton": { "description": "Cancel all pending changes button" },
+
+  "saveChangesWithCount": "שמור שינויים ({count})",
+  "@saveChangesWithCount": {
+    "description": "Save changes button with count",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersLabel": "עובדים",
+  "@workersLabel": { "description": "Workers label in shift details" },
+
+  "requestsTabLabel": "בקשות",
+  "@requestsTabLabel": { "description": "Requests tab label" },
+
+  "approvedTabLabel": "מאושרים",
+  "@approvedTabLabel": { "description": "Approved tab label" },
+
+  "messagesTabLabel": "הודעות",
+  "@messagesTabLabel": { "description": "Messages tab label" },
+
+  "detailsTabLabel": "פרטים",
+  "@detailsTabLabel": { "description": "Details tab label" },
+
+  "noPendingRequests": "אין בקשות ממתינות",
+  "@noPendingRequests": { "description": "No pending requests empty state" },
+
+  "newRequestsWillAppear": "בקשות חדשות יופיעו כאן",
+  "@newRequestsWillAppear": { "description": "New requests will appear here subtitle" },
+
+  "willBeApprovedLabel": "יאושר",
+  "@willBeApprovedLabel": { "description": "Label for pending approval action" },
+
+  "willBeRejectedLabel": "יידחה",
+  "@willBeRejectedLabel": { "description": "Label for pending rejection action" },
+
+  "addWorkersButton": "הוסף עובדים",
+  "@addWorkersButton": { "description": "Add workers button label" },
+
+  "noAssignedWorkersEmpty": "אין עובדים משובצים",
+  "@noAssignedWorkersEmpty": { "description": "Empty state for assigned workers" },
+
+  "clickAddWorkersHint": "לחץ על \"הוסף עובדים\" להוספה ידנית",
+  "@clickAddWorkersHint": { "description": "Hint to click add workers button" },
+
+  "willBeAddedLabel": "יתווסף",
+  "@willBeAddedLabel": { "description": "Label for pending addition action" },
+
+  "willBeRemovedLabel": "יוסר",
+  "@willBeRemovedLabel": { "description": "Label for pending removal action" },
+
+  "willBeRestoredLabel": "יוחזר",
+  "@willBeRestoredLabel": { "description": "Label for pending restore action" },
+
+  "sendFirstMessage": "שלח הודעה ראשונה",
+  "@sendFirstMessage": { "description": "Send first message empty state" },
+
+  "writeMessageHint": "כתוב הודעה...",
+  "@writeMessageHint": { "description": "Write message input hint" },
+
+  "createdByLabel": "נוצר על ידי",
+  "@createdByLabel": { "description": "Created by label in shift details" },
+
+  "creationDateLabel": "תאריך יצירה",
+  "@creationDateLabel": { "description": "Creation date label in shift details" },
+
+  "lastUpdatedByLabel": "עודכן לאחרונה על ידי",
+  "@lastUpdatedByLabel": { "description": "Last updated by label in shift details" },
+
+  "shiftManagerLabel": "אחראי משמרת",
+  "@shiftManagerLabel": { "description": "Shift manager label in shift details" },
+
+  "pendingChangesBanner": "{count} שינויים ממתינים לשמירה",
+  "@pendingChangesBanner": {
+    "description": "Banner showing count of unsaved changes",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeApproved": "{count} עובדים יאושרו",
+  "@workersWillBeApproved": {
+    "description": "Change summary: workers will be approved",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "requestsWillBeRejected": "{count} בקשות יידחו",
+  "@requestsWillBeRejected": {
+    "description": "Change summary: requests will be rejected",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeRemoved": "{count} עובדים יוסרו",
+  "@workersWillBeRemoved": {
+    "description": "Change summary: workers will be removed",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeRestored": "{count} עובדים יוחזרו לרשימת הממתינים",
+  "@workersWillBeRestored": {
+    "description": "Change summary: workers will be restored to pending list",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "workersWillBeAdded": "{count} עובדים יתווספו",
+  "@workersWillBeAdded": {
+    "description": "Change summary: workers will be added",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "commentsCountLabel": "{count} תגובות",
+  "@commentsCountLabel": {
+    "description": "Comment count label shown in comments sheet header",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "editCommentTitle": "עריכת תגובה",
+  "@editCommentTitle": { "description": "Title of the edit comment bottom sheet" },
+
+  "editCommentHint": "ערוך את תגובתך...",
+  "@editCommentHint": { "description": "Hint text for the edit comment text field" },
+
+  "postTypeAnnouncementDesc": "הודעות חשובות לכלל העובדים",
+  "@postTypeAnnouncementDesc": { "description": "Description for announcement post type" },
+
+  "postTypeUpdateDesc": "עדכונים ושינויים",
+  "@postTypeUpdateDesc": { "description": "Description for update post type" },
+
+  "postTypeEventDesc": "אירועים ופעילויות",
+  "@postTypeEventDesc": { "description": "Description for event post type" },
+
+  "postTypeGeneralDesc": "מידע כללי",
+  "@postTypeGeneralDesc": { "description": "Description for general post type" },
+
+  "dateRangeButton": "טווח תאריכים",
+  "@dateRangeButton": { "description": "Date range toggle button label" },
+
+  "selectDateRange": "בחר טווח תאריכים",
+  "@selectDateRange": { "description": "Placeholder for date range picker" },
+
+  "noAttendanceDataMonth": "אין נתוני נוכחות לחודש זה",
+  "@noAttendanceDataMonth": { "description": "Empty state when no attendance data for month" },
+
+  "chartTooltipDayHours": "יום {day}\n{hours} שעות",
+  "@chartTooltipDayHours": {
+    "description": "Bar chart tooltip showing day number and hours",
+    "placeholders": {
+      "day": { "type": "int" },
+      "hours": { "type": "String" }
+    }
+  },
+
+  "missingClockOutLabel": "יציאה חסרה",
+  "@missingClockOutLabel": { "description": "Badge label for missing clock-out on attendance card" },
+
+  "durationHoursMinutes": "{hours}ש׳ {minutes}ד׳",
+  "@durationHoursMinutes": {
+    "description": "Duration badge showing hours and minutes",
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "clockInPrefix": "כניסה: {time}",
+  "@clockInPrefix": {
+    "description": "Clock-in time row label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "clockOutPrefix": "יציאה: {time}",
+  "@clockOutPrefix": {
+    "description": "Clock-out time row label",
+    "placeholders": { "time": { "type": "String" } }
+  },
+
+  "exportingLabel": "מייצא...",
+  "@exportingLabel": { "description": "Exporting progress label on PDF export button" },
+
+  "exportPdfButton": "ייצוא PDF",
+  "@exportPdfButton": { "description": "Export to PDF button label" },
+
+  "allWorkersValidClockout": "כל העובדים שמרו על יציאה תקינה בחודש זה",
+  "@allWorkersValidClockout": { "description": "Empty state subtitle for missing clockout report" },
+
+  "noShiftsMonth": "אין משמרות לחודש זה",
+  "@noShiftsMonth": { "description": "Empty state when no shifts for the selected month" },
+
+  "shiftCountAndSlotsFormat": "{count} משמרות · {filled}/{total} מקומות מלאים",
+  "@shiftCountAndSlotsFormat": {
+    "description": "Shift count and filled slots text in department card",
+    "placeholders": {
+      "count": { "type": "int" },
+      "filled": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "shiftCountTooltip": "{count} משמרות",
+  "@shiftCountTooltip": {
+    "description": "Bar chart tooltip for shift count per department",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "taskDistributionTitle": "התפלגות משימות",
+  "@taskDistributionTitle": { "description": "Task distribution report screen title" },
+
+  "noTasksMonth": "אין משימות לחודש זה",
+  "@noTasksMonth": { "description": "Empty state when no tasks for the selected month" },
+
+  "totalTasksLabel": "סה\"כ משימות",
+  "@totalTasksLabel": { "description": "Total tasks stat pill label" },
+
+  "workersWithTasksLabel": "עובדים עם משימות",
+  "@workersWithTasksLabel": { "description": "Workers with tasks stat pill label" },
+
+  "completionRateLabel": "שיעור השלמה",
+  "@completionRateLabel": { "description": "Completion rate stat pill label" },
+
+  "completionRateByWorkerTitle": "שיעור השלמה לפי עובד",
+  "@completionRateByWorkerTitle": { "description": "Completion rate by worker bar chart title" },
+
+  "topTenLabel": "(10 מובילים)",
+  "@topTenLabel": { "description": "Top ten workers caption shown next to chart title" },
+
+  "workerDetailsTitle": "פירוט עובדים",
+  "@workerDetailsTitle": { "description": "Worker details section title" },
+
+  "taskStatusDone": "הושלם",
+  "@taskStatusDone": { "description": "Task status chip: done" },
+
+  "taskStatusInProgress": "בביצוע",
+  "@taskStatusInProgress": { "description": "Task status chip: in progress" },
+
+  "taskStatusPending": "ממתין",
+  "@taskStatusPending": { "description": "Task status chip: pending" },
+
+  "executionLabel": "ביצוע",
+  "@executionLabel": { "description": "Execution percentage label in pie chart center" },
+
+  "statusDistributionTitle": "התפלגות סטטוס",
+  "@statusDistributionTitle": { "description": "Status distribution pie chart title" },
+
+  "taskDetailsListTitle": "פירוט משימות",
+  "@taskDetailsListTitle": { "description": "Task details list section title" },
+
+  "taskGoalPrefix": "יעד: {date}",
+  "@taskGoalPrefix": {
+    "description": "Task goal / due date row label",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "taskTimelineSubmitted": "הוגשה",
+  "@taskTimelineSubmitted": { "description": "Timeline row label: task submitted" },
+
+  "taskTimelineStarted": "התחילה",
+  "@taskTimelineStarted": { "description": "Timeline row label: task started" },
+
+  "taskTimelineEnded": "הסתיימה",
+  "@taskTimelineEnded": { "description": "Timeline row label: task ended" },
+
+  "workersHoursTitle": "שעות עבודה",
+  "@workersHoursTitle": { "description": "Workers hours report screen title" },
+
+  "activeWorkersLabel": "עובדים פעילים",
+  "@activeWorkersLabel": { "description": "Active workers stat pill label" },
+
+  "totalHoursLabel": "סה״כ שעות",
+  "@totalHoursLabel": { "description": "Total hours stat pill label" },
+
+  "avgPerWorkerLabel": "ממוצע לעובד",
+  "@avgPerWorkerLabel": { "description": "Average per worker stat pill label" },
+
+  "hoursByWorkerTitle": "שעות לפי עובד",
+  "@hoursByWorkerTitle": { "description": "Hours by worker bar chart title" },
+
+  "workerDaysAndAvgFormat": "{days} ימים · ממוצע {avg} ש׳/יום",
+  "@workerDaysAndAvgFormat": {
+    "description": "Worker card subtitle showing days worked and average hours per day",
+    "placeholders": {
+      "days": { "type": "int" },
+      "avg": { "type": "String" }
+    }
+  },
+
+  "generalReportsTabLabel": "דוחות כלליים",
+  "@generalReportsTabLabel": { "description": "General reports tab label" },
+
+  "personalReportsSubtitle": "צפייה בנתוני נוכחות, משימות ומשמרות אישיים",
+  "@personalReportsSubtitle": { "description": "Personal reports tab subtitle" },
+
+  "attendanceReportDescription": "שעות עבודה, ימי נוכחות וסיכום חודשי",
+  "@attendanceReportDescription": { "description": "Attendance report card description" },
+
+  "taskReportDescription": "סטטוס משימות, התקדמות ואחוזי ביצוע",
+  "@taskReportDescription": { "description": "Task report card description" },
+
+  "shiftReportDescription": "היסטוריית משמרות, אישורים והחלטות",
+  "@shiftReportDescription": { "description": "Shift report card description" },
+
+  "generalReportsTitle": "דוחות כלליים",
+  "@generalReportsTitle": { "description": "General reports section heading" },
+
+  "generalReportsSubtitle": "נתונים מצטברים על כלל העובדים",
+  "@generalReportsSubtitle": { "description": "General reports tab subtitle" },
+
+  "workersHoursDescription": "סיכום שעות עבודה חודשי לפי עובד",
+  "@workersHoursDescription": { "description": "Workers hours report card description" },
+
+  "taskDistributionDescription": "משימות לפי עובד, אחוזי ביצוע ודירוג",
+  "@taskDistributionDescription": { "description": "Task distribution report card description" },
+
+  "shiftCoverageDescription": "משמרות לפי מחלקה, אחוז מילוי ופירוט",
+  "@shiftCoverageDescription": { "description": "Shift coverage report card description" },
+
+  "missingClockoutsDescription": "עובדים שלא שכחו לצאת לפי חודש",
+  "@missingClockoutsDescription": { "description": "Missing clockouts report card description" },
+
+  "reportsOfWorker": "הדוחות של {name}",
+  "@reportsOfWorker": {
+    "description": "Worker reports screen heading with worker name",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "workerReportsSubtitle": "צפייה בנתוני נוכחות, משימות ומשמרות",
+  "@workerReportsSubtitle": { "description": "Worker reports screen subtitle" },
+
+  "performanceSummaryTitle": "סיכום ביצועים — החודש",
+  "@performanceSummaryTitle": { "description": "Performance summary card title" },
+
+  "hoursWithValue": "{hours} שעות",
+  "@hoursWithValue": {
+    "description": "Performance metric: hours this month",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "daysWithValue": "{days} ימים",
+  "@daysWithValue": {
+    "description": "Performance metric: days this month",
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "presenceLabel": "נוכחות",
+  "@presenceLabel": { "description": "Performance metric label: presence" },
+
+  "atWorkLabel": "בעבודה",
+  "@atWorkLabel": { "description": "Performance metric label: at work" },
+
+  "tasksCompletedLabel": "משימות הושלמו",
+  "@tasksCompletedLabel": { "description": "Performance metric label: tasks completed" },
+
+  "shiftDecisionApproved": "מאושר ({count})",
+  "@shiftDecisionApproved": {
+    "description": "Pie chart legend for approved shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftDecisionRejected": "נדחה ({count})",
+  "@shiftDecisionRejected": {
+    "description": "Pie chart legend for rejected shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "shiftDecisionOther": "אחר ({count})",
+  "@shiftDecisionOther": {
+    "description": "Pie chart legend for other/pending shifts",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "showDetailsLabel": "הצג פרטים",
+  "@showDetailsLabel": { "description": "Show details expand button label" },
+
+  "hideDetailsLabel": "הסתר פרטים",
+  "@hideDetailsLabel": { "description": "Hide details collapse button label" },
+
+  "approvedByLabel": "אושר ע״י",
+  "@approvedByLabel": { "description": "Shift detail row label: approved by" },
+
+  "dateLabel": "בתאריך",
+  "@dateLabel": { "description": "Shift detail row label: date" },
+
+  "roleAtAssignmentLabel": "תפקיד בעת השיבוץ",
+  "@roleAtAssignmentLabel": { "description": "Shift detail row label: role at time of assignment" },
+
+  "requestTimeLabel": "זמן בקשה",
+  "@requestTimeLabel": { "description": "Shift detail row label: request time" },
+
+  "removedByLabel": "הוסר ע״י",
+  "@removedByLabel": { "description": "Shift detail row label: removed by" },
+
+  "removalTimeLabel": "זמן הסרה",
+  "@removalTimeLabel": { "description": "Shift detail row label: removal time" },
+
+  "cancelledByLabel": "בוטל ע״י",
+  "@cancelledByLabel": { "description": "Shift detail row label: cancelled by" },
+
+  "cancellationTimeLabel": "זמן ביטול",
+  "@cancellationTimeLabel": { "description": "Shift detail row label: cancellation time" },
+
+  "shiftStatusActiveFem": "פעילה",
+  "@shiftStatusActiveFem": { "description": "Shift status: active (feminine)" },
+
+  "shiftStatusCancelledFem": "מבוטלת",
+  "@shiftStatusCancelledFem": { "description": "Shift status: cancelled (feminine)" },
+
+  "shiftStatusPendingFem": "ממתינה",
+  "@shiftStatusPendingFem": { "description": "Shift status: pending (feminine)" },
+
+  "decisionAcceptedLabel": "מאושר",
+  "@decisionAcceptedLabel": { "description": "Shift decision label: accepted" },
+
+  "decisionRejectedLabel": "נדחה",
+  "@decisionRejectedLabel": { "description": "Shift decision label: rejected" },
+
+  "decisionRemovedLabel": "הוסר",
+  "@decisionRemovedLabel": { "description": "Shift decision label: removed" },
+
+  "decisionPendingLabel": "ממתין",
+  "@decisionPendingLabel": { "description": "Shift decision label: pending (empty decision)" },
+
+  "shiftManagerRoleLabel": "מנהל משמרת",
+  "@shiftManagerRoleLabel": { "description": "Role label: shift manager" },
+
+  "deptManagerRoleLabel": "מנהל מחלקה",
+  "@deptManagerRoleLabel": { "description": "Role label: department manager" },
+
+  "hoursAbbrFormat": "{hours} ש׳",
+  "@hoursAbbrFormat": {
+    "description": "Hours value with abbreviated hours unit",
+    "placeholders": { "hours": { "type": "String" } }
+  },
+
+  "pickPhotoOption": "בחר תמונות",
+  "@pickPhotoOption": { "description": "Media picker option: pick photos from gallery" },
+
+  "pickPhotoSubtitle": "בחר תמונות מהגלריה",
+  "@pickPhotoSubtitle": { "description": "Media picker option subtitle: pick photos" },
+
+  "adminRoleLabel": "מנהל מערכת",
+  "@adminRoleLabel": { "description": "Admin role label in likers sheet" },
+
+  "reactorsPeopleCount": "{count} אנשים",
+  "@reactorsPeopleCount": {
+    "description": "Number of people who reacted to a post",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "deptGeneral": "כללי",
+  "@deptGeneral": { "description": "Task department: general" },
+
+  "deptPaintball": "פיינטבול",
+  "@deptPaintball": { "description": "Task department: paintball" },
+
+  "deptRopes": "פארק חבלים",
+  "@deptRopes": { "description": "Task department: ropes park" },
+
+  "deptCarting": "קרטינג",
+  "@deptCarting": { "description": "Task department: carting" },
+
+  "deptWaterPark": "פארק מים",
+  "@deptWaterPark": { "description": "Task department: water park" },
+
+  "deptJimbory": "ג'ימבורי",
+  "@deptJimbory": { "description": "Task department: jimbory" },
+
+  "deptOperations": "תפעול",
+  "@deptOperations": { "description": "Shift department: operations/general" },
+
+  "preparingUploadShort": "מכין...",
+  "@preparingUploadShort": { "description": "Short upload preparation status shown on button" },
+
+  "clockReminder10hTitle": "שכחת לצאת? ⏰",
+  "@clockReminder10hTitle": { "description": "Local notification title: 10h shift reminder" },
+
+  "clockReminder10hBody": "אתה במשמרת כבר 10 שעות. זכור לדווח יציאה.",
+  "@clockReminder10hBody": { "description": "Local notification body: 10h shift reminder" },
+
+  "clockReminder12hTitle": "משמרת ארוכה מאוד! 🚨",
+  "@clockReminder12hTitle": { "description": "Local notification title: 12h shift reminder" },
+
+  "clockReminder12hBody": "אתה במשמרת כבר 12 שעות. דווח יציאה בהקדם.",
+  "@clockReminder12hBody": { "description": "Local notification body: 12h shift reminder" },
+
+  "taskDeadlineReminderTitle": "תזכורת משימה ⏰",
+  "@taskDeadlineReminderTitle": { "description": "Local notification title: task deadline reminder" },
+
+  "taskDeadlineReminderBody": "{title} — נותרו פחות מ-24 שעות לסיום",
+  "@taskDeadlineReminderBody": {
+    "description": "Local notification body: task deadline reminder",
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "pendingApprovalCount": "{count} עובדים ממתינים לאישור",
+  "@pendingApprovalCount": {
+    "description": "Dashboard: N workers awaiting manager approval",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "understaffedShiftsCount": "{count} משמרות היום חסרות עובדים",
+  "@understaffedShiftsCount": {
+    "description": "Dashboard: N shifts today lack enough workers",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "hoursAbbreviation": "ש׳",
+  "@hoursAbbreviation": { "description": "Short abbreviation for hours" },
+
+  "minutesAbbreviation": "דק׳",
+  "@minutesAbbreviation": { "description": "Short abbreviation for minutes" },
+
+  "daysThisMonth": "{count} ימים החודש",
+  "@daysThisMonth": {
+    "description": "Worker stat: number of days worked this month",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "totalHoursCount": "{count} שעות",
+  "@totalHoursCount": {
+    "description": "Total hours label with value",
+    "placeholders": { "count": { "type": "String" } }
+  },
+
+  "activeDepartmentsPercent": "{percent}% מהמחלקות פעילות",
+  "@activeDepartmentsPercent": {
+    "description": "Personal area: percentage of departments the worker is licensed for",
+    "placeholders": { "percent": { "type": "int" } }
+  },
+
+  "autoClockoutTitle": "יציאה אוטומטית ממשמרת",
+  "@autoClockoutTitle": { "description": "In-app notification title when system auto clocks out a worker" },
+
+  "autoClockoutBody": "לא דיווחת יציאה לאחר 16 שעות – המערכת סיימה את המשמרת אוטומטית. פנה למנהל שלך.",
+  "@autoClockoutBody": { "description": "In-app notification body when system auto clocks out a worker" },
+
+  "postCategoryAnnouncement": "הודעה",
+  "@postCategoryAnnouncement": { "description": "Newsfeed post category: announcement" },
+
+  "postCategoryUpdate": "עדכון",
+  "@postCategoryUpdate": { "description": "Newsfeed post category: update" },
+
+  "postCategoryEvent": "אירוע",
+  "@postCategoryEvent": { "description": "Newsfeed post category: event" },
+
+  "postCategoryGeneral": "כללי",
+  "@postCategoryGeneral": { "description": "Newsfeed post category: general" },
+
+  "locationRationaleTitle": "גישה למיקום",
+  "@locationRationaleTitle": { "description": "Location permission rationale dialog title" },
+
+  "locationRationaleMessage": "האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק.\n\nהמיקום משמש אך ורק לאימות נוכחות ואינו נשמר או משותף.",
+  "@locationRationaleMessage": { "description": "Location permission rationale dialog message" },
+
+  "locationRationaleConfirm": "אשר גישה",
+  "@locationRationaleConfirm": { "description": "Location permission rationale confirm button" },
+
+  "locationRationaleCancel": "לא עכשיו",
+  "@locationRationaleCancel": { "description": "Location permission rationale cancel button" },
+
+  "biometricLoginReason": "אמת את זהותך כדי להיכנס לאפליקציה",
+  "@biometricLoginReason": { "description": "Reason shown in OS biometric prompt when logging in" },
+
+  "shiftApprovedTitle": "בקשתך למשמרת אושרה",
+  "@shiftApprovedTitle": { "description": "In-app notification title: worker approved for shift" },
+
+  "shiftApprovedBody": "אושרת למשמרת {date}, {startTime}–{endTime}",
+  "@shiftApprovedBody": {
+    "description": "In-app notification body: worker approved for shift",
+    "placeholders": {
+      "date": { "type": "String" },
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "shiftRejectedTitle": "בקשתך למשמרת נדחתה",
+  "@shiftRejectedTitle": { "description": "In-app notification title: worker rejected from shift" },
+
+  "shiftRejectedBody": "בקשתך למשמרת {date}, {startTime}–{endTime} לא אושרה",
+  "@shiftRejectedBody": {
+    "description": "In-app notification body: worker rejected from shift",
+    "placeholders": {
+      "date": { "type": "String" },
+      "startTime": { "type": "String" },
+      "endTime": { "type": "String" }
+    }
+  },
+
+  "uploadingVideoProgress": "מעלה סרטון {current} מתוך {total}...",
+  "@uploadingVideoProgress": {
+    "description": "Upload progress: uploading video N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "uploadingImageProgress": "מעלה תמונה {current} מתוך {total}...",
+  "@uploadingImageProgress": {
+    "description": "Upload progress: uploading image N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "uploadingProgress": "מעלה {current} מתוך {total}...",
+  "@uploadingProgress": {
+    "description": "Upload progress: uploading file N of total",
+    "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "generatingThumbnailStatus": "מייצר תמונה מקדימה...",
+  "@generatingThumbnailStatus": { "description": "Upload progress: generating video thumbnail" },
+
+  "fileUploadedStatus": "קובץ {current} הועלה",
+  "@fileUploadedStatus": {
+    "description": "Upload progress: file N uploaded successfully",
+    "placeholders": { "current": { "type": "int" } }
+  },
+
+  "agreeToPrivacyPrefix": "קראתי ואני מסכים/ה ל",
+  "@agreeToPrivacyPrefix": { "description": "Prefix text before privacy policy link in registration form" },
+
+  "andConnector": " ול",
+  "@andConnector": { "description": "Connector word between privacy policy and terms of service links" },
+
+  "privacyPolicyRequiredError": "יש לאשר את מדיניות הפרטיות להמשך",
+  "@privacyPolicyRequiredError": { "description": "Error shown when user hasn't accepted the privacy policy" }
+}

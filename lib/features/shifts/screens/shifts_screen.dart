@@ -3,6 +3,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
@@ -27,6 +28,13 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
   late DateTime _currentWeekStart;
   late DateTime _selectedDay;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -44,13 +52,10 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (_) => Directionality(
-            textDirection: TextDirection.rtl,
-            child: ShiftDetailsPopup(
-              shift: shift,
-              shiftService: _shiftService,
-              departmentColor: departmentColor,
-            ),
+          builder: (_) => ShiftDetailsPopup(
+            shift: shift,
+            shiftService: _shiftService,
+            departmentColor: departmentColor,
           ),
         );
       });
@@ -79,22 +84,16 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
     final authProvider = context.watch<AppAuthProvider>();
     final currentUser = authProvider.user;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: const Color(0xFFF8F9FB),
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             _buildWeekHeader(),
             _buildDaySelector(),
             Expanded(child: _buildShiftList(currentUser)),
           ],
         ),
-      ),
     );
   }
 
@@ -142,9 +141,9 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
           Expanded(
             child: Column(
               children: [
-                const Text(
-                  'משמרות זמינות',
-                  style: TextStyle(
+                Text(
+                  _l10n.shiftsTitle,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -197,12 +196,10 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
     return Container(
       height: 90,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView.builder(
+      child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          reverse: true, // Shows Sunday on right, Saturday on left
+          reverse: Directionality.of(context) == TextDirection.rtl,
           itemCount: 7,
           itemBuilder: (context, index) {
             final day = _currentWeekStart.add(Duration(days: index));
@@ -246,7 +243,7 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateTimeUtils.getHebrewWeekdayName(day.weekday),
+                    DateTimeUtils.getLocalizedWeekdayName(day.weekday, Localizations.localeOf(context).languageCode),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -284,7 +281,6 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
           );
           },
         ),
-      ),
     );
   }
 
@@ -302,8 +298,8 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return _buildEmptyState(
-            'אין משמרות זמינות כרגע',
-            'בקרוב יתווספו משמרות חדשות',
+            _l10n.noShiftsAvailableEmpty,
+            _l10n.shiftsComingSoonSubtitle,
           );
         }
 
@@ -313,15 +309,15 @@ class _ShiftsScreenState extends State<ShiftsScreen> {
 
         if (filteredShifts.isEmpty) {
           return _buildEmptyState(
-            'אין משמרות ליום זה',
-            'בחר יום אחר או המתן למשמרות חדשות',
+            _l10n.noShiftsForDay,
+            _l10n.selectOtherDayHint,
           );
         }
 
         if (currentUser == null) {
           return _buildEmptyState(
-            'שגיאה בזיהוי משתמש',
-            'נסה להתחבר מחדש',
+            _l10n.userIdentificationError,
+            _l10n.tryReconnectHint,
           );
         }
 

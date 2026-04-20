@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 
 class DashboardHeroCard extends StatelessWidget {
@@ -34,14 +35,14 @@ class DashboardHeroCard extends StatelessWidget {
         end: Alignment.bottomLeft,
       );
 
-  String _roleLabel() {
+  String _roleLabel(AppLocalizations l10n) {
     switch (role) {
       case 'manager':
-        return 'מנהל';
+        return l10n.managerRole;
       case 'owner':
-        return 'בעלים';
+        return l10n.ownerRoleLabel;
       default:
-        return 'עובד';
+        return l10n.workerRoleLabel;
     }
   }
 
@@ -58,6 +59,7 @@ class DashboardHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final dept =
         licensedDepartments.isNotEmpty ? licensedDepartments.first : '';
 
@@ -128,7 +130,7 @@ class DashboardHeroCard extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        _roleLabel(),
+                                        _roleLabel(l10n),
                                         style: TextStyle(
                                           color: Colors.white.withValues(alpha: 0.85),
                                           fontSize: 13,
@@ -159,12 +161,12 @@ class DashboardHeroCard extends StatelessWidget {
                             children: [
                               _StatPill(
                                 value: hoursWorked.toStringAsFixed(1),
-                                label: 'שעות',
+                                label: l10n.hoursLabel,
                               ),
                               const SizedBox(height: 10),
                               _StatPill(
                                 value: '$daysWorked',
-                                label: 'ימים',
+                                label: l10n.daysLabel,
                               ),
                             ],
                           ),

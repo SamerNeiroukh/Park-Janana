@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import '../models/task_model.dart';
@@ -22,6 +23,14 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
   late final TaskTimelineProvider _provider;
   bool _showAllCompleted = false;
 
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -40,96 +49,90 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _provider,
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          backgroundColor: TaskTheme.background,
-          body: Column(
-            children: [
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: UserHeader(),
-              ),
-              Expanded(
-                child: Consumer<TaskTimelineProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                            color: TaskTheme.primary),
-                      );
-                    }
-
-                    return RefreshIndicator(
-                      color: TaskTheme.primary,
-                      onRefresh: () async {
-                        final uid = context.read<AppAuthProvider>().uid;
-                        if (uid != null) provider.init(uid);
-                      },
-                      child: ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                        physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics(),
-                        ),
-                        children: [
-                          _buildProgressHeader(provider),
-                          const SizedBox(height: 20),
-
-                          // Overdue section
-                          if (provider.overdueTasks.isNotEmpty) ...[
-                            _buildSection(
-                              title: 'באיחור',
-                              icon: PhosphorIconsRegular.warning,
-                              color: TaskTheme.overdue,
-                              tasks: provider.overdueTasks,
-                              provider: provider,
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-
-                          // Today section
-                          if (provider.todayTasks.isNotEmpty) ...[
-                            _buildSection(
-                              title: 'להיום',
-                              icon: PhosphorIconsRegular.calendarDot,
-                              color: TaskTheme.pending,
-                              tasks: provider.todayTasks,
-                              provider: provider,
-                              showActions: true,
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-
-                          // Upcoming section
-                          if (provider.upcomingTasks.isNotEmpty) ...[
-                            _buildSection(
-                              title: 'הקרובות',
-                              icon: PhosphorIconsRegular.calendarBlank,
-                              color: TaskTheme.inProgress,
-                              tasks: provider.upcomingTasks,
-                              provider: provider,
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-
-                          // Completed section
-                          if (provider.completedTasks.isNotEmpty)
-                            _buildCompletedSection(provider),
-
-                          // Empty state
-                          if (provider.overdueTasks.isEmpty &&
-                              provider.todayTasks.isEmpty &&
-                              provider.upcomingTasks.isEmpty &&
-                              provider.completedTasks.isEmpty)
-                            _buildEmptyState(),
-                        ],
-                      ),
+      child: Scaffold(
+        backgroundColor: TaskTheme.background,
+        body: Column(
+          children: [
+            const UserHeader(),
+            Expanded(
+              child: Consumer<TaskTimelineProvider>(
+                builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                          color: TaskTheme.primary),
                     );
-                  },
-                ),
+                  }
+
+                  return RefreshIndicator(
+                    color: TaskTheme.primary,
+                    onRefresh: () async {
+                      final uid = context.read<AppAuthProvider>().uid;
+                      if (uid != null) provider.init(uid);
+                    },
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      children: [
+                        _buildProgressHeader(provider),
+                        const SizedBox(height: 20),
+
+                        // Overdue section
+                        if (provider.overdueTasks.isNotEmpty) ...[
+                          _buildSection(
+                            title: _l10n.taskOverdueSection,
+                            icon: PhosphorIconsRegular.warning,
+                            color: TaskTheme.overdue,
+                            tasks: provider.overdueTasks,
+                            provider: provider,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Today section
+                        if (provider.todayTasks.isNotEmpty) ...[
+                          _buildSection(
+                            title: _l10n.taskTodaySection,
+                            icon: PhosphorIconsRegular.calendarDot,
+                            color: TaskTheme.pending,
+                            tasks: provider.todayTasks,
+                            provider: provider,
+                            showActions: true,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Upcoming section
+                        if (provider.upcomingTasks.isNotEmpty) ...[
+                          _buildSection(
+                            title: _l10n.taskUpcomingSection,
+                            icon: PhosphorIconsRegular.calendarBlank,
+                            color: TaskTheme.inProgress,
+                            tasks: provider.upcomingTasks,
+                            provider: provider,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Completed section
+                        if (provider.completedTasks.isNotEmpty)
+                          _buildCompletedSection(provider),
+
+                        // Empty state
+                        if (provider.overdueTasks.isEmpty &&
+                            provider.todayTasks.isEmpty &&
+                            provider.upcomingTasks.isEmpty &&
+                            provider.completedTasks.isEmpty)
+                          _buildEmptyState(),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -194,9 +197,9 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'המשימות שלי',
-                  style: TextStyle(
+                Text(
+                  _l10n.myTasksTitle,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -205,8 +208,8 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                 const SizedBox(height: 6),
                 Text(
                   total == 0
-                      ? 'אין משימות להיום'
-                      : '$completed מתוך $total הושלמו היום',
+                      ? _l10n.noTasksToday
+                      : _l10n.todayTasksProgress(completed, total),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: 0.85),
@@ -304,15 +307,15 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIconsRegular.hourglassMedium,
+          const Icon(PhosphorIconsRegular.hourglassMedium,
               size: 18, color: Color(0xFFF59E0B)),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Text(
-            'ממתין לאישור מנהל',
-            style: TextStyle(
+            _l10n.pendingManagerApproval,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFFB45309),
@@ -330,7 +333,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
         isStart ? const Color(0xFF6366F1) : const Color(0xFFF59E0B);
     final Color toColor =
         isStart ? const Color(0xFF818CF8) : const Color(0xFFFBBF24);
-    final String label = isStart ? 'התחל לעבוד' : 'שלח לאישור מנהל';
+    final String label = isStart ? _l10n.startTaskButton : _l10n.submitForApprovalButton;
     final IconData icon =
         isStart ? PhosphorIconsRegular.rocketLaunch : PhosphorIconsRegular.paperPlaneTilt;
     final String nextStatus = isStart ? 'in_progress' : 'pending_review';
@@ -411,7 +414,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              'הושלמו',
+              _l10n.taskCompletedSection,
               style: TaskTheme.heading3.copyWith(color: TaskTheme.done),
             ),
             const SizedBox(width: 8),
@@ -436,7 +439,7 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
                 onTap: () =>
                     setState(() => _showAllCompleted = !_showAllCompleted),
                 child: Text(
-                  _showAllCompleted ? 'הצג פחות' : 'הצג הכל',
+                  _showAllCompleted ? _l10n.showLessButton : _l10n.showAllButton,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -481,12 +484,12 @@ class _WorkerTaskTimelineScreenState extends State<WorkerTaskTimelineScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'אין משימות כרגע',
+              _l10n.noTasksNow,
               style: TaskTheme.heading3.copyWith(color: TaskTheme.textTertiary),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'משימות חדשות יופיעו כאן',
+            Text(
+              _l10n.newTasksWillAppear,
               style: TaskTheme.body,
             ),
           ],

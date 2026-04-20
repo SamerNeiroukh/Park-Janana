@@ -59,7 +59,7 @@ dependencies:
   package_info_plus: ^9.0.0
   video_thumbnail: ^0.5.3
 
-  intl: 0.20.2
+  intl: ^0.20.2
   connectivity_plus: ^6.0.0
   url_launcher: ^6.3.0
   local_auth: ^2.3.0
@@ -81,6 +81,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true  # Enables flutter gen-l10n via l10n.yaml
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -99,3 +101,6 @@ flutter:
       fonts:
         - asset: assets/fonts/SuezOne-Regular.ttf
         - asset: assets/fonts/NotoSansHebrew-Regular.ttf
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic-Regular.ttf

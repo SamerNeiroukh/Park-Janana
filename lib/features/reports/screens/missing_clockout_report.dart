@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
 import 'package:park_janana/features/attendance/screens/attendance_correction_screen.dart';
@@ -17,10 +18,19 @@ class MissingClockoutReport extends StatefulWidget {
 
 class _MissingClockoutReportState extends State<MissingClockoutReport> {
   late DateTime _selectedMonth;
+  late AppLocalizations _l10n;
+  late String _localeCode;
   bool _isLoading = true;
 
   // Workers who have at least one missing clock-out this month.
   List<_WorkerMissingEntry> _entries = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+    _localeCode = Localizations.localeOf(context).languageCode;
+  }
 
   @override
   void initState() {
@@ -68,16 +78,11 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: Column(
+        children: [
+          const UserHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Row(
@@ -97,7 +102,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                         color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Text('יציאות חסרות', style: TaskTheme.heading2),
+                  Text(_l10n.missingCheckoutsTitle, style: TaskTheme.heading2),
                 ],
               ),
             ),
@@ -130,7 +135,6 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
               ),
           ],
         ),
-      ),
     );
   }
 
@@ -149,14 +153,14 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
                 size: 56, color: TaskTheme.done),
           ),
           const SizedBox(height: 16),
-          const Text('אין יציאות חסרות',
-              style: TextStyle(
+          Text(_l10n.noMissingCheckoutsEmpty,
+              style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: TaskTheme.textPrimary)),
           const SizedBox(height: 6),
           Text(
-            'כל העובדים שמרו על יציאה תקינה בחודש זה',
+            _l10n.allWorkersValidClockout,
             style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
           ),
         ],
@@ -172,7 +176,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
       icon: PhosphorIconsRegular.signIn,
       color: TaskTheme.overdue,
       value: '$totalMissing',
-      label: 'יציאות חסרות',
+      label: _l10n.missingCheckoutsTitle,
     );
   }
 
@@ -218,12 +222,12 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(PhosphorIconsRegular.listBullets,
+            const Icon(PhosphorIconsRegular.listBullets,
                 size: 18, color: TaskTheme.overdue),
-            SizedBox(width: 8),
-            Text('פירוט לפי עובד',
+            const SizedBox(width: 8),
+            Text(_l10n.detailsByWorkerTitle,
                 style: TaskTheme.heading3),
           ],
         ),
@@ -304,7 +308,7 @@ class _MissingClockoutReportState extends State<MissingClockoutReport> {
               runSpacing: 8,
               children: entry.missingSessions.map((s) {
                 final date =
-                    DateFormat('d/M · HH:mm', 'he').format(s.clockIn);
+                    DateFormat('d/M · HH:mm', _localeCode).format(s.clockIn);
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,

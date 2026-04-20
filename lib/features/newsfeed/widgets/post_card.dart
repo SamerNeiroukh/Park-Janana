@@ -4,6 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/utils/profile_url_cache.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import '../models/post_model.dart';
 
 class PostCard extends StatefulWidget {
@@ -51,6 +52,14 @@ class _PostCardState extends State<PostCard> {
   String? _resolvedProfileUrl;
   bool _isLoadingProfilePic = true;
 
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -71,10 +80,10 @@ class _PostCardState extends State<PostCard> {
     final now = DateTime.now();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'עכשיו';
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דק׳';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
-    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    if (diff.inMinutes < 1) return _l10n.nowLabel;
+    if (diff.inMinutes < 60) return _l10n.minutesAgoLabel(diff.inMinutes);
+    if (diff.inHours < 24) return _l10n.hoursAgoLabel(diff.inHours);
+    if (diff.inDays < 7) return _l10n.daysAgoLabel(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
   }
 
@@ -173,7 +182,7 @@ class _PostCardState extends State<PostCard> {
                         // Title
                         Text(
                           widget.post.title,
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.start,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -227,15 +236,14 @@ class _PostCardState extends State<PostCard> {
               color: AppColors.deepOrange.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
-              textDirection: TextDirection.rtl,
               children: [
-                Icon(PhosphorIconsFill.pushPin, size: 13, color: AppColors.deepOrange),
-                SizedBox(width: 4),
+                const Icon(PhosphorIconsFill.pushPin, size: 13, color: AppColors.deepOrange),
+                const SizedBox(width: 4),
                 Text(
-                  'פוסט נעוץ',
-                  style: TextStyle(
+                  _l10n.pinnedPostLabel,
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: AppColors.deepOrange,
@@ -251,7 +259,6 @@ class _PostCardState extends State<PostCard> {
 
   Widget _buildHeader(Color categoryColor, DateTime date) {
     return Row(
-      textDirection: TextDirection.rtl,
       children: [
         _buildAvatar(categoryColor),
         const SizedBox(width: 12),
@@ -260,7 +267,6 @@ class _PostCardState extends State<PostCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Flexible(
                     child: Text(
@@ -275,7 +281,7 @@ class _PostCardState extends State<PostCard> {
                   ),
                   const SizedBox(width: 8),
                   _CategoryBadge(
-                    label: widget.post.categoryDisplayName,
+                    label: widget.post.categoryDisplayName(_l10n),
                     color: categoryColor,
                     icon: _categoryIcon(),
                   ),
@@ -283,7 +289,6 @@ class _PostCardState extends State<PostCard> {
               ),
               const SizedBox(height: 4),
               Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Text(
                     _formatTimestamp(date),
@@ -385,7 +390,6 @@ class _PostCardState extends State<PostCard> {
             PopupMenuItem(
               value: 'pin',
               child: Row(
-                textDirection: TextDirection.rtl,
                 children: [
                   Icon(
                     widget.post.isPinned
@@ -396,22 +400,21 @@ class _PostCardState extends State<PostCard> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    widget.post.isPinned ? 'בטל נעיצה' : 'נעץ פוסט',
+                    widget.post.isPinned ? _l10n.unpinPostAction : _l10n.pinPostAction,
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
             ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'delete',
             child: Row(
-              textDirection: TextDirection.rtl,
               children: [
-                Icon(PhosphorIconsRegular.trash, size: 18, color: Colors.red),
-                SizedBox(width: 10),
+                const Icon(PhosphorIconsRegular.trash, size: 18, color: Colors.red),
+                const SizedBox(width: 10),
                 Text(
-                  'מחק פוסט',
-                  style: TextStyle(
+                  _l10n.deletePostAction,
+                  style: const TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.w500,
                   ),
@@ -438,7 +441,7 @@ class _PostCardState extends State<PostCard> {
         final textPainter = TextPainter(
           text: textSpan,
           maxLines: 4,
-          textDirection: TextDirection.rtl,
+          textDirection: Directionality.of(context),
         );
         textPainter.layout(maxWidth: constraints.maxWidth);
         final isOverflowing = textPainter.didExceedMaxLines;
@@ -448,7 +451,7 @@ class _PostCardState extends State<PostCard> {
           children: [
             Text(
               widget.post.content,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.start,
               maxLines: 4,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -464,7 +467,7 @@ class _PostCardState extends State<PostCard> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'קרא עוד',
+                      _l10n.readMoreLabel,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -647,7 +650,6 @@ class _PostCardState extends State<PostCard> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _MergedReactionButton(
@@ -710,7 +712,6 @@ class _CategoryBadge extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        textDirection: TextDirection.rtl,
         children: [
           Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
@@ -864,7 +865,6 @@ class _MergedReactionButtonState extends State<_MergedReactionButton> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      textDirection: TextDirection.rtl,
       children: [
         InkWell(
           key: _key,
@@ -966,7 +966,6 @@ class _ActionButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Icon(icon, size: 20, color: AppColors.greyDark.withValues(alpha: 0.65)),
             const SizedBox(width: 6),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:park_janana/core/config/departments.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -31,6 +32,13 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
   String _originalRole = 'worker';
   bool _isLoading = true;
   bool _isSaving = false;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -74,10 +82,10 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
 
   String _roleLabel(String role) {
     switch (role) {
-      case 'manager': return 'מנהל';
-      case 'co_owner': return 'בעלים משותף';
-      case 'owner': return 'בעלים';
-      default: return 'עובד';
+      case 'manager': return _l10n.managerRole;
+      case 'co_owner': return _l10n.coOwnerRoleLabel;
+      case 'owner': return _l10n.ownerRoleLabel;
+      default: return _l10n.workerRoleLabel;
     }
   }
 
@@ -100,8 +108,8 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
             .collection('notifications')
             .add({
           'type': 'role_changed',
-          'title': 'התפקיד שלך עודכן',
-          'body': 'תפקידך שונה מ${_roleLabel(_originalRole)} ל${_roleLabel(_role)}',
+          'title': _l10n.roleChangedTitle,
+          'body': _l10n.roleChangedBody(_roleLabel(_originalRole), _roleLabel(_role)),
           'entityId': '',
           'isRead': false,
           'createdAt': Timestamp.now(),
@@ -111,11 +119,11 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
-                SizedBox(width: 10),
-                Text('ההרשאות עודכנו בהצלחה'),
+                const Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
+                const SizedBox(width: 10),
+                Text(_l10n.licensesUpdated),
               ],
             ),
             backgroundColor: const Color(0xFF10B981),
@@ -130,7 +138,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
       debugPrint("Error saving: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה בשמירת הנתונים')),
+          SnackBar(content: Text(_l10n.saveLicensesError)),
         );
       }
     } finally {
@@ -148,35 +156,32 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding:
-                                const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildHeader(),
-                                const SizedBox(height: 20),
-                                // Managers can only manage certificates, not roles.
-                                // Owners cannot demote themselves.
-                                if (widget.currentUserRole != 'manager' &&
-                                    widget.currentUserId != widget.uid) ...[
-                                  _buildRoleSection(),
-                                  const SizedBox(height: 16),
-                                ],
-                                _buildDepartmentsSection(),
-                                const SizedBox(height: 8),
+                : Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding:
+                              const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildHeader(),
+                              const SizedBox(height: 20),
+                              // Managers can only manage certificates, not roles.
+                              // Owners cannot demote themselves.
+                              if (widget.currentUserRole != 'manager' &&
+                                  widget.currentUserId != widget.uid) ...[
+                                _buildRoleSection(),
+                                const SizedBox(height: 16),
                               ],
-                            ),
+                              _buildDepartmentsSection(),
+                              const SizedBox(height: 8),
+                            ],
                           ),
                         ),
-                        _buildSaveBar(),
-                      ],
-                    ),
+                      ),
+                      _buildSaveBar(),
+                    ],
                   ),
           ),
         ],
@@ -219,9 +224,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'ניהול הרשאות ותפקיד',
-                  style: TextStyle(
+                Text(
+                  _l10n.managePermissionsButton,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Colors.white70,
                     fontWeight: FontWeight.w500,
@@ -273,9 +278,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                     color: Color(0xFF6366F1), size: 20),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'תפקיד',
-                style: TextStyle(
+              Text(
+                _l10n.roleSectionTitle,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -289,7 +294,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               Expanded(
                 child: _buildRoleTile(
                   role: 'worker',
-                  label: 'עובד',
+                  label: _l10n.workerRoleLabel,
                   icon: PhosphorIconsRegular.user,
                   color: const Color(0xFF3B82F6),
                 ),
@@ -298,7 +303,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
               Expanded(
                 child: _buildRoleTile(
                   role: 'manager',
-                  label: 'מנהל',
+                  label: _l10n.managerRole,
                   icon: PhosphorIconsRegular.users,
                   color: const Color(0xFF6366F1),
                   lockedForNonOwner: widget.currentUserRole != 'owner' &&
@@ -310,7 +315,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                 Expanded(
                   child: _buildRoleTile(
                     role: 'co_owner',
-                    label: 'בעלים משותף',
+                    label: _l10n.coOwnerRoleLabel,
                     icon: PhosphorIconsRegular.star,
                     color: const Color(0xFFF59E0B),
                   ),
@@ -320,14 +325,14 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
           ),
           if (widget.currentUserRole != 'owner' && widget.currentUserRole != 'co_owner') ...[
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
-                Icon(PhosphorIconsRegular.lock,
+                const Icon(PhosphorIconsRegular.lock,
                     size: 13, color: Color(0xFF94A3B8)),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'שדרוג לתפקיד מנהל מותר לבעלים בלבד',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                  _l10n.managerRoleUpgradeNote,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                 ),
               ],
             ),
@@ -438,10 +443,10 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                     color: AppColors.primary, size: 20),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'מחלקות מורשות',
-                  style: TextStyle(
+                  _l10n.authorizedDepartmentsLabel,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A),
@@ -467,9 +472,9 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
-            'בחר את המחלקות בהן מורשה העובד לעבוד',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+          Text(
+            _l10n.departmentsSectionHint,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
           ),
           const SizedBox(height: 16),
           ...allDepartments.map((dept) => _buildDepartmentTile(dept)),
@@ -518,7 +523,7 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
             const SizedBox(width: 14),
             Expanded(
               child: Text(
-                dept,
+                getLocalizedDepartmentName(dept, _l10n),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -587,15 +592,15 @@ class _EditWorkerLicensesScreenState extends State<EditWorkerLicensesScreen> {
                     strokeWidth: 2.5,
                   ),
                 )
-              : const Row(
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(PhosphorIconsFill.checkCircle,
+                    const Icon(PhosphorIconsFill.checkCircle,
                         color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      'שמור שינויים',
-                      style: TextStyle(
+                      _l10n.saveChangesButton,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,

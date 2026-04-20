@@ -6,6 +6,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:park_janana/core/models/user_model.dart';
 import 'package:park_janana/core/widgets/profile_avatar.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/auth/providers/auth_provider.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
@@ -40,6 +41,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   bool _isSubmitting = false;
   bool _isUpdatingStatus = false;
 
+  late AppLocalizations _l10n;
+
   String? get _currentUid => context.read<AppAuthProvider>().uid;
 
   bool get _isManager {
@@ -48,6 +51,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   }
 
   bool get _isWorker => _task.assignedTo.contains(_currentUid ?? '');
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -68,8 +77,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   }
 
   Future<void> _fetchData() async {
-    // The task doc is kept live by the StreamBuilder — no need to re-fetch it.
-    // Only fetch the worker profiles needed for the UI.
     final workers = await _workerService.getUsersByIds(widget.task.assignedTo);
     if (mounted) {
       setState(() {
@@ -88,105 +95,96 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
           .collection(AppConstants.usersCollection)
           .doc(uid)
           .get();
-      final name = doc.data()?['fullName'] ?? 'משתמש';
+      final name = doc.data()?['fullName'] ?? _l10n.userFallbackName;
       _userNameCache[uid] = name;
       return name;
     } catch (_) {
-      return 'משתמש';
+      return _l10n.userFallbackName;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: TaskTheme.background,
-        body: StreamBuilder<TaskModel?>(
-          stream: _taskService.getTaskStream(widget.task.id),
-          initialData: _task,
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data != null) {
-              _task = snapshot.data!;
-            }
+    return Scaffold(
+      backgroundColor: TaskTheme.background,
+      body: StreamBuilder<TaskModel?>(
+        stream: _taskService.getTaskStream(widget.task.id),
+        initialData: _task,
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            _task = snapshot.data!;
+          }
 
-            return Column(
-              children: [
-                const Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: UserHeader(),
-                ),
-                if (_isManager)
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: PopupMenuButton<String>(
-                          icon: const Icon(PhosphorIconsRegular.dotsThree),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => EditTaskScreen(task: _task),
-                                ),
-                              ).then((_) => _fetchData());
-                            } else if (value == 'delete') {
-                              _confirmDelete();
-                            }
-                          },
-                          itemBuilder: (_) => [
-                            const PopupMenuItem(
-                                value: 'edit',
-                                child: Row(
-                                  children: [
-                                    Icon(PhosphorIconsRegular.pencilSimple, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('ערוך משימה'),
-                                  ],
-                                )),
-                            const PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    Icon(PhosphorIconsRegular.trash,
-                                        size: 18, color: TaskTheme.overdue),
-                                    SizedBox(width: 8),
-                                    Text('מחק משימה',
-                                        style: TextStyle(color: TaskTheme.overdue)),
-                                  ],
-                                )),
-                          ],
-                        ),
-                      ),
+          return Column(
+            children: [
+              const UserHeader(),
+              if (_isManager)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(PhosphorIconsRegular.dotsThree),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditTaskScreen(task: _task),
+                            ),
+                          ).then((_) => _fetchData());
+                        } else if (value == 'delete') {
+                          _confirmDelete();
+                        }
+                      },
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                const Icon(PhosphorIconsRegular.pencilSimple, size: 18),
+                                const SizedBox(width: 8),
+                                Text(_l10n.editTaskMenuItem),
+                              ],
+                            )),
+                        PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(PhosphorIconsRegular.trash,
+                                    size: 18, color: TaskTheme.overdue),
+                                const SizedBox(width: 8),
+                                Text(_l10n.deleteTaskMenuItem,
+                                    style: const TextStyle(color: TaskTheme.overdue)),
+                              ],
+                            )),
+                      ],
                     ),
                   ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _buildHeroSection(),
-                      _buildTabBar(),
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildOverviewTab(),
-                            _buildDiscussionTab(),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-                _buildBottomBar(),
-              ],
-            );
-          },
-        ),
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildHeroSection(),
+                    _buildTabBar(),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildOverviewTab(),
+                          _buildDiscussionTab(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _buildBottomBar(),
+            ],
+          );
+        },
       ),
     );
   }
@@ -220,7 +218,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    TaskTheme.departmentLabel(_task.department),
+                    TaskTheme.departmentLabel(_task.department, _l10n),
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -318,9 +316,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         unselectedLabelStyle:
             const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         dividerColor: Colors.transparent,
-        tabs: const [
-          Tab(text: 'סקירה'),
-          Tab(text: 'דיון'),
+        tabs: [
+          Tab(text: _l10n.taskOverviewTabLabel),
+          Tab(text: _l10n.taskDiscussionTabLabel),
         ],
       ),
     );
@@ -336,11 +334,11 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         children: [
           _buildInfoCard(
             icon: PhosphorIconsRegular.fileText,
-            title: 'תיאור',
+            title: _l10n.taskDescriptionLabel,
             child: Text(
               _task.description.isNotEmpty
                   ? _task.description
-                  : 'אין תיאור למשימה זו',
+                  : _l10n.noTaskDescription,
               style: TaskTheme.body.copyWith(
                 color: _task.description.isNotEmpty
                     ? TaskTheme.textPrimary
@@ -351,31 +349,31 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
           const SizedBox(height: 16),
           _buildInfoCard(
             icon: PhosphorIconsRegular.info,
-            title: 'פרטים',
+            title: _l10n.taskInfoSectionTitle,
             child: Column(
               children: [
                 _buildDetailRow(
-                  'תאריך יעד',
+                  _l10n.taskDeadlineLabel,
                   DateFormat('dd/MM/yyyy HH:mm')
                       .format(_task.dueDate.toDate()),
                   PhosphorIconsRegular.calendarBlank,
                 ),
                 const Divider(height: 20, color: TaskTheme.divider),
                 _buildDetailRow(
-                  'עדיפות',
-                  TaskTheme.priorityLabel(_task.priority),
+                  _l10n.taskPriorityLabel,
+                  TaskTheme.priorityLabel(_task.priority, _l10n),
                   TaskTheme.priorityIcon(_task.priority),
                   color: TaskTheme.priorityColor(_task.priority),
                 ),
                 const Divider(height: 20, color: TaskTheme.divider),
                 _buildDetailRow(
-                  'מחלקה',
-                  TaskTheme.departmentLabel(_task.department),
+                  _l10n.taskDepartmentLabel,
+                  TaskTheme.departmentLabel(_task.department, _l10n),
                   PhosphorIconsRegular.buildings,
                 ),
                 const Divider(height: 20, color: TaskTheme.divider),
                 _buildDetailRow(
-                  'נוצרה',
+                  _l10n.taskCreatedAtLabel,
                   DateFormat('dd/MM/yyyy').format(_task.createdAt.toDate()),
                   PhosphorIconsRegular.clock,
                 ),
@@ -385,7 +383,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
           const SizedBox(height: 16),
           _buildInfoCard(
             icon: PhosphorIconsRegular.usersThree,
-            title: 'עובדים (${_workers.length})',
+            title: _l10n.taskAssigneesCount(_workers.length),
             child: Column(
               children: _workers.map((w) {
                 final status = _task.workerStatusFor(w.uid);
@@ -480,7 +478,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                 Icon(TaskTheme.statusIcon(status), size: 11, color: statusColor),
                 const SizedBox(width: 4),
                 Text(
-                  TaskTheme.statusLabel(status),
+                  TaskTheme.statusLabel(status, _l10n),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -513,7 +511,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                       size: 48,
                       color: TaskTheme.textTertiary.withValues(alpha: 0.4)),
                   const SizedBox(height: 12),
-                  Text('אין תגובות עדיין',
+                  Text(_l10n.noCommentsEmpty,
                       style: TaskTheme.body
                           .copyWith(color: TaskTheme.textTertiary)),
                 ],
@@ -615,7 +613,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     final showPendingReviewBanner =
         _isWorker && workerStatus == 'pending_review';
 
-    // Nothing to show if not on discussion tab and no worker action needed
     if (!isOnDiscussionTab && !showWorkerAction && !showPendingReviewBanner) {
       return const SizedBox.shrink();
     }
@@ -654,12 +651,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                       child: TextField(
                         controller: _commentController,
                         style: const TextStyle(fontSize: 14),
-                        decoration: const InputDecoration(
-                          hintText: 'כתוב תגובה...',
-                          hintStyle: TextStyle(
+                        decoration: InputDecoration(
+                          hintText: _l10n.writeCommentHintTask,
+                          hintStyle: const TextStyle(
                               color: TaskTheme.textTertiary, fontSize: 14),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                               horizontal: 18, vertical: 12),
                         ),
                       ),
@@ -712,14 +709,14 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
         borderRadius: BorderRadius.circular(TaskTheme.radiusM),
         border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIconsRegular.hourglassMedium, size: 18, color: Color(0xFFF59E0B)),
-          SizedBox(width: 8),
+          const Icon(PhosphorIconsRegular.hourglassMedium, size: 18, color: Color(0xFFF59E0B)),
+          const SizedBox(width: 8),
           Text(
-            'ממתין לאישור מנהל',
-            style: TextStyle(
+            _l10n.pendingManagerApproval,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFFB45309),
@@ -763,7 +760,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  isStart ? 'להתחיל לעבוד' : 'שלח לאישור מנהל',
+                  isStart ? _l10n.startWorkButton : _l10n.submitForApprovalButton,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -809,7 +806,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('שגיאה בשליחת תגובה')),
+          SnackBar(content: Text(_l10n.commentSendError)),
         );
       }
     } finally {
@@ -820,9 +817,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
   Future<void> _confirmDelete() async {
     final confirmed = await showAppDialog(
       context,
-      title: 'מחיקת משימה',
-      message: 'למחוק את "${_task.title}"?',
-      confirmText: 'מחק',
+      title: _l10n.deleteTaskTitle,
+      message: _l10n.deleteTaskConfirmation(_task.title),
+      confirmText: _l10n.deleteTaskButton,
       icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
@@ -835,7 +832,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen>
               const Icon(PhosphorIconsRegular.trash,
                   color: Colors.white, size: 18),
               const SizedBox(width: 8),
-              Text('המשימה "${_task.title}" נמחקה',
+              Text(_l10n.taskDeletedSnackbar(_task.title),
                   style: const TextStyle(fontWeight: FontWeight.w600)),
             ]),
             backgroundColor: const Color(0xFFEF4444),

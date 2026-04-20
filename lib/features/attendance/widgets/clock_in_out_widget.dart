@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
 import '../models/attendance_model.dart';
 import '../services/clock_service.dart';
@@ -131,6 +132,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   Future<void> _autoClockOut() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null || _ongoingSession == null) return;
+    final l10n = AppLocalizations.of(context);
+    final clockoutTitle = l10n.autoClockoutTitle;
+    final clockoutBody = l10n.autoClockoutBody;
     try {
       await _clockService.clockOut();
       await FirebaseFirestore.instance
@@ -139,8 +143,8 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           .collection('notifications')
           .add({
         'type': 'clockout_missed',
-        'title': 'יציאה אוטומטית ממשמרת',
-        'body': 'לא דיווחת יציאה לאחר 16 שעות – המערכת סיימה את המשמרת אוטומטית. פנה למנהל שלך.',
+        'title': clockoutTitle,
+        'body': clockoutBody,
         'entityId': '',
         'isRead': false,
         'createdAt': FieldValue.serverTimestamp(),
@@ -269,7 +273,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Flexible(
-                child: Text('שגיאה בדיווח נוכחות: $e',
+                child: Text(AppLocalizations.of(context).attendanceReportError(e.toString()),
                     style: const TextStyle(fontWeight: FontWeight.w500),
                     textAlign: TextAlign.right),
               ),
@@ -351,10 +355,10 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                               size: 38, color: Colors.white),
                         ),
                         const SizedBox(height: 22),
-                        const Text(
-                          'נדרשת גישה למיקום',
+                        Text(
+                          AppLocalizations.of(ctx).locationPermissionTitle,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 21,
                             fontWeight: FontWeight.w800,
                             color: Colors.black87,
@@ -362,10 +366,10 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Text(
-                          'כדי לדווח כניסה או יציאה ממשמרת יש לאפשר שירותי מיקום במכשיר.',
+                        Text(
+                          AppLocalizations.of(ctx).locationPermissionMessage,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54,
@@ -388,9 +392,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                               shape: const RoundedRectangleBorder(),
                             ),
                             onPressed: () => Navigator.of(ctx).pop(false),
-                            child: const Text(
-                              'ביטול',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(ctx).cancelButton,
+                              style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w600),
                             ),
                           ),
@@ -407,9 +411,9 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
                               await Geolocator.openLocationSettings();
                               if (ctx.mounted) Navigator.of(ctx).pop(true);
                             },
-                            child: const Text(
-                              'הפעל מיקום',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(ctx).enableLocationButton,
+                              style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -438,13 +442,15 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
   // ── Location warning ─────────────────────────────────────────────────────
 
   Future<bool?> _showLocationWarning(bool isClockingIn) {
+    final l10n = AppLocalizations.of(context);
     return showAppDialog(
       context,
-      title: 'אינך נמצא בגבולות הפארק',
-      message:
-          'אתה מנסה ${isClockingIn ? 'להתחבר' : 'להתנתק'} מחוץ לאזור המותר. האם ברצונך להמשיך בכל זאת?',
-      confirmText: 'כן',
-      cancelText: 'לא',
+      title: l10n.outsideParkBoundsMessage,
+      message: isClockingIn
+          ? l10n.clockInOutsideParkMessage
+          : l10n.clockOutOutsideParkMessage,
+      confirmText: l10n.yesButton,
+      cancelText: l10n.noButton,
       icon: PhosphorIconsRegular.gpsSlash,
       isDestructive: true,
     );
@@ -471,11 +477,10 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
     final isClockedIn = _ongoingSession != null;
     final ringColor = isClockedIn ? _kRingClockOut : _kRingClockIn;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
           // ── Analog clock + long-press ring ──────────────────────────────
           GestureDetector(
             onLongPressStart: _onLongPressStart,
@@ -550,7 +555,7 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: Text(
-              isClockedIn ? 'לחיצה ארוכה לסיום משמרת' : 'לחיצה ארוכה להתחיל משמרת',
+              isClockedIn ? l10n.longPressToEndShift : l10n.longPressToStartShift,
               key: ValueKey(isClockedIn),
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -563,7 +568,6 @@ class _ClockInOutWidgetState extends State<ClockInOutWidget>
           ),
 
         ],
-      ),
     );
   }
 }
@@ -587,7 +591,8 @@ class _ActiveClockInfo extends StatelessWidget {
     String two(int n) => n.toString().padLeft(2, '0');
     final elapsedStr =
         '${two(elapsed.inHours)}:${two(elapsed.inMinutes.remainder(60))}:${two(elapsed.inSeconds.remainder(60))}';
-    final sinceStr = 'מאז ${two(clockInTime.hour)}:${two(clockInTime.minute)}';
+    final timeStr = '${two(clockInTime.hour)}:${two(clockInTime.minute)}';
+    final sinceStr = AppLocalizations.of(context).clockedInSince(timeStr);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/attendance/models/attendance_model.dart';
@@ -28,6 +29,13 @@ class WorkerReportsScreen extends StatefulWidget {
 class _WorkerReportsScreenState extends State<WorkerReportsScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -46,26 +54,21 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: TaskTheme.background,
         body: Column(
           children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
+            const UserHeader(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('הדוחות של ${widget.userName}', style: TaskTheme.heading1),
+                    Text(_l10n.reportsOfWorker(widget.userName), style: TaskTheme.heading1),
                     const SizedBox(height: 4),
                     Text(
-                      'צפייה בנתוני נוכחות, משימות ומשמרות',
+                      _l10n.workerReportsSubtitle,
                       style: TaskTheme.body.copyWith(color: TaskTheme.textTertiary),
                     ),
                     const SizedBox(height: 20),
@@ -76,8 +79,8 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                     _buildReportCard(
                       index: 0,
                       icon: PhosphorIconsRegular.clock,
-                      title: 'דו״ח נוכחות',
-                      description: 'שעות עבודה, ימי נוכחות וסיכום חודשי',
+                      title: _l10n.attendanceReportTitle,
+                      description: _l10n.attendanceReportDescription,
                       gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
                       onTap: () => Navigator.push(
                         context,
@@ -94,8 +97,8 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                     _buildReportCard(
                       index: 1,
                       icon: PhosphorIconsRegular.checkSquare,
-                      title: 'דו״ח משימות',
-                      description: 'סטטוס משימות, התקדמות ואחוזי ביצוע',
+                      title: _l10n.taskReportCard,
+                      description: _l10n.taskReportDescription,
                       gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
                       onTap: () => Navigator.push(
                         context,
@@ -112,8 +115,8 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
                     _buildReportCard(
                       index: 2,
                       icon: PhosphorIconsRegular.clock,
-                      title: 'דו״ח משמרות',
-                      description: 'היסטוריית משמרות, אישורים והחלטות',
+                      title: _l10n.shiftReportTitle,
+                      description: _l10n.shiftReportDescription,
                       gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
                       onTap: () => Navigator.push(
                         context,
@@ -132,8 +135,7 @@ class _WorkerReportsScreenState extends State<WorkerReportsScreen>
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildReportCard({
@@ -184,11 +186,18 @@ class _PerformanceSummaryCard extends StatefulWidget {
 }
 
 class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
+  late AppLocalizations _l10n;
   bool _loading = true;
   double _hoursThisMonth = 0;
   int _daysThisMonth = 0;
   int _totalTasks = 0;
   int _completedTasks = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -265,11 +274,11 @@ class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(PhosphorIconsRegular.chartBar, color: Colors.white70, size: 18),
-            SizedBox(width: 6),
-            Text('סיכום ביצועים — החודש',
-                style: TextStyle(
+          Row(children: [
+            const Icon(PhosphorIconsRegular.chartBar, color: Colors.white70, size: 18),
+            const SizedBox(width: 6),
+            Text(_l10n.performanceSummaryTitle,
+                style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
                     fontWeight: FontWeight.w500)),
@@ -277,11 +286,11 @@ class _PerformanceSummaryCardState extends State<_PerformanceSummaryCard> {
           const SizedBox(height: 14),
           Row(children: [
             _metric(PhosphorIconsRegular.clock,
-                '${_hoursThisMonth.toStringAsFixed(1)} שעות', 'נוכחות'),
+                _l10n.hoursWithValue(_hoursThisMonth.toStringAsFixed(1)), _l10n.presenceLabel),
             _divider(),
-            _metric(PhosphorIconsRegular.calendarBlank, '$_daysThisMonth ימים', 'בעבודה'),
+            _metric(PhosphorIconsRegular.calendarBlank, _l10n.daysWithValue(_daysThisMonth), _l10n.atWorkLabel),
             _divider(),
-            _metric(PhosphorIconsRegular.checkSquare, '$completionRate%', 'משימות הושלמו'),
+            _metric(PhosphorIconsRegular.checkSquare, '$completionRate%', _l10n.tasksCompletedLabel),
           ]),
         ],
       ),

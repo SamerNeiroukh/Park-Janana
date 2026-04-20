@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class LocationUtils {
   static const double parkLatitude = 31.805613;
@@ -25,13 +26,13 @@ class LocationUtils {
 
     // Show our custom rationale dialog before triggering the OS prompt.
     if (!context.mounted) return false;
+    final l10n = AppLocalizations.of(context);
     final agreed = await showAppDialog(
       context,
-      title: 'גישה למיקום',
-      message:
-          'האפליקציה זקוקה לגישה למיקומך כדי לאפשר כניסה ויציאה מהעבודה בתחום הפארק.\n\nהמיקום משמש אך ורק לאימות נוכחות ואינו נשמר או משותף.',
-      confirmText: 'אשר גישה',
-      cancelText: 'לא עכשיו',
+      title: l10n.locationRationaleTitle,
+      message: l10n.locationRationaleMessage,
+      confirmText: l10n.locationRationaleConfirm,
+      cancelText: l10n.locationRationaleCancel,
       icon: PhosphorIconsRegular.mapPin,
       isDestructive: false,
     );

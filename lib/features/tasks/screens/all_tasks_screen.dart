@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/tasks/models/task_model.dart';
 import 'package:park_janana/features/tasks/screens/task_details_screen.dart';
@@ -21,35 +22,42 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _searchQuery = '';
 
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
+
   @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  static const _filters = [
-    _Filter(label: 'הכל', value: null, color: Color(0xFF7C3AED)),
-    _Filter(label: 'ממתין', value: 'pending', color: TaskTheme.pending),
-    _Filter(label: 'בביצוע', value: 'in_progress', color: TaskTheme.inProgress),
-    _Filter(label: 'הושלם', value: 'done', color: TaskTheme.done),
+  List<_Filter> _buildFilters() => [
+    _Filter(label: _l10n.filterAll, value: null, color: const Color(0xFF7C3AED)),
+    _Filter(label: _l10n.filterStatusPending, value: 'pending', color: TaskTheme.pending),
+    _Filter(label: _l10n.filterStatusInProgress, value: 'in_progress', color: TaskTheme.inProgress),
+    _Filter(label: _l10n.filterStatusDone, value: 'done', color: TaskTheme.done),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final filters = _buildFilters();
+
     return Scaffold(
       backgroundColor: TaskTheme.background,
       appBar: const UserHeader(),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildFilterRow(),
-            _buildSearchBar(),
-            const SizedBox(height: 4),
-            Expanded(child: _buildTaskList()),
-          ],
-        ),
+      body: Column(
+        children: [
+          _buildHeader(),
+          _buildFilterRow(filters),
+          _buildSearchBar(),
+          const SizedBox(height: 4),
+          Expanded(child: _buildTaskList()),
+        ],
       ),
     );
   }
@@ -72,20 +80,20 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
                 color: Colors.white, size: 22),
           ),
           const SizedBox(width: 14),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'כל המשימות',
-                style: TextStyle(
+                _l10n.allTasksTitle,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: TaskTheme.textPrimary,
                 ),
               ),
               Text(
-                'תצוגה כוללת לכל המשימות',
-                style: TextStyle(
+                _l10n.allTasksSubtitle,
+                style: const TextStyle(
                     fontSize: 12, color: TaskTheme.textTertiary),
               ),
             ],
@@ -95,16 +103,16 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
+  Widget _buildFilterRow(List<_Filter> filters) {
     return SizedBox(
       height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _filters.length,
+        itemCount: filters.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
-          final f = _filters[i];
+          final f = filters[i];
           final isSelected = _statusFilter == f.value;
           return GestureDetector(
             onTap: () => setState(() => _statusFilter = f.value),
@@ -142,7 +150,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
         controller: _searchCtrl,
         textDirection: TextDirection.rtl,
         decoration: InputDecoration(
-          hintText: 'חיפוש משימה...',
+          hintText: _l10n.searchTaskHint,
           hintStyle: const TextStyle(
               color: TaskTheme.textTertiary, fontSize: 14),
           prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
@@ -198,7 +206,7 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
         }
         if (snap.hasError) {
           return Center(
-            child: Text('שגיאה: ${snap.error}',
+            child: Text(_l10n.taskErrorPrefix(snap.error.toString()),
                 style: const TextStyle(color: Colors.red)),
           );
         }
@@ -250,8 +258,8 @@ class _AllTasksScreenState extends State<AllTasksScreen> {
 
   Widget _buildEmpty() {
     final label = _statusFilter == null
-        ? 'אין משימות'
-        : 'אין משימות ${TaskTheme.statusLabel(_statusFilter!)}';
+        ? _l10n.noTasksEmpty
+        : '${_l10n.noTasksEmpty} ${TaskTheme.statusLabel(_statusFilter!, _l10n)}';
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -288,6 +296,30 @@ class _TaskRow extends StatelessWidget {
 
   const _TaskRow({required this.task, required this.onTap});
 
+  String _localizedStatus(AppLocalizations l10n, String status) {
+    switch (status) {
+      case 'in_progress':
+        return l10n.taskStatusInProgress;
+      case 'pending_review':
+        return l10n.taskStatusPendingReview;
+      case 'done':
+        return l10n.taskStatusDone;
+      default:
+        return l10n.taskStatusPending;
+    }
+  }
+
+  String _localizedPriority(AppLocalizations l10n, String priority) {
+    switch (priority) {
+      case 'high':
+        return l10n.taskPriorityHigh;
+      case 'low':
+        return l10n.taskPriorityLow;
+      default:
+        return l10n.taskPriorityMedium;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final priorityColor = TaskTheme.priorityColor(task.priority);
@@ -296,6 +328,7 @@ class _TaskRow extends StatelessWidget {
     final dueDate = task.dueDate.toDate();
     final dueDateStr = DateFormat('d/M/yyyy').format(dueDate);
     final isOverdue = task.isOverdue;
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -354,7 +387,7 @@ class _TaskRow extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              TaskTheme.statusLabel(task.status),
+                              _localizedStatus(l10n, task.status),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -410,7 +443,7 @@ class _TaskRow extends StatelessWidget {
                               size: 13, color: priorityColor),
                           const SizedBox(width: 4),
                           Text(
-                            TaskTheme.priorityLabel(task.priority),
+                            _localizedPriority(l10n, task.priority),
                             style: TextStyle(
                               fontSize: 12,
                               color: priorityColor,

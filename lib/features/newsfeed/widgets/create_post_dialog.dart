@@ -10,6 +10,7 @@ import 'package:park_janana/core/constants/app_colors.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class CreatePostDialog extends StatefulWidget {
   final String authorId;
@@ -43,6 +44,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   bool _isPickingMedia = false;
   String _uploadStatus = '';
   double _uploadProgress = 0.0;
+  late AppLocalizations _l10n;
 
   // Media handling
   final List<File> _selectedMedia = [];
@@ -52,34 +54,40 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   // Local thumbnail paths for selected videos (filePath → thumbPath or null if failed)
   final Map<String, String?> _videoThumbnails = {};
 
-  final List<Map<String, dynamic>> _categories = const [
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
+
+  List<Map<String, dynamic>> get _categories => [
     {
       'value': 'announcement',
-      'label': 'הודעה',
+      'label': _l10n.categoryLabelAnnouncement,
       'icon': PhosphorIconsFill.megaphone,
       'color': AppColors.salmon,
-      'description': 'הודעות חשובות לכלל העובדים',
+      'description': _l10n.postTypeAnnouncementDesc,
     },
     {
       'value': 'update',
-      'label': 'עדכון',
+      'label': _l10n.categoryLabelUpdate,
       'icon': PhosphorIconsRegular.arrowsClockwise,
       'color': AppColors.primaryBlue,
-      'description': 'עדכונים ושינויים',
+      'description': _l10n.postTypeUpdateDesc,
     },
     {
       'value': 'event',
-      'label': 'אירוע',
+      'label': _l10n.categoryLabelEvent,
       'icon': PhosphorIconsRegular.calendarBlank,
       'color': AppColors.success,
-      'description': 'אירועים ופעילויות',
+      'description': _l10n.postTypeEventDesc,
     },
     {
       'value': 'general',
-      'label': 'כללי',
+      'label': _l10n.categoryLabelGeneral,
       'icon': PhosphorIconsRegular.article,
       'color': AppColors.greyMedium,
-      'description': 'מידע כללי',
+      'description': _l10n.postTypeGeneralDesc,
     },
   ];
 
@@ -128,7 +136,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   Future<void> _pickImages() async {
     if (_isPickingMedia) return;
     if (_selectedMedia.length >= _maxMediaCount) {
-      _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
+      _showErrorSnackbar(_l10n.maxMediaError(_maxMediaCount));
       return;
     }
 
@@ -159,7 +167,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   Future<void> _pickVideo() async {
     if (_isPickingMedia) return;
     if (_selectedMedia.length >= _maxMediaCount) {
-      _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
+      _showErrorSnackbar(_l10n.maxMediaError(_maxMediaCount));
       return;
     }
 
@@ -176,10 +184,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         _generateVideoPreviewThumbnail(file);
         final ext = video.path.split('.').last.toLowerCase();
         if (ext == 'mov') {
-          _showInfoSnackbar(
-            'סרטוני .MOV מאייפון עשויים להיות בפורמט Dolby Vision שלא '
-            'נתמך בחלק מהמכשירים. מומלץ להשתמש ב-MP4.',
-          );
+          _showInfoSnackbar(_l10n.movWarningMessage);
         }
       }
     } catch (e) {
@@ -198,7 +203,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             Flexible(
               child: Text(
                 message,
-                textAlign: TextAlign.right,
                 style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
               ),
             ),
@@ -218,7 +222,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   Future<void> _takePhoto() async {
     if (_isPickingMedia) return;
     if (_selectedMedia.length >= _maxMediaCount) {
-      _showErrorSnackbar('ניתן להעלות עד $_maxMediaCount קבצים');
+      _showErrorSnackbar(_l10n.maxMediaError(_maxMediaCount));
       return;
     }
 
@@ -269,9 +273,9 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'הוסף מדיה',
-              style: TextStyle(
+            Text(
+              _l10n.addMediaButton,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -280,8 +284,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             const SizedBox(height: 20),
             _buildMediaOption(
               icon: PhosphorIconsRegular.images,
-              label: 'בחר תמונות',
-              subtitle: 'בחר תמונות מהגלריה',
+              label: _l10n.pickPhotoOption,
+              subtitle: _l10n.pickPhotoSubtitle,
               color: AppColors.primaryBlue,
               onTap: () {
                 Navigator.pop(context);
@@ -291,8 +295,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             const SizedBox(height: 12),
             _buildMediaOption(
               icon: PhosphorIconsRegular.videoCamera,
-              label: 'בחר סרטון',
-              subtitle: 'בחר סרטון מהגלריה',
+              label: _l10n.pickVideoOption,
+              subtitle: _l10n.pickVideoSubtitle,
               color: AppColors.success,
               onTap: () {
                 Navigator.pop(context);
@@ -302,8 +306,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             const SizedBox(height: 12),
             _buildMediaOption(
               icon: PhosphorIconsRegular.camera,
-              label: 'צלם תמונה',
-              subtitle: 'פתח את המצלמה',
+              label: _l10n.takePhotoOption,
+              subtitle: _l10n.takePhotoSubtitle,
               color: AppColors.salmon,
               onTap: () {
                 Navigator.pop(context);
@@ -333,7 +337,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -397,7 +400,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
             const SizedBox(height: 5),
             Text(
-              'וידאו',
+              _l10n.videoLabel,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.6),
                 fontSize: 9,
@@ -445,14 +448,14 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     // Thumbnail generation failed — show static icon
     return Container(
       color: const Color(0xFF1E2A3A),
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIconsRegular.videoCamera, color: Colors.white54, size: 28),
-          SizedBox(height: 4),
+          const Icon(PhosphorIconsRegular.videoCamera, color: Colors.white54, size: 28),
+          const SizedBox(height: 4),
           Text(
-            'וידאו',
-            style: TextStyle(color: Colors.white38, fontSize: 9),
+            _l10n.videoLabel,
+            style: const TextStyle(color: Colors.white38, fontSize: 9),
           ),
         ],
       ),
@@ -469,7 +472,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     setState(() {
       _isSubmitting = true;
       _uploadProgress = 0.0;
-      _uploadStatus = 'מכין להעלאה...';
+      _uploadStatus = _l10n.preparingUploadStatus;
     });
 
     try {
@@ -494,7 +497,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
 
       setState(() {
         _uploadProgress = 1.0;
-        _uploadStatus = 'מפרסם פוסט...';
+        _uploadStatus = _l10n.publishingPostStatus;
       });
 
       final post = PostModel(
@@ -521,7 +524,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
     } catch (e) {
       debugPrint('Create post error: $e');
       if (!mounted) return;
-      _showErrorSnackbar('שגיאה בפרסום הפוסט: $e');
+      _showErrorSnackbar(_l10n.postPublishError(e.toString()));
     } finally {
       if (mounted) {
         setState(() {
@@ -536,15 +539,15 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   void _showSuccessSnackbar() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              'הפוסט פורסם בהצלחה',
-              style: TextStyle(fontWeight: FontWeight.w500),
+              _l10n.postPublishedSuccess,
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
-            SizedBox(width: 8),
-            Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            const Icon(PhosphorIconsFill.checkCircle, color: Colors.white, size: 20),
           ],
         ),
         backgroundColor: AppColors.success,
@@ -578,9 +581,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_isSubmitting,
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Dialog(
+      child: Dialog(
           insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
           backgroundColor: Colors.transparent,
           child: Container(
@@ -638,7 +639,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -661,10 +661,8 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         ],
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -682,16 +680,16 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'פוסט חדש',
-                    style: TextStyle(
+                  Text(
+                    _l10n.createPostTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    'שתף עדכונים עם הצוות',
+                    _l10n.createPostSubtitle,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 13,
@@ -728,7 +726,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          textDirection: TextDirection.rtl,
           children: [
             Icon(
               PhosphorIconsRegular.squaresFour,
@@ -736,9 +733,9 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
-            const Text(
-              'בחר קטגוריה',
-              style: TextStyle(
+            Text(
+              _l10n.selectCategoryLabel,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -787,7 +784,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  textDirection: TextDirection.rtl,
                   children: [
                     Icon(
                       category['icon'] as IconData,
@@ -818,7 +814,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          textDirection: TextDirection.rtl,
           children: [
             Icon(
               PhosphorIconsRegular.textT,
@@ -826,9 +821,9 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
-            const Text(
-              'כותרת',
-              style: TextStyle(
+            Text(
+              _l10n.postTitleLabel,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -840,15 +835,14 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         TextFormField(
           controller: _titleController,
           focusNode: _titleFocus,
-          textAlign: TextAlign.right,
-          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.start,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           decoration: _inputDecoration(
-            hint: 'הזן כותרת לפוסט...',
+            hint: _l10n.postTitleHint,
             prefixIcon: PhosphorIconsRegular.textAlignLeft,
           ),
           validator: (value) =>
-              value == null || value.trim().isEmpty ? 'יש להזין כותרת' : null,
+              value == null || value.trim().isEmpty ? _l10n.postTitleRequired : null,
           onFieldSubmitted: (_) => _contentFocus.requestFocus(),
         ),
       ],
@@ -860,7 +854,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          textDirection: TextDirection.rtl,
           children: [
             Icon(
               PhosphorIconsRegular.note,
@@ -868,9 +861,9 @@ class _CreatePostDialogState extends State<CreatePostDialog>
               color: AppColors.primaryBlue.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 8),
-            const Text(
-              'תוכן הפוסט',
-              style: TextStyle(
+            Text(
+              _l10n.postContentLabel,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -882,16 +875,15 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         TextFormField(
           controller: _contentController,
           focusNode: _contentFocus,
-          textAlign: TextAlign.right,
-          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.start,
           maxLines: 5,
           style: const TextStyle(fontSize: 15, height: 1.5),
           decoration: _inputDecoration(
-            hint: 'מה תרצה לשתף?',
+            hint: _l10n.postContentHint,
             prefixIcon: null,
           ),
           validator: (value) =>
-              value == null || value.trim().isEmpty ? 'יש להזין תוכן' : null,
+              value == null || value.trim().isEmpty ? _l10n.postContentRequired : null,
         ),
       ],
     );
@@ -902,7 +894,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          textDirection: TextDirection.rtl,
           children: [
             Icon(
               PhosphorIconsRegular.images,
@@ -911,7 +902,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
             const SizedBox(width: 8),
             Text(
-              'מדיה (${_selectedMedia.length}/$_maxMediaCount)',
+              _l10n.mediaLabel(_selectedMedia.length, _maxMediaCount),
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -1004,9 +995,9 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                               color: Colors.black54,
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'וידאו',
-                              style: TextStyle(
+                            child: Text(
+                              _l10n.videoLabel,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -1039,7 +1030,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: TextDirection.rtl,
               children: [
                 Icon(
                   PhosphorIconsRegular.images,
@@ -1048,7 +1038,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _selectedMedia.isEmpty ? 'הוסף תמונות או סרטונים' : 'הוסף עוד',
+                  _selectedMedia.isEmpty ? _l10n.addMediaButton : _l10n.addMoreMediaButton,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -1133,7 +1123,6 @@ class _CreatePostDialogState extends State<CreatePostDialog>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              textDirection: TextDirection.rtl,
               children: [
                 const SizedBox(
                   width: 18,
@@ -1146,8 +1135,7 @@ class _CreatePostDialogState extends State<CreatePostDialog>
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _uploadStatus.isEmpty ? 'מכין...' : _uploadStatus,
-                    textDirection: TextDirection.rtl,
+                    _uploadStatus.isEmpty ? _l10n.preparingUploadShort : _uploadStatus,
                     style: const TextStyle(
                       color: AppColors.primaryBlue,
                       fontSize: 14,
@@ -1200,23 +1188,22 @@ class _CreatePostDialogState extends State<CreatePostDialog>
         child: InkWell(
           onTap: _submitPost,
           borderRadius: BorderRadius.circular(16),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                textDirection: TextDirection.rtl,
                 children: [
                   Text(
-                    'פרסם פוסט',
-                    style: TextStyle(
+                    _l10n.publishPostButton,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Icon(PhosphorIconsRegular.paperPlaneTilt, color: Colors.white, size: 22),
+                  const SizedBox(width: 10),
+                  const Icon(PhosphorIconsRegular.paperPlaneTilt, color: Colors.white, size: 22),
                 ],
               ),
             ),

@@ -9,6 +9,7 @@ import 'package:park_janana/core/utils/profile_url_cache.dart';
 import '../models/post_model.dart';
 import '../services/newsfeed_service.dart';
 import 'package:park_janana/core/widgets/app_dialog.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 class CommentsSheet extends StatefulWidget {
   final PostModel post;
@@ -40,6 +41,13 @@ class _CommentsSheetState extends State<CommentsSheet>
   late AnimationController _animController;
   late Stream<PostModel?> _postStream;
   bool _isSubmitting = false;
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   void initState() {
@@ -71,10 +79,10 @@ class _CommentsSheetState extends State<CommentsSheet>
     final date = timestamp.toDate();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'עכשיו';
-    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דק׳';
-    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
-    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    if (diff.inMinutes < 1) return _l10n.nowLabel;
+    if (diff.inMinutes < 60) return _l10n.minutesAgoLabel(diff.inMinutes);
+    if (diff.inHours < 24) return _l10n.hoursAgoLabel(diff.inHours);
+    if (diff.inDays < 7) return _l10n.daysAgoLabel(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
   }
 
@@ -97,10 +105,10 @@ class _CommentsSheetState extends State<CommentsSheet>
       if (!mounted) return;
       _commentController.clear();
       _focusNode.unfocus();
-      _showSuccessSnackbar('התגובה נוספה');
+      _showSuccessSnackbar(_l10n.commentAddedSuccess);
     } catch (e) {
       if (!mounted) return;
-      _showErrorSnackbar('שגיאה בהוספת תגובה');
+      _showErrorSnackbar(_l10n.commentAddError);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -110,9 +118,9 @@ class _CommentsSheetState extends State<CommentsSheet>
     HapticFeedback.mediumImpact();
     final confirm = await showAppDialog(
       context,
-      title: 'מחיקת תגובה',
-      message: 'האם אתה בטוח שברצונך למחוק את התגובה?',
-      confirmText: 'מחק',
+      title: _l10n.deleteCommentTitle,
+      message: _l10n.deleteCommentMessage,
+      confirmText: _l10n.deleteLabel,
       icon: PhosphorIconsRegular.trash,
       isDestructive: true,
     );
@@ -122,10 +130,10 @@ class _CommentsSheetState extends State<CommentsSheet>
     try {
       await _newsfeedService.deleteComment(widget.post.id, comment);
       if (!mounted) return;
-      _showSuccessSnackbar('התגובה נמחקה');
+      _showSuccessSnackbar(_l10n.commentDeletedSuccess);
     } catch (e) {
       if (!mounted) return;
-      _showErrorSnackbar('שגיאה במחיקת תגובה');
+      _showErrorSnackbar(_l10n.commentDeleteError);
     }
   }
 
@@ -170,9 +178,7 @@ class _CommentsSheetState extends State<CommentsSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: AnimatedBuilder(
+    return AnimatedBuilder(
         animation: _animController,
         builder: (context, child) => SlideTransition(
           position: Tween<Offset>(
@@ -224,7 +230,6 @@ class _CommentsSheetState extends State<CommentsSheet>
             },
           ),
         ),
-      ),
     );
   }
 
@@ -249,10 +254,8 @@ class _CommentsSheetState extends State<CommentsSheet>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 20, 14),
       child: Row(
-        textDirection: TextDirection.rtl,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -275,15 +278,15 @@ class _CommentsSheetState extends State<CommentsSheet>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'תגובות',
-                    style: TextStyle(
+                  Text(
+                    _l10n.commentsTitle,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '${post.commentsCount} תגובות',
+                    _l10n.commentsCountLabel(post.commentsCount),
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.greyMedium.withValues(alpha: 0.8),
@@ -355,7 +358,6 @@ class _CommentsSheetState extends State<CommentsSheet>
           ],
         ),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             Expanded(
               child: Container(
@@ -369,12 +371,10 @@ class _CommentsSheetState extends State<CommentsSheet>
                 child: TextField(
                   controller: _commentController,
                   focusNode: _focusNode,
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
                   maxLines: null,
                   style: const TextStyle(fontSize: 15),
                   decoration: InputDecoration(
-                    hintText: 'כתוב תגובה...',
+                    hintText: _l10n.writeCommentHint,
                     hintStyle: TextStyle(
                       color: AppColors.greyMedium.withValues(alpha: 0.7),
                     ),
@@ -408,6 +408,7 @@ class _EmptyComments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -425,9 +426,9 @@ class _EmptyComments extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'אין תגובות עדיין',
-            style: TextStyle(
+          Text(
+            l10n.noCommentsEmpty,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -435,7 +436,7 @@ class _EmptyComments extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'היה הראשון להגיב!',
+            l10n.beFirstToComment,
             style: TextStyle(
               fontSize: 14,
               color: AppColors.greyMedium.withValues(alpha: 0.8),
@@ -508,7 +509,6 @@ class _CommentCardState extends State<_CommentCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            textDirection: TextDirection.rtl,
             children: [
               _buildAvatar(),
               const SizedBox(width: 12),
@@ -524,7 +524,6 @@ class _CommentCardState extends State<_CommentCard> {
                   ),
                   const SizedBox(height: 2),
                   Row(
-                    textDirection: TextDirection.rtl,
                     children: [
                       Text(
                         widget.timestamp,
@@ -566,7 +565,7 @@ class _CommentCardState extends State<_CommentCard> {
           const SizedBox(height: 12),
           Text(
             widget.comment.content,
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
             style: const TextStyle(
               fontSize: 14,
               height: 1.5,

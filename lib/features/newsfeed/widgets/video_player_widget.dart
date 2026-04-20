@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:park_janana/core/constants/app_colors.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -128,6 +129,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Widget _buildErrorWidget({bool isFormatError = false}) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       color: const Color(0xFF1A1A2E),
       padding: const EdgeInsets.all(24),
@@ -153,7 +155,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             ),
             const SizedBox(height: 16),
             Text(
-              isFormatError ? 'פורמט סרטון לא נתמך' : 'שגיאה בטעינת הסרטון',
+              isFormatError ? l10n.videoFormatNotSupported : l10n.videoLoadError,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -163,9 +165,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             ),
             const SizedBox(height: 8),
             Text(
-              isFormatError
-                  ? 'הסרטון מקודד בפורמט Dolby Vision / HEVC שלא נתמך\nבמכשיר זה. נסה להעלות סרטון ב-H.264 (MP4 רגיל).'
-                  : 'אירעה שגיאה בהפעלת הסרטון.\nבדוק את החיבור ונסה שוב.',
+              isFormatError ? l10n.videoFormatErrorDetail : l10n.videoPlaybackErrorDetail,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.65),
                 fontSize: 13,
@@ -185,7 +185,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   _initializePlayer();
                 },
                 icon: const Icon(PhosphorIconsRegular.arrowsClockwise, size: 18),
-                label: const Text('נסה שוב'),
+                label: Text(l10n.retryButton),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   foregroundColor: Colors.white,
@@ -203,17 +203,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Widget _buildLoadingWidget() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       color: AppColors.greyDark,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Colors.white),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 16),
             Text(
-              'טוען סרטון...',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              l10n.videoLoadingLabel,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
         ),

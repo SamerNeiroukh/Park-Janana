@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:park_janana/core/constants/app_constants.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ── Navigation targets (ALL UNCHANGED) ───────────────────────────────────
@@ -106,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final userProvider = context.watch<UserProvider>();
     final appStateProvider = context.watch<AppStateProvider>();
     final authProvider = context.watch<AppAuthProvider>();
@@ -125,9 +127,7 @@ class _HomeScreenState extends State<HomeScreen>
       return Scaffold(
         backgroundColor: _kBg,
         body: Center(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Padding(
+          child: Padding(
               padding: const EdgeInsets.all(32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -138,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen>
                     color: Color(0xFF9CA3AF),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'אין חיבור לאינטרנט',
-                    style: TextStyle(
+                  Text(
+                    l10n.offlineStatusText,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF1F2937),
@@ -148,9 +148,9 @@ class _HomeScreenState extends State<HomeScreen>
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'לא ניתן לטעון את הנתונים.\nבדוק את החיבור ונסה שוב.',
-                    style: TextStyle(
+                  Text(
+                    l10n.networkErrorLoadMessage,
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF6B7280),
                       height: 1.5,
@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen>
                       context.read<UserProvider>().loadWorkStats();
                     },
                     icon: const Icon(PhosphorIconsRegular.arrowsClockwise),
-                    label: const Text('נסה שוב'),
+                    label: Text(l10n.retryButton),
                     style: FilledButton.styleFrom(
                       backgroundColor: _kPrimary,
                       padding: const EdgeInsets.symmetric(
@@ -175,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ),
           ),
-        ),
       );
     }
 
@@ -389,6 +388,7 @@ class _HomeScreenState extends State<HomeScreen>
     String profileUrl,
     HomeBadgeProvider badgeProvider,
   ) {
+    final l10n = AppLocalizations.of(context);
     final items = <_StripItem>[];
 
     if (role == 'worker') {
@@ -396,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen>
         // Primary CTA (first = rightmost in RTL strip)
         _StripItem(
           icon: PhosphorIconsRegular.clock,
-          label: 'משמרות',
+          label: l10n.shiftsNavLabel,
           badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
           onTap: () {
@@ -407,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.calendarDots,
-          label: 'סידור עבודה',
+          label: l10n.weeklyScheduleNavLabel,
           badge: badgeProvider.getBadgeCount('schedule'),
           color: const Color(0xFF6366F1),
           onTap: () {
@@ -420,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.checkSquare,
-          label: 'משימות',
+          label: l10n.tasksNavLabel,
           badge: badgeProvider.getBadgeCount('tasks'),
           color: const Color(0xFF8B5CF6),
           onTap: () => Navigator.push(
@@ -430,7 +430,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.chartBar,
-          label: 'דוחות',
+          label: l10n.reportsNavLabel,
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
               context,
@@ -442,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.newspaper,
-          label: 'לוח מודעות',
+          label: l10n.newsfeedNavLabel,
           badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
           onTap: () {
@@ -457,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen>
         // Primary CTA
         _StripItem(
           icon: PhosphorIconsRegular.clockCounterClockwise,
-          label: 'משמרות',
+          label: l10n.shiftsNavLabel,
           badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
           onTap: () {
@@ -468,7 +468,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.calendarDots,
-          label: 'סידור שבועי',
+          label: l10n.weeklySchedulingNavLabel,
           badge: badgeProvider.getBadgeCount('schedule'),
           color: const Color(0xFF6366F1),
           onTap: () {
@@ -481,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.clipboard,
-          label: 'משימות',
+          label: l10n.tasksNavLabel,
           badge: badgeProvider.getBadgeCount('tasks'),
           color: const Color(0xFF8B5CF6),
           onTap: () => Navigator.push(
@@ -491,14 +491,14 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.usersThree,
-          label: 'ניהול עובדים',
+          label: l10n.manageWorkersNavLabel,
           color: const Color(0xFF0EA5E9),
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ManageWorkersScreen())),
         ),
         _StripItem(
           icon: PhosphorIconsRegular.chartBar,
-          label: 'דוחות',
+          label: l10n.reportsNavLabel,
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
               context,
@@ -510,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.newspaper,
-          label: 'לוח מודעות',
+          label: l10n.newsfeedNavLabel,
           badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
           onTap: () {
@@ -525,14 +525,14 @@ class _HomeScreenState extends State<HomeScreen>
       items.addAll([
         _StripItem(
           icon: PhosphorIconsRegular.squaresFour,
-          label: 'לוח בקרה',
+          label: l10n.dashboardNavLabel,
           color: const Color(0xFF7C3AED),
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const OwnerDashboardScreen())),
         ),
         _StripItem(
           icon: PhosphorIconsRegular.clockCounterClockwise,
-          label: 'משמרות',
+          label: l10n.shiftsNavLabel,
           badge: badgeProvider.getBadgeCount('shifts'),
           color: _kPrimary,
           onTap: () {
@@ -543,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.calendarDots,
-          label: 'סידור שבועי',
+          label: l10n.weeklySchedulingNavLabel,
           badge: badgeProvider.getBadgeCount('schedule'),
           color: const Color(0xFF6366F1),
           onTap: () {
@@ -556,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.clipboard,
-          label: 'משימות',
+          label: l10n.tasksNavLabel,
           badge: badgeProvider.getBadgeCount('tasks'),
           color: const Color(0xFF8B5CF6),
           onTap: () => Navigator.push(context,
@@ -564,14 +564,14 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.usersThree,
-          label: 'ניהול עובדים',
+          label: l10n.manageWorkersNavLabel,
           color: const Color(0xFF0EA5E9),
           onTap: () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ManageWorkersScreen())),
         ),
         _StripItem(
           icon: PhosphorIconsRegular.chartBar,
-          label: 'דוחות',
+          label: l10n.reportsNavLabel,
           color: const Color(0xFF22C55E),
           onTap: () => Navigator.push(
               context,
@@ -583,7 +583,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _StripItem(
           icon: PhosphorIconsRegular.newspaper,
-          label: 'לוח מודעות',
+          label: l10n.newsfeedNavLabel,
           badge: badgeProvider.getBadgeCount('newsfeed'),
           color: const Color(0xFFF59E0B),
           onTap: () {
@@ -645,10 +645,7 @@ class _HorizontalActionStrip extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.all(16),
-        child: Directionality(
-          // RTL: first item is top-right
-          textDirection: TextDirection.rtl,
-          child: GridView.builder(
+        child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -661,7 +658,6 @@ class _HorizontalActionStrip extends StatelessWidget {
             itemBuilder: (_, i) => _StripPill(item: items[i]),
           ),
         ),
-      ),
     )
         .animate()
         .fadeIn(duration: 380.ms, delay: 100.ms, curve: Curves.easeOut)
@@ -798,6 +794,7 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (!_loaded || _understaffedCount == 0) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -810,9 +807,7 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFEF4444), width: 1.5),
           ),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
+          child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -829,25 +824,29 @@ class _UnderstaffedShiftsBannerState extends State<_UnderstaffedShiftsBanner> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '$_understaffedCount משמרות היום חסרות עובדים',
+                        l10n.understaffedShiftsCount(_understaffedCount),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF991B1B),
                         ),
                       ),
-                      const Text(
-                        'לחץ לסידור שבועי',
-                        style: TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
+                      Text(
+                        l10n.clickForWeeklySchedule,
+                        style: const TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
                       ),
                     ],
                   ),
                 ),
-                const Icon(PhosphorIconsRegular.caretRight,
-                    color: Color(0xFFDC2626), size: 22),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? PhosphorIconsRegular.caretLeft
+                      : PhosphorIconsRegular.caretRight,
+                  color: const Color(0xFFDC2626),
+                  size: 22,
+                ),
               ],
             ),
-          ),
         ),
       ),
     );

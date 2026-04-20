@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 
 /// Global network status banner.
 ///
@@ -140,7 +141,9 @@ class _NetworkBannerState extends State<NetworkBanner>
               ),
               const SizedBox(width: 8),
               Text(
-                isOffline ? 'אין חיבור לאינטרנט' : 'החיבור לאינטרנט שוחזר ✓',
+                isOffline
+                    ? AppLocalizations.of(context).offlineStatusText
+                    : AppLocalizations.of(context).onlineStatusText,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -151,7 +154,7 @@ class _NetworkBannerState extends State<NetworkBanner>
               if (isOffline) ...[
                 const SizedBox(width: 8),
                 Text(
-                  'פועל במצב לא מקוון',
+                  AppLocalizations.of(context).offlineModeLabel,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.75),
                     fontSize: 11,

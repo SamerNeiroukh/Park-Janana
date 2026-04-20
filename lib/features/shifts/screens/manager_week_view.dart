@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:park_janana/core/l10n/app_localizations.dart';
 import 'package:park_janana/features/shifts/models/shift_model.dart';
 import 'package:park_janana/features/home/widgets/user_header.dart';
 import 'package:park_janana/features/shifts/services/shift_service.dart';
@@ -23,20 +24,22 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
 
   DateTime _currentWeekStart = DateTimeUtils.startOfWeek(DateTime.now());
   bool _isNavigating = false; // ✅ Prevent multiple taps
+  late AppLocalizations _l10n;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _l10n = AppLocalizations.of(context);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Column(
-          children: [
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: UserHeader(),
-            ),
-            _buildWeekNavigation(),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          const UserHeader(),
+          _buildWeekNavigation(),
           _buildCreateShiftButton(),
           Expanded(
             child: StreamBuilder<List<ShiftModel>>(
@@ -47,9 +50,9 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      'אין משמרות זמינות לשבוע זה',
+                      _l10n.noShiftsAvailableEmpty,
                       style: AppTheme.bodyText,
                     ),
                   );
@@ -60,7 +63,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 final Map<String, List<ShiftModel>> weeklyShifts = {};
                 for (var shift in shifts) {
                   final String dayLabel =
-                      DateTimeUtils.formatDateWithDay(shift.date);
+                      DateTimeUtils.formatDateWithDayLocalized(shift.date, Localizations.localeOf(context).languageCode);
                   if (!weeklyShifts.containsKey(dayLabel)) {
                     weeklyShifts[dayLabel] = [];
                   }
@@ -91,8 +94,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
           ),
         ],
       ),
-    ),
-  );
+    );
   }
 
   Widget _buildWeekNavigation() {
@@ -111,7 +113,10 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
             }),
           ),
           Text(
-            "שבוע ${DateTimeUtils.formatDate(_currentWeekStart)} - ${DateTimeUtils.formatDate(_currentWeekStart.add(const Duration(days: 6)))}",
+            _l10n.weekRangeLabel(
+              DateTimeUtils.formatDate(_currentWeekStart),
+              DateTimeUtils.formatDate(_currentWeekStart.add(const Duration(days: 6))),
+            ),
             style: AppTheme.sectionTitle,
           ),
           IconButton(
@@ -145,7 +150,7 @@ class _ManagerWeekViewState extends State<ManagerWeekView> {
                 if (mounted) setState(() => _isNavigating = false);
               },
         style: AppTheme.primaryButtonStyle,
-        child: const Text("יצירת משמרת"),
+        child: Text(_l10n.newShiftFab),
       ),
     );
   }

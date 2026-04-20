@@ -7,6 +7,7 @@ import 'package:park_janana/core/constants/app_constants.dart';
 import 'package:park_janana/features/workers/services/worker_service.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShiftService {
   final FirebaseService _firebaseService = FirebaseService();
@@ -222,8 +223,8 @@ class ShiftService {
           .collection('notifications')
           .add({
         'type': 'shift_assigned',
-        'title': 'בקשתך למשמרת אושרה',
-        'body': 'אושרת למשמרת $shiftDate, $startTime–$endTime',
+        'title': await shiftApprovedTitle(),
+        'body': await shiftApprovedBody(shiftDate, startTime, endTime),
         'entityId': shiftId,
         'isRead': false,
         'createdAt': Timestamp.now(),
@@ -284,8 +285,8 @@ class ShiftService {
           .collection('notifications')
           .add({
         'type': 'shift_rejected',
-        'title': 'בקשתך למשמרת נדחתה',
-        'body': 'בקשתך למשמרת $shiftDate, $startTime–$endTime לא אושרה',
+        'title': await shiftRejectedTitle(),
+        'body': await shiftRejectedBody(shiftDate, startTime, endTime),
         'entityId': shiftId,
         'isRead': false,
         'createdAt': Timestamp.now(),
@@ -473,6 +474,49 @@ class ShiftService {
       return affectedWorkers;
     } catch (e) {
       throw CustomException('שגיאה בביטול המשמרת.');
+    }
+  }
+
+  // ── Locale-aware notification helpers ────────────────────────────────────
+
+  static Future<String> _savedLocaleCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('app_locale') ?? 'he';
+  }
+
+  static Future<String> shiftApprovedTitle() async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Your shift request was approved';
+      case 'ar': return 'تمت الموافقة على طلبك للوردية';
+      default:   return 'בקשתך למשמרת אושרה';
+    }
+  }
+
+  static Future<String> shiftApprovedBody(String date, String startTime, String endTime) async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'You were assigned to the shift on $date, $startTime–$endTime';
+      case 'ar': return 'تم تعيينك في الوردية بتاريخ $date، $startTime–$endTime';
+      default:   return 'אושרת למשמרת $date, $startTime–$endTime';
+    }
+  }
+
+  static Future<String> shiftRejectedTitle() async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Your shift request was rejected';
+      case 'ar': return 'تم رفض طلبك للوردية';
+      default:   return 'בקשתך למשמרת נדחתה';
+    }
+  }
+
+  static Future<String> shiftRejectedBody(String date, String startTime, String endTime) async {
+    final locale = await _savedLocaleCode();
+    switch (locale) {
+      case 'en': return 'Your request for the shift on $date, $startTime–$endTime was not approved';
+      case 'ar': return 'لم تتم الموافقة على طلبك للوردية بتاريخ $date، $startTime–$endTime';
+      default:   return 'בקשתך למשמרת $date, $startTime–$endTime לא אושרה';
     }
   }
 }
